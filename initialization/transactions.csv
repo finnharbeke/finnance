@@ -89,7 +89,7 @@ id,Konto id,Gegenüber,Betrag,Betrag CHF,Datum,Uhrzeit,Kommentar
 84,1,Coop-5222 ZH Stad. Conv. 8001,CHF 8.70,CHF 8.70,04.10.19,20:05,
 108,1,Coop Pronto Klusplatz,CHF 3.25,CHF 3.25,04.10.19,21:00,
 152,0,Yume,CHF -179.00,CHF -179.00,07.10.19,14:15,Trinkgeld September 19
-100,1,Sabine,CHF -135.00,CHF -135.00,07.10.19,,
+100,1,Sabine,CHF -135.00,CHF -135.00,07.10.19,15:30,
 61,4,"Paris, Gare du Nord",€ 0.70,CHF 0.77,08.10.19,11:45,WC gare de nord
 62,4,S-Bahn Paris,€ 2.00,CHF 2.19,08.10.19,11:55,von gare du nord nach gare de lyon
 63,4,"Paris, Gare de Lyon",€ 2.30,CHF 2.52,08.10.19,12:20,Kinder Bueno bei Monqdaily oder so
