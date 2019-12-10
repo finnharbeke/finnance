@@ -1,0 +1,11 @@
+{% extends "main/layout.html" %}
+
+{% block body %}
+<h1 class="display-1 ml-0"> Finnance </h1>
+<h2 class=""> Links </h2>
+<ul>
+    <a href="{{ url_for('main.add_transaction') }}">Add Transaction</a>
+    <a href="{{ url_for('main.add_account') }}">Add Account</a>
+
+</ul>
+{% endblock %}
