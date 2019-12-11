@@ -20,8 +20,15 @@ def add_transaction():
     if request.method == "GET":
         return render_template("main/add_trans.html", accounts=accounts, agents=agents)
     else:
-        account_id = request.form.get("account")
+        account = Account.query.get(int(request.form.get("account")))
         amount = float(request.form.get("amount"))
+
+        date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
+        if date_issued < account.date_created:
+            return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
+        if date_issued > datetime.datetime.now():
+            return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
+        
         agent_desc = request.form.get("agent")
         agent = Agent.query.filter_by(desc=agent_desc).first()
         if not agent:
@@ -29,12 +36,12 @@ def add_transaction():
             db.session.add(agent)
             db.session.commit()
 
-        date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
         comment = request.form.get("comment")
-        transaction = Transaction(account_id=account_id, amount=amount, agent_id=agent.id, date_issued=date_issued, comment=comment)
+
+        transaction = Transaction(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, comment=comment)
         db.session.add(transaction)
         db.session.commit()
-        return render_template("main/index.html")
+        return redirect(url_for('main.add_transaction'))
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -45,6 +52,8 @@ def add_account():
         desc = request.form.get("description")
         starting_saldo = float(request.form.get("starting_saldo"))
         date_created = datetime.datetime.strptime(request.form.get("date_created"), "%d.%m.%Y")
+        if date_created > datetime.datetime.now():
+            return render_template("error.html", title="Creation Failed!", desc="Account can't have been created after today!", link=url_for('main.add_account'), link_text="Try again")
         currency_id = int(request.form.get("currency"))
         account = Account(desc=desc, starting_saldo=starting_saldo, date_created=date_created, currency_id=currency_id)
         db.session.add(account)
@@ -52,7 +61,7 @@ def add_account():
             db.session.commit()
         except sqlalchemy.exc.IntegrityError:
             return render_template("error.html", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
-        return render_template("main/index.html")
+        return redirect(url_for('main.add_account'))
 
 @mod_main.route("/api/transactions/<int:transaction_id>")
 def api_transaction(transaction_id):
