@@ -1,7 +1,9 @@
-from flask import Flask, render_template, Blueprint, request, redirect, url_for
+from flask import Flask, render_template, Blueprint, request, redirect, url_for, jsonify
+import sqlalchemy
 from app import db
 from app.main.models import Transaction, Account, Agent, Currency
 import datetime
+import sys
 
 mod_main = Blueprint('main', __name__)
 
@@ -18,11 +20,21 @@ def add_transaction():
     if request.method == "GET":
         return render_template("main/add_trans.html", accounts=accounts, agents=agents)
     else:
-        account = request.form.get("account")
+        account_id = request.form.get("account")
         amount = float(request.form.get("amount"))
-        agent = request.form.get("agent")
-        date_issued = datetime.datetime(request.form.get("date_issued"))
+        agent_desc = request.form.get("agent")
+        agent = Agent.query.filter_by(desc=agent_desc).first()
+        if not agent:
+            agent = Agent(desc=agent_desc) 
+            db.session.add(agent)
+            db.session.commit()
+
+        date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
         comment = request.form.get("comment")
+        transaction = Transaction(account_id=account_id, amount=amount, agent_id=agent.id, date_issued=date_issued, comment=comment)
+        db.session.add(transaction)
+        db.session.commit()
+        return render_template("main/index.html")
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -32,5 +44,36 @@ def add_account():
     else:
         desc = request.form.get("description")
         starting_saldo = float(request.form.get("starting_saldo"))
-        date_created = datetime.datetime.strftime(request.form.get("date_created"), "%d.%m.%Y")
-        currency_id = int(request.form.get("currency_id"))
+        date_created = datetime.datetime.strptime(request.form.get("date_created"), "%d.%m.%Y")
+        currency_id = int(request.form.get("currency"))
+        account = Account(desc=desc, starting_saldo=starting_saldo, date_created=date_created, currency_id=currency_id)
+        db.session.add(account)
+        try:
+            db.session.commit()
+        except sqlalchemy.exc.IntegrityError:
+            return render_template("error.html", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
+        return render_template("main/index.html")
+
+@mod_main.route("/api/transactions/<int:transaction_id>")
+def api_transaction(transaction_id):
+    transaction = Transaction.query.get(transaction_id)
+    if not transaction:
+        return jsonify({"error": "Invalid transaction_id!"}), 422
+
+    return jsonify(transaction.to_dict())
+
+@mod_main.route("/api/accounts/<int:account_id>")
+def api_account(account_id):
+    account = Account.query.get(account_id)
+    if not account:
+        return jsonify({"error": "Invalid account_id!"}), 422
+
+    return jsonify(account.to_dict())
+
+@mod_main.route("/api/agents/<int:agent_id>")
+def api_agent(agent_id):
+    agent = Agent.query.get(agent_id)
+    if not agent:
+        return jsonify({"error": "Invalid agent_id!"}), 422
+
+    return jsonify(agent.to_dict())
