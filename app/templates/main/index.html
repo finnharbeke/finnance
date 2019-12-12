@@ -1,11 +1,25 @@
 {% extends "main/layout.html" %}
 
 {% block body %}
-<h1 class="display-1 ml-0"> Finnance </h1>
-<h2 class=""> Links </h2>
-<ul class="list-group list-group-flush">
-    <li class="list-group-item"><a href="{{ url_for('main.add_transaction') }}">Add Transaction</a></li>
-    <li class="list-group-item"><a href="{{ url_for('main.add_account') }}">Add Account</a></li>
-    <li class="list-group-item"><a href="{{ url_for('main.list_accounts') }}">All Accounts</a></li>
-</ul>
+<h1 class="display-1">Finnance</h1>
+<h2 class="display-4">Accounts:</h2>
+<table class="table table-hover clickable-table" id="all_accounts">
+    <tbody>
+        {% for i, account in accounts %}
+        <tr>
+            <th onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
+                scope="row">{{ account.desc }}</th>
+            <!-- <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td> -->
+            <td onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
+                style="text-align: right;">{{ account.currency() }} {{ account.saldo() }}</td>
+            <td style="width: 44px; padding: 0px;">
+                <button style="height: 100%; width: 100%;" title="Add Transaction to Account" class="btn btn-success btn-lg">+</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<form action="{{ url_for('main.add_account') }}">
+    <button type="submit" class="btn btn-primary btn-lg btn-block">Create Account</button>
+</form>
 {% endblock %}

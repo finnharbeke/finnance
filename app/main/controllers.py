@@ -8,7 +8,9 @@ mod_main = Blueprint('main', __name__)
 
 @mod_main.route("/")
 def index():
-    return render_template("main/index.html")
+    accounts = Account.query.all()
+    accounts = zip(list(range(1, len(accounts)+1)), accounts)
+    return render_template("main/index.html", accounts=accounts)
 
 @mod_main.route("/add/transaction", methods=["GET", "POST"])
 def add_transaction():
@@ -80,6 +82,19 @@ def account(account_id):
     
     code = Currency.query.get(account.currency_id).code
     return render_template("main/account.html", account=account, transactions=zipped_transactions, currency_code=code)
+
+@mod_main.route("/accounts/<int:account_id>/transactions")
+def account_transactions(account_id):
+    account = Account.query.get(account_id)
+    transactions = sorted(account.transactions, key=lambda x: x.date_issued)
+    saldo = account.starting_saldo
+    zipped_transactions = []
+    for i, t in enumerate(transactions):
+        saldo -= t.amount
+        zipped_transactions.append((i+1, t, Agent.query.get(t.agent_id), f"{round(saldo, 2):9.2f}" if saldo >= 0.005 or saldo <= -0.005 else "0"))
+    
+    code = Currency.query.get(account.currency_id).code
+    return render_template("main/account_transactions.html", account=account, transactions=zipped_transactions, currency_code=code)
 
 @mod_main.route("/transactions/<int:transaction_id>")
 def transaction(transaction_id):

@@ -55,7 +55,7 @@ class Account(db.Model):
         saldo = self.starting_saldo
         for t in self.transactions:
             saldo -= t.amount
-        return f"{round(saldo, 2):9.2f}" if saldo >= 0.005 or saldo <= -0.005 else "0"
+        return f"{round(abs(saldo), 2):,.2f}"
 
     def currency(self):
         return Currency.query.get(self.currency_id).code
