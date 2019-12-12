@@ -3,7 +3,6 @@ import sqlalchemy
 from app import db
 from app.main.models import Transaction, Account, Agent, Currency
 import datetime
-import sys
 
 mod_main = Blueprint('main', __name__)
 
@@ -62,6 +61,30 @@ def add_account():
         except sqlalchemy.exc.IntegrityError:
             return render_template("error.html", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
         return redirect(url_for('main.add_account'))
+
+@mod_main.route("/accounts")
+def list_accounts():
+    accounts = sorted(Account.query.all(), key=lambda x: (x.date_created, x.desc.lower()))
+    accounts = zip(list(range(1, len(accounts)+1)), accounts)
+    return render_template("main/accounts.html", accounts=accounts)
+
+@mod_main.route("/accounts/<int:account_id>")
+def account(account_id):
+    account = Account.query.get(account_id)
+    transactions = sorted(account.transactions, key=lambda x: x.date_issued)
+    saldo = account.starting_saldo
+    zipped_transactions = []
+    for i, t in enumerate(transactions):
+        saldo -= t.amount
+        zipped_transactions.append((i+1, t, Agent.query.get(t.agent_id), f"{round(saldo, 2):9.2f}" if saldo >= 0.005 or saldo <= -0.005 else "0"))
+    
+    code = Currency.query.get(account.currency_id).code
+    return render_template("main/account.html", account=account, transactions=zipped_transactions, currency_code=code)
+
+@mod_main.route("/transactions/<int:transaction_id>")
+def transaction(transaction_id):
+    transaction = Transaction.query.get(transaction_id)
+    return jsonify(transaction.to_dict())
 
 @mod_main.route("/api/transactions/<int:transaction_id>")
 def api_transaction(transaction_id):

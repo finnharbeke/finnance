@@ -1,0 +1,3 @@
+table.clickable-table > tbody > tr:hover {
+    cursor: pointer;
+}

@@ -30,7 +30,7 @@ class Account(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    desc = db.Column(db.String(64), nullable=False, unique=True)
+    desc = db.Column(db.String(32), nullable=False, unique=True)
     starting_saldo = db.Column(db.Float, nullable=False, default=0)
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
@@ -50,6 +50,15 @@ class Account(db.Model):
             d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
         
         return d
+
+    def saldo(self):
+        saldo = self.starting_saldo
+        for t in self.transactions:
+            saldo -= t.amount
+        return f"{round(saldo, 2):9.2f}" if saldo >= 0.005 or saldo <= -0.005 else "0"
+
+    def currency(self):
+        return Currency.query.get(self.currency_id).code
 
 class Currency(db.Model):
     
