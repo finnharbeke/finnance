@@ -2,9 +2,23 @@
 
 {% block body %}
 
-<h1 class="display-4r">{{ account.desc }}</h1>
+<div class="row">
+    <div class="col-10">
+        <h1 class="display-4">{{ account.desc }}</h1>
+    </div>
+    <div class="col-2">
+        <button class="btn btn-primary btn-lg btn-block">Edit</button>
+    </div>
+</div>
+
+<h2>{{ account.currency() }} {{ account.saldo_formatted() }}</h2>
+
+<form action="{{ url_for('main.add_transaction') }}">
+    <button class="btn btn-primary btn-lg mb-2">New Transaction</button>
+</form>
 
 <table class="table table-hover clickable-table">
+    <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
     <thead>
         <tr>
             <th scope="col">Date</th>
@@ -16,7 +30,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for transaction, saldo in transactions %}
+        {% for transaction, saldo in last_5 %}
         <tr onclick="document.location = `{{ url_for('main.transaction', transaction_id=transaction.id) }}`;">
             <td>{{ transaction.date_issued.strftime('%d.%m.%Y') }}</td>
             <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
@@ -26,14 +40,13 @@
             <td>{{ transaction.comment }}</td>
         </tr>
         {% endfor %}
-        <tr>
-            <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td>
-            <td>00:00</td>
-            <td>  </td>
-            <td>  </td>
-            <td style="text-align: right;">{{ account.currency() }} {{ formatted(account.starting_saldo) }}</td>
-            <td>  </td>
-        </tr>
     </tbody>
 </table>
+
+<img src="{{ url_for('main.account_plot', account_id=account.id) }}" class="img-fluid img-thumbnail mb-2" alt="Responsive image">
+
+<form action="{{ url_for('main.account_analysis', account_id=account.id) }}">
+    <button type="submit" class="btn btn-primary btn-lg btn-block mb-5">Analysis</button>
+</form>
+
 {% endblock %}

@@ -26,6 +26,9 @@ class Transaction(db.Model):
         "currency": currency.to_dict()
     }
 
+    def agent(self):
+        return Agent.query.get(self.agent_id).desc
+
 class Account(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -53,9 +56,12 @@ class Account(db.Model):
 
     def saldo(self):
         saldo = self.starting_saldo
-        for t in self.transactions:
+        for t in Transaction.query.filter_by(account_id=self.id).order_by(Transaction.date_issued).all():
             saldo -= t.amount
-        return f"{round(abs(saldo), 2):,.2f}"
+        return saldo
+
+    def saldo_formatted(self):
+        return f"{round(abs(self.saldo()), 2):,.2f}"
 
     def currency(self):
         return Currency.query.get(self.currency_id).code

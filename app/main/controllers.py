@@ -1,8 +1,11 @@
-from flask import Flask, render_template, Blueprint, request, redirect, url_for, jsonify
+from flask import Flask, render_template, Blueprint, request, redirect, url_for, jsonify, send_file
 import sqlalchemy
 from app import db
 from app.main.models import Transaction, Account, Agent, Currency
-import datetime
+import datetime, io
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 mod_main = Blueprint('main', __name__)
 
@@ -66,35 +69,63 @@ def add_account():
 
 @mod_main.route("/accounts")
 def list_accounts():
-    accounts = sorted(Account.query.all(), key=lambda x: (x.date_created, x.desc.lower()))
+    accounts = Account.query.order_by(Account.date_created).all()
     accounts = zip(list(range(1, len(accounts)+1)), accounts)
     return render_template("main/accounts.html", accounts=accounts)
 
 @mod_main.route("/accounts/<int:account_id>")
 def account(account_id):
     account = Account.query.get(account_id)
-    transactions = sorted(account.transactions, key=lambda x: x.date_issued)
-    saldo = account.starting_saldo
+    # last 5 transactions
+    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).limit(5).all()
+    saldo = account.saldo()
     zipped_transactions = []
-    for i, t in enumerate(transactions):
-        saldo -= t.amount
-        zipped_transactions.append((i+1, t, Agent.query.get(t.agent_id), f"{round(saldo, 2):9.2f}" if saldo >= 0.005 or saldo <= -0.005 else "0"))
+    for t in transactions:
+        zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
+        saldo += t.amount
     
-    code = Currency.query.get(account.currency_id).code
-    return render_template("main/account.html", account=account, transactions=zipped_transactions, currency_code=code)
+    return render_template("main/account.html", account=account, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
 
 @mod_main.route("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
     account = Account.query.get(account_id)
-    transactions = sorted(account.transactions, key=lambda x: x.date_issued)
-    saldo = account.starting_saldo
+    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).all()
+    saldo = account.saldo()
     zipped_transactions = []
-    for i, t in enumerate(transactions):
-        saldo -= t.amount
-        zipped_transactions.append((i+1, t, Agent.query.get(t.agent_id), f"{round(saldo, 2):9.2f}" if saldo >= 0.005 or saldo <= -0.005 else "0"))
+    for t in transactions:
+        zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
+        saldo += t.amount
     
-    code = Currency.query.get(account.currency_id).code
-    return render_template("main/account_transactions.html", account=account, transactions=zipped_transactions, currency_code=code)
+    return render_template("main/account_transactions.html", account=account, transactions=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
+
+@mod_main.route("/accounts/<int:account_id>/plot")
+def account_plot(account_id):
+    account = Account.query.get(account_id)
+    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued).all()
+    saldo = account.starting_saldo
+    saldos = [account.starting_saldo]
+    for t in transactions:
+        saldo -= t.amount
+        saldos.append(saldo)
+
+    sns.set("notebook", font_scale=2)
+    f, ax = plt.subplots(figsize=(24, 6))
+    plt.tight_layout()
+    sns.lineplot(x=[account.date_created]+[t.date_issued for t in transactions], y=saldos)
+
+    bytes_image = io.BytesIO()
+    plt.savefig(bytes_image, format='png')
+    bytes_image.seek(0)
+
+    plt.close()
+
+    return send_file(bytes_image,
+                     attachment_filename='plot.png',
+                     mimetype='image/png')
+
+@mod_main.route("/accounts/<int:account_id>/analysis")
+def account_analysis(account_id):
+    pass
 
 @mod_main.route("/transactions/<int:transaction_id>")
 def transaction(transaction_id):

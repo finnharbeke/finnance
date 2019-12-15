@@ -11,9 +11,11 @@
                 scope="row">{{ account.desc }}</th>
             <!-- <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td> -->
             <td onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
-                style="text-align: right;">{{ account.currency() }} {{ account.saldo() }}</td>
+                style="text-align: right;">{{ account.currency() }} {{ account.saldo_formatted() }}</td>
             <td style="width: 44px; padding: 0px;">
-                <button style="height: 100%; width: 100%;" title="Add Transaction to Account" class="btn btn-success btn-lg">+</button>
+                <form action="{{ url_for('main.add_transaction') }}">
+                    <button style="height: 100%; width: 100%;" title="Add Transaction to Account" class="btn btn-success btn-lg">+</button>
+                </form>
             </td>
         </tr>
         {% endfor %}
