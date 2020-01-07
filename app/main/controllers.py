@@ -9,43 +9,55 @@ import seaborn as sns
 
 mod_main = Blueprint('main', __name__)
 
-@mod_main.route("/")
+def add_trans(request, redirect_url, account):
+    amount = float(request.form.get("amount"))
+
+    date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
+    if date_issued < account.date_created:
+        return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
+    if date_issued > datetime.datetime.now():
+        return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
+    
+    agent_desc = request.form.get("agent")
+    agent = Agent.query.filter_by(desc=agent_desc).first()
+    if not agent:
+        agent = Agent(desc=agent_desc) 
+        db.session.add(agent)
+        db.session.commit()
+
+    comment = request.form.get("comment")
+
+    transaction = Transaction(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, comment=comment)
+    db.session.add(transaction)
+    db.session.commit()
+    return redirect(redirect_url)
+
+@mod_main.route("/", methods=["GET", "POST"])
 def index():
     accounts = Account.query.all()
-    accounts = zip(list(range(1, len(accounts)+1)), accounts)
-    return render_template("main/index.html", accounts=accounts)
-
-@mod_main.route("/add/transaction", methods=["GET", "POST"])
-def add_transaction():
-    accounts = Account.query.all()
-    # if not accounts:
-    #     return render_template("error.html", title="No Account", desc="Create an Account First!", link=url_for('main.add_account'), link_text="Create Account")
     agents = Agent.query.all()
     if request.method == "GET":
-        return render_template("main/add_trans.html", accounts=accounts, agents=agents)
+        return render_template("main/index.html", accounts=accounts, agents=agents)
     else:
-        account = Account.query.get(int(request.form.get("account")))
-        amount = float(request.form.get("amount"))
+        account = Account.query.get(int(request.form.get("account_id")))
+        return add_trans(request, url_for('main.index'), account)
 
-        date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
-        if date_issued < account.date_created:
-            return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
-        if date_issued > datetime.datetime.now():
-            return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
-        
-        agent_desc = request.form.get("agent")
-        agent = Agent.query.filter_by(desc=agent_desc).first()
-        if not agent:
-            agent = Agent(desc=agent_desc) 
-            db.session.add(agent)
-            db.session.commit()
+@mod_main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
+def account(account_id):
+    account = Account.query.get(account_id)
+    agents = Agent.query.all()
+    # last 5 transactions
+    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).limit(5).all()
+    saldo = account.saldo()
+    zipped_transactions = []
+    for t in transactions:
+        zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
+        saldo += t.amount
 
-        comment = request.form.get("comment")
-
-        transaction = Transaction(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, comment=comment)
-        db.session.add(transaction)
-        db.session.commit()
-        return redirect(url_for('main.add_transaction'))
+    if request.method == "GET":
+        return render_template("main/account.html", agents=agents, account=account, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
+    else:
+        return add_trans(request, url_for('main.account', account_id=account.id), account)
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -73,18 +85,6 @@ def list_accounts():
     accounts = zip(list(range(1, len(accounts)+1)), accounts)
     return render_template("main/accounts.html", accounts=accounts)
 
-@mod_main.route("/accounts/<int:account_id>")
-def account(account_id):
-    account = Account.query.get(account_id)
-    # last 5 transactions
-    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).limit(5).all()
-    saldo = account.saldo()
-    zipped_transactions = []
-    for t in transactions:
-        zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
-        saldo += t.amount
-    
-    return render_template("main/account.html", account=account, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
 
 @mod_main.route("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
