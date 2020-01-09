@@ -46,7 +46,9 @@
     </tbody>
 </table>
 
-<img src="{{ url_for('main.account_plot', account_id=account.id) }}" class="img-fluid img-thumbnail mb-2" alt="Responsive image">
+<a href="{{ url_for('main.account_plot', account_id=account.id) }}">
+    <img src="{{ url_for('main.account_plot', account_id=account.id) }}" class="img-fluid img-thumbnail mb-2" alt="Responsive image">
+</a>
 
 <form action="{{ url_for('main.account_analysis', account_id=account.id) }}">
     <button type="submit" class="btn btn-primary btn-lg btn-block mb-5">Analysis</button>

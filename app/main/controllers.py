@@ -102,21 +102,28 @@ def account_transactions(account_id):
 def account_plot(account_id):
     account = Account.query.get(account_id)
     transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued).all()
+
     saldo = account.starting_saldo
-    saldos = [account.starting_saldo]
+    saldos = [saldo]
     for t in transactions:
         saldo -= t.amount
         saldos.append(saldo)
+    # current saldo
+    saldos.append(saldos[-1])
 
+    # Set seaborn & matplotlib
     sns.set("notebook", font_scale=2)
     f, ax = plt.subplots(figsize=(24, 6))
     plt.tight_layout()
-    sns.lineplot(x=[account.date_created]+[t.date_issued for t in transactions], y=saldos)
+    # creation, transactions and now
+    x = [account.date_created] + [t.date_issued for t in transactions] + [datetime.datetime.now()]
+
+    plt.plot(x, saldos, drawstyle='steps-post', linewidth=2.5)
+    ax.set_xlim(left=x[0], right=[x[-1]])
 
     bytes_image = io.BytesIO()
     plt.savefig(bytes_image, format='png')
     bytes_image.seek(0)
-
     plt.close()
 
     return send_file(bytes_image,
