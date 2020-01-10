@@ -10,13 +10,14 @@ import seaborn as sns
 mod_main = Blueprint('main', __name__)
 
 def add_trans(request, redirect_url, account):
+    # pylint: disable=no-member
     amount = float(request.form.get("amount"))
 
     date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
     if date_issued < account.date_created:
-        return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
+        return render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
     if date_issued > datetime.datetime.now():
-        return render_template("error.html", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
+        return render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
     
     agent_desc = request.form.get("agent")
     agent = Agent.query.filter_by(desc=agent_desc).first()
@@ -37,7 +38,7 @@ def index():
     accounts = Account.query.all()
     agents = Agent.query.all()
     if request.method == "GET":
-        return render_template("main/index.html", accounts=accounts, agents=agents)
+        return render_template("main/index.jinja", accounts=accounts, agents=agents)
     else:
         account = Account.query.get(int(request.form.get("account_id")))
         return add_trans(request, url_for('main.index'), account)
@@ -55,7 +56,7 @@ def account(account_id):
         saldo += t.amount
 
     if request.method == "GET":
-        return render_template("main/account.html", agents=agents, account=account, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
+        return render_template("main/account.jinja", agents=agents, account=account, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
     else:
         return add_trans(request, url_for('main.account', account_id=account.id), account)
 
@@ -63,28 +64,21 @@ def account(account_id):
 def add_account():
     currencies = Currency.query.all()
     if request.method == "GET":
-        return render_template("main/add_acc.html", currencies=currencies)
+        return render_template("main/add_acc.jinja", currencies=currencies)
     else:
         desc = request.form.get("description")
         starting_saldo = float(request.form.get("starting_saldo"))
         date_created = datetime.datetime.strptime(request.form.get("date_created"), "%d.%m.%Y")
         if date_created > datetime.datetime.now():
-            return render_template("error.html", title="Creation Failed!", desc="Account can't have been created after today!", link=url_for('main.add_account'), link_text="Try again")
+            return render_template("error.jinja", title="Creation Failed!", desc="Account can't have been created after today!", link=url_for('main.add_account'), link_text="Try again")
         currency_id = int(request.form.get("currency"))
         account = Account(desc=desc, starting_saldo=starting_saldo, date_created=date_created, currency_id=currency_id)
-        db.session.add(account)
+        db.session.add(account) # pylint: disable=no-member
         try:
-            db.session.commit()
+            db.session.commit() # pylint: disable=no-member
         except sqlalchemy.exc.IntegrityError:
-            return render_template("error.html", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
+            return render_template("error.jinja", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
         return redirect(url_for('main.add_account'))
-
-@mod_main.route("/accounts")
-def list_accounts():
-    accounts = Account.query.order_by(Account.date_created).all()
-    accounts = zip(list(range(1, len(accounts)+1)), accounts)
-    return render_template("main/accounts.html", accounts=accounts)
-
 
 @mod_main.route("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
@@ -96,7 +90,7 @@ def account_transactions(account_id):
         zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
         saldo += t.amount
     
-    return render_template("main/account_transactions.html", account=account, transactions=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
+    return render_template("main/account_transactions.jinja", account=account, transactions=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):
@@ -113,7 +107,7 @@ def account_plot(account_id):
 
     # Set seaborn & matplotlib
     sns.set("notebook", font_scale=2)
-    f, ax = plt.subplots(figsize=(24, 6))
+    f, ax = plt.subplots(figsize=(24, 6)) # pylint: disable=unused-variable
     plt.tight_layout()
     # creation, transactions and now
     x = [account.date_created] + [t.date_issued for t in transactions] + [datetime.datetime.now()]

@@ -1,7 +1,8 @@
 from app import db
+import datetime
 
 class Transaction(db.Model):
-
+    # pylint: disable=no-member
     id = db.Column(db.Integer, primary_key=True)
 
     account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
@@ -30,7 +31,7 @@ class Transaction(db.Model):
         return Agent.query.get(self.agent_id).desc
 
 class Account(db.Model):
-
+    # pylint: disable=no-member
     id = db.Column(db.Integer, primary_key=True)
 
     desc = db.Column(db.String(32), nullable=False, unique=True)
@@ -67,6 +68,7 @@ class Account(db.Model):
         return Currency.query.get(self.currency_id).code
 
 class Currency(db.Model):
+    # pylint: disable=no-member
     
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(3), nullable=False, unique=True)
@@ -78,6 +80,7 @@ class Currency(db.Model):
         }
 
 class Agent(db.Model):
+    # pylint: disable=no-member
     
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False, unique=True)

@@ -1,4 +1,5 @@
-<div class="modal fade" data-backdrop="static" id="addTrans{{ account.id }}" tabindex="-1" role="dialog" aria-labelledby="addTransLabel" aria-hidden="true">
+{% macro add_trans_modal(account, post_url, agents) -%}
+<div class="modal fade" data-backdrop="static" id="addTransModal{{ account.id }}" tabindex="-1" role="dialog" aria-labelledby="addTransLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -8,7 +9,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="{{ url_for('main.account', account_id=account.id) }}" id="transactionForm" method="post">
+                <form action="{{ post_url }}" id="transactionForm" method="post">
                     <input type="number" value="{{ account.id }}" name="account_id" style="display: none;">
                     <div class="form-group">
                         <label for="account">Account</label>
@@ -50,3 +51,4 @@
         </div>
     </div>
 </div>
+{%- endmacro %}

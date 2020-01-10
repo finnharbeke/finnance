@@ -1,4 +1,5 @@
-{% extends "main/layout.html" %}
+{% extends "main/layout.jinja" %}
+{% import "main/macros.jinja" as macros %}
 
 {% block body %}
 
@@ -13,12 +14,12 @@
 
 <h2>{{ account.currency() }} {{ account.saldo_formatted() }}</h2>
 
-<button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#addTrans{{ account.id }}">
+<button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#addTransModal{{ account.id }}">
     New Transaction
 </button>
 <!-- Modal -->
-
-{% include "main/add_trans.html" %}
+<!-- defined in included macros.jinja -->
+{{ macros.add_trans_modal(account, url_for('main.account', account_id=account.id)) }}
 
 <table class="table table-hover clickable-table">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
