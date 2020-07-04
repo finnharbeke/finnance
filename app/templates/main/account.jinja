@@ -19,7 +19,7 @@
 </button>
 <!-- Modal -->
 <!-- defined in included macros.jinja -->
-{{ macros.add_trans_modal(account, url_for('main.account', account_id=account.id)) }}
+{{ macros.add_trans_modal(account, url_for('main.account', account_id=account.id), agents) }}
 
 <table class="table table-hover clickable-table">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
