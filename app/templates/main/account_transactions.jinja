@@ -1,31 +1,17 @@
 {% extends "main/layout.jinja" %}
+{% import "main/macros.jinja" as macros %}
 
 {% block body %}
 
-<h1 class="display-4r">{{ account.desc }}</h1>
+<h1 class="display-4r h1-link" 
+    onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;">
+{{ account.desc }}
+</h1>
 
-<table class="table table-hover clickable-table">
-    <thead>
-        <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Time</th>
-            <th scope="col">To / From</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Saldo</th>
-            <th scope="col">Comment</th>
-        </tr>
-    </thead>
+<table id="transtable" class="table table-hover clickable-table" cellspacing="0" width="100%">
+    {{ macros.trans_table_head() }}
     <tbody>
-        {% for transaction, saldo in transactions %}
-        <tr onclick="document.location = `{{ url_for('main.transaction', transaction_id=transaction.id) }}`;">
-            <td>{{ transaction.date_issued.strftime('%d.%m.%Y') }}</td>
-            <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
-            <td>{{ transaction.agent() }}</td>
-            <td style="text-align: right;">{{ account.currency() }} {{ formatted(transaction.amount) }}</td>
-            <td style="text-align: right;">{{ account.currency() }} {{ saldo }}</td>
-            <td>{{ transaction.comment }}</td>
-        </tr>
-        {% endfor %}
+        {{ macros.trans_table_forloop(transactions, account, formatted) }}
         <tr>
             <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td>
             <td>00:00</td>
@@ -33,7 +19,18 @@
             <td>  </td>
             <td style="text-align: right;">{{ account.currency() }} {{ formatted(account.starting_saldo) }}</td>
             <td>  </td>
+            <td>  </td>
         </tr>
     </tbody>
 </table>
+
+<script>
+$(document).ready(function () {
+$('#transtable').DataTable({
+"scrollY": "65vh",
+"scrollCollapse": true,
+});
+$('.dataTables_length').addClass('bs-select');
+});
+</script>
 {% endblock %}

@@ -17,7 +17,7 @@
                     </div>
                     <div class="form-group">
                         <label for="amount">Amount</label>
-                        <input class="form-control" type="number" name="amount" step="0.01">
+                        <input class="form-control" type="number" name="amount" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label for="date_issued">Date & Time of Transaction</label>
@@ -31,7 +31,7 @@
                     </div>
                     <div class="form-group">
                         <label for="agent">Agent</label>
-                        <input class="form-control" type="text" list="agents" name="agent">
+                        <input class="form-control" type="text" list="agents" name="agent" required>
                         <datalist id="agents">
                             {% for agent in agents %}
                             <option value="{{ agent.desc }}"></option>
@@ -51,4 +51,47 @@
         </div>
     </div>
 </div>
+{%- endmacro %}
+
+{% macro trans_table_head() -%}
+    <col style="width:auto">
+    <col style="width:auto">
+    <col style="width:20%">
+    <col style="width:auto">
+    <col style="width:auto">
+    <col style="width:auto">
+    <col style="width:30%">
+    <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Time</th>
+            <th scope="col">To / From</th>
+            <th style="text-align: right;" scope="col">Amount</th>
+            <th style="text-align: right;" scope="col">Saldo</th>
+            <th scope="col">Category</th>
+            <th scope="col">Comment</th>
+        </tr>
+    </thead>
+{%- endmacro %}
+
+{% macro trans_table_forloop(transactions, account, format_func) -%}
+{% for transaction, saldo in transactions %}
+    <tr onclick="document.location = `{{ url_for('main.transaction', transaction_id=transaction.id) }}`;">
+        <td data-sort="{{transaction.date_issued.strftime('%Y%m%d%H%M%s') }}">
+            {{ transaction.date_issued.strftime('%d.%m.%Y') }}
+        </td>
+        <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
+        <td>{{ transaction.agent.desc }}</td>
+        <td style="text-align: right;"  
+            data-sort="{{ format_func(transaction.amount) }}">
+            {{ account.currency() }} {{ format_func(transaction.amount) }}
+        </td>
+        <td style="text-align: right;"  
+            data-sort="{{ format_func(saldo) }}">
+            {{ account.currency() }} {{ format_func(saldo) }}
+        </td>
+        <td>{{ transaction.category.desc }}</td>
+        <td>{{ transaction.comment }}</td>
+    </tr>
+{% endfor %}
 {%- endmacro %}

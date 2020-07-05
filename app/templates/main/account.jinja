@@ -23,27 +23,9 @@
 
 <table class="table table-hover clickable-table">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
-    <thead>
-        <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Time</th>
-            <th scope="col">To / From</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Saldo</th>
-            <th scope="col">Comment</th>
-        </tr>
-    </thead>
+    {{ macros.trans_table_head() }}
     <tbody>
-        {% for transaction, saldo in last_5 %}
-        <tr onclick="document.location = `{{ url_for('main.transaction', transaction_id=transaction.id) }}`;">
-            <td>{{ transaction.date_issued.strftime('%d.%m.%Y') }}</td>
-            <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
-            <td>{{ transaction.agent() }}</td>
-            <td style="text-align: right;">{{ account.currency() }} {{ formatted(transaction.amount) }}</td>
-            <td style="text-align: right;">{{ account.currency() }} {{ saldo }}</td>
-            <td>{{ transaction.comment }}</td>
-        </tr>
-        {% endfor %}
+        {{ macros.trans_table_forloop(last_5, account, formatted) }}
     </tbody>
 </table>
 
