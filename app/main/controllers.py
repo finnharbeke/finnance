@@ -1,7 +1,7 @@
 from flask import Flask, render_template, Blueprint, request, redirect, url_for, jsonify, send_file
 import sqlalchemy
 from app import db
-from app.main.models import Transaction, Account, Agent, Currency
+from app.main.models import Transaction, Account, Agent, Currency, Category
 import datetime, io
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -36,7 +36,7 @@ def add_trans(request, redirect_url, account):
 @mod_main.route("/", methods=["GET", "POST"])
 def index():
     accounts = Account.query.all()
-    agents = Agent.query.all()
+    agents = Agent.query.order_by(Agent.desc).all()
     if request.method == "GET":
         return render_template("main/index.jinja", accounts=accounts, agents=agents)
     else:
@@ -46,13 +46,13 @@ def index():
 @mod_main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 def account(account_id):
     account = Account.query.get(account_id)
-    agents = Agent.query.all()
+    agents = Agent.query.order_by(Agent.desc).all()
     # last 5 transactions
     transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).limit(5).all()
     saldo = account.saldo()
     zipped_transactions = []
     for t in transactions:
-        zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
+        zipped_transactions.append((t, saldo))
         saldo += t.amount
 
     if request.method == "GET":
@@ -87,7 +87,7 @@ def account_transactions(account_id):
     saldo = account.saldo()
     zipped_transactions = []
     for t in transactions:
-        zipped_transactions.append((t, f"{round(abs(saldo), 2):,.2f}"))
+        zipped_transactions.append((t, saldo))
         saldo += t.amount
     
     return render_template("main/account_transactions.jinja", account=account, transactions=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
@@ -156,3 +156,18 @@ def api_agent(agent_id):
         return jsonify({"error": "Invalid agent_id!"}), 422
 
     return jsonify(agent.to_dict())
+
+# CODE BELOW IS FOR FORCE RELOADING CSS
+@mod_main.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    import os
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename:
+            file_path = os.path.join(mod_main.root_path, '..',
+                                 endpoint, filename)
+            values['q'] = int(os.stat(file_path).st_mtime)
+    return url_for(endpoint, **values)

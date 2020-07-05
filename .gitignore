@@ -4,3 +4,4 @@
 *.pyc
 /app.db
 /Finnance.app
+import.py

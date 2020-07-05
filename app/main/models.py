@@ -10,6 +10,7 @@ class Transaction(db.Model):
     date_issued = db.Column(db.DateTime, nullable=False)
     comment = db.Column(db.String(120))
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
 
     def to_dict(self):
         account = Account.query.get(self.account_id)
@@ -84,12 +85,35 @@ class Agent(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False, unique=True)
-    transactions = db.relationship("Transaction", backref="agents", lazy=True)
+    transactions = db.relationship("Transaction", backref="agent", lazy=True)
 
     def to_dict(self, deep=True):
         d = {
             "id": self.id,
             "desc": self.desc
+        }
+        if deep:
+            d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
+        
+        return d
+
+class Category(db.Model):
+    # pylint: disable=no-member
+
+    id = db.Column(db.Integer, primary_key=True)
+    desc = db.Column(db.String(64), nullable=False, unique=True)
+    is_expense = db.Column(db.Boolean, nullable=False, default=1)
+    parent_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    children = db.relationship("Category", lazy=True)
+    transactions = db.relationship("Transaction", backref="category", lazy=True)
+
+    def to_dict(self, deep=True):
+        d = {
+            "id": self.id,
+            "desc": self.desc,
+            "is_expense": self.is_expense,
+            "parent": Category.query.get(self.parent_id) if self.parent_id else None,
+            "children": [category.to_dict(deep=False) for category in self.children]
         }
         if deep:
             d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
