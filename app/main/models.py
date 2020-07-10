@@ -28,9 +28,6 @@ class Transaction(db.Model):
         "currency": currency.to_dict()
     }
 
-    def agent(self):
-        return Agent.query.get(self.agent_id).desc
-
 class Account(db.Model):
     # pylint: disable=no-member
     id = db.Column(db.Integer, primary_key=True)
@@ -39,7 +36,7 @@ class Account(db.Model):
     starting_saldo = db.Column(db.Float, nullable=False, default=0)
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
-    transactions = db.relationship("Transaction", backref="accounts", lazy=True)
+    transactions = db.relationship("Transaction", backref="account", lazy=True)
 
     def to_dict(self, deep=True):
         currency = Currency.query.get(self.currency_id)
@@ -65,14 +62,12 @@ class Account(db.Model):
     def saldo_formatted(self):
         return f"{round(abs(self.saldo()), 2):,.2f}"
 
-    def currency(self):
-        return Currency.query.get(self.currency_id).code
-
 class Currency(db.Model):
     # pylint: disable=no-member
     
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(3), nullable=False, unique=True)
+    accounts = db.relationship("Account", backref="currency", lazy=True)
 
     def to_dict(self):
         return {

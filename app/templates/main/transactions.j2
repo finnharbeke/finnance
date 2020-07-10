@@ -1,5 +1,5 @@
-{% extends "main/layout.jinja" %}
-{% import "main/macros.jinja" as macros %}
+{% extends "main/layout.j2" %}
+{% import "main/macros.j2" as macros %}
 
 {% block body %}
 
@@ -8,16 +8,17 @@
 {{ account.desc }}
 </h1>
 
-<table id="transtable" class="table table-hover clickable-table" cellspacing="0" width="100%">
+<table id="transtable" class="table table-sm table-hover clickable-table" cellspacing="0" width="100%">
     {{ macros.trans_table_head() }}
     <tbody>
-        {{ macros.trans_table_forloop(transactions, account, formatted) }}
+        {{ macros.trans_table_forloop(transactions, url_for("main.account_transactions", account_id=account.id), account, formatted, agents, categories) }}
         <tr>
             <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td>
             <td>00:00</td>
             <td>  </td>
             <td>  </td>
-            <td style="text-align: right;">{{ account.currency() }} {{ formatted(account.starting_saldo) }}</td>
+            <td style="text-align: right;">{{ account.currency.code }} {{ formatted(account.starting_saldo) }}</td>
+            <td>  </td>
             <td>  </td>
             <td>  </td>
         </tr>
@@ -26,11 +27,7 @@
 
 <script>
 $(document).ready(function () {
-$('#transtable').DataTable({
-"scrollY": "65vh",
-"scrollCollapse": true,
-});
-$('.dataTables_length').addClass('bs-select');
+$('#transtable').DataTable();
 });
 </script>
 {% endblock %}

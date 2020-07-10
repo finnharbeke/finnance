@@ -1,0 +1,53 @@
+{% import "main/trans_modals.j2" as trans_modals %}
+
+{% macro trans_table_head() -%}
+    <col style="width:auto">
+    <col style="width:auto">
+    <col style="width:20%">
+    <col style="width:auto">
+    <col style="width:auto">
+    <col style="width:auto">
+    <col style="width:30%">
+    <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Time</th>
+            <th scope="col">To / From</th>
+            <th style="text-align: right;" scope="col">Amount</th>
+            <th style="text-align: right;" scope="col">Saldo</th>
+            <th scope="col">Category</th>
+            <th scope="col">Comment</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+{%- endmacro %}
+
+{% macro trans_table_forloop(transactions, redirect_url, account, format_func, agents, categories) -%}
+{% for transaction, saldo in transactions %}
+    <tr>
+        <td data-sort="{{transaction.date_issued.strftime('%Y%m%d%H%M%s') }}">
+            {{ transaction.date_issued.strftime('%d.%m.%Y') }}
+        </td>
+        <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
+        <td>{{ transaction.agent.desc }}</td>
+        <td style="text-align: right;"  
+            data-sort="{{ format_func(transaction.amount) }}">
+            {{ account.currency.code }} {{ format_func(transaction.amount) }}
+        </td>
+        <td style="text-align: right;"  
+            data-sort="{{ format_func(saldo) }}">
+            {{ account.currency.code }} {{ format_func(saldo) }}
+        </td>
+        <td>{{ transaction.category.desc }}</td>
+        <td>{{ transaction.comment }}</td>
+        <td style="width: 44px; padding: 0px;">
+            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#editTransModal{{ transaction.id }}" style="height: 100%; width: 100%;">
+                <i class="fa fa-pencil"></i>
+            </button>
+            <!-- Modal -->
+            <!-- defined in included trans_modals.j2 -->
+            {{ trans_modals.edit(transaction, redirect_url, agents, categories) }}
+        </td>
+    </tr>
+{% endfor %}
+{%- endmacro %}

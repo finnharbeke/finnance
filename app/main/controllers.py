@@ -9,15 +9,15 @@ import seaborn as sns
 
 mod_main = Blueprint('main', __name__)
 
-def add_trans(request, redirect_url, account):
+def trans_from_request(request, account):
     # pylint: disable=no-member
     amount = float(request.form.get("amount"))
 
     date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
     if date_issued < account.date_created:
-        return render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
+        return False, render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
     if date_issued > datetime.datetime.now():
-        return render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
+        return False, render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed after today!", link=url_for('main.add_transaction'), link_text="Try again")
     
     agent_desc = request.form.get("agent")
     agent = Agent.query.filter_by(desc=agent_desc).first()
@@ -26,27 +26,47 @@ def add_trans(request, redirect_url, account):
         db.session.add(agent)
         db.session.commit()
 
+    category_id = request.form.get("category")
     comment = request.form.get("comment")
 
-    transaction = Transaction(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, comment=comment)
-    db.session.add(transaction)
-    db.session.commit()
-    return redirect(redirect_url)
+    return True, dict(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, category_id=category_id, comment=comment)
 
-@mod_main.route("/", methods=["GET", "POST"])
+@mod_main.route("/accounts/<int:account_id>/transactions/add/", methods=["POST"])
+def add_trans(account_id):
+    # pylint: disable=no-member
+    account = Account.query.get(account_id)
+    success, kwargs = trans_from_request(request, account)
+    if not success:
+        return kwargs
+    db.session.add(Transaction(**kwargs))
+    db.session.commit()
+    return redirect(request.form.get("redirect"))
+
+@mod_main.route("/transactions/edit/<int:transaction_id>", methods=["POST"])
+def edit_trans(transaction_id):
+    # pylint: disable=no-member
+    tr = Transaction.query.get(transaction_id)
+    success, columns = trans_from_request(request, tr.account)
+    if not success:
+        return columns
+
+    for key, val in columns.items():
+        setattr(tr, key, val)
+    db.session.commit()
+    return redirect(request.form.get("redirect"))
+
+@mod_main.route("/", methods=["GET"])
 def index():
     accounts = Account.query.all()
     agents = Agent.query.order_by(Agent.desc).all()
-    if request.method == "GET":
-        return render_template("main/index.jinja", accounts=accounts, agents=agents)
-    else:
-        account = Account.query.get(int(request.form.get("account_id")))
-        return add_trans(request, url_for('main.index'), account)
+    categories = Category.query.order_by(Category.desc).all()
+    return render_template("main/home.j2", accounts=accounts, agents=agents, categories=categories)
 
 @mod_main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 def account(account_id):
     account = Account.query.get(account_id)
     agents = Agent.query.order_by(Agent.desc).all()
+    categories = Category.query.order_by(Category.desc).all()
     # last 5 transactions
     transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).limit(5).all()
     saldo = account.saldo()
@@ -55,16 +75,13 @@ def account(account_id):
         zipped_transactions.append((t, saldo))
         saldo += t.amount
 
-    if request.method == "GET":
-        return render_template("main/account.jinja", agents=agents, account=account, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
-    else:
-        return add_trans(request, url_for('main.account', account_id=account.id), account)
+    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
     currencies = Currency.query.all()
     if request.method == "GET":
-        return render_template("main/add_acc.jinja", currencies=currencies)
+        return render_template("main/add_acc.j2", currencies=currencies)
     else:
         desc = request.form.get("description")
         starting_saldo = float(request.form.get("starting_saldo"))
@@ -84,13 +101,15 @@ def add_account():
 def account_transactions(account_id):
     account = Account.query.get(account_id)
     transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).all()
+    agents = Agent.query.order_by(Agent.desc).all()
+    categories = Category.query.order_by(Category.desc).all()
     saldo = account.saldo()
     zipped_transactions = []
     for t in transactions:
         zipped_transactions.append((t, saldo))
         saldo += t.amount
     
-    return render_template("main/account_transactions.jinja", account=account, transactions=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
+    return render_template("main/transactions.j2", account=account, transactions=zipped_transactions, agents=agents, categories=categories, formatted=lambda x: f"{round(x, 2):,.2f}")
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):
