@@ -7,21 +7,13 @@
     onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;">
 {{ account.desc }}
 </h1>
+<p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ formatted(account.starting_saldo) }},
+Current Saldo: {{ formatted(transactions[-1][1]) }}</p>
 
 <table id="transtable" class="table table-sm table-hover clickable-table" cellspacing="0" width="100%">
     {{ macros.trans_table_head() }}
     <tbody>
         {{ macros.trans_table_forloop(transactions, url_for("main.account_transactions", account_id=account.id), account, formatted, agents, categories) }}
-        <tr>
-            <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td>
-            <td>00:00</td>
-            <td>  </td>
-            <td>  </td>
-            <td style="text-align: right;">{{ account.currency.code }} {{ formatted(account.starting_saldo) }}</td>
-            <td>  </td>
-            <td>  </td>
-            <td>  </td>
-        </tr>
     </tbody>
 </table>
 

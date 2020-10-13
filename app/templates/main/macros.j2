@@ -31,12 +31,17 @@
         <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
         <td>{{ transaction.agent.desc }}</td>
         <td style="text-align: right;"  
-            data-sort="{{ format_func(transaction.amount) }}">
-            {{ account.currency.code }} {{ format_func(transaction.amount) }}
+            data-sort="{{ format_func(transaction.amount) }}"
+            {% if transaction.amount > 0 %}
+                class="text-danger"
+            {% else %}
+                class="text-success"
+            {% endif %}>
+            {{ format_func(transaction.amount) }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
             data-sort="{{ format_func(saldo) }}">
-            {{ account.currency.code }} {{ format_func(saldo) }}
+            {{ format_func(saldo) }} {{ account.currency.code }}
         </td>
         <td>{{ transaction.category.desc }}</td>
         <td>{{ transaction.comment }}</td>

@@ -75,7 +75,7 @@ def account(account_id):
         zipped_transactions.append((t, saldo))
         saldo += t.amount
 
-    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=zipped_transactions, formatted=lambda x: f"{round(x, 2):,.2f}")
+    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=zipped_transactions, formatted=lambda x: f"{'+' if x<0 else ''}{-round(x, 2):,.2f}")
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -109,7 +109,7 @@ def account_transactions(account_id):
         zipped_transactions.append((t, saldo))
         saldo += t.amount
     
-    return render_template("main/transactions.j2", account=account, transactions=zipped_transactions, agents=agents, categories=categories, formatted=lambda x: f"{round(x, 2):,.2f}")
+    return render_template("main/transactions.j2", account=account, transactions=zipped_transactions, agents=agents, categories=categories, formatted=lambda x: f"{'+' if x<0 else ''}{-round(x, 2):,.2f}")
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):

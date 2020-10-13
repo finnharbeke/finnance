@@ -14,6 +14,7 @@
 </div>
 
 <h2>{{ account.currency.code }} {{ account.saldo_formatted() }}</h2>
+<p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ formatted(account.starting_saldo) }}</p>
 
 <button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#addTransModal{{ account.id }}">
     New Transaction
