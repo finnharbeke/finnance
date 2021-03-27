@@ -1,5 +1,5 @@
 {% extends "main/layout.j2" %}
-{% import "main/trans_modals.j2" as trans_modals %}
+{% import "main/trans_modal.j2" as trans_modal %}
 
 {% block body %}
 <h1 class="display-1">Finnance</h1>
@@ -14,10 +14,10 @@
             <td onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
                 style="text-align: right;">{{ account.currency.code }} {{ account.saldo_formatted() }}</td>
             <td style="width: 44px; padding: 0px;">
-                <button type="button" class="btn btn-success btn-lg mb-2" data-toggle="modal" data-target="#addTransModal{{ account.id }}" style="height: 100%; width: 100%;">+</button>
+                <button type="button" class="btn btn-success btn-lg mb-2" data-toggle="modal" data-target="#transModal{{ account.id }}" style="height: 100%; width: 100%;">+</button>
                 <!-- Modal -->
                 <!-- defined in included trans_modals.j2 -->
-                {{ trans_modals.post(account, url_for('main.index'), agents, categories) }}
+                {{ trans_modal.modal(account, url_for('main.index'), agents, categories, none) }}
             </td>
         </tr>
         {% endfor %}

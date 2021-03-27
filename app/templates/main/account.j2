@@ -1,5 +1,5 @@
 {% extends "main/layout.j2" %}
-{% import "main/trans_modals.j2" as trans_modals %}
+{% import "main/trans_modal.j2" as trans_modal %}
 {% import "main/macros.j2" as macros %}
 
 {% block body %}
@@ -16,12 +16,12 @@
 <h2>{{ account.currency.code }} {{ account.saldo_formatted() }}</h2>
 <p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ formatted(account.starting_saldo) }}</p>
 
-<button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#addTransModal{{ account.id }}">
+<button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#transModal{{ account.id }}">
     New Transaction
 </button>
 <!-- Modal -->
 <!-- defined in included trans_modals.j2 -->
-{{ trans_modals.post(account, url_for('main.account', account_id=account.id), agents, categories) }}
+{{ trans_modal.modal(account, url_for('main.account', account_id=account.id), agents, categories, none) }}
 
 <table class="table table-hover clickable-table">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>

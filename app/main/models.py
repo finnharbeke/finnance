@@ -4,6 +4,8 @@ import datetime
 from sqlalchemy import ForeignKeyConstraint
 
 class Transaction(db.Model):
+    input_format = "%d.%m.%Y %H:%M"
+
     __tablename__ = 'trans'
     id = db.Column(db.Integer, primary_key=True)
 
@@ -11,16 +13,14 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)
     date_issued = db.Column(db.DateTime, nullable=False)
     comment = db.Column(db.String(120))
-    is_expense = db.Column(db.Boolean, nullable=False)
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
-    category_id = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
 
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ['category_id', 'is_expense'],
-            ['category.id', 'category.is_expense'],
-        )
-    )
+    def is_expense(self):
+        return self.category.is_expense
+
+    def date_to_fmt(self) -> str:
+        return self.date_issued.strftime(Transaction.input_format)
 
     def to_dict(self):
         account = Account.query.get(self.account_id)
@@ -58,9 +58,10 @@ class AccountTransfer(db.Model):
     amount = db.Column(db.Float, nullable=False)
     src_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     dest_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
+    date_issued = db.Column(db.DateTime)
 
     __table_args__ = (
-        CheckConstraint('src_id != dest_id')
+        CheckConstraint('src_id != dest_id'),
     )
 
 class Account(db.Model):
@@ -128,11 +129,16 @@ class Category(db.Model):
     # pylint: disable=no-member
 
     id = db.Column(db.Integer, primary_key=True)
-    desc = db.Column(db.String(64), nullable=False, unique=True)
+    desc = db.Column(db.String(64), nullable=False)
     is_expense = db.Column(db.Boolean, nullable=False, default=1)
     parent_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     children = db.relationship("Category", lazy=True)
     transactions = db.relationship("Transaction", backref="category", lazy=True)
+
+    __table_args__ = (
+        CheckConstraint('parent_id != id'),
+        UniqueConstraint('desc', 'is_expense')
+    )
 
     def to_dict(self, deep=True):
         d = {

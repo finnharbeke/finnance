@@ -12,8 +12,10 @@ mod_main = Blueprint('main', __name__)
 def trans_from_request(request, account):
     # pylint: disable=no-member
     amount = float(request.form.get("amount"))
+    is_expense = request.form.get("expinc") == 'expense'
+    print(request.form.get("expinc"))
 
-    date_issued = datetime.datetime.strptime(request.form.get("date_issued"), "%d.%m.%Y %H:%M")
+    date_issued = datetime.datetime.strptime(request.form.get("date_issued"), Transaction.input_format)
     if date_issued < account.date_created:
         return False, render_template("error.jinja", title="Creation Failed!", desc="Transaction can't have been executed before the creation of the account!", link=url_for('main.add_transaction'), link_text="Try again")
     if date_issued > datetime.datetime.now():
@@ -26,10 +28,14 @@ def trans_from_request(request, account):
         db.session.add(agent)
         db.session.commit()
 
-    category_id = request.form.get("category")
+    if is_expense:
+        category_id = request.form.get("exp_category")
+    else:
+        category_id = request.form.get("inc_category")
+
     comment = request.form.get("comment")
 
-    return True, dict(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, category_id=category_id, comment=comment)
+    return True, dict(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, category_id=category_id, comment=comment, is_expense=is_expense)
 
 @mod_main.route("/accounts/<int:account_id>/transactions/add/", methods=["POST"])
 def add_trans(account_id):

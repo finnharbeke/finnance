@@ -1,4 +1,4 @@
-{% import "main/trans_modals.j2" as trans_modals %}
+{% import "main/trans_modal.j2" as trans_modal %}
 
 {% macro trans_table_head() -%}
     <col style="width:auto">
@@ -46,12 +46,13 @@
         <td>{{ transaction.category.desc }}</td>
         <td>{{ transaction.comment }}</td>
         <td style="width: 44px; padding: 0px;">
-            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#editTransModal{{ transaction.id }}" style="height: 100%; width: 100%;">
+            {% set id = "{acc}-{tr}".format(acc=account.id, tr=transaction.id) %}
+            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#transModal{{ id }}" style="height: 100%; width: 100%;">
                 <i class="fa fa-pencil"></i>
             </button>
             <!-- Modal -->
             <!-- defined in included trans_modals.j2 -->
-            {{ trans_modals.edit(transaction, redirect_url, agents, categories) }}
+            {{ trans_modal.modal(account, redirect_url, agents, categories, transaction) }}
         </td>
     </tr>
 {% endfor %}
