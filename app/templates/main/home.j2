@@ -1,5 +1,11 @@
 {% extends "main/layout.j2" %}
 {% import "main/trans_modal.j2" as trans_modal %}
+{% import "main/transfer_modal.j2" as transfer %}
+
+{% macro data(account) %}
+data-acc_desc="{{ account.desc }}" data-acc_id={{ account.id }}
+data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimals }}
+{% endmacro %}
 
 {% block body %}
 <h1 class="display-1">Finnance</h1>
@@ -7,14 +13,23 @@
 <table class="table table-hover clickable-table" id="all_accounts">
     <tbody>
         {% for account in accounts %}
-        <tr>
+        <tr ondragover="allow_drop_color(event, 'rgb(0, 170, 0, 0.5)')" ondragleave="allow_drop_color(event, null)" ondrop="drop(event)"
+            {{ data(account) }}>
+            <td style="width: 44px; padding: 0px;">
+                <div class="bg-info btn-lg transfer" style="height: 100%; width: 100%;"
+                  draggable="true" ondragstart="drag(event)"
+                  {{ data(account) }}>
+                    <i class="fa fa-exchange" aria-hidden="true"></i>
+                </div>
+            </td>
             <th onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
                 scope="row">{{ account.desc }}</th>
             <!-- <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td> -->
             <td onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
-                style="text-align: right;">{{ account.currency.code }} {{ account.saldo_formatted() }}</td>
+                style="text-align: right;">{{ account.currency.code }} {{ account.saldo() }}</td>
             <td style="width: 44px; padding: 0px;">
-                <button type="button" class="btn btn-success btn-lg mb-2" data-toggle="modal" data-target="#transModal{{ account.id }}" style="height: 100%; width: 100%;">+</button>
+                <button type="button" class="btn btn-success btn-lg mb-2" data-toggle="modal"
+                  data-target="#transModal{{ account.id }}" style="height: 100%; width: 100%;">+</button>
                 <!-- Modal -->
                 <!-- defined in included trans_modals.j2 -->
                 {{ trans_modal.modal(account, url_for('main.index'), agents, categories, none) }}
@@ -23,7 +38,59 @@
         {% endfor %}
     </tbody>
 </table>
+{% include "main/transfer_modal.j2" %}
 <form action="{{ url_for('main.add_account') }}">
     <button type="submit" class="btn btn-primary btn-lg btn-block">Create Account</button>
 </form>
+<script>
+function allow_drop_color(ev, col) {
+    ev.preventDefault();
+    let tr = ev.target;
+    while (tr.tagName != "TR") {
+        tr = tr.parentNode;
+    }
+    tr.style["background-color"] = col;
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text/plain", JSON.stringify(ev.target.dataset));
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    let tr = ev.target;
+    while (tr.tagName != "TR") {
+        tr = tr.parentNode;
+    }
+    tr.style["background-color"] = null;
+    let src_data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+    let dst_data = JSON.parse(JSON.stringify(tr.dataset));
+    console.log(src_data, dst_data);
+    openModal(src_data, dst_data);
+}
+
+function openModal(src, dst) {
+    if (src.acc_id == dst.acc_id) {
+        alert("Can't transfer to itself!");
+    } else {
+        $('#transferModal input[name=src_id]').val(src.acc_id);
+        $('#transferModal input[name=dst_id]').val(dst.acc_id);
+        $('#transferModal input[name=src_desc]').val(src.acc_desc);
+        $('#transferModal input[name=dst_desc]').val(dst.acc_desc);
+        update_currency('#transferModal input[name=src_amount', src.curr_dec, true);
+        update_currency('#transferModal input[name=dst_amount', dst.curr_dec, true);
+        if (src.curr_id == dst.curr_id) {
+            $('#same_currency').show();
+            $('input[name=dst_amount]').attr('readonly', true);
+            $('.fa-lock').show();
+            $('.fa-unlock').hide();
+        } else {
+            $('input[name=dst_amount]').attr('readonly', false);
+            $('#same_currency').hide();
+        }
+
+        $('#transferModal').modal();
+    }
+}
+</script>
 {% endblock %}

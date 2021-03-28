@@ -9,7 +9,8 @@
     </div>
     <div class="form-group">
         <label for="starting_saldo">Starting Saldo</label>
-        <input class="form-control" type="number" name="starting_saldo" step=0.01 required>
+        <input class="form-control" type="number" name="starting_saldo" required>
+        <small class="form-text text-muted" id="saldo_dec"></small>
     </div>
     <div class="form-group">
         <label for="date_created">Date Account is Added to Finnance</label>
@@ -23,7 +24,7 @@
     </div>
     <div class="form-group">
         <label for="currency">Currency</label>
-        <select class="form-control" list="currencies" name="currency" required>
+        <select class="form-control" name="currency" required>
             {% for currency in currencies %}
             <option value="{{ currency.id }}">{{ currency.code }}</option>
             {% endfor %}
@@ -31,5 +32,21 @@
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+<script>
+function decimals() { 
+    let cur_id = $('select[name=currency]').val();
+    {% for currency in currencies %}
+        if (cur_id == {{ currency.id }}) {
+            return {{ currency.decimals }};
+        }
+    {% endfor %}
+}
+$(document).ready(function() {
+    update_currency('input[type=number]', decimals());
+});
+$('select[name=currency]').change(function() {
+    update_currency('input[type=number]', decimals());
+});
 
+</script>
 {% endblock %}
