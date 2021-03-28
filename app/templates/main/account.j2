@@ -13,8 +13,8 @@
     </div>
 </div>
 
-<h2>{{ account.currency.code }} {{ account.saldo_formatted() }}</h2>
-<p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ formatted(account.starting_saldo) }}</p>
+<h2>{{ account.currency.code }} {{ saldo }}</h2>
+<p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ account.starting() }}</p>
 
 <button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#transModal{{ account.id }}">
     New Transaction
@@ -27,7 +27,7 @@
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
     {{ macros.trans_table_head() }}
     <tbody>
-        {{ macros.trans_table_forloop(last_5, url_for("main.account", account_id=account.id), account, formatted, agents, categories) }}
+        {{ macros.trans_table_forloop(last_5, url_for("main.account", account_id=account.id), account, agents, categories) }}
     </tbody>
 </table>
 

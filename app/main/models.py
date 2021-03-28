@@ -55,7 +55,8 @@ class Flow(db.Model):
 class AccountTransfer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    amount = db.Column(db.Float, nullable=False)
+    src_amount = db.Column(db.Float, nullable=False)
+    dest_amount = db.Column(db.Float, nullable=False)
     src_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     dest_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     date_issued = db.Column(db.DateTime)
@@ -71,37 +72,49 @@ class Account(db.Model):
     starting_saldo = db.Column(db.Float, nullable=False, default=0)
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
-    transactions = db.relationship("Transaction", backref="account", lazy=True)
+    transactions = db.relationship("Transaction", backref="account", lazy='dynamic')
 
     def to_dict(self, deep=True):
-        currency = Currency.query.get(self.currency_id)
-
         d = {
             "id": self.id,
             "desc": self.desc,
             "starting_saldo": self.starting_saldo,
             "date_created": self.date_created.strftime('%d.%m.%Y'),
-            "currency": currency.to_dict()
+            "currency": self.currency.to_dict()
         }
         if deep:
             d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
         
         return d
 
-    def saldo(self):
+    def saldo_transactions(self, num=None):
         saldo = self.starting_saldo
-        for t in Transaction.query.filter_by(account_id=self.id).order_by(Transaction.date_issued).all():
-            saldo -= t.amount
-        return saldo
+        total = Transaction.query.count()
+        tuples = []
+        for i, tr in enumerate(self.transactions.order_by(Transaction.date_issued).all()):
+            if tr.is_expense():
+                saldo -= tr.amount
+            else:
+                saldo += tr.amount
+            if num is None or total - i <= num:
+                tuples.append((self.currency.format(saldo), tr))
+        return self.currency.format(saldo), tuples[::-1]
 
-    def saldo_formatted(self):
-        return f"{round(abs(self.saldo()), 2):,.2f}"
+    def saldo(self):
+        return self.saldo_transactions(num=0)[0]
+    
+    def starting(self):
+        return self.currency.format(self.starting_saldo)
 
 class Currency(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(3), nullable=False, unique=True)
+    decimals = db.Column(db.Integer, CheckConstraint("decimals >= 0"), nullable=False)
     accounts = db.relationship("Account", backref="currency", lazy=True)
+
+    def format(self, number: float) -> str:
+        return "{n:,.{d}f}".format(n=number, d=self.decimals)
 
     def to_dict(self):
         return {

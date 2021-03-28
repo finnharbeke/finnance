@@ -1,6 +1,6 @@
 {% import "main/trans_modal.j2" as trans_modal %}
 
-{% macro trans_table_head() -%}
+{% macro trans_table_head() %}
     <col style="width:auto">
     <col style="width:auto">
     <col style="width:20%">
@@ -20,10 +20,10 @@
             <th scope="col"></th>
         </tr>
     </thead>
-{%- endmacro %}
+{% endmacro %}
 
-{% macro trans_table_forloop(transactions, redirect_url, account, format_func, agents, categories) -%}
-{% for transaction, saldo in transactions %}
+{% macro trans_table_forloop(transactions, redirect_url, account, agents, categories) %}
+{% for saldo, transaction in transactions %}
     <tr>
         <td data-sort="{{transaction.date_issued.strftime('%Y%m%d%H%M%s') }}">
             {{ transaction.date_issued.strftime('%d.%m.%Y') }}
@@ -31,17 +31,17 @@
         <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
         <td>{{ transaction.agent.desc }}</td>
         <td style="text-align: right;"  
-            data-sort="{{ format_func(transaction.amount) }}"
-            {% if transaction.amount > 0 %}
+            data-sort="{% if transaction.is_expense() %}{{ transaction.amount }}{% else %}{{ -transaction.amount }}{% endif %}"
+            {% if transaction.is_expense() %}
                 class="text-danger"
             {% else %}
                 class="text-success"
             {% endif %}>
-            {{ format_func(transaction.amount) }} {{ account.currency.code }}
+            {{ transaction.amount }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
-            data-sort="{{ format_func(saldo) }}">
-            {{ format_func(saldo) }} {{ account.currency.code }}
+            data-sort="{{ saldo }}">
+            {{ saldo }} {{ account.currency.code }}
         </td>
         <td>{{ transaction.category.desc }}</td>
         <td>{{ transaction.comment }}</td>
@@ -56,4 +56,4 @@
         </td>
     </tr>
 {% endfor %}
-{%- endmacro %}
+{% endmacro %}

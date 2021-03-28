@@ -73,15 +73,8 @@ def account(account_id):
     account = Account.query.get(account_id)
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
-    # last 5 transactions
-    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).limit(5).all()
-    saldo = account.saldo()
-    zipped_transactions = []
-    for t in transactions:
-        zipped_transactions.append((t, saldo))
-        saldo += t.amount
-
-    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=zipped_transactions, formatted=lambda x: f"{'+' if x<0 else ''}{-round(x, 2):,.2f}")
+    saldo, saldo_transactions = account.saldo_transactions()
+    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=saldo_transactions, saldo=saldo)
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -106,16 +99,12 @@ def add_account():
 @mod_main.route("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
     account = Account.query.get(account_id)
-    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued.desc()).all()
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
-    saldo = account.saldo()
-    zipped_transactions = []
-    for t in transactions:
-        zipped_transactions.append((t, saldo))
-        saldo += t.amount
     
-    return render_template("main/transactions.j2", account=account, transactions=zipped_transactions, agents=agents, categories=categories, formatted=lambda x: f"{'+' if x<0 else ''}{-round(x, 2):,.2f}")
+    saldo, saldo_transactions = account.saldo_transactions()
+    
+    return render_template("main/transactions.j2", account=account, saldo=saldo, transactions=saldo_transactions, agents=agents, categories=categories)
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):
