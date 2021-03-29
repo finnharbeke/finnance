@@ -3,7 +3,6 @@
 {% import "main/macros.j2" as macros %}
 
 {% block body %}
-
 <div class="row">
     <div class="col-10">
         <h1 class="display-4">{{ account.desc }}</h1>
@@ -23,7 +22,7 @@
 <!-- defined in included trans_modals.j2 -->
 {{ trans_modal.modal(account, url_for('main.account', account_id=account.id), agents, categories, none) }}
 
-<table class="table table-hover clickable-table">
+<table class="table table-hover">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
     {{ macros.trans_table_head() }}
     <tbody>

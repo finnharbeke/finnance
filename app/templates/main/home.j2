@@ -73,8 +73,10 @@ function openModal(src, dst) {
     if (src.acc_id == dst.acc_id) {
         alert("Can't transfer to itself!");
     } else {
-        $('#transferModal input[name=src_id]').val(src.acc_id);
-        $('#transferModal input[name=dst_id]').val(dst.acc_id);
+        $('#transferModal form').attr(
+            'action',
+            "{{ url_for('main.add_transfer', src_id=-1, dst_id=0) }}".replace('-1', src.acc_id).replace('0', dst.acc_id)
+        );
         $('#transferModal input[name=src_desc]').val(src.acc_desc);
         $('#transferModal input[name=dst_desc]').val(dst.acc_desc);
         update_currency('#transferModal input[name=src_amount', src.curr_dec, true);

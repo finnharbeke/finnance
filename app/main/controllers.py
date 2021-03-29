@@ -1,16 +1,15 @@
 from flask import Flask, render_template, Blueprint, request, redirect, url_for, jsonify, send_file
 import sqlalchemy
 from app import db
-from app.main.models import Transaction, Account, Agent, Currency, Category
+from app.main.models import AccountTransfer, Transaction, Account, Agent, Currency, Category
 import datetime, io
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import os
 
 mod_main = Blueprint('main', __name__)
 
 def trans_from_request(request, account):
-    # pylint: disable=no-member
     amount = float(request.form.get("amount"))
     is_expense = request.form.get("expinc") == 'expense'
     print(request.form.get("expinc"))
@@ -37,9 +36,24 @@ def trans_from_request(request, account):
 
     return True, dict(account_id=account.id, amount=amount, agent_id=agent.id, date_issued=date_issued, category_id=category_id, comment=comment, is_expense=is_expense)
 
+@mod_main.route("/transfers/add/<int:src_id>-<int:dst_id>/", methods=["POST"])
+def add_transfer(src_id, dst_id):
+    src = Account.query.get(src_id)
+    dst = Account.query.get(dst_id)
+    src_amount = request.form.get("src_amount")
+    dst_amount = request.form.get("dst_amount")
+    date_issued = datetime.datetime.strptime(request.form.get("date_issued"), Transaction.input_format)
+    if date_issued < src.date_created or date_issued < dst.date_created:
+        return render_template("error.jinja", title="Creation Failed!", desc="Transfer can't have been executed before the creation of an account!", link=url_for('main.index'), link_text="Back")
+    if date_issued > datetime.datetime.now():
+        return render_template("error.jinja", title="Creation Failed!", desc="Transfer can't have been executed after today!", link=url_for('main.index'), link_text="Back")
+
+    db.session.add(AccountTransfer(src_id=src_id, dst_id=dst_id, src_amount=src_amount, dst_amount=dst_amount, date_issued=date_issued))
+    db.session.commit()
+    return redirect(url_for('main.index'))
+
 @mod_main.route("/accounts/<int:account_id>/transactions/add/", methods=["POST"])
 def add_trans(account_id):
-    # pylint: disable=no-member
     account = Account.query.get(account_id)
     success, kwargs = trans_from_request(request, account)
     if not success:
@@ -50,7 +64,6 @@ def add_trans(account_id):
 
 @mod_main.route("/transactions/edit/<int:transaction_id>", methods=["POST"])
 def edit_trans(transaction_id):
-    # pylint: disable=no-member
     tr = Transaction.query.get(transaction_id)
     success, columns = trans_from_request(request, tr.account)
     if not success:
@@ -73,8 +86,8 @@ def account(account_id):
     account = Account.query.get(account_id)
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
-    saldo, saldo_transactions = account.saldo_transactions()
-    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=saldo_transactions, saldo=saldo)
+    saldo, saldo_children = account.saldo_children(num=5)
+    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=saldo_children, saldo=saldo)
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -102,31 +115,26 @@ def account_transactions(account_id):
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
     
-    saldo, saldo_transactions = account.saldo_transactions()
+    saldo, saldo_children = account.saldo_children()
     
-    return render_template("main/transactions.j2", account=account, saldo=saldo, transactions=saldo_transactions, agents=agents, categories=categories)
+    return render_template("main/transactions.j2", account=account, saldo=saldo, transactions=saldo_children, agents=agents, categories=categories)
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):
     account = Account.query.get(account_id)
-    transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date_issued).all()
 
-    saldo = account.starting_saldo
-    saldos = [saldo]
-    for t in transactions:
-        saldo -= t.amount
-        saldos.append(saldo)
-    # current saldo
-    saldos.append(saldos[-1])
+    saldo, children = account.saldo_children(saldo_formatted=False)
+    children = children[::-1]
 
     # Set seaborn & matplotlib
     sns.set("notebook", font_scale=2)
-    f, ax = plt.subplots(figsize=(24, 6)) # pylint: disable=unused-variable
+    f, ax = plt.subplots(figsize=(24, 6))
     plt.tight_layout()
     # creation, transactions and now
-    x = [account.date_created] + [t.date_issued for t in transactions] + [datetime.datetime.now()]
+    x = [account.date_created]*2 + [child.date_issued for child in children] + [datetime.datetime.now()]
+    y = [0, account.starting_saldo] + [child.saldo(formatted=False) for child in children] + [saldo]
 
-    plt.plot(x, saldos, drawstyle='steps-post', linewidth=2.5)
+    plt.plot(x, y, drawstyle='steps-post', linewidth=2.5)
     ax.set_xlim(left=x[0], right=[x[-1]])
 
     bytes_image = io.BytesIO()

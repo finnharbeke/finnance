@@ -22,37 +22,38 @@
     </thead>
 {% endmacro %}
 
-{% macro trans_table_forloop(transactions, redirect_url, account, agents, categories) %}
-{% for saldo, transaction in transactions %}
+{% macro trans_table_forloop(children, redirect_url, account, agents, categories) %}
+{% for child in children %}
     <tr>
-        <td data-sort="{{transaction.date_issued.strftime('%Y%m%d%H%M%s') }}">
-            {{ transaction.date_issued.strftime('%d.%m.%Y') }}
+        <td data-sort="{{child.date_issued.strftime('%Y%m%d%H%M%s') }}">
+            {{ child.date_issued.strftime('%d.%m.%Y') }}
         </td>
-        <td>{{ transaction.date_issued.strftime('%H:%M') }}</td>
-        <td>{{ transaction.agent.desc }}</td>
+        <td>{{ child.date_issued.strftime('%H:%M') }}</td>
+        <td>{% if child.is_transfer() %}<a href="{{ url_for('main.account', account_id=child.agent_id) }}">{{ child.agent }}</a>{% else %}{{ child.agent }}{% endif %}</td>
         <td style="text-align: right;"  
-            data-sort="{% if transaction.is_expense() %}{{ transaction.amount }}{% else %}{{ -transaction.amount }}{% endif %}"
-            {% if transaction.is_expense() %}
+            data-sort="{% if child.is_expense %}{{ child.amount }}{% else %}{{ -child.amount }}{% endif %}"
+            {% if child.is_expense %}
                 class="text-danger"
             {% else %}
                 class="text-success"
             {% endif %}>
-            {{ transaction.amount }} {{ account.currency.code }}
+            {{ child.amount }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
             data-sort="{{ saldo }}">
-            {{ saldo }} {{ account.currency.code }}
+            {{ child.saldo() }} {{ account.currency.code }}
         </td>
-        <td>{{ transaction.category.desc }}</td>
-        <td>{{ transaction.comment }}</td>
+        <td><span class="rounded p-1 {% if child.is_transfer() %} bg-info{% endif %}">{{ child.category }}</span></td>
+        <td>{{ child.comment }}</td>
         <td style="width: 44px; padding: 0px;">
-            {% set id = "{acc}-{tr}".format(acc=account.id, tr=transaction.id) %}
-            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#transModal{{ id }}" style="height: 100%; width: 100%;">
+            {% set id = "{acc}-{tr}".format(acc=account.id, tr=child.id) %}
+            <button type="button" class="btn btn-warning btn-lg" style="height: 100%; width: 100%;"
+              data-toggle="modal" data-target="{% if child.is_transaction() %}#transModal{% elif child.is_transfer() %}#transferModal{% endif %}{{ id }}" >
                 <i class="fa fa-pencil"></i>
             </button>
             <!-- Modal -->
             <!-- defined in included trans_modals.j2 -->
-            {{ trans_modal.modal(account, redirect_url, agents, categories, transaction) }}
+            {% if child.is_transaction() %}{{ trans_modal.modal(account, redirect_url, agents, categories, child) }}{% endif %}
         </td>
     </tr>
 {% endfor %}

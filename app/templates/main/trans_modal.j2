@@ -22,11 +22,11 @@
                     <div class="form-row">
                         <div class="form-group col-md-4 order-md-2">
                             <div class="btn-group btn-group-toggle float-right" data-toggle="expinc">
-                                <label class="btn btn-danger" id="expenseLabel{{ id }}">
-                                    <input type="radio" name="expinc" id="expense{{ id }}" value="expense" {% if not edit or tr.is_expense() %}checked{% endif %}>Expense
+                                <label class="btn {% if not edit or tr.is_expense %}btn-danger{% else %}btn-light{% endif %}" id="expenseLabel{{ id }}">
+                                    <input type="radio" name="expinc" id="expense{{ id }}" value="expense" {% if not edit or tr.is_expense %}checked{% endif %}>Expense
                                 </label>
-                                <label class="btn btn-light" id="incomeLabel{{ id }}">
-                                    <input type="radio" name="expinc" id="income{{ id }}" value="income" {% if edit and not tr.is_expense() %}checked{% endif %}>Income
+                                <label class="btn {% if edit and not tr.is_expense %}btn-success{% else %}btn-light{% endif %}" id="incomeLabel{{ id }}">
+                                    <input type="radio" name="expinc" id="income{{ id }}" value="income" {% if edit and not tr.is_expense %}checked{% endif %}>Income
                                 </label>
                             </div>
                         </div>
@@ -49,29 +49,29 @@
                     </div>
                     <div class="form-group">
                         <label for="agent">Agent</label>
-                        <input class="form-control" type="text" list="agents{{ id }}" name="agent" {% if edit %}value="{{ tr.agent.desc }}"{% endif %} required>
+                        <input class="form-control" type="text" list="agents{{ id }}" name="agent" {% if edit %}value="{{ tr.agent }}"{% endif %} required>
                         <datalist id="agents{{ id }}">
                         {% for agent in agents %}
                             <option value="{{ agent.desc }}"/>
                         {% endfor %}
                         </datalist>
                     </div>
-                    <div class="form-group" id="incomeSelect{{ id }}" style="display:none;">
+                    <div class="form-group" id="incomeSelect{{ id }}" {% if not edit or tr.is_expense %}style="display:none;"{% endif %}>
                         <label for="inc_category">Category</label>
                         <select class="form-control" name="inc_category">
                         {% for cat in categories %}
                             {% if not cat.is_expense %}
-                                <option value="{{ cat.id }}" {% if edit and cat.id == tr.category.id %} selected {% endif %}>{{ cat.desc }}</option>
+                                <option value="{{ cat.id }}" {% if edit and cat.id == tr.category_id %} selected {% endif %}>{{ cat.desc }}</option>
                             {% endif %}
                         {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group" id="expenseSelect{{ id }}">
+                    <div class="form-group" id="expenseSelect{{ id }}" {% if edit and not tr.is_expense %}style="display:none;"{% endif %}>
                         <label for="exp_category">Category</label>
                         <select class="form-control" name="exp_category">
                         {% for cat in categories %}
                             {% if cat.is_expense %}
-                                <option value="{{ cat.id }}" {% if edit and cat.id == tr.category.id %} selected {% endif %}>{{ cat.desc }}</option>
+                                <option value="{{ cat.id }}" {% if edit and cat.id == tr.category_id %} selected {% endif %}>{{ cat.desc }}</option>
                             {% endif %}
                         {% endfor %}
                         </select>
@@ -93,8 +93,8 @@
 $(document).ready(function () {
     update_currency('#transModal{{ id }} input[name=amount]', {{ account.currency.decimals }})
 })
-$('input[type=radio][name=expinc]').change(function() {
-    let id = {{ id }};
+$('#transactionForm{{ id }} input[type=radio][name=expinc]').change(function() {
+    let id = "{{ id }}";
     if (this.id == `expense${ id }`){
         $(`#expenseLabel${ id }`).toggleClass('btn-light btn-danger');
         $(`#incomeLabel${ id }`).toggleClass('btn-success btn-light');

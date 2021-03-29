@@ -10,7 +10,7 @@
 <p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code }} {{ account.starting() }},
 Current Saldo: {{ saldo }}</p>
 
-<table id="transtable" class="table table-sm table-hover clickable-table" cellspacing="0" width="100%">
+<table id="transtable" class="table table-sm table-hover" cellspacing="0" width="100%">
     {{ macros.trans_table_head() }}
     <tbody>
         {{ macros.trans_table_forloop(transactions, url_for("main.account_transactions", account_id=account.id), account, agents, categories) }}

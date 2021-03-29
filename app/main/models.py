@@ -1,3 +1,5 @@
+import enum
+import os
 from sqlalchemy.sql.schema import CheckConstraint, UniqueConstraint
 from app import db
 import datetime
@@ -18,9 +20,6 @@ class Transaction(db.Model):
 
     def is_expense(self):
         return self.category.is_expense
-
-    def date_to_fmt(self) -> str:
-        return self.date_issued.strftime(Transaction.input_format)
 
     def to_dict(self):
         account = Account.query.get(self.account_id)
@@ -56,13 +55,16 @@ class AccountTransfer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     src_amount = db.Column(db.Float, nullable=False)
-    dest_amount = db.Column(db.Float, nullable=False)
+    dst_amount = db.Column(db.Float, nullable=False)
     src_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
-    dest_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
+    dst_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     date_issued = db.Column(db.DateTime)
 
+    src = db.relationship("Account", backref="out_transfers", foreign_keys=[src_id])
+    dst = db.relationship("Account", backref="in_transfers", foreign_keys=[dst_id])
+
     __table_args__ = (
-        CheckConstraint('src_id != dest_id'),
+        CheckConstraint('src_id != dst_id'),
     )
 
 class Account(db.Model):
@@ -73,6 +75,42 @@ class Account(db.Model):
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
     transactions = db.relationship("Transaction", backref="account", lazy='dynamic')
+
+    class AnyChild():
+        """A class that holds data of a Transaction or an AccountTransfer"""
+        class ChildType(enum.Enum):
+            AccountTransfer = enum.auto()
+            Transaction = enum.auto()
+
+        def __init__(self, row: dict, account):
+            self.account = account
+            self.date_issued = datetime.datetime.strptime(row.get('date_issued'), "%Y-%m-%d %H:%M:%S.%f")
+            self.amount = float(row.get('amount'))
+            self.is_expense = bool(row.get('is_expense'))
+            self.agent = row.get('agent')
+            self.agent_id = row.get('agent_id')
+            self.category = row.get('cat')
+            self.category_id = row.get('cat_id')
+            self.comment = row.get('comment')
+            self.id = int(row.get('id'))
+            self._saldo = None
+            self.type = self.ChildType.AccountTransfer if self.category == "transfer" else self.ChildType.Transaction
+
+        def saldo(self, saldo: float = None, formatted=True):
+            if saldo is not None:
+                self._saldo = saldo
+            return self.account.currency.format(self._saldo) if formatted else self._saldo
+        
+        def date_to_fmt(self) -> str:
+            return self.date_issued.strftime(Transaction.input_format)
+
+        def is_transfer(self) -> bool:
+            return self.type is self.ChildType.AccountTransfer
+
+        def is_transaction(self) -> bool:
+            return self.type is self.ChildType.Transaction
+
+        
 
     def to_dict(self, deep=True):
         d = {
@@ -87,21 +125,27 @@ class Account(db.Model):
         
         return d
 
-    def saldo_transactions(self, num=None):
+    def saldo_children(self, num=None, saldo_formatted=True):
         saldo = self.starting_saldo
-        total = Transaction.query.count()
-        tuples = []
-        for i, tr in enumerate(self.transactions.order_by(Transaction.date_issued).all()):
-            if tr.is_expense():
-                saldo -= tr.amount
+        total = self.transactions.count() + len(self.in_transfers) + len(self.out_transfers)
+        with open(os.path.join(os.path.dirname(__file__), '../static/sql/all_transactions.sql'), "r") as f:
+            sql = f.read()
+
+        children = []
+        for i, entry in enumerate(db.session.execute(sql, {'id': self.id})):
+            entry = self.AnyChild(dict(entry), self)
+            if entry.is_expense:
+                saldo -= entry.amount
             else:
-                saldo += tr.amount
+                saldo += entry.amount
+            entry.saldo(saldo)
             if num is None or total - i <= num:
-                tuples.append((self.currency.format(saldo), tr))
-        return self.currency.format(saldo), tuples[::-1]
+                children.append(entry) 
+        saldo = self.currency.format(saldo) if saldo_formatted else saldo
+        return saldo, children[::-1]
 
     def saldo(self):
-        return self.saldo_transactions(num=0)[0]
+        return self.saldo_children(num=0)[0]
     
     def starting(self):
         return self.currency.format(self.starting_saldo)
