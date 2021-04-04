@@ -84,7 +84,7 @@
                         <label for="inc_category">Category</label>
                         <select class="form-control" name="inc_category">
                         {% for cat in categories %}
-                            {% if not cat.is_expense %}
+                            {% if not cat.is_expense and cat.usable %}
                                 <option value="{{ cat.id }}" {% if edit and cat.id == tr.category_id %} selected {% endif %}>{{ cat.desc }}</option>
                             {% endif %}
                         {% endfor %}
@@ -94,7 +94,7 @@
                         <label for="exp_category">Category</label>
                         <select class="form-control" name="exp_category">
                         {% for cat in categories %}
-                            {% if cat.is_expense %}
+                            {% if cat.is_expense and cat.usable %}
                                 <option value="{{ cat.id }}" {% if edit and cat.id == tr.category_id %} selected {% endif %}>{{ cat.desc }}</option>
                             {% endif %}
                         {% endfor %}

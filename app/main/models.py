@@ -126,6 +126,7 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False)
     is_expense = db.Column(db.Boolean, nullable=False)
+    usable = db.Column(db.Boolean, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     children = db.relationship("Category", lazy=True)
     transactions = db.relationship("Transaction", backref="category", lazy=True)
