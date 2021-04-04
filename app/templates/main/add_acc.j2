@@ -42,10 +42,10 @@ function decimals() {
     {% endfor %}
 }
 $(document).ready(function() {
-    update_currency('input[type=number]', decimals());
+    update_currency('input[type=number]', decimals(), undefined, false);
 });
 $('select[name=currency]').change(function() {
-    update_currency('input[type=number]', decimals());
+    update_currency('input[type=number]', decimals(), undefined, false);
 });
 
 </script>

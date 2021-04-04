@@ -68,6 +68,10 @@
                             required {% if edit %}value="{{ tr.date_to_fmt() }}"{% endif %}>
                         <small class="form-text text-muted">dd.mm.yyyy hh:mm</small>
                     </div>
+                    <div class="form-group">
+                        <label for="comment">Comment</label>
+                        <input class="form-control" type="text" maxlength=120 name="comment">
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">

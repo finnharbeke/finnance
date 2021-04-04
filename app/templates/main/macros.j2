@@ -22,38 +22,38 @@
     </thead>
 {% endmacro %}
 
-{% macro trans_table_forloop(children, redirect_url, account, agents, categories) %}
-{% for child in children %}
+{% macro trans_table_forloop(changes, redirect_url, account, agents, categories) %}
+{% for change in changes %}
     <tr>
-        <td data-sort="{{child.date_issued.strftime('%Y%m%d%H%M%s') }}">
-            {{ child.date_issued.strftime('%d.%m.%Y') }}
+        <td data-sort="{{ change.date_issued.strftime('%Y%m%d%H%M%s') }}">
+            {{ change.date_issued.strftime('%d.%m.%Y') }}
         </td>
-        <td>{{ child.date_issued.strftime('%H:%M') }}</td>
-        <td>{% if child.is_transfer() %}<a href="{{ url_for('main.account', account_id=child.agent_id) }}">{{ child.agent }}</a>{% else %}{{ child.agent }}{% endif %}</td>
+        <td>{{ change.date_issued.strftime('%H:%M') }}</td>
+        <td>{% if change.transfer %}<a href="{{ url_for('main.account', account_id=change.agent_id) }}">{{ change.agent }}</a>{% else %}{{ change.agent }}{% endif %}</td>
         <td style="text-align: right;"  
-            data-sort="{% if child.is_expense %}{{ child.amount }}{% else %}{{ -child.amount }}{% endif %}"
-            {% if child.is_expense %}
+            data-sort="{% if change.is_expense %}{{ change.amount }}{% else %}{{ -change.amount }}{% endif %}"
+            {% if change.is_expense %}
                 class="text-danger"
             {% else %}
                 class="text-success"
             {% endif %}>
-            {{ child.amount }} {{ account.currency.code }}
+            {{ change.amount }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
             data-sort="{{ saldo }}">
-            {{ child.saldo() }} {{ account.currency.code }}
+            {{ change.saldo() }} {{ account.currency.code }}
         </td>
-        <td><span class="rounded p-1 {% if child.is_transfer() %} bg-info{% endif %}">{{ child.category }}</span></td>
-        <td>{{ child.comment }}</td>
+        <td><span class="rounded p-1 {% if change.transfer or change.direct_flow_in is not none %}bg-info{% endif %}">{{ change.category }}</span></td>
+        <td>{{ change.comment }}</td>
         <td style="width: 44px; padding: 0px;">
-            {% set id = "{acc}-{tr}".format(acc=account.id, tr=child.id) %}
+            {% set id = "{acc}-{tr}".format(acc=account.id, tr=change.id) %}
             <button type="button" class="btn btn-warning btn-lg" style="height: 100%; width: 100%;"
-              data-toggle="modal" data-target="{% if child.is_transaction() %}#transModal{% elif child.is_transfer() %}#transferModal{% endif %}{{ id }}" >
+              data-toggle="modal" data-target="{% if not change.transfer %}#transModal{% else %}#transferModal{% endif %}{{ id }}" >
                 <i class="fa fa-pencil"></i>
             </button>
             <!-- Modal -->
             <!-- defined in included trans_modals.j2 -->
-            {% if child.is_transaction() %}{{ trans_modal.modal(account, redirect_url, agents, categories, child) }}{% endif %}
+            {% if not change.transfer %}{{ trans_modal.modal(account, redirect_url, agents, categories, change) }}{% endif %}
         </td>
     </tr>
 {% endfor %}
