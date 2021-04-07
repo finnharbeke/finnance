@@ -37,7 +37,7 @@
             {% else %}
                 class="text-success"
             {% endif %}>
-            {{ change.amount }} {{ account.currency.code }}
+            {{ account.currency.format(change.amount) }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
             data-sort="{{ saldo }}">

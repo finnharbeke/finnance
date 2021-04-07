@@ -24,9 +24,9 @@ class Change:
         direct_flow_in = d.get('direct_flow_in')
         if direct_flow_in is not None:
             direct_flow_in = bool(direct_flow_in)
-            
+
         if d.get('cat_id') is None:
-            if direct_flow_in:
+            if direct_flow_in is not None:
                 cat_desc = "flow"
             else:
                 cat_desc = "transfer"

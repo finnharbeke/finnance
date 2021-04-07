@@ -37,7 +37,13 @@ def handle_transaction(request, account, edit=None):
     is_expense = request.form.get("expinc") == 'expense'
     # check saldo
     saldo = account.saldo(formatted=False)
-    if is_expense and saldo - amount < 0:
+    if edit is None:
+        diff = amount if is_expense else -amount
+    else:
+        tr = Transaction.query.get(edit)
+        diff = tr.amount if tr.is_expense else -tr.amount
+        diff += -amount if is_expense else amount
+    if is_expense and saldo + diff < 0:
         return render_template(
             desc="Transaction would result in negative Account Saldo!",
             **error_kwargs
@@ -225,9 +231,9 @@ def account_transactions(account_id):
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
     
-    saldo, saldo_children = account.saldo_children()
+    saldo, changes = account.changes()
     
-    return render_template("main/transactions.j2", account=account, saldo=saldo, transactions=saldo_children, agents=agents, categories=categories)
+    return render_template("main/transactions.j2", account=account, saldo=saldo, transactions=changes, agents=agents, categories=categories)
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):
