@@ -215,14 +215,14 @@ def add_account():
         starting_saldo = float(request.form.get("starting_saldo"))
         date_created = datetime.datetime.strptime(request.form.get("date_created"), "%d.%m.%Y")
         if date_created > datetime.datetime.now():
-            return render_template("error.jinja", title="Creation Failed!", desc="Account can't have been created after today!", link=url_for('main.add_account'), link_text="Try again")
+            return render_template("error.j2", title="Creation Failed!", desc="Account can't have been created after today!", link=url_for('main.add_account'), link_text="Try again")
         currency_id = int(request.form.get("currency"))
         account = Account(desc=desc, starting_saldo=starting_saldo, date_created=date_created, currency_id=currency_id)
         db.session.add(account) # pylint: disable=no-member
         try:
             db.session.commit() # pylint: disable=no-member
         except sqlalchemy.exc.IntegrityError:
-            return render_template("error.jinja", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
+            return render_template("error.j2", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
         return redirect(url_for('main.add_account'))
 
 @mod_main.route("/accounts/<int:account_id>/transactions")
@@ -265,38 +265,6 @@ def account_plot(account_id):
 @mod_main.route("/accounts/<int:account_id>/analysis")
 def account_analysis(account_id):
     pass
-
-@mod_main.route("/transactions/<int:transaction_id>")
-def transaction(transaction_id):
-    transaction = Transaction.query.get(transaction_id)
-    print(transaction.flows)
-    for f in transaction.flows:
-        print(f.agent.desc)
-    return jsonify(transaction.to_dict())
-
-@mod_main.route("/api/transactions/<int:transaction_id>")
-def api_transaction(transaction_id):
-    transaction = Transaction.query.get(transaction_id)
-    if not transaction:
-        return jsonify({"error": "Invalid transaction_id!"}), 422
-
-    return jsonify(transaction.to_dict())
-
-@mod_main.route("/api/accounts/<int:account_id>")
-def api_account(account_id):
-    account = Account.query.get(account_id)
-    if not account:
-        return jsonify({"error": "Invalid account_id!"}), 422
-
-    return jsonify(account.to_dict())
-
-@mod_main.route("/api/agents/<int:agent_id>")
-def api_agent(agent_id):
-    agent = Agent.query.get(agent_id)
-    if not agent:
-        return jsonify({"error": "Invalid agent_id!"}), 422
-
-    return jsonify(agent.to_dict())
 
 # CODE BELOW IS FOR FORCE RELOADING CSS
 @mod_main.context_processor

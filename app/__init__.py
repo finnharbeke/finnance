@@ -15,13 +15,15 @@ db = SQLAlchemy(app)
 # Sample HTTP error handling
 @app.errorhandler(404)
 def not_found(error):
-    return render_template('error.jinja', title="404", desc="Page Not Found!", link=url_for("main.index"), link_text="Home"), 404
+    return render_template('error.j2', title="404", desc="Page Not Found!", link=url_for("main.index"), link_text="Home"), 404
 
 # Import a module / component using its blueprint handler variable (mod_auth)
 from app.main.controllers import mod_main as main_module
+from app.main.api import mod_api as api_module
 
 # Register blueprint(s)
 app.register_blueprint(main_module)
+app.register_blueprint(api_module)
 # app.register_blueprint(xyz_module)
 # ..
 

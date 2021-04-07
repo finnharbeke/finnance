@@ -11,17 +11,20 @@ class Account(db.Model):
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
     transactions = db.relationship("Transaction", backref="account", lazy='dynamic')
 
-    def to_dict(self, deep=True):
+    def api(self, deep=False):
         d = {
             "id": self.id,
             "desc": self.desc,
             "starting_saldo": self.starting_saldo,
             "date_created": self.date_created.strftime('%d.%m.%Y'),
-            "currency": self.currency.to_dict()
+            "currency": self.currency.api() if deep else self.currency.id,
+            "saldo": self.saldo(formatted=False)
         }
         if deep:
-            d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
-        
+            d["transactions"] = [tr.api() for tr in self.transactions]
+            d["transfers_in"] = [tr.api() for tr in self.in_transfers]
+            d["transfers_out"] = [tr.api() for tr in self.out_transfers]
+
         return d
 
     def changes(self, num=None, saldo_formatted=True):
@@ -40,7 +43,7 @@ class Account(db.Model):
             change.saldo(saldo)
             if num is None or total - i <= num:
                 changes.append(change)
-        saldo = self.currency.format(saldo) if saldo_formatted else saldo
+        saldo = self.currency.format(saldo) if saldo_formatted else round(saldo, self.currency.decimals)
         return saldo, changes[::-1]
 
     def saldo(self, formatted=True):

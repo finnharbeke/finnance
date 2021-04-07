@@ -20,22 +20,21 @@ class Transaction(db.Model):
     )
 
     def is_expense(self):
-        return self.category.is_expense
+        return self.category.is_expense if self.category_id is not None else not self.direct_flow_in
 
-    def to_dict(self):
-        currency = Currency.query.get(self.account.currency_id)
-        agent = Agent.query.get(self.agent_id)
-
+    def api(self, deep=False):
+        cat = self.category_id is not None
         return {
+            "type": "categorized" if cat else "flow",
             "id": self.id,
-            "account": self.account.to_dict(deep=False),
+            "account": self.account.api() if deep else self.account.id,
+            "is_expense": self.is_expense(),
             "amount": self.amount,
-            "agent": agent.to_dict(deep=False),
+            "agent": self.agent.api() if deep else self.agent.id,
             "comment": self.comment,
-            "date": self.date_issued.strftime('%d.%m.%Y'),
-            "time": self.date_issued.strftime('%H:%M'),
-            "currency": currency.to_dict(),
-            "is_expense": self.is_expense()
+            "date_issued": self.date_issued.strftime('%d.%m.%Y %H:%M'),
+            "currency": self.account.currency.api() if deep else self.account.currency.id,
+            "category": self.category.api() if cat and deep else self.category.id if cat else None
         }
 
 class Flow(db.Model):
@@ -50,6 +49,14 @@ class Flow(db.Model):
     __table_args__ = (
         UniqueConstraint('agent_id', 'trans_id'),
     )
+
+    def api(self, deep=False):
+        return {
+            "id": self.id,
+            "amount": self.amount,
+            "agent": self.agent.api() if deep else self.agent.id,
+            "transaction": self.trans.api() if deep else self.trans.id
+        }
 
 class RemoteFlow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,6 +77,19 @@ class RemoteFlow(db.Model):
         CheckConstraint('flow_agent_id != trans_agent_id'),
     )
 
+    def api(self, deep=False):
+        return {
+            "id": self.id,
+            "amount": self.amount,
+            "is_expense": self.is_expense,
+            "date_issued": self.date_issued,
+            "flow_agent": self.flow_agent.api() if deep else self.flow_agent.id,
+            "trans_agent": self.trans_agent.api() if deep else self.trans_agent.id,
+            "category": self.category.api(),
+            "currency": self.currency.api(),
+            "comment": self.comment
+        }
+
 class AccountTransfer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -87,21 +107,38 @@ class AccountTransfer(db.Model):
         CheckConstraint('src_id != dst_id'),
     )
 
+    def api(self, deep=False):
+        return {
+            "id": self.id,
+            "src_amount": self.src_amount,
+            "dst_amount": self.dst_amount,
+            "src": self.src.api() if deep else self.src.id,
+            "dst": self.dst.api() if deep else self.dst.id,
+            "date_issued": self.date_issued.strftime("%d.%m.%Y %H:%M"),
+            "comment": self.comment
+        }
+
 class Currency(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(3), nullable=False, unique=True)
     decimals = db.Column(db.Integer, CheckConstraint("decimals >= 0"), nullable=False)
     accounts = db.relationship("Account", backref="currency", lazy=True)
+    remote_flows = db.relationship("RemoteFlow", backref="currency", lazy=True)
 
     def format(self, number: float) -> str:
         return "{n:,.{d}f}".format(n=number, d=self.decimals)
 
-    def to_dict(self):
-        return {
+    def api(self, deep=False):
+        d = {
             "id": self.id,
-            "code": self.code
+            "code": self.code,
+            "decimals": self.decimals,
         }
+        if deep:
+            d["accounts"] = [acc.id for acc in self.accounts]
+            d["remote_flows"] = [fl.id for fl in self.remote_flows]
+        return d
 
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -110,13 +147,16 @@ class Agent(db.Model):
     transactions = db.relationship("Transaction", backref="agent", lazy=True)
     flows = db.relationship("Flow", backref="agent", lazy=True)
 
-    def to_dict(self, deep=True):
+    def api(self, deep=False):
         d = {
             "id": self.id,
-            "desc": self.desc
+            "desc": self.desc,
         }
         if deep:
-            d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
+            d["flows"] = [flow.id for flow in self.flows]
+            d["remote_flows"] = [flow.id for flow in self.remote_flows]
+            d["remotes"] = [tr.id for tr in self.remotes]
+            d["transactions"] = [tr.id for tr in self.transactions]
         
         return d
 
@@ -128,23 +168,25 @@ class Category(db.Model):
     is_expense = db.Column(db.Boolean, nullable=False)
     usable = db.Column(db.Boolean, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    children = db.relationship("Category", lazy=True)
+    parent = db.relationship("Category", backref="children", remote_side=[id], lazy=True)
     transactions = db.relationship("Transaction", backref="category", lazy=True)
+    remote_flows = db.relationship("RemoteFlow", backref="category", lazy=True)
 
     __table_args__ = (
         CheckConstraint('parent_id != id'),
         UniqueConstraint('desc', 'is_expense')
     )
 
-    def to_dict(self, deep=True):
+    def api(self, deep=False):
         d = {
             "id": self.id,
             "desc": self.desc,
             "is_expense": self.is_expense,
-            "parent": Category.query.get(self.parent_id) if self.parent_id else None,
-            "children": [category.to_dict(deep=False) for category in self.children]
+            "parent": self.parent.api() if self.parent_id is not None else None,
+            "children": [category.api() for category in self.children] if deep else [category.id for category in self.children]
         }
         if deep:
-            d["transactions"] = [transaction.to_dict() for transaction in self.transactions]
+            d["transactions"] = [tr.id for tr in self.transactions]
+            d["remote_flows"] = [fl.id for fl in self.remote_flows]
         
         return d
