@@ -1,6 +1,6 @@
 {% extends "main/layout.j2" %}
 {% import "main/trans_modal.j2" as trans_modal %}
-{% import "main/macros.j2" as macros %}
+{% import "main/changes.j2" as change_macros %}
 
 {% block body %}
 <div class="row">
@@ -24,9 +24,9 @@
 
 <table class="table table-hover">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
-    {{ macros.trans_table_head() }}
+    {{ change_macros.head() }}
     <tbody>
-        {{ macros.trans_table_forloop(last_5, url_for("main.account", account_id=account.id), account, agents, categories) }}
+        {{ change_macros.rows(last_5, url_for("main.account", account_id=account.id), account, agents, categories) }}
     </tbody>
 </table>
 

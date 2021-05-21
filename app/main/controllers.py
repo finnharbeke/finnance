@@ -266,6 +266,17 @@ def account_plot(account_id):
 def account_analysis(account_id):
     pass
 
+@mod_main.route("/agents/<int:agent_id>")
+def agent(agent_id):
+    agent = Agent.query.get(agent_id)
+    if not agent:
+        return jsonify({"error": "Invalid agent_id!"}), 422
+    account = Account.query.get(1)
+    agents = Agent.query.order_by(Agent.desc).all()
+    categories = Category.query.order_by(Category.desc).all()
+
+    return render_template("main/agent.j2", agent=agent, account=account, categories=categories, agents=agents)
+
 # CODE BELOW IS FOR FORCE RELOADING CSS
 @mod_main.context_processor
 def override_url_for():

@@ -1,5 +1,5 @@
 {% extends "main/layout.j2" %}
-{% import "main/macros.j2" as macros %}
+{% import "main/changes.j2" as change_macros %}
 
 {% block body %}
 
@@ -11,9 +11,9 @@
 Current Saldo: {{ saldo }}</p>
 
 <table id="transtable" class="table table-sm table-hover" cellspacing="0" width="100%">
-    {{ macros.trans_table_head() }}
+    {{ change_macros.head() }}
     <tbody>
-        {{ macros.trans_table_forloop(transactions, url_for("main.account_transactions", account_id=account.id), account, agents, categories) }}
+        {{ change_macros.rows(transactions, url_for("main.account_transactions", account_id=account.id), account, agents, categories) }}
     </tbody>
 </table>
 
