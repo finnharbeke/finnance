@@ -24,7 +24,7 @@ def scatters(exp, inc, currency, scope=None, lim=50, **kwargs):
     incs = widgets.Output()
     with incs:
         for i, tr in inc.iterrows():
-            print(tr_str(tr, scope=scope, neg=True))
+            print(tr_str(tr, scope=scope))
     
     return widgets.VBox([
         plots, widgets.HBox([

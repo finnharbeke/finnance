@@ -14,7 +14,7 @@ def totals(df, c):
             ('title_w', len(te))
             
         ])
-        print(total_str(select(df, exp=1, currency=c), te, **kwargs))
-        print(total_str(select(df, exp=-1, currency=c), "Total Income", **kwargs))
+        print(total_str(select(df, exp=True, currency=c), te, **kwargs))
+        print(total_str(select(df, exp=False, currency=c), "Total Income", **kwargs))
         print(total_str(select(df, currency=c), "Total", **kwargs))
     return out

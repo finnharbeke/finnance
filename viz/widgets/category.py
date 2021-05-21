@@ -17,9 +17,7 @@ def category(df, exp, inc, currency, **kwargs):
             plt.title("Expense Categories")
             plt.yscale("log")
             plt.subplot(1, 2, 2)
-            d = inc.copy()
-            d['amount'] *= -1
-            p.bars(select(df=d, exp=0, currency=currency), estimator=sum, **kwargs)
+            p.bars(select(df=inc, currency=currency), estimator=sum, **kwargs)
             plt.title("Income Categories")
             plt.yscale("log")
             plt.show()
@@ -33,7 +31,7 @@ def category(df, exp, inc, currency, **kwargs):
         with print_inc:
             m = max([len(c) for c in inc.category])
             for cat in sorted(inc.category.unique()):
-                print(total_str(inc[inc.category == cat], cat, currency, title_w=m, neg=True))
+                print(total_str(inc[inc.category == cat], cat, currency, title_w=m))
             
         display(
             widgets.VBox([
