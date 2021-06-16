@@ -9,7 +9,8 @@ class Account(db.Model):
     starting_saldo = db.Column(db.Float, nullable=False, default=0)
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
-    transactions = db.relationship("Transaction", backref="account", lazy='dynamic')
+
+    currency = db.relationship("Currency", backref="accounts")
 
     def api(self, deep=False):
         d = {
@@ -29,7 +30,7 @@ class Account(db.Model):
 
     def changes(self, num=None, saldo_formatted=True):
         saldo = self.starting_saldo
-        total = self.transactions.count() + len(self.in_transfers) + len(self.out_transfers)
+        total = len(self.transactions) + len(self.in_transfers) + len(self.out_transfers)
         with open(os.path.join(os.path.dirname(__file__), '../static/sql/changes.sql'), "r") as f:
             sql = f.read()
 

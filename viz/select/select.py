@@ -34,6 +34,6 @@ def select(df, currency='CHF', exp=None,
         time_end = time_end.hour * 60 + time_end.minute
         res = res[res.time < time_end]
     if categories:
-        res = res[res.category_id.isin(categories) | res.category.isin(categories)]
+        res = res[res.category.isin(categories)]
     
     return res

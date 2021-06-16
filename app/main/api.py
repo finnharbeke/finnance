@@ -1,5 +1,5 @@
 from app.main.account import Account
-from app.main.models import Category, Currency, Flow, RemoteFlow, Transaction, AccountTransfer, Agent
+from app.main.models import Category, Currency, Flow, Record, Transaction, AccountTransfer, Agent
 from flask import jsonify, Blueprint
 
 mod_api = Blueprint('api', __name__)
@@ -60,10 +60,10 @@ def api_flow(flow_id):
 
     return jsonify(flow.api(deep=True))
 
-@mod_api.route("/api/remotes/<int:remote_id>")
-def api_remoteflow(remote_id):
-    remote = RemoteFlow.query.get(remote_id)
-    if not remote:
-        return jsonify({"error": "Invalid remote_flow_id!"}), 422
+@mod_api.route("/api/records/<int:record_id>")
+def api_record(record_id):
+    record = Record.query.get(record_id)
+    if not record:
+        return jsonify({"error": "Invalid record_id!"}), 422
 
-    return jsonify(remote.api(deep=True))
+    return jsonify(record.api(deep=True))
