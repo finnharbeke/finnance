@@ -32,16 +32,21 @@ data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimal
                   data-target="#transModal{{ account.id }}" style="height: 100%; width: 100%;">+</button>
                 <!-- Modal -->
                 <!-- defined in included trans_modals.j2 -->
-                {{ trans_modal.modal(account, url_for('main.index'), agents, categories, none) }}
+                {# {{ trans_modal.modal(account, url_for('main.index'), agents, categories, none) }} #}
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% include "main/transfer_modal.j2" %}
-<form action="{{ url_for('main.add_account') }}">
+<form action="{{ url_for('main.add_account') }}" class="mb-3">
     <button type="submit" class="btn btn-primary btn-lg btn-block">Create Account</button>
 </form>
+<button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
+    data-target="#transModal" data-info="remote" style="height: 100%; width: 100%;">Remote</button>
+<button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
+    data-target="#transModal" data-info="new3" style="height: 100%; width: 100%;">Modal</button>
+{{ trans_modal.modal(agents, categories, currencies, accounts) }}
 <script>
 function allow_drop_color(ev, col) {
     ev.preventDefault();
@@ -75,7 +80,7 @@ function openModal(src, dst) {
     } else {
         $('#transferModal form').attr(
             'action',
-            "{{ url_for('main.add_transfer', src_id=-1, dst_id=0) }}".replace('-1', src.acc_id).replace('0', dst.acc_id)
+            "{{ url_for('post.add_transfer', src_id=-1, dst_id=0) }}".replace('-1', src.acc_id).replace('0', dst.acc_id)
         );
         $('#transferModal input[name=src_desc]').val(src.acc_desc);
         $('#transferModal input[name=dst_desc]').val(dst.acc_desc);

@@ -1,265 +1,108 @@
-{% macro flowRow(i, id, min_step, desc, amount) %}
-<div class="col-7 form-group">
-    <input class="form-control" type="text" list="agents{{ id }}" name="flowAgent{{ i }}"
-        {% if desc is not none %}value="{{ desc }}"{% endif %} required>
-    <small class="form-text text-muted">Agent #{{ i }}</small>
-</div>
-<div class="col-4 form-group">
-    <input class="form-control" type="number" name="flowAmount{{ i }}"
-        min="{{ min_step }}" step="{{ min_step }}" required
-        value={% if amount is not none %}{{ amount }}{% else %}{{ min_step }}{% endif %}>
-    <small class="form-text text-muted">Amount #{{ i }}</small>
-</div>
-<div class="col-1 form-group">
-    <button type="button" class="btn btn-danger" name="flowDelete{{ i }}">
-        <i class="fa fa-trash" aria-hidden="true"></i>
-    </button>
+{% import "main/modal_customization.j2" as custom %}
+{% import "main/flows_records.j2" as fr %}
+
+{% macro datetimeForm() %}
+<div class="col-6 form-group">
+    <label for="date_issued">Date & Time of Transaction</label>
+    <input class="form-control" type="text" name="date_issued" maxlength=16 required>
+    <small class="form-text text-muted">dd.mm.yyyy hh:mm</small>
 </div>
 {% endmacro %}
 
-{% macro modal(account, redirect_url, agents, categories, tr)  %}
-{% if tr is none %}{% set edit = False %}{% else %}{% set edit = True %}{% endif %}
-{% if edit %}
-{% set post_url = url_for('main.edit_trans', transaction_id=tr.id) %}
-{% set id = "{acc}-{tr}".format(acc=account.id, tr=tr.id)%}
-{% else %}
-{% set post_url = url_for('main.add_trans', account_id=account.id) %}
-{% set id = "{acc}".format(acc=account.id)%}
-{% endif %}
-<div class="modal fade" data-backdrop="static" id="transModal{{ id }}" tabindex="-1" role="dialog" aria-labelledby="transLabel{{ id }}" aria-hidden>
+{% macro amountForm() %}
+<div class="col-6 form-group">
+    <label for="amount">Amount</label>
+    <input class="form-control" type="number" name="amount" required>
+</div>
+{% endmacro %}
+
+{% macro expinc() %}
+<div class="btn-group btn-group-toggle float-right mb-2 ml-2" data-toggle="expinc">
+    <label class="btn btn-danger btn-light" id="expenseLabel">
+        <input type="radio" name="expinc" id="expense" value="expense">Expense
+    </label>
+    <label class="btn btn-success btn-light" id="incomeLabel">
+        <input type="radio" name="expinc" id="income" value="income">Income
+    </label>
+</div>
+{% endmacro %}
+
+{% macro top(currencies) %}
+<div class="form-row">
+    <div class="col-md-4 order-md-2">
+        {{ expinc() }}
+        <button id="directFlowBtn" type="button"
+            class="btn btn-secondary float-right" data-toggle="button"
+            aria-pressed="false">
+                Direct Flow
+            <input type="hidden" id="directFlow" name="directFlow" value="false"/>
+        </button>
+    </div>
+    <div class="form-group col-md-8 order-md-1" id="accountForm">
+        <label for="account">Account</label>
+        <input class="form-control" type="text" name="accountDesc" readonly>
+        <input type="hidden" name="accountId">
+    </div>
+    <div class="form-group col-md-8 order-md-1" id="currencyForm">
+        <label for="currency">Currency</label>
+        <select class="form-control" name="currency">
+        {% for curr in currencies %}
+            <option value="{{ curr.id }}"
+                data-decimals="{{ curr.decimals }}">{{ curr.code }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro agentForm(id, name, label) %}
+<div class="form-group" id="{{ id }}">
+    <label for="{{ name }}"">{{label}}</label>
+    <input class="form-control" type="text" list="agents" name="{{ name }}" required>
+</div>
+{% endmacro %}
+
+{% macro commentForm(comment) %}
+<div class="form-group">
+    <label for="comment">Comment</label>
+    <input class="form-control" type="text" maxlength=120 name="comment">
+</div>
+{% endmacro %}
+
+{% macro modal(agents, categories, currencies, accounts) %}
+<div class="modal fade" data-backdrop="static" id="transModal" tabindex="-1"
+    role="dialog" aria-labelledby="transLabel" aria-hidden>
+    {{ custom.lists(agents, categories, currencies, accounts) }}
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="transLabel{{ id }}">{% if edit %}Edit Transaction #{{tr.id}}{% else %}New Transaction{% endif %}</h5>
+                <h5 class="modal-title" id="transLabel">Title</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden>&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form action="{{ post_url }}" id="transactionForm{{ id }}" method="post">
+                <form id="transactionForm">
                     <input value="{{ redirect_url }}" name="redirect" type="hidden">
+                    {{ top(currencies) }}
                     <div class="form-row">
-                        <div class="col-md-4 order-md-2">
-                            <div class="btn-group btn-group-toggle float-right mb-2 ml-2" data-toggle="expinc">
-                                <label class="btn {% if not edit or tr.is_expense %}btn-danger{% else %}btn-light{% endif %}" id="expenseLabel{{ id }}">
-                                    <input type="radio" name="expinc" id="expense{{ id }}" value="expense" {% if not edit or tr.is_expense %}checked{% endif %}>Expense
-                                </label>
-                                <label class="btn {% if edit and not tr.is_expense %}btn-success{% else %}btn-light{% endif %}" id="incomeLabel{{ id }}">
-                                    <input type="radio" name="expinc" id="income{{ id }}" value="income" {% if edit and not tr.is_expense %}checked{% endif %}>Income
-                                </label>
-                            </div>
-                            <button id="directFlowBtn{{ id }}" type="button" class="btn btn-secondary float-right" data-toggle="button"
-                                aria-pressed="{% if edit and tr.direct_flow_in is not none %}true{% else %}false{% endif %}">
-                            Direct Flow
-                            </button>
-                            <input type="hidden" id="directFlow{{ id }}" name="directFlow" value="false"/>
-                        </div>
-                        <div class="form-group col-md-8 order-md-1">
-                            <label for="account">Account</label>
-                            <input class="form-control" type="text" name="account" placeholder="{{ account.desc }}" readonly>
-                        </div>
+                    {{ datetimeForm() }}
+                    {{ amountForm() }}
                     </div>
-                    <div class="form-group">
-                        <label for="amount">Amount</label>
-                        {% set min_step = 10 ** (-account.currency.decimals) %}
-                        <input class="form-control" type="number" name="amount" min="{{ min_step }}" step="{{ min_step }}" required {% if edit %}value="{{ tr.amount }}"{% endif %}>
-                    </div>
-                    <div class="form-group">
-                        <label for="date_issued">Date & Time of Transaction</label>
-                        <input class="form-control" type="text" name="date_issued" maxlength=16 
-                            pattern="((0[1-9]|[12]\d|3[01]).(0[13578]|1[02]).\d{4}|(0[1-9]|[12]\d|30).(0[469]|11).\d{4}|(0[1-9]|1\d|2[0-8]).02.\d{4}|29.02.\d\d(0[048]|[13579][26]|[2468][048])) ([01]\d|2[0-3]):[0-5][0-9]"
-                            required {% if edit %}value="{{ tr.date_issued.strftime('%d.%m.%Y %H:%M') }}"{% endif %}>
-                        <small class="form-text text-muted">dd.mm.yyyy hh:mm</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="agent">Agent</label>
-                        <input class="form-control" type="text" list="agents{{ id }}" name="agent" {% if edit %}value="{{ tr.agent }}"{% endif %} required>
-                        <datalist id="agents{{ id }}">
-                        {% for agent in agents %}
-                            <option value="{{ agent.desc }}"/>
-                        {% endfor %}
-                        </datalist>
-                    </div>
-                    <div class="form-group" id="incomeSelect{{ id }}" {% if not edit or tr.is_expense %}style="display:none;"{% endif %}>
-                        <label for="inc_category">Category</label>
-                        <select class="form-control" name="inc_category">
-                        {% for cat in categories %}
-                            {% if not cat.is_expense and cat.usable %}
-                                <option value="{{ cat.id }}" {% if edit and cat.id == tr.category_id %} selected {% endif %}>{{ cat.desc }}</option>
-                            {% endif %}
-                        {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group" id="expenseSelect{{ id }}" {% if edit and not tr.is_expense %}style="display:none;"{% endif %}>
-                        <label for="exp_category">Category</label>
-                        <select class="form-control" name="exp_category">
-                        {% for cat in categories %}
-                            {% if cat.is_expense and cat.usable %}
-                                <option value="{{ cat.id }}" {% if edit and cat.id == tr.category_id %} selected {% endif %}>{{ cat.desc }}</option>
-                            {% endif %}
-                        {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="comment">Comment</label>
-                        <input class="form-control" type="text" maxlength=120 name="comment" {% if edit %}value="{{ tr.comment }}"{% endif %}>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn btn-warning" id="newFlow{{ id }}" style="width: 100%">New Flow</button>
-                        <input type="hidden" id="flowCount{{ id }}" name="flowCount"
-                            value={% if edit %}{{ tr.flows|length }}{% else %}0{% endif %} />
-                    </div>
-                    <div id="flowRows{{ id }}">
-                        {% if edit and tr.direct_flow_in is none %}
-                        {% for flow in tr.original.flows %}
-                        <div class="form-row">
-                            {{ flowRow(loop.index0, id, min_step, flow.agent.desc, flow.amount)}}
-                        </div>
-                        {% endfor %}
-                        {% endif %}
-                    </div>
+                    {{ agentForm("agentForm", "agent", "Agent") }}
+                    {{ agentForm("remoteAgentForm", "remoteAgent", "Transaction via") }}
+                    {{ fr.flowsRecords(categories) }}
+                    {{ commentForm() }}
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" form="transactionForm{{ id }}" class="btn btn-primary">{% if edit %}Save{% else %}Add new Transaction{% endif %}</button>
+                <button type="button" class="btn btn-secondary"
+                    data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary"
+                    id="transactionSubmit">Submit</button>
             </div>
         </div>
     </div>
 </div>
-<script>
-$(document).ready(function () {
-    update_currency('#transModal{{ id }} input[name=amount]', {{ account.currency.decimals }});
-
-    // DELETE FLOW
-    $('#flowRows{{ id }} > div button').click(function () {
-        flowDelete(this, "{{ id }}");
-    });
-
-    // CHANGE FLOW AMOUNT
-    $('#flowRows{{ id }} > div input[type=number]').change(function () {
-        flowAmounts(this, "{{ id }}");
-    });
-
-    {% if edit and tr.direct_flow_in is not none %}
-    // TOGGLE DIRECT FLOW
-    $('#directFlowBtn{{ id }}').toggleClass('btn-secondary btn-info');
-    $('#newFlow{{ id }}').prop('disabled', true);
-    $('#directFlow{{ id }}').val("true");
-    $('#incomeSelect{{ id }}').hide();
-    $('#expenseSelect{{ id }}').hide(); 
-    {% endif %}
-});
-$('#transactionForm{{ id }} input[type=radio][name=expinc]').change(function() {
-    let id = "{{ id }}";
-    if (this.id == `expense${ id }`){
-        $(`#expenseLabel${ id }`).toggleClass('btn-light btn-danger');
-        $(`#incomeLabel${ id }`).toggleClass('btn-success btn-light');
-        if ($(`#directFlow${ id }`).val() == "false") {
-            $(`#incomeSelect${ id }`).hide();
-            $(`#expenseSelect${ id }`).show();
-        }
-    } else if (this.id == `income${ id }`) {
-        $(`#expenseLabel${ id }`).toggleClass('btn-danger btn-light');
-        $(`#incomeLabel${ id }`).toggleClass('btn-light btn-success');
-        if ($(`#directFlow${ id }`).val() == "false") {
-            $(`#incomeSelect${ id }`).show();
-            $(`#expenseSelect${ id }`).hide();
-        }
-    }
-});
-$('#directFlowBtn{{ id }}').click(function() {
-    $(this).toggleClass('btn-secondary btn-info');
-    if (this.classList.contains('btn-info')) {
-        // delete all flows
-        document.getElementById('flowRows{{ id }}').innerHTML = "";
-        // disable and reset counter
-        $('#newFlow{{ id }}').prop('disabled', true);
-        $('#flowCount{{ id }}').val(0);
-        $('#directFlow{{ id }}').val("true");
-        $('#incomeSelect{{ id }}').hide();
-        $('#expenseSelect{{ id }}').hide();
-    } else {
-        // enable
-        $('#newFlow{{ id }}').prop('disabled', false);
-        $('#directFlow{{ id }}').val("false");
-        if ($('#transactionForm{{ id }} input[type=radio][name=expinc]:checked').val() == "expense") {
-            $(`#expenseSelect{{ id }}`).show();
-        } else {
-            $(`#incomeSelect{{ id }}`).show();
-        }
-    }
-});
-
-function flowDelete(node, id) {
-    let name = $(node).prop('name');
-    let i = parseInt(name.substring("flowDelete".length));
-    $(`#flowCount${ id }`).val($(`#flowCount${ id }`).val() - 1);
-    for (; i < $(`#flowCount${ id }`).val(); i++) {
-        $(`#flowRows${ id } input[name=flowAgent${ i }]`).val($(`#flowRows${ id } input[name=flowAgent${ i + 1 }]`).val());
-        $(`#flowRows${ id } input[name=flowAmount${ i }]`).val($(`#flowRows${ id } input[name=flowAmount${ i + 1 }]`).val());
-    }
-    $(`#flowRows${ id } > div:last-child`).remove();
-}
-
-function flowAmounts(node, id) {
-    let n = parseInt($(`#flowCount${ id }`).val());
-    let step = parseFloat($(`#transactionForm${ id } input[type=number][name=amount]`).prop('step'));
-    let total = parseFloat($(`#transactionForm${ id } input[type=number][name=amount]`).val());
-    let node_i = parseInt($(node).prop('name').substring("flowAmount".length));
-    console.log(n, step, total, node_i, $(node), node)
-    // cap at tr.amount - (n - 1) * step
-    let cap = total - (n - 1) * step;
-    cap = cap < step ? step : cap;
-    if ($(node).val() > cap)
-        $(node).val(cap);
-
-    // if sum <= tr.amount it's fine
-    let sum = 0;
-    $(`#flowRows${ id } input[type=number]`).each(function () {
-        sum += parseFloat(this.value);
-    });
-    console.log(sum);
-    
-    let diff = sum - total;
-    if (sum > total) {
-        let i = n;
-        $($(`#flowRows${ id } input[type=number]`).get().reverse()).each(function () {
-            let i = --n;
-            if (i == node_i)
-                return true;
-            let val = parseFloat($(this).val());
-            let finish = val - diff > step;
-            $(this).val(finish ? parseFloat((val - diff).toFixed({{ account.currency.decimals}})) : step);
-            diff -= finish ? diff : val - step;
-            if (finish)
-                return false;
-        });
-    }
-}
-
-// new flow
-$('#newFlow{{ id }}').click(function() {
-    let row = document.createElement('div');
-    row.classList.add("form-row");
-
-    let n = parseInt($('#flowCount{{ id }}').val());
-
-    row.innerHTML = `{{ flowRow('&', id, min_step, none, none) }}`.replaceAll('&', n);
-
-    document.getElementById('flowRows{{ id }}').appendChild(row);
-
-    $('#flowCount{{ id }}').val(n + 1);
-
-    // DELETE FLOW
-    $('#flowRows{{ id }} > div:last-child button').click(function () {
-        flowDelete(this, "{{ id }}");
-    });
-
-    // CHANGE FLOW AMOUNT
-    $('#flowRows{{ id }} > div:last-child input[type=number]').change(function () {
-        flowAmounts(this, "{{ id }}");
-    });
-});
-</script>
+{{ custom.customLogic() }}
 {% endmacro %}

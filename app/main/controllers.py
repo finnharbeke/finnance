@@ -2,208 +2,30 @@ from app.main.account import Account
 from flask import render_template, Blueprint, request, redirect, url_for, jsonify, send_file
 import sqlalchemy
 from app import db
-from app.main.models import AccountTransfer, Flow, Transaction, Agent, Currency, Category, Record
+from app.main.models import Transaction, Agent, Currency, Category, Record
 import datetime as dt, io
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 mod_main = Blueprint('main', __name__)
 
-def handle_transaction(request, account, edit=None):
-    """Handles Post Method from trans_modal.j2
-    
-    If edit = None:
-        - get all infos
-        - if direct_flow create direct flow and set flow_id to it's id
-        - else set category_id
-    else:
-        - edit is id of tr
-        - get all infos
-        1. Not direct_flow, wasn't either: Do Nothing
-        2. Not direct_flow, was one: Delete Flow
-        3. direct_flow, wasn't one: Create Flow
-        4. direct_flow, was one: Edit Flow"""
-
-    error_kwargs = dict(
-        template_name_or_list="error.j2",
-        title="Creation Failed!",
-        link_text="Back",
-        link=request.form.get("redirect"),
-    )
-
-    # AMOUNT
-    amount = float(request.form.get("amount"))
-    # IS_EXPENSE
-    is_expense = request.form.get("expinc") == 'expense'
-    # check saldo
-    saldo = account.saldo(formatted=False)
-    if edit is None:
-        diff = amount if is_expense else -amount
-    else:
-        tr = Transaction.query.get(edit)
-        diff = tr.amount if tr.is_expense else -tr.amount
-        diff += -amount if is_expense else amount
-    if is_expense and saldo + diff < 0:
-        return render_template(
-            desc="Transaction would result in negative Account Saldo!",
-            **error_kwargs
-        )
-    # DATE_ISSUED
-    date_issued = dt.datetime.strptime(request.form.get("date_issued"), Transaction.input_format)
-    if date_issued < account.date_created:
-        return render_template(
-            desc="Transaction can't have been executed before the creation of the account!",
-            **error_kwargs
-        )
-    if date_issued > dt.datetime.now():
-        return render_template(
-            desc="Transaction can't have been executed in the future!",
-            **error_kwargs
-        )
-    # AGENT
-    agent_desc = request.form.get("agent")
-    agent = Agent.query.filter_by(desc=agent_desc).first()
-    if not agent:
-        agent = Agent(desc=agent_desc)
-        db.session.add(agent)
-        db.session.commit()
-    # COMMENT
-    comment = request.form.get("comment")
-    # DIRECT_FLOW
-    if request.form.get('directFlow') == "true":
-        direct_flow_in = not is_expense
-    else:
-        direct_flow_in = None
-    # CATEGORY_ID
-    if direct_flow_in is not None:
-        category_id = None
-    elif is_expense:
-        category_id = request.form.get("exp_category")
-    else:
-        category_id = request.form.get("inc_category")
-    
-    kwargs = dict(
-        account_id=account.id, amount=amount, 
-        agent_id=agent.id, date_issued=date_issued,
-        category_id=category_id, comment=comment,
-        is_expense=is_expense, direct_flow_in=direct_flow_in
-    )
-    flow_kwargs = dict(
-        amount=amount,
-        agent_id=agent.id
-    )
-
-    # DIRECT FLOW
-    if edit is not None:
-        tr = Transaction.query.get(edit)
-        if direct_flow_in is None and tr.direct_flow_in:
-            Flow.query.filter_by(trans_id=tr.id).delete()
-        elif direct_flow_in is not None and not tr.direct_flow_in:
-            db.session.add(Flow(trans_id=tr.id, **flow_kwargs))
-        elif direct_flow_in is not None and tr.direct_flow_in:
-            # edit direct flow
-            flow = Flow.query.filter_by(trans_id=tr.id).first()
-            for key, val in flow_kwargs.items():
-                setattr(flow, key, val)
-        
-        # edit transaction
-        for key, val in kwargs.items():
-            setattr(tr, key, val)
-        db.session.commit()
-
-    else:
-        tr = Transaction(**kwargs)
-        db.session.add(tr)
-        db.session.commit()
-
-        if direct_flow_in is not None:
-            db.session.add(Flow(trans_id=tr.id, **flow_kwargs))
-            db.session.commit()
-
-    if direct_flow_in is None:
-        # other FLOWS
-        if edit:
-            # DELETE PREV FLOWS
-            for flow in Flow.query.filter_by(trans_id=edit):
-                db.session.delete(flow)
-
-        n = int(request.form.get('flowCount'))
-        if n > 0:
-            for i in range(n):
-                flow_agent_desc = request.form.get(f'flowAgent{i}')
-                flow_amount = float(request.form.get(f'flowAmount{i}'))
-                flow_agent = Agent.query.filter_by(desc=flow_agent_desc).first()
-                if not flow_agent:
-                    flow_agent = Agent(desc=flow_agent_desc) 
-                    db.session.add(flow_agent)
-                    db.session.commit()
-
-                db.session.add(Flow(amount=flow_amount, agent_id=flow_agent.id, trans_id=tr.id))
-        
-        db.session.commit()
-
-    return redirect(request.form.get("redirect"))
-
-@mod_main.route("/transfers/add/<int:src_id>-<int:dst_id>/", methods=["POST"])
-def add_transfer(src_id, dst_id):
-    error_kwargs = dict(
-        template_name_or_list="error.j2",
-        title="Creation Failed!",
-        link_text="Back",
-        link=url_for('main.index'),
-    )
-    src = Account.query.get(src_id)
-    dst = Account.query.get(dst_id)
-    src_amount = float(request.form.get("src_amount"))
-    saldo = src.saldo(formatted=False)
-    if saldo - src_amount < 0:
-        return render_template(
-            desc="Transfer would result in negative Account Saldo!",
-            **error_kwargs
-        )
-    dst_amount = float(request.form.get("dst_amount"))
-    date_issued = dt.datetime.strptime(request.form.get("date_issued"), Transaction.input_format)
-    if date_issued < src.date_created or date_issued < dst.date_created:
-        return render_template(
-            desc="Transfer can't have been executed before the creation of an account!",
-            **error_kwargs
-        )
-    if date_issued > dt.datetime.now():
-        return render_template(
-            desc="Transfer can't have been executed in the future!",
-            **error_kwargs
-        )
-
-    comment = request.form.get('comment')
-
-    db.session.add(AccountTransfer(src_id=src_id, dst_id=dst_id, src_amount=src_amount, dst_amount=dst_amount, date_issued=date_issued, comment=comment))
-    db.session.commit()
-    return redirect(url_for('main.index'))
-
-@mod_main.route("/accounts/<int:account_id>/transactions/add/", methods=["POST"])
-def add_trans(account_id):
-    account = Account.query.get(account_id)
-    return handle_transaction(request, account)
-
-@mod_main.route("/transactions/edit/<int:transaction_id>", methods=["POST"])
-def edit_trans(transaction_id):
-    tr = Transaction.query.get(transaction_id)
-    return handle_transaction(request, tr.account, tr.id)
-
 @mod_main.route("/", methods=["GET"])
 def index():
     accounts = Account.query.all()
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
-    return render_template("main/home.j2", accounts=accounts, agents=agents, categories=categories)
+    currencies = Currency.query.all()
+    return render_template("main/home.j2", accounts=accounts, agents=agents, categories=categories, currencies=currencies)
 
 @mod_main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 def account(account_id):
     account = Account.query.get(account_id)
+    accounts = Account.query.all()
+    currencies = Currency.query.all()
     agents = Agent.query.order_by(Agent.desc).all()
     categories = Category.query.order_by(Category.desc).all()
     saldo, changes = account.changes(num=5)
-    return render_template("main/account.j2", agents=agents, account=account, categories=categories, last_5=changes, saldo=saldo)
+    return render_template("main/account.j2", account=account, agents=agents, categories=categories, accounts=accounts, currencies=currencies, last_5=changes, saldo=saldo)
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():

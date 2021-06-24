@@ -1,0 +1,180 @@
+{% macro flowRow() %}
+<div class="form-row" id="flowRowINDEX">
+<div class="col-7 form-group">
+    <input class="form-control" type="text" list="agents" name="flowAgentINDEX" required>
+    <small class="form-text text-muted">Agent #INDEX</small>
+</div>
+<div class="col-4 form-group">
+    <input class="form-control" type="number" name="flowAmountINDEX" value=0 required>
+    <small class="form-text text-muted">Amount #INDEX</small>
+</div>
+<div class="col-1 form-group">
+    <button type="button" class="btn btn-danger" name="flowDeleteINDEX">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+    </button>
+</div>
+</div>
+{% endmacro %}
+
+{% macro recordRow(categories) %}
+<div class="form-row" id="recordRowINDEX">
+<div class="col-7 form-group" class="expenseSelect">
+    <select class="form-control" name="recordCategoryExpINDEX">
+    {% for cat in categories %}
+        {% if cat.usable and cat.is_expense %}
+            <option value="{{ cat.id }}"
+                data-exp="{{ cat.is_expense }}">{{ cat.desc }}</option>
+        {% endif %}
+    {% endfor %}
+    </select>
+    <select class="form-control" name="recordCategoryIncINDEX">
+    {% for cat in categories %}
+        {% if cat.usable and not cat.is_expense %}
+            <option value="{{ cat.id }}" 
+                data-exp="{{ cat.is_expense }}">{{ cat.desc }}</option>
+        {% endif %}
+    {% endfor %}
+    </select>
+    <small class="form-text text-muted">Category #INDEX</small>
+</div>
+<div class="col-4 form-group">
+    <input class="form-control" type="number"
+        name="recordAmountINDEX" value=0 required>
+    <small class="form-text text-muted">Amount #INDEX</small>
+</div>
+<div class="col-1 form-group">
+    <button type="button" class="btn btn-danger" name="recordDeleteINDEX">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+    </button>
+</div>
+</div>
+{% endmacro %}
+
+{% macro flowsForm() %}
+<div id="flows">
+    <div class="form-group">
+        <button type="button" class="btn btn-warning" id="newFlow"
+            style="width: 100%">New Flow</button>
+        <input type="hidden" id="flowCount" name="flowCount" value=0/>
+    </div>
+    <div id="flowRows">
+    </div>
+</div>
+{% endmacro %}
+
+{% macro recordsForm() %}
+<div id="records">
+    <div class="form-group">
+        <button type="button" class="btn btn-warning" id="newRecord"
+            style="width: 100%">New Record</button>
+        <input type="hidden" id="recordCount" name="recordCount" value=0/>
+    </div>
+    <div id="recordRows">
+    </div>
+</div>
+{% endmacro %}
+
+{% macro flowsRecordsLogic(categories) %}
+<script>
+// DELETE FLOW
+$('#flowRows').on('click', 'button', function () {
+    flowDelete(this);
+});
+$('#recordRows').on('click', 'button', function () {
+    recordDelete(this);
+});
+
+function delete_fr(str, node) {
+    let name = $(node).prop('name');
+    let i = parseInt(name.substring(`${str}Delete`.length));
+    $(`#${str}Count`).val($(`#${str}Count`).val() - 1);
+    for (; i < $(`#${str}Count`).val(); i++) {
+        if (str == 'flow')
+            $(`#${str}Rows input[name=${str}Agent${ i }]`).val(
+                $(`#${str}Rows input[name=${str}Agent${ i + 1 }]`).val()
+            );
+        else {
+            $(`#${str}Rows select[name=${str}CategoryExp${ i }]`).val(
+                $(`#${str}Rows select[name=${str}CategoryExp${ i + 1 }]`).val()
+            );
+            $(`#${str}Rows select[name=${str}CategoryInc${ i }]`).val(
+                $(`#${str}Rows select[name=${str}CategoryInc${ i + 1 }]`).val()
+            );
+        }
+        $(`#${str}Rows input[name=${str}Amount${ i }]`).val(
+            $(`#${str}Rows input[name=${str}Amount${ i + 1 }]`).val()
+        );
+    }
+    $(`#${str}Rows > div:last-child`).remove();
+    regulateAmounts(undefined);
+}
+
+function flowDelete(node) {
+    let n = parseInt($(`#flowCount`).val()) + parseInt($(`#recordCount`).val());
+    if (n > 1)
+        delete_fr('flow', node);
+}
+function recordDelete(node) {
+    let n = parseInt($(`#flowCount`).val()) + parseInt($(`#recordCount`).val());
+    if (n > 1)
+        delete_fr('record', node);
+}
+
+function new_fr(str, template_str) {
+    let template = document.createElement('template');
+    let n = parseInt($(`#${str}Count`).val());
+    template.innerHTML = template_str.trim().replaceAll('INDEX', n);
+
+    document.getElementById(`${str}Rows`)
+        .appendChild(template.content.firstChild);
+    $(`#${str}Count`).val(n + 1);
+    currency($('#currencyForm').css('display') == 'block',
+        $('#currency select[name=currency]').val()
+    );
+    regulateAmounts(document.getElementById(`${str}Rows`).lastChild);
+    set_expense($('#transactionForm input[type=radio][name=expinc]:checked')
+        .val() == 'expense'
+    );
+
+    $(`#${str}Rows input[type=number]`).change(function () {
+        regulateAmounts(this);
+    });
+}
+
+function check_new() {
+    let n = parseInt($('#flowCount').val())
+        + parseInt($('#recordCount').val());
+    let _ = $('#transactionForm input[type=number][name=amount]').val();
+    const total = _ == "" ? 0 : parseFloat(_);
+    const  step = parseFloat(
+        $('#transactionForm input[type=number][name=amount]').prop('step')
+    );
+    if (n >= Math.floor(total / step)) {
+        alert('raise the total amount first!');
+        return false;
+    }
+    return true;
+}
+
+// new flow
+$('#newFlow').click(function() {
+    if (check_new())
+        new_fr('flow', `{{ flowRow() }}`);
+});
+$('#newRecord').click(function() {
+    if (check_new())
+        new_record()
+});
+
+function new_record() {
+    new_fr('record', `{{ recordRow(categories) }}`);
+}
+
+</script>
+{% endmacro %}
+
+{% macro flowsRecords(categories) %}
+{{ recordsForm() }}
+{{ flowsForm() }}
+{{ flowsRecordsLogic(categories) }}
+{% endmacro %}
