@@ -99,6 +99,7 @@ function modal_as_edit(trans_id) {
             request(trans_id);
             title(`Edit Transaction #${trans_id}`);
             submit("save");
+            set_expense(trans.is_expense);
             $('#transactionForm input[name=date_issued]').val(
                 luxon.DateTime.fromISO(trans.date_issued).toFormat(DATE_FMT)
             );

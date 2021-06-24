@@ -69,10 +69,10 @@
 </div>
 {% endmacro %}
 
-{% macro modal(agents, categories, currencies, accounts) %}
+{% macro modal(accounts, agents, categories, currencies) %}
 <div class="modal fade" data-backdrop="static" id="transModal" tabindex="-1"
     role="dialog" aria-labelledby="transLabel" aria-hidden>
-    {{ custom.lists(agents, categories, currencies, accounts) }}
+    {{ custom.lists(accounts, agents) }}
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -87,8 +87,8 @@
                     <input name="url" type="hidden">
                     {{ top(currencies) }}
                     <div class="form-row">
-                    {{ datetimeForm() }}
                     {{ amountForm() }}
+                    {{ datetimeForm() }}
                     </div>
                     {{ agentForm("agentForm", "agent", "Agent") }}
                     {{ agentForm("remoteAgentForm", "remoteAgent", "Transaction via") }}

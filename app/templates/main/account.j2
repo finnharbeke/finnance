@@ -21,7 +21,7 @@
 </button>
 <!-- Modal -->
 <!-- defined in included trans_modals.j2 -->
-{{ trans_modal.modal(agents, categories, currencies, accounts) }}
+{{ trans_modal.modal(accounts, agents, categories, currencies) }}
 
 <table class="table table-hover">
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>

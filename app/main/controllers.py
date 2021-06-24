@@ -248,11 +248,8 @@ def agent(agent_id):
     agent = Agent.query.get(agent_id)
     if not agent:
         return jsonify({"error": "Invalid agent_id!"}), 422
-    account = Account.query.get(1)
-    agents = Agent.query.order_by(Agent.desc).all()
-    categories = Category.query.order_by(Category.desc).all()
 
-    return render_template("main/agent.j2", agent=agent, account=account, categories=categories, agents=agents)
+    return render_template("main/agent.j2", agent=agent, **modal_params())
 
 # CODE BELOW IS FOR FORCE RELOADING CSS
 @mod_main.context_processor

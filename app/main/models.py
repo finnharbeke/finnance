@@ -16,6 +16,7 @@ class Transaction(db.Model):
 
     account = db.relationship("Account", backref="transactions")
     agent = db.relationship("Agent", backref="transactions")
+    currency = db.relationship("Currency", backref="transactions")
 
     def api(self, deep=False):
         return {

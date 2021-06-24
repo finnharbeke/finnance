@@ -1,4 +1,4 @@
-{% macro lists(agents, categories, currencies, accounts) %}
+{% macro lists(accounts, agents) %}
 <datalist id="agents">
 {% for agent in agents %}
     <option value="{{ agent.desc }}" data-id="{{ agent.id }}"/>

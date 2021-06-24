@@ -10,50 +10,40 @@
     <col style="width:auto">
     <col style="width:auto">
     <col style="width:auto">
-    <col style="width:auto">
     <col style="width:30%">
     <thead>
         <tr>
             <th scope="col">Date</th>
             <th scope="col">Time</th>
             <th style="text-align: right;" scope="col">Amount</th>
-            <th scope="col">Category</th>
             <th scope="col">Comment</th>
-            {# <th scope="col"></th> #}
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
-        {% for trans in agent.transactions %}
-        {% if trans.direct_flow_in is none %}
+        {% for trans in agent.transactions|sort(attribute='date_issued') %}
         <tr>
             <td data-sort="{{ trans.date_issued.strftime('%Y%m%d%H%M%s') }}">
             {{ trans.date_issued.strftime('%d.%m.%Y') }}
             </td>
             <td>{{ trans.date_issued.strftime('%H:%M') }}</td>
             <td style="text-align: right;"  
-                data-sort="{% if trans.category.is_expense %}{{ trans.amount }}{% else %}{{ -trans.amount }}{% endif %}"
-                {% if trans.category.is_expense %}
+                data-sort="{% if trans.is_expense %}{{ trans.amount }}{% else %}{{ -trans.amount }}{% endif %}"
+                {% if trans.is_expense %}
                     class="text-danger"
                 {% else %}
                     class="text-success"
                 {% endif %}>
-                {{ trans.account.currency.format(trans.amount) }} {{ trans.account.currency.code }}
+                {{ trans.currency.format(trans.amount) }} {{ trans.currency.code }}
             </td>
-            <td>{{ trans.category.desc }}</td>
             <td>{{ trans.comment }}</td>
-            {# <td style="width: 44px; padding: 0px;">
-            {% set id = "{acc}-{tr}".format(acc=trans.account.id, tr=trans.id) %}
-            <button type="button" class="btn btn-warning btn-lg" style="height: 100%; width: 100%;"
-              data-toggle="modal" data-target="#transModal{{ id }}" >
-                <i class="fa fa-pencil"></i>
-            </button>
-            <!-- Modal -->
-            <!-- defined in included trans_modals.j2 -->
-            {{ trans_modal.modal(trans.account, redirect_url, agents, categories, trans) }}
-            </td> #}
+            <td style="width: 44px; padding: 0px;">
+                <button type="button" class="btn btn-warning btn-lg toggler" style="height: 100%; width: 100%;"
+                data-toggle="modal" data-target="#transModal" data-info="edit{{ trans.id }}" >
+                    <i class="fa fa-pencil"></i>
+                </button>
+            </td>
         </tr>
-        {% endif %}
-        
         {% endfor %}
     </tbody>
 </table>
@@ -68,37 +58,40 @@ No Transactions
     <col style="width:auto">
     <col style="width:auto">
     <col style="width:auto">
-    <col style="width:auto">
     <col style="width:30%">
     <thead>
         <tr>
             <th scope="col">Date</th>
             <th scope="col">Time</th>
             <th style="text-align: right;" scope="col">Amount</th>
-            <th scope="col">Category</th>
             <th scope="col">Comment</th>
-            {# <th scope="col"></th> #}
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
-        {% for flow in agent.flows %}
+        {% for flow in agent.flows|sort(attribute='trans.date_issued') %}
         {% set trans = flow.trans %}
         <tr>
             <td data-sort="{{ trans.date_issued.strftime('%Y%m%d%H%M%s') }}">
-            {{ trans.date_issued.strftime('%d.%m.%Y') }}
+                {{ trans.date_issued.strftime('%d.%m.%Y') }}
             </td>
             <td>{{ trans.date_issued.strftime('%H:%M') }}</td>
             <td style="text-align: right;"  
-                data-sort="{% if trans.category.is_expense %}{{ trans.amount }}{% else %}{{ -trans.amount }}{% endif %}"
-                {% if trans.category.is_expense %}
+                data-sort="{% if flow.is_debt %}{{ flow.amount }}{% else %}{{ -flow.amount }}{% endif %}"
+                {% if flow.is_debt %}
                     class="text-danger"
                 {% else %}
                     class="text-success"
                 {% endif %}>
-                {{ trans.account.currency.format(flow.amount) }} {{ trans.account.currency.code }}
+                {{ trans.currency.format(flow.amount) }} {{ trans.currency.code }}
             </td>
-            <td>{{ trans.category.desc }}</td>
             <td>{{ trans.comment }}</td>
+            <td style="width: 44px; padding: 0px;">
+                <button type="button" class="btn btn-warning btn-lg toggler" style="height: 100%; width: 100%;"
+                    data-toggle="modal" data-target="#transModal" data-info="edit{{ trans.id }}" >
+                    <i class="fa fa-pencil"></i>
+                </button>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -107,5 +100,6 @@ No Transactions
 No Flows
 {% endif %}
 
+{{ trans_modal.modal(accounts, agents, categories, currencies)}}
 
 {% endblock body %}

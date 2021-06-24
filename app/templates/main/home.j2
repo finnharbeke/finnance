@@ -44,7 +44,7 @@ data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimal
     data-target="#transModal" data-info="remote" style="height: 100%; width: 100%;">Remote</button>
 <button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
     data-target="#transModal" data-info="edit1260" style="height: 100%; width: 100%;">edit 1260</button>
-{{ trans_modal.modal(agents, categories, currencies, accounts) }}
+{{ trans_modal.modal(accounts, agents, categories, currencies) }}
 <script>
 function allow_drop_color(ev, col) {
     ev.preventDefault();
