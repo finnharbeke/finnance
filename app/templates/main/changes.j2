@@ -1,10 +1,7 @@
-{% import "main/trans_modal.j2" as trans_modal %}
-
 {% macro head() %}
     <col style="width:auto">
     <col style="width:auto">
     <col style="width:20%">
-    <col style="width:auto">
     <col style="width:auto">
     <col style="width:auto">
     <col style="width:30%">
@@ -15,45 +12,50 @@
             <th scope="col">To / From</th>
             <th style="text-align: right;" scope="col">Amount</th>
             <th style="text-align: right;" scope="col">Saldo</th>
-            <th scope="col">Category</th>
             <th scope="col">Comment</th>
             <th scope="col"></th>
         </tr>
     </thead>
 {% endmacro %}
 
-{% macro rows(changes, redirect_url, account, agents, categories) %}
-{% for change in changes %}
+{% macro rows(changes, account) %}
+{% for ch in changes %}
     <tr>
-        <td data-sort="{{ change.date_issued.strftime('%Y%m%d%H%M%s') }}">
-            {{ change.date_issued.strftime('%d.%m.%Y') }}
+        <td data-sort="{{ ch.date_issued.strftime('%Y%m%d%H%M%s') }}">
+            {{ ch.date_issued.strftime('%d.%m.%Y') }}
         </td>
-        <td>{{ change.date_issued.strftime('%H:%M') }}</td>
-        <td>{% if change.transfer %}<a href="{{ url_for('main.account', account_id=change.agent_id) }}">{% else %}<a href="{{ url_for('main.agent', agent_id=change.agent_id) }}">{% endif %}{{ change.agent }}</a></td>
+        <td>{{ ch.date_issued.strftime('%H:%M') }}</td>
+        <td>
+            {% if ch.transfer %}
+                <a href="{{ url_for('main.account', account_id=ch.agent_id) }}"
+                    class="text-primary">
+            {% else %}
+                <a href="{{ url_for('main.agent', agent_id=ch.agent_id) }}"
+                    class="text-info">
+            {% endif %}
+                {{ ch.agent }}</a>
+        </td>
         <td style="text-align: right;"  
-            data-sort="{% if change.is_expense %}{{ change.amount }}{% else %}{{ -change.amount }}{% endif %}"
-            {% if change.is_expense %}
+            data-sort="{% if ch.is_expense %}{{ ch.amount }}{% else %}{{ -ch.amount }}{% endif %}"
+            {% if ch.is_expense %}
                 class="text-danger"
             {% else %}
                 class="text-success"
             {% endif %}>
-            {{ account.currency.format(change.amount) }} {{ account.currency.code }}
+            {{ account.currency.format(ch.amount) }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
             data-sort="{{ saldo }}">
-            {{ change.saldo() }} {{ account.currency.code }}
+            {{ ch.saldo() }} {{ account.currency.code }}
         </td>
-        <td><span class="rounded p-1 {% if change.transfer or change.direct_flow_in is not none %}bg-info{% endif %}">{{ change.category }}</span></td>
-        <td>{{ change.comment }}</td>
+        <td>{{ ch.comment }}</td>
         <td style="width: 44px; padding: 0px;">
-            {% set id = "{acc}-{tr}".format(acc=account.id, tr=change.id) %}
-            <button type="button" class="btn btn-warning btn-lg" style="height: 100%; width: 100%;"
-              data-toggle="modal" data-target="{% if not change.transfer %}#transModal{% else %}#transferModal{% endif %}{{ id }}" >
+            <button type="button" class="btn btn-warning btn-lg toggler"
+                style="height: 100%; width: 100%;" data-toggle="modal" 
+                data-info="{% if ch.transfer %}transferEdit{% else %}edit{% endif %}{{ch.id}}"
+                data-target="{% if ch.transfer %}#transferModal{% else %}#transModal{% endif %}">
                 <i class="fa fa-pencil"></i>
             </button>
-            <!-- Modal -->
-            <!-- defined in included trans_modals.j2 -->
-            {% if not change.transfer %}{{ trans_modal.modal(account, redirect_url, agents, categories, change) }}{% endif %}
         </td>
     </tr>
 {% endfor %}

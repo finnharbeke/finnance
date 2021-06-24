@@ -1,5 +1,3 @@
-const date_fmt = "dd.MM.yyyy HH:mm";
-
 function submit_transaction() {
     console.log('submit');
     if (checks())
@@ -12,16 +10,16 @@ function checks() {
 
 function post() {
     let is_expense = $('#transactionForm input[type=radio]:checked').val() == 'expense';
-    $.ajax({
-        type: "POST",
-        url: "/transactions/add/",
+    let settings = {
+        type: $('#transactionForm input[name=method]').val(),
+        url: $('#transactionForm input[name=url]').val(),
         contentType: 'application/json',
         data: JSON.stringify({
             account_id: parseInt($('input[name=accountId]').val()),
             currency_id: parseInt($('select[name=currency]').val()),
-            datetime: luxon.DateTime.fromFormat(
+            date_issued: luxon.DateTime.fromFormat(
                 $('#transactionForm input[name=date_issued]').val(),
-                date_fmt
+                DATE_FMT
             ).toISO(),
             amount: parseFloat($('#transactionForm input[name=amount]').val()),
             is_expense: is_expense,
@@ -53,14 +51,17 @@ function post() {
         success: (r) => {
             empty();
             $('#transModal').modal('hide');
+            console.log(r.responseText);
         }
-    });
+    }
+    console.log(settings);
+    $.ajax(settings);
 }
 
 
 function check_date() {
     let issued = luxon.DateTime.fromFormat(
-        $('#transactionForm input[name=date_issued]').val(), date_fmt);
+        $('#transactionForm input[name=date_issued]').val(), DATE_FMT);
     if (!issued.isValid) {
         alert(`${issued.invalidReason}:\n${issued.invalidExplanation}`);
         return false;
@@ -78,10 +79,10 @@ function check_date() {
                 break;
             }
         }
-        let date_created = luxon.DateTime.fromFormat(date_created_str, date_fmt);
+        let date_created = luxon.DateTime.fromFormat(date_created_str, DATE_FMT);
         if (date_created > issued) {
             alert(`Can't make Transaction before Creation of Account!\n${
-                date_created.toFormat(date_fmt)
+                date_created.toFormat(DATE_FMT)
             }`);
             return false;
         }
@@ -142,7 +143,8 @@ function check_categories() {
 
 function check_amount() {
     let total = parseFloat($('#transactionForm input[name=amount]').val());
-    if (total == NaN || total == 0) {
+    console.log(total);
+    if (isNaN(total) || total == 0) {
         alert("Enter an amount >= 0!");
         return false
     }

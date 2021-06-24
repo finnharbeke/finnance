@@ -15,7 +15,8 @@
 <h2>{{ account.currency.code }} {{ saldo }}</h2>
 <p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ account.starting() }}</p>
 
-<button type="button" class="btn btn-primary btn-lg mb-2" data-toggle="modal" data-target="#transModal{{ account.id }}">
+<button type="button" class="btn btn-primary btn-lg mb-2 toggler" data-info="new{{ account.id }}"
+    data-toggle="modal" data-target="#transModal">
     New Transaction
 </button>
 <!-- Modal -->
@@ -26,7 +27,7 @@
     <caption><a href="{{ url_for('main.account_transactions', account_id=account.id) }}">More...</a></caption>
     {{ change_macros.head() }}
     <tbody>
-        {{ change_macros.rows(last_5, url_for("main.account", account_id=account.id), account, agents, categories) }}
+        {{ change_macros.rows(last_5, account) }}
     </tbody>
 </table>
 

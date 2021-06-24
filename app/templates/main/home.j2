@@ -28,11 +28,9 @@ data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimal
             <td onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
                 style="text-align: right;">{{ account.currency.code }} {{ account.saldo() }}</td>
             <td style="width: 44px; padding: 0px;">
-                <button type="button" class="btn btn-success btn-lg mb-2" data-toggle="modal"
-                  data-target="#transModal{{ account.id }}" style="height: 100%; width: 100%;">+</button>
-                <!-- Modal -->
-                <!-- defined in included trans_modals.j2 -->
-                {# {{ trans_modal.modal(account, url_for('main.index'), agents, categories, none) }} #}
+                <button type="button" class="btn btn-success btn-lg mb-2 toggler" data-toggle="modal"
+                    data-info="new{{ account.id }}"
+                    data-target="#transModal" style="height: 100%; width: 100%;">+</button>
             </td>
         </tr>
         {% endfor %}
@@ -45,7 +43,7 @@ data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimal
 <button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
     data-target="#transModal" data-info="remote" style="height: 100%; width: 100%;">Remote</button>
 <button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
-    data-target="#transModal" data-info="new3" style="height: 100%; width: 100%;">Modal</button>
+    data-target="#transModal" data-info="edit1260" style="height: 100%; width: 100%;">edit 1260</button>
 {{ trans_modal.modal(agents, categories, currencies, accounts) }}
 <script>
 function allow_drop_color(ev, col) {
@@ -80,7 +78,7 @@ function openModal(src, dst) {
     } else {
         $('#transferModal form').attr(
             'action',
-            "{{ url_for('post.add_transfer', src_id=-1, dst_id=0) }}".replace('-1', src.acc_id).replace('0', dst.acc_id)
+            "{{ url_for('modal.add_transfer', src_id=-1, dst_id=0) }}".replace('-1', src.acc_id).replace('0', dst.acc_id)
         );
         $('#transferModal input[name=src_desc]').val(src.acc_desc);
         $('#transferModal input[name=dst_desc]').val(dst.acc_desc);

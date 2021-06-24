@@ -83,7 +83,8 @@
             </div>
             <div class="modal-body">
                 <form id="transactionForm">
-                    <input value="{{ redirect_url }}" name="redirect" type="hidden">
+                    <input name="method" type="hidden">
+                    <input name="url" type="hidden">
                     {{ top(currencies) }}
                     <div class="form-row">
                     {{ datetimeForm() }}

@@ -1,5 +1,6 @@
 {% extends "main/layout.j2" %}
 {% import "main/changes.j2" as change_macros %}
+{% import "main/trans_modal.j2" as trans_modal %}
 
 {% block body %}
 
@@ -13,9 +14,11 @@ Current Saldo: {{ saldo }}</p>
 <table id="transtable" class="table table-sm table-hover" cellspacing="0" width="100%">
     {{ change_macros.head() }}
     <tbody>
-        {{ change_macros.rows(transactions, url_for("main.account_transactions", account_id=account.id), account, agents, categories) }}
+        {{ change_macros.rows(changes, account) }}
     </tbody>
 </table>
+
+{{ trans_modal.modal(agents, categories, currencies, accounts) }}
 
 <script>
 $(document).ready(function () {

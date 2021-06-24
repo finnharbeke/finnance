@@ -9,23 +9,24 @@ import seaborn as sns
 
 mod_main = Blueprint('main', __name__)
 
+def modal_params():
+    return dict(
+        accounts=Account.query.all(),
+        agents=Agent.query.order_by(Agent.desc).all(),
+        categories=Category.query.order_by(Category.desc).all(),
+        currencies=Currency.query.all()
+    )
+
 @mod_main.route("/", methods=["GET"])
 def index():
-    accounts = Account.query.all()
-    agents = Agent.query.order_by(Agent.desc).all()
-    categories = Category.query.order_by(Category.desc).all()
-    currencies = Currency.query.all()
-    return render_template("main/home.j2", accounts=accounts, agents=agents, categories=categories, currencies=currencies)
+    return render_template("main/home.j2", **modal_params())
 
 @mod_main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 def account(account_id):
     account = Account.query.get(account_id)
-    accounts = Account.query.all()
-    currencies = Currency.query.all()
-    agents = Agent.query.order_by(Agent.desc).all()
-    categories = Category.query.order_by(Category.desc).all()
     saldo, changes = account.changes(num=5)
-    return render_template("main/account.j2", account=account, agents=agents, categories=categories, accounts=accounts, currencies=currencies, last_5=changes, saldo=saldo)
+    return render_template("main/account.j2", account=account,
+        last_5=changes, saldo=saldo, **modal_params())
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -35,27 +36,34 @@ def add_account():
     else:
         desc = request.form.get("description")
         starting_saldo = float(request.form.get("starting_saldo"))
-        date_created = dt.datetime.strptime(request.form.get("date_created"), "%d.%m.%Y")
+        date_created = dt.datetime.strptime(
+            request.form.get("date_created"), "%d.%m.%Y"
+        )
         if date_created > dt.datetime.now():
-            return render_template("error.j2", title="Creation Failed!", desc="Account can't have been created after today!", link=url_for('main.add_account'), link_text="Try again")
+            return render_template("error.j2", 
+                title="Creation Failed!",
+                desc="Account can't have been created after today!",
+                link=url_for('main.add_account'), link_text="Try again"
+            )
         currency_id = int(request.form.get("currency"))
         account = Account(desc=desc, starting_saldo=starting_saldo, date_created=date_created, currency_id=currency_id)
         db.session.add(account) # pylint: disable=no-member
         try:
             db.session.commit() # pylint: disable=no-member
         except sqlalchemy.exc.IntegrityError:
-            return render_template("error.j2", title="Creation Failed!", desc="Account with same Description already exists!", link=url_for('main.add_account'), link_text="Try again")
+            return render_template("error.j2", title="Creation Failed!", 
+                desc="Account with same Description already exists!",
+                link=url_for('main.add_account'), link_text="Try again"
+            )
         return redirect(url_for('main.add_account'))
 
 @mod_main.route("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
     account = Account.query.get(account_id)
-    agents = Agent.query.order_by(Agent.desc).all()
-    categories = Category.query.order_by(Category.desc).all()
-    
     saldo, changes = account.changes()
     
-    return render_template("main/transactions.j2", account=account, saldo=saldo, transactions=changes, agents=agents, categories=categories)
+    return render_template("main/transactions.j2", account=account,
+        saldo=saldo, changes=changes, **modal_params())
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):

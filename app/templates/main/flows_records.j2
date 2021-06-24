@@ -22,16 +22,14 @@
     <select class="form-control" name="recordCategoryExpINDEX">
     {% for cat in categories %}
         {% if cat.usable and cat.is_expense %}
-            <option value="{{ cat.id }}"
-                data-exp="{{ cat.is_expense }}">{{ cat.desc }}</option>
+            <option value="{{ cat.id }}">{{ cat.desc }}</option>
         {% endif %}
     {% endfor %}
     </select>
     <select class="form-control" name="recordCategoryIncINDEX">
     {% for cat in categories %}
         {% if cat.usable and not cat.is_expense %}
-            <option value="{{ cat.id }}" 
-                data-exp="{{ cat.is_expense }}">{{ cat.desc }}</option>
+            <option value="{{ cat.id }}">{{ cat.desc }}</option>
         {% endif %}
     {% endfor %}
     </select>
@@ -163,12 +161,8 @@ $('#newFlow').click(function() {
 });
 $('#newRecord').click(function() {
     if (check_new())
-        new_record()
+        new_fr('record', `{{ recordRow(categories) }}`);
 });
-
-function new_record() {
-    new_fr('record', `{{ recordRow(categories) }}`);
-}
 
 </script>
 {% endmacro %}
