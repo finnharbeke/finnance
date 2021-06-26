@@ -41,25 +41,17 @@ def edit_trans(transaction_id):
         trans, records, flows = result
         for key, value in trans.items():
             setattr(old, key, value)
-        i = -1
-        for i, rec in enumerate(old.records):
-            if i >= len(records):
-                db.session.delete(rec)
-            else:
-                for key, value in records[i].items():
-                    setattr(rec, key, value)
-        for rec in records[i+1:]:
+        for rec in old.records:
+            db.session.delete(rec)
+        db.session.commit()
+        for rec in records:
             db.session.add(
                 Record(**rec, trans_id=old.id)
             )
-        i = -1
-        for i, flow in enumerate(old.flows):
-            if i >= len(flows):
-                db.session.delete(flow)
-            else:
-                for key, value in flows[i].items():
-                    setattr(flow, key, value)
-        for flow in flows[i+1:]:
+        for flow in old.flows:
+            db.session.delete(flow)
+        db.session.commit()
+        for flow in flows:
             db.session.add(
                 Flow(**flow, trans_id=old.id)
             )

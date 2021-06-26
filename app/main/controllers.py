@@ -9,7 +9,7 @@ import seaborn as sns
 
 mod_main = Blueprint('main', __name__)
 
-def modal_params():
+def params():
     return dict(
         accounts=Account.query.all(),
         agents=Agent.query.order_by(Agent.desc).all(),
@@ -19,20 +19,19 @@ def modal_params():
 
 @mod_main.route("/", methods=["GET"])
 def index():
-    return render_template("main/home.j2", **modal_params())
+    return render_template("main/home.j2", **params())
 
 @mod_main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 def account(account_id):
     account = Account.query.get(account_id)
     saldo, changes = account.changes(num=5)
     return render_template("main/account.j2", account=account,
-        last_5=changes, saldo=saldo, **modal_params())
+        last_5=changes, saldo=saldo, **params())
 
 @mod_main.route("/add/account", methods=["GET", "POST"])
 def add_account():
-    currencies = Currency.query.all()
     if request.method == "GET":
-        return render_template("main/add_acc.j2", currencies=currencies)
+        return render_template("main/add_acc.j2", **params())
     else:
         desc = request.form.get("description")
         starting_saldo = float(request.form.get("starting_saldo"))
@@ -63,7 +62,7 @@ def account_transactions(account_id):
     saldo, changes = account.changes()
     
     return render_template("main/transactions.j2", account=account,
-        saldo=saldo, changes=changes, **modal_params())
+        saldo=saldo, changes=changes, **params())
 
 @mod_main.route("/accounts/<int:account_id>/plot")
 def account_plot(account_id):
@@ -91,10 +90,6 @@ def account_plot(account_id):
     return send_file(bytes_image,
                      attachment_filename='plot.png',
                      mimetype='image/png')
-
-@mod_main.route("/accounts/<int:account_id>/analysis")
-def account_analysis(account_id):
-    pass
 
 @mod_main.route("/d3/<int:year>/<int:month>")
 def d3(year, month):
@@ -249,7 +244,7 @@ def agent(agent_id):
     if not agent:
         return jsonify({"error": "Invalid agent_id!"}), 422
 
-    return render_template("main/agent.j2", agent=agent, **modal_params())
+    return render_template("main/agent.j2", agent=agent, **params())
 
 # CODE BELOW IS FOR FORCE RELOADING CSS
 @mod_main.context_processor

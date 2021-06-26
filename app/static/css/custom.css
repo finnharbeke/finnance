@@ -7,7 +7,7 @@ table.clickable-table > tbody > tr:hover {
 }
 
 #all_accounts {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
 }
 
 #all_accounts .modal {
@@ -25,8 +25,4 @@ table.dataTable thead .sorting_desc:before,
 table.dataTable thead .sorting_desc_disabled:after,
 table.dataTable thead .sorting_desc_disabled:before {
 bottom: .5em;
-}
-
-.transfer {
-    color: #fff;
 }

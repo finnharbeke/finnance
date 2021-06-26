@@ -20,8 +20,36 @@
     {% endblock head %}
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <a class="navbar-brand" href="{{ url_for('main.index') }}">Finnance</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="navbar-nav mr-auto">
+                <a class="nav-item nav-link" href="{{ url_for('main.index') }}">
+                    Home
+                </a>
+                <a class="nav-item nav-link" href="{{ url_for('anal.analysis') }}">
+                    Analysis
+                </a>
+                <div class="nav-item dropdown">
+                    <div class="nav-link dropdown-toggle" 
+                        id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Accounts
+                    </div>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {% for account in accounts %}
+                        <a class="dropdown-item" 
+                            href="{{ url_for('main.account', account_id=account.id) }}">
+                            {{ account.desc }}
+                        </a>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
     <div class="container mt-4">
         {% block body %}

@@ -7,52 +7,89 @@ data-acc_desc="{{ account.desc }}" data-acc_id={{ account.id }}
 data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimals }}
 {% endmacro %}
 
+{% macro drop_goal(account) %}
+ondragover="allow_drop_color(event, 'rgb(0, 170, 0, 0.5)')"
+ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
+{{ data(account) }}
+{% endmacro %}
+
 {% block body %}
-<h1 class="display-1">Finnance</h1>
-<h2 class="display-4">Accounts:</h2>
-<table class="table table-hover clickable-table" id="all_accounts">
-    <tbody>
-        {% for account in accounts %}
-        <tr ondragover="allow_drop_color(event, 'rgb(0, 170, 0, 0.5)')" ondragleave="allow_drop_color(event, null)" ondrop="drop(event)"
+<h1 class="display-3">Finnance</h1>
+
+<a class="btn btn-primary btn-lg btn-block mb-3"
+    href="{{ url_for('anal.analysis') }}">
+    Analysis
+</a>
+
+<div class="row mb-3" id="all_accounts">
+    {% for account in accounts %}
+    <div class="col-2 col-lg-1 pb-1 acc{{account.id}}" {{ drop_goal(account) }}>
+        <button class="btn btn-info btn-block text-white"
+            draggable="true" ondragstart="drag(event)"
             {{ data(account) }}>
-            <td style="width: 44px; padding: 0px;">
-                <div class="bg-info btn-lg transfer" style="height: 100%; width: 100%;"
-                  draggable="true" ondragstart="drag(event)"
-                  {{ data(account) }}>
-                    <i class="fa fa-exchange" aria-hidden="true"></i>
-                </div>
-            </td>
-            <th onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
-                scope="row">{{ account.desc }}</th>
-            <!-- <td>{{ account.date_created.strftime('%d.%m.%Y') }}</td> -->
-            <td onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;" 
-                style="text-align: right;">{{ account.currency.code }} {{ account.saldo() }}</td>
-            <td style="width: 44px; padding: 0px;">
-                <button type="button" class="btn btn-success btn-lg mb-2 toggler" data-toggle="modal"
-                    data-info="new{{ account.id }}"
-                    data-target="#transModal" style="height: 100%; width: 100%;">+</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <i class="fa fa-exchange" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="col-4 col-lg-2 acc{{account.id}}" {{ drop_goal(account) }}
+        onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;">
+        {{ account.desc }}
+    </div>
+    <div class="col-4 col-lg-2 acc{{account.id}}" {{ drop_goal(account) }}
+        onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;">
+        {{ account.currency.code }} {{ account.saldo() }}
+    </div>
+    <div class="col-2 col-lg-1 acc{{account.id}}" {{ drop_goal(account) }}>
+        <button class="btn btn-success btn-block toggler"
+            data-toggle="modal"
+            data-info="new{{ account.id }}" data-target="#transModal">+
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
 {% include "main/transfer_modal.j2" %}
-<form action="{{ url_for('main.add_account') }}" class="mb-3">
-    <button type="submit" class="btn btn-primary btn-lg btn-block">Create Account</button>
-</form>
-<button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
-    data-target="#transModal" data-info="remote" style="height: 100%; width: 100%;">Remote</button>
-<button type="button" class="btn btn-success btn-lg mb-3 toggler" data-toggle="modal"
-    data-target="#transModal" data-info="edit1260" style="height: 100%; width: 100%;">edit 1260</button>
+<button type="button" class="btn btn-success btn-lg mb-3 toggler"
+    data-toggle="modal" data-target="#transModal" data-info="remote"
+    style="height: 100%; width: 100%;">
+    Remote
+</button>
+
+<a class="btn btn-primary btn-lg btn-block mb-3"
+    href="{{ url_for('main.add_account') }}">
+    Create Account
+</a>
 {{ trans_modal.modal(accounts, agents, categories, currencies) }}
+
 <script>
+$('.row > div').hover(function () {
+    let [_, acc_class] = get_div_class(this);
+    $(`.${acc_class}`)
+        .css('cursor', 'pointer')
+        .addClass('bg-secondary');
+}, function () {
+    let [_, acc_class] = get_div_class(this);
+    $(`.${acc_class}`).removeClass('bg-secondary');
+});
+
+function get_div_class(div) {
+    while (div.tagName != "DIV") {
+        div = div.parentNode;
+    }
+    let acc_class = "temp";
+    for (let i in div.classList) {
+        if (/^acc\d+$/.test(div.classList[i])) {
+            acc_class = div.classList[i];
+            break;
+        }
+    }
+    return [div, acc_class];
+}
+
 function allow_drop_color(ev, col) {
     ev.preventDefault();
-    let tr = ev.target;
-    while (tr.tagName != "TR") {
-        tr = tr.parentNode;
-    }
-    tr.style["background-color"] = col;
+    let [div, acc_class] = get_div_class(ev.target);
+    console.log(ev.dataTransfer.getData("text/plain"));
+    $(`.${acc_class}`).css('background-color', col);
 }
 
 function drag(ev) {
@@ -61,13 +98,10 @@ function drag(ev) {
 
 function drop(ev) {
     ev.preventDefault();
-    let tr = ev.target;
-    while (tr.tagName != "TR") {
-        tr = tr.parentNode;
-    }
-    tr.style["background-color"] = null;
+    let [div, acc_class] = get_div_class(ev.target);
+    $(`.${acc_class}`).css('background-color', '');
     let src_data = JSON.parse(ev.dataTransfer.getData("text/plain"));
-    let dst_data = JSON.parse(JSON.stringify(tr.dataset));
+    let dst_data = JSON.parse(JSON.stringify(div.dataset));
     console.log(src_data, dst_data);
     openModal(src_data, dst_data);
 }
