@@ -133,6 +133,3 @@ sunburst = function (data) {
         return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
     }
 };
-
-d3.json('/api/sunburst').then(sunburst);
-d3.json('/api/sunburst_agents').then(sunburst);

@@ -19,9 +19,7 @@ var svg = d3.select("div#container").append("svg")
 .style("margin", 5)
 .classed("svg-content", true);
 
-
-d3.json(`/api/d3/${year}/${month}`)
-.then(function(data) {
+stairs = function(data) {
     console.log(data);
     let min = d3.min(data.map(x => x.base));
     let max = d3.max(data.map(x => x.top));
@@ -60,7 +58,7 @@ d3.json(`/api/d3/${year}/${month}`)
     })
     .attr("fill", function(d){
         return d.color
-    });;
+    });
 
     svg.append("g")
         .attr("class", "axis")
@@ -70,4 +68,4 @@ d3.json(`/api/d3/${year}/${month}`)
     svg.append("g")
         .attr("class", "axis")
         .call(d3.axisLeft(yScale));
-})
+}
