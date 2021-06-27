@@ -1,26 +1,15 @@
-var script = $('script').filter(function() {
-    console.log(this)
-    if ($(this).attr('src') != undefined)
-        return $(this).attr('src').match(/\/static\/js\/d3\.js.*/);
-    else
-        return false;
-});
-var year = script.attr('data-year');
-var month = script.attr('data-month');
-//------------------------SVG PREPARATION------------------------//
-var width = 960;
-var height = 500;
-var adj = 20;
-// we are appending SVG first
-var svg = d3.select("div#container").append("svg")
-.attr("preserveAspectRatio", "xMinYMin meet")
-.attr("viewBox", "-" + adj + " -"+ adj + " " + (width + adj) + " " + (height + adj))
-.style("padding", 15)
-.style("margin", 5)
-.classed("svg-content", true);
-
-stairs = function(data) {
-    console.log(data);
+stairs = function(data, container) {
+    var width = 960;
+    var height = 500;
+    var adj = 20;
+    // we are appending SVG first
+    var svg = d3.select(container).append("svg")
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", "-" + adj + " -"+ adj + " " + (width + adj) + " " + (height + adj))
+        .style("padding", 15)
+        .style("margin", 5)
+        .classed("svg-content", true);
+        
     let min = d3.min(data.map(x => x.base));
     let max = d3.max(data.map(x => x.top));
 

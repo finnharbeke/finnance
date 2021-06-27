@@ -1,4 +1,4 @@
-from  app.main.models import Transaction, Category, Record, Agent
+from  app.main.models import Transaction, Category, Record, Agent, Currency
 from flask import jsonify, Blueprint
 import sqlalchemy, datetime as dt, seaborn as sns
 from .controllers import anal
@@ -58,40 +58,6 @@ def sunburst():
         is_expense=True
     )
 
-    help_ = lambda c: Record.query.filter_by(category_id=c.id).join(Transaction).filter(
-        Transaction.currency_id == 1
-    ).with_entities(
-        sqlalchemy.func.sum(Record.amount).label('sum')
-    ).first().sum
-
-    sum_cat = lambda c: help_(c) if help_(c) is not None else 0
-
-    data = []
-    for cat in categories:
-        if cat.parent is not None:
-            continue
-        if len(cat.children) != 0:
-            ch = []
-            ch.append({'name': cat.desc, 'value': sum_cat(cat)})
-            for c in cat.children:
-                ch.append({'name': c.desc, 'value': sum_cat(c)})
-            data.append({
-                'name': cat.desc,
-                'children': ch
-            })
-        else:
-            data.append({
-                'name': cat.desc,
-                'value': sum_cat(cat)
-            })
-    return jsonify({'name': 'exp', 'children': data})
-
-@api.route("/sunburst_agents")
-def sunburst_agents():
-    categories = Category.query.filter_by(
-        is_expense=True
-    )
-
     help_ = lambda c, ag: Record.query.filter_by(
         category_id=c.id
     ).join(Transaction).join(Agent).filter(
@@ -143,3 +109,49 @@ def sunburst_agents():
                 'children': agents(cat)
             })
     return jsonify({'name': 'exp', 'children': data})
+
+@api.route("/divstackbars")
+def divstackbars():
+    now = dt.datetime.now()
+    start_of_month = dt.datetime(year=now.year, month=now.month, day=1)
+    dates = [start_of_month, now]
+    for _ in range(11):
+        dates.insert(0, dt.datetime(
+            year = dates[0].year - int(dates[0].month == 1),
+            month = dates[0].month - 1 if dates[0].month != 1 else 12,
+            day = 1
+        ))
+    
+    print([str(d) for d in dates])
+
+    data = []
+    exp = set()
+    inc = set()
+    for i, start in enumerate(dates[:-1]):
+        for row in Record.query.join(Category).join(Transaction).join(Currency).filter(
+                sqlalchemy.and_(
+                    start <= Transaction.date_issued,
+                    Transaction.date_issued < dates[i+1]
+                )
+            ).group_by(Category.id).with_entities(
+                sqlalchemy.func.round(
+                    sqlalchemy.func.sum(Record.amount),
+                    Currency.decimals
+                ).label('value'),
+                Category.desc.label('category'),
+                Category.is_expense
+            ):
+            data.append(dict(month=start.strftime('%B %y'), **row._asdict()))
+            if row._asdict()['is_expense']:
+                exp.add(row._asdict()['category'])
+            else:
+                inc.add(row._asdict()['category'])
+    print(exp, inc)
+    for cat in exp:
+        if cat in inc:
+            for entry in data:
+                if entry['category'] == cat and not entry['is_expense']:
+                    entry['category'] += ' +'
+
+
+    return jsonify(data)

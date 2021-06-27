@@ -8,7 +8,7 @@ anal = Blueprint('anal', __name__, url_prefix='/analysis',
 @anal.route('/')
 def analysis():
     accounts = Account.query.all()
-    return render_template('dashboard.j2', accounts=accounts)
+    return render_template('dashboard.j2', accounts=accounts, timestamp=dt.datetime.utcnow())
 
 @anal.route("/<int:year>/<int:month>")
 def d3(year, month):

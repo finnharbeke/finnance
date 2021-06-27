@@ -1,5 +1,5 @@
-sunburst = function (data) {
-    width = 932
+sunburst = function (data, container) {
+    width = $(container).width()
     radius = width / 6
     color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
     partition = data => {
@@ -42,7 +42,7 @@ sunburst = function (data) {
 
     root.each(d => d.current = d);
 
-    const svg = d3.select("div#container").append("svg")
+    const svg = d3.select(container).append("svg")
         .attr("viewBox", [0, 0, width, width])
         .style("font", "10px sans-serif");
 
@@ -124,7 +124,7 @@ sunburst = function (data) {
     }
 
     function labelVisible(d) {
-        return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
+        return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.06;
     }
 
     function labelTransform(d) {

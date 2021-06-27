@@ -1,19 +1,13 @@
-{% extends "main/layout.j2" %}
-{% block head %}
-    <script src = "https://d3js.org/d3.v6.min.js"></script>
-{% endblock head %}
+{% extends "d3base.j2" %}
 {% block body %}
-
-<div id="container"></div>
 
 <script src="{{ url_for('anal.static', filename='js/stairs.js', stamp=timestamp) }}"
     data-year="{{year}}" data-month="{{month}}"></script>
 
 <script src="{{ url_for('anal.static', filename='js/sb.js', stamp=timestamp) }}"></script>
 <script>
-d3.json("{{ url_for('anal_api.stairs', year=year, month=month) }}").then(stairs);
-d3.json("{{ url_for('anal_api.sunburst') }}").then(sunburst);
-d3.json("{{ url_for('anal_api.sunburst_agents') }}").then(sunburst);
+d3.json("{{ url_for('anal_api.stairs', year=year, month=month) }}").then((data) => stairs(data, '.container'));
+d3.json("{{ url_for('anal_api.sunburst') }}").then((data) => sunburst(data, '.container'));
 
 </script>
 {% endblock body %}
