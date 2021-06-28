@@ -34,7 +34,6 @@ divstackbars = function(data, container) {
         .offset(d3.stackOffsetDiverging)(
             d3.rollups(data, data => d3.rollup(data, ([d]) => d.value, d => d.category), d => d.month)
     );
-    console.log(series);
 
     const x = d3.scaleLinear()
         .domain(d3.extent(series.flat(2)))
@@ -88,8 +87,7 @@ divstackbars = function(data, container) {
         .attr("width", d => x(d[1]) - x(d[0]))
         .attr("height", y.bandwidth())
         .append("title")
-        .text(({key, data: [name, value]}) => `${name}
-    ${value.get(key)} ${key}`);
+        .text(({key, data: [name, value]}) => `${name}\n${value.get(key)} ${key}`);
 
     svg.append("g")
         .call(xAxis);
@@ -106,7 +104,6 @@ divstackbars = function(data, container) {
         .call(legend);
     
     legend.attr("transform", `translate(${width - legend._groups[0][0].getBBox().width}, 80)`)
-    console.log(legend._groups[0][0].getBBox());
 }
 
 function i(i){

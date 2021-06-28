@@ -110,8 +110,7 @@ def sunburst():
             })
     return jsonify({'name': 'exp', 'children': data})
 
-@api.route("/divstackbars")
-def divstackbars():
+def months_dates():
     now = dt.datetime.now()
     start_of_month = dt.datetime(year=now.year, month=now.month, day=1)
     dates = [start_of_month, now]
@@ -121,8 +120,11 @@ def divstackbars():
             month = dates[0].month - 1 if dates[0].month != 1 else 12,
             day = 1
         ))
-    
-    print([str(d) for d in dates])
+    return dates
+
+@api.route("/divstackbars")
+def divstackbars():
+    dates = months_dates()
 
     data = []
     exp = set()
@@ -155,3 +157,25 @@ def divstackbars():
 
 
     return jsonify(data)
+
+@api.route("/12incexp")
+def inc_vs_exp():
+    dates = months_dates()
+    i = 0
+    inc = [0] * 12
+    exp = [0] * 12
+
+    for record in Record.query.join(Transaction).join(Category).filter(
+        Transaction.date_issued >= dates[0]).order_by(Transaction.date_issued):
+        while record.trans.date_issued >= dates[i+1]:
+            i += 1
+        if record.category.is_expense:
+            exp[i] += record.amount
+        else:
+            inc[i] += record.amount
+
+    return jsonify({
+        'inc': inc,
+        'exp': exp,
+        'months': [d.isoformat() for d in dates[:-1]]
+    })

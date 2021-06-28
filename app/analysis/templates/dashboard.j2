@@ -4,11 +4,14 @@
 <div class="row bg-secondary">
     <div class="col-12 col-lg-6 bg-light" id="divstackbars"></div>
     <div class="col-12 col-lg-6 bg-light" id="sunburst"></div>
+    <div class="col-12 col-lg-6 bg-light" id="incexp"></div>
 </div>
 <script src="{{ url_for('anal.static', filename='js/sunburst.js', stamp=timestamp) }}"></script>
 <script src="{{ url_for('anal.static', filename='js/divstackbars.js', stamp=timestamp) }}"></script>
+<script src="{{ url_for('anal.static', filename='js/scatter.js', stamp=timestamp) }}"></script>
 <script>
 d3.json("{{ url_for('anal_api.sunburst') }}").then((data) => sunburst(data, '#sunburst'));
 d3.json("{{ url_for('anal_api.divstackbars') }}").then((data) => divstackbars(data, '#divstackbars'));
+d3.json("{{ url_for('anal_api.inc_vs_exp') }}").then((data) => scatter(data, '#incexp'));
 </script>
 {% endblock %}
