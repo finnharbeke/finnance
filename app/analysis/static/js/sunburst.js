@@ -1,11 +1,13 @@
 sunburst = function (data, container) {
     width = $(container).width()
     radius = width / 6
-    color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
     partition = data => {
         const root = d3.hierarchy(data)
             .sum(d => d.value)
-            .sort((a, b) => b.value - a.value);
+            .sort((a, b) => {
+                return a.data.order != undefined ?
+                a.data.order - b.data.order : b.value - a.value
+            });
         return d3.partition()
             .size([2 * Math.PI, root.height + 1])
         (root);
@@ -28,7 +30,9 @@ sunburst = function (data, container) {
         return res;
     }
         
-        
+    color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1));
+
+    const strong = 0.8, weak = 0.5;
 
     arc = d3.arc()
         .startAngle(d => d.x0)
@@ -53,8 +57,8 @@ sunburst = function (data, container) {
         .selectAll("path")
         .data(root.descendants().slice(1))
         .join("path")
-        .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
-        .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)
+        .attr("fill", d => d.data.color)
+        .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? strong : weak) : 0)
         .attr("d", d => arc(d.current));
 
     path.filter(d => d.children)
@@ -106,7 +110,7 @@ sunburst = function (data, container) {
         .filter(function(d) {
             return +this.getAttribute("fill-opacity") || arcVisible(d.target);
         })
-            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
+            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? strong : weak) : 0)
             .attrTween("d", d => () => arc(d.current));
 
         label.filter(function(d) {

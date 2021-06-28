@@ -4,7 +4,7 @@
 <script src="{{ url_for('anal.static', filename='js/stairs.js', stamp=timestamp) }}"
     data-year="{{year}}" data-month="{{month}}"></script>
 
-<script src="{{ url_for('anal.static', filename='js/sb.js', stamp=timestamp) }}"></script>
+<script src="{{ url_for('anal.static', filename='js/sunburst.js', stamp=timestamp) }}"></script>
 <script>
 d3.json("{{ url_for('anal_api.stairs', year=year, month=month) }}").then((data) => stairs(data, '.container'));
 d3.json("{{ url_for('anal_api.sunburst') }}").then((data) => sunburst(data, '.container'));

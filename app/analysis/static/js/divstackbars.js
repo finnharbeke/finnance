@@ -4,24 +4,14 @@ divstackbars = function(data, container) {
     Object.assign(data, {
         negative: "← Expenses",
         positive: "Income →",
-        negatives: [...new Set(data.filter(d => d.is_expense).map(d => d.category))],
-        positives: [...new Set(data.filter(d => !d.is_expense).map(d => d.category))]
     });
     
     const margin = {top: 60, right: 30, bottom: 0, left: 160};
     const font_size = "20px";
 
-    const color = d3.scaleOrdinal()
-        .domain([].concat(data.negatives.sort(), data.positives.sort()))
-        .range([].concat(
-            // muted
-            // ['#4878d0', '#ee854a', '#6acc64', '#d65f5f', '#956cb4', '#8c613c', '#dc7ec0', '#797979', '#d5bb67', '#82c6e2', '#4878d0', '#ee854a', '#6acc64', '#d65f5f', '#956cb4', '#8c613c', '#dc7ec0'],
-            // flare
-            ['#eba278', '#ea946f', '#e88667', '#e67861', '#e36a5c', '#de5c5b', '#d7505e', '#ce4762', '#c14067', '#b43c6b', '#a7396e', '#9a356f', '#8d3270', '#7e2e70', '#712c6d', '#64296a', '#572666'],
-            ['#3a528b', '#20908c', '#5ec961']
-        ));
+    const color = d3.scaleOrdinal().domain(data.keys).range(data.colors);
 
-    const bias = d3.rollups(data, v => 
+    const bias = d3.rollups(data.categories, v => 
             d3.sum(v, d => d.value * Math.min(0, d.is_expense ? -1 : 1)), d => d.month
     );
 
@@ -32,7 +22,7 @@ divstackbars = function(data, container) {
         .keys([].concat(data.negatives.slice().reverse(), data.positives))
         .value(([, value], category) => (data.negatives.includes(category) ? -value.get(category) : value.get(category)) || 0)
         .offset(d3.stackOffsetDiverging)(
-            d3.rollups(data, data => d3.rollup(data, ([d]) => d.value, d => d.category), d => d.month)
+            d3.rollups(data.categories, data => d3.rollup(data, ([d]) => d.value, d => d.category), d => d.month)
     );
 
     const x = d3.scaleLinear()
@@ -79,6 +69,7 @@ divstackbars = function(data, container) {
         .data(series)
         .join("g")
         .attr("fill", d => color(d.key))
+        .attr("fill-opacity", 0.8)
         .selectAll("rect")
         .data(d => d.map(v => Object.assign(v, {key: d.key})))
         .join("rect")
@@ -105,11 +96,3 @@ divstackbars = function(data, container) {
     
     legend.attr("transform", `translate(${width - legend._groups[0][0].getBBox().width}, 80)`)
 }
-
-function i(i){
-    var o = i+"", a=t.get(o);
-    if(!a){
-        if(r!==op)return r;
-        t.set(o,a=n.push(i))
-    }
-    return e[(a-1)%e.length]}

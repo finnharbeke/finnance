@@ -21,8 +21,6 @@ def stairs(year, month):
     ix = 0
     in_dict = {cat.id: i for i, cat in enumerate(Category.query.filter_by(is_expense=False))}
     out_dict = {cat.id: i for i, cat in enumerate(Category.query.filter_by(is_expense=True))}
-    in_cmap = sns.color_palette("viridis", n_colors=len(in_dict)).as_hex()
-    out_cmap = sns.color_palette("rocket", n_colors=len(out_dict)).as_hex()
     while day < dt.datetime(2021, 6, 1):
         while ix < records.count() and records[ix].trans.date_issued < day:
             ix += 1
@@ -41,7 +39,7 @@ def stairs(year, month):
             data.append({
                 'base': base, 'top': top,
                 'name': day.strftime('%d'),
-                'color': out_cmap[out_dict[rec.category_id]] if rec.trans.is_expense else in_cmap[in_dict[rec.category_id]]
+                'color': rec.category.color
             })
             ix += 1
         if nothing:
@@ -74,40 +72,42 @@ def sunburst():
         d = []
         for ag in Agent.query.join(Transaction).join(Record).filter(Record.category_id == cat.id):
             # d.append({'name': ag.desc, 'value': sum_cat_ag(cat, ag)})
-            d.append({'name': ag.desc, 'children': [
+            d.append({'name': ag.desc, 'color': cat.color, 'children': [
                 {
                     'name': rec.trans.date_issued.strftime('%d.%m.%y %H:%M'),
+                    'color': cat.color,
                     'value': rec.amount
                 }
                 for rec in  Record.query.filter_by(
-                                category_id=cat.id
-                            ).join(Transaction).join(Agent).filter(
-                                Transaction.currency_id == 1
-                            ).filter(
-                                Agent.id == ag.id
-                            )
+                        category_id=cat.id
+                    ).join(Transaction).join(Agent).filter(
+                        Transaction.currency_id == 1
+                    ).filter(
+                        Agent.id == ag.id
+                    )
             ]})
 
         return d
+
+    def cat_obj(cat: Category, inside=False):
+        if len(cat.children) == 0 or inside:
+            children = agents(cat)
+        else:
+            children = [
+                cat_obj(ch) for ch in cat.children
+            ] + [cat_obj(cat, inside=True)]
+        return {
+            'name': cat.desc,
+            'color': cat.color,
+            'children': children,
+            'order': cat.order
+        }
 
     data = []
     for cat in categories:
         if cat.parent is not None:
             continue
-        if len(cat.children) != 0:
-            ch = []
-            ch.append({'name': cat.desc, 'children': agents(cat)})
-            for c in cat.children:
-                ch.append({'name': c.desc, 'children': agents(c)})
-            data.append({
-                'name': cat.desc,
-                'children': ch
-            })
-        else:
-            data.append({
-                'name': cat.desc,
-                'children': agents(cat)
-            })
+        data.append(cat_obj(cat))
     return jsonify({'name': 'exp', 'children': data})
 
 def months_dates():
@@ -125,10 +125,17 @@ def months_dates():
 @api.route("/divstackbars")
 def divstackbars():
     dates = months_dates()
+    
+    exp = set()
+    desc_dict = {}
+    for cat in Category.query.order_by(Category.is_expense.desc()):
+        desc_dict[cat.id] = cat.desc
+        if cat.is_expense:
+            exp.add(cat.desc)
+        elif cat.desc in exp:
+            desc_dict[cat.id] += ' +'
 
     data = []
-    exp = set()
-    inc = set()
     for i, start in enumerate(dates[:-1]):
         for row in Record.query.join(Category).join(Transaction).join(Currency).filter(
                 sqlalchemy.and_(
@@ -140,23 +147,23 @@ def divstackbars():
                     sqlalchemy.func.sum(Record.amount),
                     Currency.decimals
                 ).label('value'),
-                Category.desc.label('category'),
+                Category.id,
                 Category.is_expense
             ):
-            data.append(dict(month=start.strftime('%B %y'), **row._asdict()))
-            if row._asdict()['is_expense']:
-                exp.add(row._asdict()['category'])
-            else:
-                inc.add(row._asdict()['category'])
-    print(exp, inc)
-    for cat in exp:
-        if cat in inc:
-            for entry in data:
-                if entry['category'] == cat and not entry['is_expense']:
-                    entry['category'] += ' +'
+            data.append(dict(
+                month=start.strftime('%B %y'),
+                category=desc_dict[row._asdict()['id']], 
+                **row._asdict()
+            ))
 
 
-    return jsonify(data)
+    return jsonify({
+        'categories': data,
+        'positives': [desc_dict[cat.id] for cat in Category.query.filter_by(is_expense=False).order_by(Category.order)],
+        'negatives': [desc_dict[cat.id] for cat in Category.query.filter_by(is_expense=True).order_by(Category.order)],
+        'colors': [cat.color for cat in Category.query.order_by(Category.order)],
+        'keys': [desc_dict[cat.id] for cat in Category.query.order_by(Category.order)]
+    })
 
 @api.route("/12incexp")
 def inc_vs_exp():

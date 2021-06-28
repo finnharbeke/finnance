@@ -143,6 +143,8 @@ class Category(db.Model):
     is_expense = db.Column(db.Boolean, nullable=False)
     usable = db.Column(db.Boolean, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    color = db.Column(db.String(7), nullable=False)
+    order = db.Column(db.Integer, nullable=False, unique=True)
 
     parent = db.relationship("Category", backref="children", remote_side=[id])
 

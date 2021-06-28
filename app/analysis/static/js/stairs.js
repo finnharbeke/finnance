@@ -13,13 +13,6 @@ stairs = function(data, container) {
     let min = d3.min(data.map(x => x.base));
     let max = d3.max(data.map(x => x.top));
 
-    // let t = min;
-    // let pad = 0.05;
-    // min -= (max - t) * pad;
-    // max += (max - t) * pad;
-
-    console.log(min, max)
-
     let xScale = d3.scaleBand()
         .rangeRound([0, width])
         .domain(data.map(x => x.name));
@@ -33,21 +26,12 @@ stairs = function(data, container) {
     .enter()
     .append("rect")
     .attr("class", "bar")
-    .attr("x", function (d) {
-            return xScale(d.name);
-    })
-    .attr("width", function (d) {
-        return xScale.bandwidth();
-    })
-    .attr("y", function (d) {
-        return yScale(d.top);
-    })
-    .attr("height", function (d) {
-        return yScale(d.base) - yScale(d.top);
-    })
-    .attr("fill", function(d){
-        return d.color
-    });
+    .attr("x", d => xScale(d.name))
+    .attr("width", xScale.bandwidth())
+    .attr("y", d => yScale(d.top))
+    .attr("height", d => yScale(d.base) - yScale(d.top))
+    .attr("fill", d => d.color)
+    .attr("fill-opacity", 0.8);
 
     svg.append("g")
         .attr("class", "axis")
