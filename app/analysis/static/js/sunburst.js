@@ -59,6 +59,8 @@ sunburst = function (data, container) {
         .join("path")
         .attr("fill", d => d.data.color)
         .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? strong : weak) : 0)
+        .on("mouseover", (ev, d) => arcVisible(d.current) ? over_category(d.data.id) : null)
+        .on("mouseout", (ev, d) => out_category(d.data.id))
         .attr("d", d => arc(d.current));
 
     path.filter(d => d.children)

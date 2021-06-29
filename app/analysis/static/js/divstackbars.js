@@ -19,7 +19,7 @@ divstackbars = function(data, container) {
     const width = 954;
 
     const series = d3.stack()
-        .keys([].concat(data.negatives.slice().reverse(), data.positives))
+        .keys(data.keys)
         .value(([, value], category) => (data.negatives.includes(category) ? -value.get(category) : value.get(category)) || 0)
         .offset(d3.stackOffsetDiverging)(
             d3.rollups(data.categories, data => d3.rollup(data, ([d]) => d.value, d => d.category), d => d.month)
@@ -77,6 +77,8 @@ divstackbars = function(data, container) {
         .attr("y", ({data: [name]}) => y(name))
         .attr("width", d => x(d[1]) - x(d[0]))
         .attr("height", y.bandwidth())
+        .on("mouseover", (ev, d) => over_category(data.key_to_id[d.key]))
+        .on("mouseout", (ev, d) => out_category(data.key_to_id[d.key]))
         .append("title")
         .text(({key, data: [name, value]}) => `${name}\n${value.get(key)} ${key}`);
 
@@ -85,14 +87,4 @@ divstackbars = function(data, container) {
 
     svg.append("g")
         .call(yAxis);
-
-    var legend = d3.legendColor()
-        .cellFilter(function(d){ return d.label !== "e" })
-        .scale(color);
-        
-    legend = svg.append("g")
-        .attr("fill", "currentColor")
-        .call(legend);
-    
-    legend.attr("transform", `translate(${width - legend._groups[0][0].getBBox().width}, 80)`)
 }

@@ -64,33 +64,6 @@ def account_transactions(account_id):
     return render_template("main/transactions.j2", account=account,
         saldo=saldo, changes=changes, **params())
 
-@mod_main.route("/accounts/<int:account_id>/plot")
-def account_plot(account_id):
-    account = Account.query.get(account_id)
-
-    saldo, changes = account.changes(saldo_formatted=False)
-    changes = changes[::-1]
-
-    # Set seaborn & matplotlib
-    sns.set("notebook", font_scale=2)
-    f, ax = plt.subplots(figsize=(24, 6))
-    plt.tight_layout()
-    # creation, transactions and now
-    x = [account.date_created]*2 + [change.date_issued for change in changes] + [dt.datetime.now()]
-    y = [0, account.starting_saldo] + [change.saldo(formatted=False) for change in changes] + [saldo]
-
-    plt.plot(x, y, drawstyle='steps-post', linewidth=2.5)
-    ax.set_xlim(left=x[0], right=[x[-1]])
-
-    bytes_image = io.BytesIO()
-    plt.savefig(bytes_image, format='png')
-    bytes_image.seek(0)
-    plt.close()
-
-    return send_file(bytes_image,
-                     attachment_filename='plot.png',
-                     mimetype='image/png')
-
 @mod_main.route("/agents/<int:agent_id>")
 def agent(agent_id):
     agent = Agent.query.get(agent_id)

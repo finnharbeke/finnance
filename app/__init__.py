@@ -22,6 +22,7 @@ from app.main.controllers import mod_main as main_module
 from app.main.api import mod_api as api_module
 from app.main.modal import mod_modal as modal_module
 from app.analysis import anal, anal_api
+from app.category import blueprint as category
 
 # Register blueprint(s)
 app.register_blueprint(main_module)
@@ -29,6 +30,7 @@ app.register_blueprint(api_module)
 app.register_blueprint(modal_module)
 app.register_blueprint(anal)
 app.register_blueprint(anal_api)
+app.register_blueprint(category)
 # app.register_blueprint(xyz_module)
 # ..
 

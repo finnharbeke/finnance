@@ -1,16 +1,9 @@
-{% extends "main/layout.j2" %}
+{% extends "layout.j2" %}
 {% import "main/trans_modal.j2" as trans_modal %}
 {% import "main/changes.j2" as change_macros %}
 
 {% block body %}
-<div class="row">
-    <div class="col-9">
-        <h1 class="display-4">{{ account.desc }}</h1>
-    </div>
-    <div class="col-3">
-        <button class="btn btn-primary btn-lg btn-block">Edit</button>
-    </div>
-</div>
+<h1 class="display-4">{{ account.desc }}</h1>
 
 <h2>{{ account.currency.code }} {{ saldo }}</h2>
 <p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code}} {{ account.starting() }}</p>
@@ -31,8 +24,10 @@
     </tbody>
 </table>
 
-<a href="{{ url_for('main.account_plot', account_id=account.id) }}">
-    <img src="{{ url_for('main.account_plot', account_id=account.id) }}" class="img-fluid img-thumbnail mb-2" alt="Responsive image">
-</a>
-
+<div id="balance"></div>
+<script src="{{ url_for('anal.static', filename='js/scatter.js') }}"></script>
+<script>
+d3.json("{{ url_for('anal_api.account', acc_id=account.id) }}")
+        .then((data) => scatter(data, '#balance'));
+</script>
 {% endblock %}

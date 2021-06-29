@@ -45,12 +45,12 @@
             {{ account.currency.format(ch.amount) }} {{ account.currency.code }}
         </td>
         <td style="text-align: right;"  
-            data-sort="{{ saldo }}">
+            data-sort="{{ ch.saldo(formatted=False) }}">
             {{ ch.saldo() }} {{ account.currency.code }}
         </td>
         <td>{{ ch.comment }}</td>
         <td style="width: 44px; padding: 0px;">
-            <button type="button" class="btn btn-warning btn-lg toggler"
+            <button type="button" class="btn btn-warning toggler"
                 style="height: 100%; width: 100%;" data-toggle="modal" 
                 data-info="{% if ch.transfer %}transferEdit{% else %}edit{% endif %}{{ch.id}}"
                 data-target="{% if ch.transfer %}#transferModal{% else %}#transModal{% endif %}">

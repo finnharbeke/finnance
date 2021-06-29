@@ -9,24 +9,21 @@ scatter = function (data, container) {
             .attr("stroke-width", 4)
             .attr("stroke-linejoin", "round");
     }
-    const x_label = "Months";
-    const y_label = "Swiss Francs";
-    const inc = data.inc;
-    const exp = data.exp;
     const font_size = "20px";
 
-    const xLabels = d3.scaleTime().domain([
-        Date.parse(data.months[0]),
-        Date.parse(data.months[data.months.length - 1]),
+    const x = d3.scaleTime().domain([
+        Date.parse(data.x[0]),
+        Date.parse(data.x[data.x.length - 1]),
     ]).range([margin.left, width - margin.right]);
 
-    const y = d3.scaleLinear().domain(
-        [0, Math.max(d3.max(inc), d3.max(exp))]
-    ).range([height - margin.bottom, margin.top]);
+    const y = d3.scaleLinear().domain([
+        Math.min(0, ...d3.map(data.ys, y => d3.min(y))), 
+        Math.max(...d3.map(data.ys, y => d3.max(y)))
+    ]).range([height - margin.bottom, margin.top]);
 
     const xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(xLabels).tickFormat(d3.timeFormat("%b %y")))
+        .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %y")))
             .attr("font-size", font_size)
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick line").clone()
@@ -38,12 +35,12 @@ scatter = function (data, container) {
             .attr("font-weight", "bold")
             .attr("text-anchor", "end")
             .attr("fill", "black")
-            .text(x_label)
+            .text(data.x_label)
             .call(halo));
 
     const yAxis = g => g
         .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).tickFormat(d => `${d} CHF`))
+        .call(d3.axisLeft(y).tickFormat(d => `${d} ${data.curr_code}`))
             .attr("font-size", font_size)
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick line").clone()
@@ -54,7 +51,7 @@ scatter = function (data, container) {
             .attr("text-anchor", "start")
             .attr("font-weight", "bold")
             .attr("fill", "black")
-            .text(y_label)
+            .text(data.y_label)
             .call(halo));
 
     function length(path) {
@@ -63,8 +60,8 @@ scatter = function (data, container) {
     
     const line = d3.line()
         .curve(d3.curveCatmullRom)
-        .x((d, i) => xLabels(Date.parse(data.months[i])))
-        .y((d, i) => y(d));
+        .x((d, i) => x(Date.parse(data.x[i])))
+        .y(d => y(d));
 
     const svg = d3.select(container).append("svg")
         .attr("viewBox", [0, 0, width, height + margin.bottom])
@@ -76,7 +73,7 @@ scatter = function (data, container) {
     svg.append("g")
         .call(yAxis);
         
-    plot = function (arr, color) {
+    plot = function (arr, color, str) {
         const l = length(line(arr));
         svg.append("path")
             .datum(arr)
@@ -99,12 +96,17 @@ scatter = function (data, container) {
         .selectAll("circle")
         .data(arr)
         .join("circle")
-            .attr("cx", (d, i) => xLabels(Date.parse(data.months[i])))
+            .attr("cx", (d, i) => x(Date.parse(data.x[i])))
             .attr("cy", d => y(d))
-            .attr("r", 3);
+            .attr("r", 3)
+            .append("title")
+                .text(
+                    (d, i) => `${str} ${d3.timeFormat("%b %y")(
+                        Date.parse(data.x[i])
+                    )}\n${d}`
+                );
     }
 
-    plot(data.inc, "#7ac56d");
-    plot(data.exp, "#bf5164");
+    data.ys.map((y, i) => plot(y, data.colors[i], data.labels[i]));
 
 }

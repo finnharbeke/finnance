@@ -1,10 +1,10 @@
-{% extends "main/layout.j2" %}
+{% extends "layout.j2" %}
 {% import "main/changes.j2" as change_macros %}
 {% import "main/trans_modal.j2" as trans_modal %}
 
 {% block body %}
 
-<h1 class="display-4r h1-link" 
+<h1 class="display-3 h1-link" 
     onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;">
 {{ account.desc }}
 </h1>
@@ -22,7 +22,7 @@ Current Saldo: {{ saldo }}</p>
 
 <script>
 $(document).ready(function () {
-$('#transtable').DataTable();
+$('#transtable').DataTable({order: [[0, 'desc']]});
 });
 </script>
 {% endblock %}
