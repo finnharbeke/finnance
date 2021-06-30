@@ -1,7 +1,0 @@
-{% extends "layout.j2" %}
-{% block logic %}
-    <script src="{{ url_for('category.static', filename='js/legend.js', stamp=timestamp) }}"></script>
-    <script>
-        d3.json("{{ url_for('category.categories') }}").then((data) => legend(data, '#legend'));
-    </script>
-{% endblock logic %}

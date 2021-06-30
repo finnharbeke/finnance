@@ -1,0 +1,49 @@
+{% import "load.j2" as custom %}
+{% extends "layout.j2" %}
+
+{% block body %}
+
+<form action="{{ url_for('main.add_account') }}" method="post">
+    <div class="form-group">
+        <label for="description">Account Description</label>
+        <input class="form-control" type="text" name="description" maxlength=32 required>
+    </div>
+    <div class="form-group">
+        <label for="starting_saldo">Starting Saldo</label>
+        <input class="form-control" type="number" name="starting_saldo" required>
+        <small class="form-text text-muted" id="saldo_dec"></small>
+    </div>
+    <div class="form-group">
+        <label for="date_created">Date Account is Added to Finnance</label>
+        <!-- Date Regex:
+                 dd                    mm mit 31 d       yyyy     dd                 mm mit 30 d     dd - 28         feb             y y schaltjahr                        hh
+            /^((0[1-9]|[12]\d|3[01]).(0[13578]|1[02]).\d{4}|(0[1-9]|[12]\d|30).(0[469]|11).\d{4}|(0[1-9]|1\d|2[0-8]).02.\d{4}|29.02.\d\d(0[048]|[13579][26]|[2468][048])) ([01]\d|2[0-3]):[0-5][0-9]$/ -->
+        <input class="form-control" type="text" name="date_created" maxlength=10 
+            pattern="((0[1-9]|[12]\d|3[01]).(0[13578]|1[02]).\d{4}|(0[1-9]|[12]\d|30).(0[469]|11).\d{4}|(0[1-9]|1\d|2[0-8]).02.\d{4}|29.02.\d\d(0[048]|[13579][26]|[2468][048]))"
+            required>
+        <small class="form-text text-muted">dd.mm.yyyy</small>
+    </div>
+    <div class="form-group">
+        <label for="currency">Currency</label>
+        <select class="form-control" name="currency" required>
+            {% for currency in currencies %}
+            <option value="{{ currency.id }}"
+                data-decs="{{ currency.decimals }}">{{ currency.code }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{{ custom.customLogic() }}
+<script>
+function decimals() { 
+    return parseInt($('select[name=currency] option:selected').data('decs'));
+}
+$(document).ready(function() {
+    update_currency('input[type=number]', decimals(), undefined, false);
+});
+$('select[name=currency]').change(function() {
+    update_currency('input[type=number]', decimals(), undefined, false);
+});
+</script>
+{% endblock %}

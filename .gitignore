@@ -1,9 +1,6 @@
 .vscode
-.ipynb_checkpoints
 *.DS_Store
 *__pycache__
 *.pyc
-/app.db
-/Finnance.app
-import.py
+app.db
 backups

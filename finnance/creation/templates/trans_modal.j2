@@ -1,0 +1,109 @@
+{% import "load.j2" as custom %}
+{% import "flows_records.j2" as fr %}
+
+{% macro datetimeForm() %}
+<div class="col-6 form-group">
+    <label for="date_issued">Date & Time of Transaction</label>
+    <input class="form-control" type="text" name="date_issued" maxlength=16 required>
+    <small class="form-text text-muted">dd.mm.yyyy hh:mm</small>
+</div>
+{% endmacro %}
+
+{% macro amountForm() %}
+<div class="col-6 form-group">
+    <label for="amount">Amount</label>
+    <input class="form-control" type="number" name="amount" required>
+    <small class="form-text text-muted"></small>
+</div>
+{% endmacro %}
+
+{% macro expinc() %}
+<div class="btn-group btn-group-toggle float-right mb-2 ml-2" data-toggle="expinc">
+    <label class="btn btn-danger btn-light" id="expenseLabel">
+        <input type="radio" name="expinc" id="expense" value="expense">Expense
+    </label>
+    <label class="btn btn-success btn-light" id="incomeLabel">
+        <input type="radio" name="expinc" id="income" value="income">Income
+    </label>
+</div>
+{% endmacro %}
+
+{% macro top(currencies) %}
+<div class="form-row">
+    <div class="col-md-4 order-md-2">
+        {{ expinc() }}
+        <button id="directFlowBtn" type="button"
+            class="btn btn-secondary float-right" data-toggle="button"
+            aria-pressed="false">
+                Direct Flow
+            <input type="hidden" id="directFlow" name="directFlow" value="false"/>
+        </button>
+    </div>
+    <div class="form-group col-md-8 order-md-1" id="accountForm">
+        <label for="account">Account</label>
+        <input class="form-control" type="text" name="accountDesc" readonly>
+        <input type="hidden" name="accountId">
+    </div>
+    <div class="form-group col-md-8 order-md-1" id="currencyForm">
+        <label for="currency">Currency</label>
+        <select class="form-control" name="currency">
+        {% for curr in currencies %}
+            <option value="{{ curr.id }}"
+                data-decimals="{{ curr.decimals }}">{{ curr.code }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro agentForm(id, name, label) %}
+<div class="form-group" id="{{ id }}">
+    <label for="{{ name }}"">{{label}}</label>
+    <input class="form-control" type="text" list="agents" name="{{ name }}" required>
+</div>
+{% endmacro %}
+
+{% macro commentForm(comment) %}
+<div class="form-group">
+    <label for="comment">Comment</label>
+    <input class="form-control" type="text" maxlength=120 name="comment">
+</div>
+{% endmacro %}
+
+<div class="modal fade" data-backdrop="static" id="transModal" tabindex="-1"
+    role="dialog" aria-labelledby="transLabel" aria-hidden>
+    {{ custom.lists(accounts, agents) }}
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transLabel">Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="transactionForm">
+                    <input name="method" type="hidden">
+                    <input name="url" type="hidden">
+                    {{ top(currencies) }}
+                    <div class="form-row">
+                    {{ amountForm() }}
+                    {{ datetimeForm() }}
+                    </div>
+                    {{ agentForm("agentForm", "agent", "Agent") }}
+                    {{ agentForm("remoteAgentForm", "remoteAgent", "Transaction via") }}
+                    {{ fr.flowsRecords(categories) }}
+                    {{ commentForm() }}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary"
+                    id="transactionSubmit">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "load.j2" %}
