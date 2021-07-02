@@ -1,5 +1,4 @@
 function submit_transaction() {
-    console.log('submit');
     if (checks())
         post()
 }
@@ -48,13 +47,11 @@ function post() {
         error: (e) => {
             alert(`Error: ${e.status} ${e.statusText}\n${e.responseText}`);
         },
-        success: (r) => {
+        success: (msg) => {
             empty();
             $('#transModal').modal('hide');
-            console.log(r.responseText);
         }
     }
-    console.log(settings);
     $.ajax(settings);
 }
 
@@ -143,7 +140,6 @@ function check_categories() {
 
 function check_amount() {
     let total = parseFloat($('#transactionForm input[name=amount]').val());
-    console.log(total);
     if (isNaN(total) || total == 0) {
         alert("Enter an amount >= 0!");
         return false

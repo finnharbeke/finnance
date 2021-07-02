@@ -1,4 +1,5 @@
-from finnance.change import Change
+import sqlalchemy
+from finnance.models import AccountTransfer, Transaction
 from finnance import db
 import os
 
@@ -12,27 +13,33 @@ class Account(db.Model):
 
     currency = db.relationship("Currency", backref="accounts")
 
-    def changes(self, num=None, saldo_formatted=True):
+    def changes(self, num=None):
         saldo = self.starting_saldo
         total = len(self.transactions) + len(self.in_transfers) + len(self.out_transfers)
-        with open(os.path.join(os.path.dirname(__file__), 'changes.sql'), "r") as f:
-            sql = f.read()
 
-        changes = []
-        for i, change in enumerate(db.session.execute(sql, {'id': self.id})):
-            change = Change.from_dict(dict(change), self)
-            if change.is_expense:
-                saldo -= change.amount
+        changes = sorted(
+            self.transactions + self.out_transfers + self.in_transfers,
+            key=lambda ch: ch.date_issued
+        )
+        
+        saldos = []
+        for i, change in enumerate(changes):
+            if type(change) is AccountTransfer:
+                exp = change.src_id == self.id
+                amount = change.src_amount if exp else change.dst_amount
             else:
-                saldo += change.amount
-            change.saldo(saldo)
-            if num is None or total - i <= num:
-                changes.append(change)
-        saldo = self.currency.format(saldo) if saldo_formatted else round(saldo, self.currency.decimals)
-        return saldo, changes[::-1]
+                exp = change.is_expense
+                amount = change.amount
+            if exp:
+                saldo -= amount
+            else:
+                saldo += amount
+            saldos.append(round(saldo, self.currency.decimals))
+        
+        return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
-    def saldo(self, formatted=True):
-        return self.changes(num=0, saldo_formatted=formatted)[0]
+    def saldo(self):
+        return self.changes()[1][0]
     
     def starting(self):
         return self.currency.format(self.starting_saldo)

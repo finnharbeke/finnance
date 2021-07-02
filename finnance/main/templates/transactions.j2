@@ -1,6 +1,6 @@
 {% extends "layout.j2" %}
-{% import "changes.j2" as change_macros %}
 {% import "trans_modal.j2" as trans_modal %}
+{% import "tables.j2" as tables %}
 
 {% block body %}
 
@@ -9,20 +9,22 @@
 {{ account.desc }}
 </h1>
 <p class="lead">Started at: {{ account.date_created.strftime('%x') }} with {{ account.currency.code }} {{ account.starting() }},
-Current Saldo: {{ saldo }}</p>
+Current Saldo: {{ saldos[0] }}</p>
 
-<table id="transtable" class="table table-sm table-hover" cellspacing="0" width="100%">
-    {{ change_macros.head() }}
-    <tbody>
-        {{ change_macros.rows(changes, account) }}
-    </tbody>
+<div class="table-responsive">
+<table id="transtable" class="table table-sm">
+    {{ tables.changes_table(account, changes, saldos) }}
 </table>
+</div>
 
-{{ trans_modal.modal(accounts, agents, categories, currencies) }}
+{% include "trans_modal.j2" %}
 
 <script>
 $(document).ready(function () {
-$('#transtable').DataTable({order: [[0, 'desc']]});
+    $('#transtable').DataTable({
+        order: [[1, 'desc']], 
+        columnDefs: [{ orderable: false, targets: 0 }]
+    });
 });
 </script>
 {% endblock %}

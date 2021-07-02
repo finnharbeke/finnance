@@ -1,0 +1,111 @@
+{% macro trans_edit(id) %}
+<td style="min">
+    <button type="button" 
+        class="btn btn-warning toggler w-100 h-100" 
+        data-toggle="modal" data-info="edit{{id}}"
+        data-target="#transModal">
+        <i class="fa fa-pencil"></i>
+    </button>
+</td>
+{% endmacro %}
+
+{% macro transfer_edit(id) %}
+<td class="edit">
+    <button type="button" 
+        class="btn btn-warning toggler w-100 h-100" 
+        data-toggle="modal" data-info="edit{{id}}"
+        data-target="#transModal">
+        <i class="fa fa-pencil"></i>
+    </button>
+</td>
+{% endmacro %}
+
+{% macro date(dt) %}
+<td class="min" data-sort="{{ dt.strftime('%Y%m%d%H%M%s') }}">
+    {{ dt.strftime('%d.%m.%Y') }}
+</td>
+{% endmacro %}
+{% macro time(dt) %}
+<td class="min">{{ dt.strftime('%H:%M') }}</td>
+{% endmacro %}
+
+{% macro agent(agent) %}
+<td class="long">
+    <a href="{{ url_for('main.agent', agent_id=agent.id) }}"
+        class="text-info">
+    {{ agent.desc }}
+    </a>
+</td>
+{% endmacro %}
+{% macro account_td(account) %}
+<td class="long">
+    <a href="{{ url_for('main.account', account_id=account.id) }}"
+        class="text-primary">
+    {{ account.desc }}
+    </a>
+</td>
+{% endmacro %}
+
+{% macro amount(amount, is_expense, currency) %}
+<td class ="min text-right text-{% if is_expense %}danger{% else %}success{% endif %}"
+    data-sort="{% if is_expense %}{{ amount }}{% else %}{{ -amount }}{% endif %}">
+    {{ currency.format(amount) }} {{ currency.code }}
+</td>
+{% endmacro %}
+
+{% macro saldo_td(saldo, currency) %}
+<td class="min text-right" data-sort="{{ saldo }}">
+    {{ currency.format(saldo) }} {{ currency.code }}
+</td>
+{% endmacro %}
+
+{% macro comment(comment) %}
+<td class="long">{{ comment }}</td>
+{% endmacro %}
+
+{% macro head(strs) %}
+    <thead>
+        <tr>
+        {% for str in strs %}
+            <th scope="col">{{str}}</th>
+        {% endfor %}
+        </tr>
+    </thead>
+{% endmacro %}
+
+{% macro trans_row(tr, saldo) %}
+<tr>
+    {{ trans_edit(tr.id) }}
+    {{ date(tr.date_issued) }}
+    {{ time(tr.date_issued) }}
+    {{ agent(tr.agent) }}
+    {{ amount(tr.amount, tr.is_expense, tr.currency) }}
+    {{ saldo_td(saldo, tr.currency) }}
+    {{ comment(tr.comment) }}
+</tr>
+{% endmacro %}
+{% macro transfer_row(trf, account, saldo) %}
+{% set src = trf.src_id == account.id %}
+<tr>
+    {{ transfer_edit(trf.id) }}
+    {{ date(trf.date_issued) }}
+    {{ time(trf.date_issued) }}
+    {{ account_td(trf.dst if src else trf.src) }}
+    {{ amount(trf.src_amount if src else trf.dst_amount, src, account.currency) }}
+    {{ saldo_td(saldo, account.currency) }}
+    {{ comment(trf.comment) }}
+</tr>
+{% endmacro %}
+
+{% macro changes_table(account, changes, saldos) %}
+{{ head(['', 'Date', 'Time', 'Agent', 'Amount', 'Saldo', 'Comment']) }}
+<tbody>
+{% for change in changes %}
+    {% if change.agent %}
+        {{ trans_row(change, saldos[loop.index0]) }}
+    {% else %}
+        {{ transfer_row(change, account, saldos[loop.index0]) }}
+    {% endif %}
+{% endfor %}
+</tbody>
+{% endmacro %}

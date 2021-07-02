@@ -2,31 +2,36 @@ from finnance.account import Account
 from flask import render_template, Blueprint, request, redirect, url_for, jsonify, abort
 import sqlalchemy
 from finnance import db
-from finnance.models import Agent, Currency, Category
+from finnance.models import Agent, Currency, Category, Transaction, Flow
 import datetime as dt, os
 
 main = Blueprint('main', __name__, static_url_path='/static/main',
     static_folder='static', template_folder='templates')
 
 def params():
+    agents = Agent.query.join(Transaction, isouter=True).join(
+        Flow, sqlalchemy.and_(Agent.id == Flow.agent_id, 
+        Transaction.id == Flow.trans_id), isouter=True).group_by(
+            Agent.id).order_by(Agent.uses.desc(), Agent.desc).all()
     return dict(
         accounts=Account.query.all(),
-        agents=Agent.query.order_by(Agent.desc).all(),
+        agents=agents,
         categories=Category.query.order_by(Category.desc).all(),
         currencies=Currency.query.all()
     )
 
 @main.route("/", methods=["GET"])
 def index():
-    print(url_for('anal_api.static', filename='stairs.js'))
     return render_template("home.j2", **params())
 
 @main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 def account(account_id):
     account = Account.query.get(account_id)
-    saldo, changes = account.changes(num=5)
+    if not account:
+        return abort(404)
+    changes, saldos = account.changes(num=5)
     return render_template("account.j2", account=account,
-        last_5=changes, saldo=saldo, **params())
+        last_5=changes, saldos=saldos, **params())
 
 @main.route("/add/account", methods=["GET", "POST"])
 def add_account():
@@ -52,17 +57,17 @@ def add_account():
 @main.route("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
     account = Account.query.get(account_id)
-    saldo, changes = account.changes()
-    
+    if not account:
+        return abort(404)
+    changes, saldos = account.changes()
     return render_template("transactions.j2", account=account,
-        saldo=saldo, changes=changes, **params())
+        saldos=saldos, changes=changes, **params())
 
 @main.route("/agents/<int:agent_id>")
 def agent(agent_id):
     agent = Agent.query.get(agent_id)
     if not agent:
-        return jsonify({"error": "Invalid agent_id!"}), 422
-
+        return abort(404)
     return render_template("agent.j2", agent=agent, **params())
 
 # CODE BELOW IS FOR FORCE RELOADING CSS

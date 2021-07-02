@@ -1,7 +1,3 @@
-table.clickable-table > tbody > tr:hover {
-    cursor: pointer;
-}
-
 .h1-link:hover {
     cursor: pointer;
 }
@@ -21,4 +17,16 @@ table.clickable-table > tbody > tr:hover {
 .tightcol {
     padding-left: 2px;
     padding-right: 2px;
+}
+
+/* https://stackoverflow.com/questions/26983301/how-to-make-a-table-column-be-a-minimum-width */
+td.min {
+    width: 1px;
+    white-space: nowrap;
+}
+td.long {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

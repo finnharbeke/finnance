@@ -99,7 +99,6 @@ function modal_as_edit(trans_id) {
             request(trans_id);
             title(`Edit Transaction #${trans_id}`);
             submit("save");
-            set_expense(trans.is_expense);
             $('#transactionForm input[name=date_issued]').val(
                 luxon.DateTime.fromISO(trans.date_issued).toFormat(DATE_FMT)
             );
@@ -107,7 +106,7 @@ function modal_as_edit(trans_id) {
             $('#transactionForm input[name=agent]').val(trans.agent);
             $('#transactionForm input[name=comment]').val(trans.comment);
             for (let i in records) {
-                $('#newRecord').click();
+                new_record();
                 $('#recordRows > div:last-child select').filter(function () {
                     return ($(this).prop('name').startsWith('recordCategoryExp') &&
                         trans.is_expense) || (
@@ -119,11 +118,13 @@ function modal_as_edit(trans_id) {
                 );
             }
             for (let i in flows) {
-                $('#newFlow').click();
+                new_flow();
                 $('#flowRows > div:last-child input[type=text]').val(flows[i].agent);
                 $('#flowRows > div:last-child input[type=number]').val(flows[i].amount);
             }
             // so that numbers get formatted
+            set_expense(trans.is_expense);
+            fr_update();
             regulateAmounts();
         },
         error: (e) => {
@@ -245,19 +246,9 @@ function currency(show, currency_id) {
     if (currency_id != undefined) {
         $('#transactionForm select[name=currency]').val(currency_id);
     }
-    let curr_decimals = $('#transactionForm select[name=currency] option:selected').data('decimals');
-    let step = Math.pow(10, -parseInt(curr_decimals));
-    $('#transactionForm input[name=amount]').attr('step', step).attr('min', step);
-    update = (obj) => {
-        $(obj).attr('step', step).attr('min', step);
-        $(obj).attr('step', step).attr('min', step);
-        $(obj).val(parseFloat($(obj).val()).toFixed(curr_decimals));
-    }
-    $('#transModal input[type=number]').each(function() {
-        update(this);
-    });
-
-    regulateAmounts(undefined);
+    update_currency('#transactionForm input[type=number]', 
+    $('#transactionForm select[name=currency] option:selected').data('decimals')
+    );
 }
 
 function account(show, account_id, account_desc) {

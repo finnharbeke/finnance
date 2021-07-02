@@ -1,6 +1,7 @@
 function regulateAmounts(node) {
     let n = parseInt($('#flowCount').val()) + parseInt($('#recordCount').val());
     const amount_sel = '#transactionForm input[name=amount]';
+    const all_parts = '#recordRows input[type=number], #flowRows input[type=number]'
     const step = parseFloat(
         $(amount_sel).prop('step')
     );
@@ -18,9 +19,7 @@ function regulateAmounts(node) {
     if (node != undefined && $(node).val() > cap)
         $(node).val(cap);
 
-    const all_parts = '#flowRows input[type=number], #recordRows input[type=number]';
-    update_currency(all_parts + ', ' + amount_sel, decimals);
-
+    update_currency('#transactionForm input[type=number]', decimals);
     // if sum <= tr.amount it's fine
     let sum = 0;
     $(all_parts).each(function () {

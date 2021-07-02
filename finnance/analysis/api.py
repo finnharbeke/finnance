@@ -219,11 +219,12 @@ def inc_vs_exp(curr_id):
 def account(acc_id):
     account = Account.query.get(acc_id)
 
-    saldo, changes = account.changes(saldo_formatted=False)
+    changes, saldos = account.changes()
     changes = changes[::-1]
+    saldos = saldos[::-1]
 
     x = [account.date_created] + [change.date_issued for change in changes] + [dt.datetime.now()]
-    y = [account.starting_saldo] + [change.saldo(formatted=False) for change in changes] + [saldo]
+    y = [saldos[0]] + saldos + [saldos[-1]]
 
     return jsonify({
         'ys': [y],

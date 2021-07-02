@@ -100,7 +100,7 @@ def parseRequest(request, edit=None):
     if trans['account_id']:
         account = Account.query.get(trans['account_id'])
         # check saldo
-        saldo = account.saldo(formatted=False)
+        saldo = account.saldo()
         if edit is None:
             diff = -trans['amount'] if trans['is_expense'] else trans['amount']
         else:
@@ -154,7 +154,7 @@ def add_transfer(src_id, dst_id):
     src = Account.query.get(src_id)
     dst = Account.query.get(dst_id)
     src_amount = float(request.form.get("src_amount"))
-    saldo = src.saldo(formatted=False)
+    saldo = src.saldo()
     if saldo - src_amount < 0:
         return abort(409)
     dst_amount = float(request.form.get("dst_amount"))

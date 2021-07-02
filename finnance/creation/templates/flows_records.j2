@@ -126,17 +126,6 @@ function new_fr(str, template_str) {
     document.getElementById(`${str}Rows`)
         .appendChild(template.content.firstChild);
     $(`#${str}Count`).val(n + 1);
-    currency($('#currencyForm').css('display') == 'block',
-        $('#currency select[name=currency]').val()
-    );
-    regulateAmounts(document.getElementById(`${str}Rows`).lastChild);
-    set_expense($('#transactionForm input[type=radio][name=expinc]:checked')
-        .val() == 'expense'
-    );
-
-    $(`#${str}Rows input[type=number]`).change(function () {
-        regulateAmounts(this);
-    });
 }
 
 function check_new() {
@@ -154,14 +143,34 @@ function check_new() {
     return true;
 }
 
+function new_flow() {
+    new_fr('flow', `{{ flowRow() }}`);
+}
+function new_record() {
+    new_fr('record', `{{ recordRow(categories) }}`);
+}
+
+function fr_update() {
+    set_expense($('#transactionForm input[type=radio][name=expinc]:checked')
+        .val() == 'expense'
+    );
+    $(`#transactionForm input[type=number]`).change(function () {
+        regulateAmounts(this);
+    });
+}
+
 // new flow
 $('#newFlow').click(function() {
     if (check_new())
-        new_fr('flow', `{{ flowRow() }}`);
+        new_flow();
+    fr_update('flow');
+    regulateAmounts(document.getElementById(`flowRows`).lastChild);
 });
 $('#newRecord').click(function() {
     if (check_new())
-        new_fr('record', `{{ recordRow(categories) }}`);
+        new_record();
+    fr_update('record');
+    regulateAmounts(document.getElementById(`recordRows`).lastChild);
 });
 
 </script>

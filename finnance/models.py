@@ -1,4 +1,6 @@
 from sqlalchemy.sql.schema import CheckConstraint, UniqueConstraint
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import func
 from finnance import db
 
 class Transaction(db.Model):
@@ -72,6 +74,14 @@ class Currency(db.Model):
 class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False, unique=True)
+
+    @hybrid_property
+    def uses(self):
+        return len(self.transactions) + len(self.flows)
+
+    @uses.expression
+    def uses(cls):
+        return func.count(Transaction.id) + func.count(Flow.id)
 
 class Category(db.Model):
     # pylint: disable=no-member
