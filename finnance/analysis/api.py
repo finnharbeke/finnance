@@ -1,5 +1,4 @@
-from finnance.models import Transaction, Category, Record, Agent, Currency
-from finnance.account import Account
+from finnance.models import Transaction, Category, Record, Agent, Currency, Account
 from flask import jsonify, Blueprint
 import sqlalchemy, datetime as dt
 from .controllers import anal

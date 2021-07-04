@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, abort
 import datetime as dt
-from finnance.account import Account
-from finnance.models import Currency
+from finnance.models import Currency, Account
 from finnance.main.controllers import dated_url_for
 
 anal = Blueprint('anal', __name__, url_prefix='/analysis', 

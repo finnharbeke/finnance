@@ -1,8 +1,7 @@
-from finnance.account import Account
-from flask import render_template, Blueprint, request, redirect, url_for, jsonify, abort
+from flask import render_template, Blueprint, request, redirect, url_for, abort
 import sqlalchemy
 from finnance import db
-from finnance.models import Agent, Currency, Category, Transaction, Flow
+from finnance.models import Agent, Currency, Category, Transaction, Flow, Account
 import datetime as dt, os
 
 main = Blueprint('main', __name__, static_url_path='/static/main',
@@ -53,15 +52,6 @@ def add_account():
         except sqlalchemy.exc.IntegrityError:
             abort(409)
         return redirect(url_for('main.add_account'))
-
-@main.route("/accounts/<int:account_id>/transactions")
-def account_transactions(account_id):
-    account = Account.query.get(account_id)
-    if not account:
-        return abort(404)
-    changes, saldos = account.changes()
-    return render_template("transactions.j2", account=account,
-        saldos=saldos, changes=changes, **params())
 
 @main.route("/agents/<int:agent_id>")
 def agent(agent_id):

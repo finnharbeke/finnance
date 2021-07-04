@@ -1,0 +1,20 @@
+{% extends "layout.j2" %}
+
+{% block body %}
+{% block header %}{% endblock header %}
+<div class="table-responsive">
+<table id="table" class="table table-sm">
+{% block table_macro %}{% endblock table_macro %}
+</table>
+</div>
+<script>
+$(document).ready(function () {
+    $('#table').DataTable({
+        order: [[1, 'desc']], 
+        columnDefs: [{ orderable: false, targets: 0 }]
+    });
+});
+</script>
+{% include "trans_modal.j2" %}
+{% include "transfer_modal.j2" %}
+{% endblock body %}

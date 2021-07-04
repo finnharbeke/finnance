@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, jsonify
-from finnance.account import Account
-from finnance.models import Category
+from finnance.models import Category, Account
 from finnance.main.controllers import dated_url_for
 
 category = Blueprint('category', __name__, url_prefix='/category',
