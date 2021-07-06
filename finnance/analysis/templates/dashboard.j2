@@ -20,10 +20,12 @@ edit categories
     <div class="col-12 col-md-8 bg-light tightcol" id="divstackbars"></div>
     <div class="col-12 col-md-4 bg-light tightcol" id="sunburst"></div>
     <div class="col-12 col-md-4 bg-light tightcol" id="incexp"></div>
+    <div class="col-12 col-md-6 bg-light tightcol" id="net"></div>
 </div>
 <script src="{{ url_for('anal.static', filename='js/sunburst.js') }}"></script>
 <script src="{{ url_for('anal.static', filename='js/divstackbars.js') }}"></script>
 <script src="{{ url_for('anal.static', filename='js/scatter.js') }}"></script>
+<script src="{{ url_for('anal.static', filename='js/stairline.js') }}"></script>
 <script>
 function load() {
     const curr_id = $('select[name=currency]').val();
@@ -37,6 +39,8 @@ function load() {
         .then((data) => divstackbars(data, '#divstackbars'));
     d3.json("{{ url_for('anal_api.inc_vs_exp', curr_id=0) }}".replace(0, curr_id))
         .then((data) => scatter(data, '#incexp'));
+    d3.json("{{ url_for('anal_api.net') }}")
+        .then((data) => stairline(data, '#net'));
 }
 load();
 $('select[name=currency]').on('change', load);
