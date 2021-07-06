@@ -11,6 +11,7 @@ app.config.from_object('config')
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
+from . import models
 db.create_all()
 
 # Import a module / component using its blueprint handler variable
