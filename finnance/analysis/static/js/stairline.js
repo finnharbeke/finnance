@@ -58,12 +58,6 @@ stairline = function (data, container) {
     const svg = d3.select(container).append("svg")
         .attr("viewBox", [0, 0, width, height + margin.bottom])
         .attr("font", font_size + " sans-serif");
-        
-    svg.append("g")
-        .call(xAxis);
-        
-    svg.append("g")
-        .call(yAxis);
     
     const line = d3.line()
         .curve(d3.curveStep)
@@ -84,4 +78,10 @@ stairline = function (data, container) {
     }
 
     data.plots.map(pl => plot(pl));
+
+    svg.append("g")
+        .call(xAxis);
+        
+    svg.append("g")
+        .call(yAxis);
 }

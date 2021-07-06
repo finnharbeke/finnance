@@ -67,12 +67,6 @@ scatter = function (data, container) {
         .attr("viewBox", [0, 0, width, height + margin.bottom])
         .attr("font", font_size + " sans-serif");
         
-    svg.append("g")
-        .call(xAxis);
-        
-    svg.append("g")
-        .call(yAxis);
-        
     plot = function (pl) {
         const l = length(line(pl.xy));
         svg.append("path")
@@ -107,5 +101,11 @@ scatter = function (data, container) {
     }
 
     data.plots.map(pl => plot(pl));
+
+    svg.append("g")
+        .call(xAxis);
+        
+    svg.append("g")
+        .call(yAxis);
 
 }
