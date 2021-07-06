@@ -21,10 +21,10 @@
 </div>
 
 <div id="balance"></div>
-<script src="{{ url_for('anal.static', filename='js/scatter.js') }}"></script>
+<script src="{{ url_for('anal.static', filename='js/stairline.js') }}"></script>
 <script>
 d3.json("{{ url_for('anal_api.account', acc_id=account.id) }}")
-        .then((data) => scatter(data, '#balance'));
+        .then((data) => stairline(data, '#balance'));
 </script>
 
 {% include "trans_modal.j2" %}

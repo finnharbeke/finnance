@@ -223,7 +223,7 @@ def account(acc_id):
     saldos = saldos[::-1]
 
     x = [account.date_created] + [change.date_issued for change in changes] + [dt.datetime.now()]
-    y = [saldos[0]] + saldos + [saldos[-1]]
+    y = [saldos[0]] + saldos[1:] + [saldos[-1]]
 
     return jsonify({
         'ys': [y],
