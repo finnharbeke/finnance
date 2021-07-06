@@ -221,10 +221,7 @@ def inc_vs_exp(curr_id):
         'y_label': 'Months',
     })
 
-@api.route('account/<int:acc_id>')
-def account(acc_id):
-    account = Account.query.get(acc_id)
-
+def acc_plot(acc, color='#000000', label=None):
     changes, saldos = account.changes()
     changes = changes[::-1]
     saldos = saldos[::-1]
@@ -232,17 +229,19 @@ def account(acc_id):
     x = [account.date_created] + [change.date_issued for change in changes] + [dt.datetime.now()]
     y = [saldos[0]] + saldos[1:] + [saldos[-1]]
 
+    return {
+        'color': color,
+        'label': acc.desc if label is None else label,
+        'xy': [{'x': t[0], 'y': t[1]} for t in zip(
+            [d.isoformat() for d in x], y)]
+    }
+
+@api.route('account/<int:acc_id>')
+def account(acc_id):
+    account = Account.query.get(acc_id)
     return jsonify({
-        'plots': [{
-            'color': '#000000',
-            'label': 'Saldo',
-            'xy': [{'x': t[0], 'y': t[1]} for t in zip(
-                [d.isoformat() for d in x], y)]
-        }],
+        'plots': [acc_plot(account, label='Saldo')],
         'curr_code': account.currency.code,
         'x_label': 'Time',
         'y_label': 'Saldo',
     })
-    
-
-    
