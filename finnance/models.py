@@ -10,7 +10,6 @@ class Account(db.Model):
     starting_saldo = db.Column(db.Float, nullable=False, default=0)
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
-    color = db.Column(db.String(7), nullable=False)
 
     currency = db.relationship("Currency", backref="accounts")
 
