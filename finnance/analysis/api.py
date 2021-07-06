@@ -178,6 +178,13 @@ def divstackbars(curr_id):
         'key_to_id': {desc_dict[cat.id]: cat.id for cat in cats}
     })
 
+def plot_dict(x, y, label, color):
+    return {
+        'label': label,
+        'color': color,
+        'xy': [{'x': t[0], 'y': t[1]} for t in zip(x, y)]
+    }
+
 @api.route("/12incexp/<int:curr_id>")
 def inc_vs_exp(curr_id):
     currency = Currency.query.get(curr_id)
@@ -204,18 +211,13 @@ def inc_vs_exp(curr_id):
         inc[i] = round(inc[i], 2)
         exp[i] = round(exp[i], 2)
 
+    dates = [d.isoformat() for d in dates[:-1]]
+
     return jsonify({
-        'plots': [{
-            'label': "Income",
-            'color': "#7ac56d",
-            'xy': [{'x': t[0], 'y': t[1]} for t in zip(
-                [d.isoformat() for d in dates[:-1]], inc)]
-        },{
-            'label': "Expenses",
-            'color': "#bf5164",
-            'xy': [{'x': t[0], 'y': t[1]} for t in zip(
-                [d.isoformat() for d in dates[:-1]], exp)]
-        }],
+        'plots': [
+            plot_dict(dates, inc, "Income", "#7ac56d"),
+            plot_dict(dates, exp, "Expenses", "#bf5164")
+        ],
         'curr_code': currency.code,
         'x_label': 'Income / Expenses',
         'y_label': 'Months',
@@ -226,15 +228,16 @@ def acc_plot(acc, color=None, label=None):
     changes = changes[::-1]
     saldos = saldos[::-1]
 
-    x = [acc.date_created] * 2 + [change.date_issued for change in changes] + [dt.datetime.now()] * 2
+    x = [acc.date_created] * 2 + (
+        [change.date_issued for change in changes] + 
+        [dt.datetime.now()] * 2)
+    x = [d.isoformat() for d in x]
     y = [0, saldos[0]] + saldos[1:] + [saldos[-1], 0]
 
-    return {
-        'color': acc.color if color is None else color,
-        'label': acc.desc if label is None else label,
-        'xy': [{'x': t[0], 'y': t[1]} for t in zip(
-            [d.isoformat() for d in x], y)]
-    }
+    return plot_dict(x, y, 
+        acc.desc if label is None else label,
+        acc.color if color is None else color
+    )
 
 @api.route('account/<int:acc_id>')
 def account(acc_id):
