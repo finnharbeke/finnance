@@ -205,13 +205,20 @@ def inc_vs_exp(curr_id):
         exp[i] = round(exp[i], 2)
 
     return jsonify({
-        'ys': [inc, exp],
-        'x': [d.isoformat() for d in dates[:-1]],
+        'plots': [{
+            'label': "Income",
+            'color': "#7ac56d",
+            'xy': [{'x': t[0], 'y': t[1]} for t in zip(
+                [d.isoformat() for d in dates[:-1]], inc)]
+        },{
+            'label': "Expenses",
+            'color': "#bf5164",
+            'xy': [{'x': t[0], 'y': t[1]} for t in zip(
+                [d.isoformat() for d in dates[:-1]], exp)]
+        }],
         'curr_code': currency.code,
         'x_label': 'Income / Expenses',
         'y_label': 'Months',
-        'colors': ["#7ac56d", "#bf5164"],
-        'labels': ["Income", "Expenses"]
     })
 
 @api.route('account/<int:acc_id>')
@@ -226,11 +233,16 @@ def account(acc_id):
     y = [saldos[0]] + saldos[1:] + [saldos[-1]]
 
     return jsonify({
-        'ys': [y],
-        'x': [d.isoformat() for d in x],
+        'plots': [{
+            'color': '#000000',
+            'label': 'Saldo',
+            'xy': [{'x': t[0], 'y': t[1]} for t in zip(
+                [d.isoformat() for d in x], y)]
+        }],
         'curr_code': account.currency.code,
         'x_label': 'Time',
         'y_label': 'Saldo',
-        'colors': ["#000000"],
-        'labels': ["Saldo"]
     })
+    
+
+    

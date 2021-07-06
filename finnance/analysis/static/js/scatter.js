@@ -12,13 +12,13 @@ scatter = function (data, container) {
     const font_size = "20px";
 
     const x = d3.scaleTime().domain([
-        Date.parse(data.x[0]),
-        Date.parse(data.x[data.x.length - 1]),
+        Date.parse(d3.min(d3.map(data.plots, p => p.xy[0].x))),
+        Date.parse(d3.max(d3.map(data.plots, p => p.xy[p.xy.length - 1].x)))
     ]).range([margin.left, width - margin.right]);
 
     const y = d3.scaleLinear().domain([
-        Math.min(0, ...d3.map(data.ys, y => d3.min(y))), 
-        Math.max(...d3.map(data.ys, y => d3.max(y)))
+        Math.min(0, ...d3.map(data.plots, p => d3.min(d3.map(p.xy, xy => xy.y)))), 
+        Math.max(...d3.map(data.plots, p => d3.max(d3.map(p.xy, xy => xy.y))))
     ]).range([height - margin.bottom, margin.top]);
 
     const xAxis = g => g
@@ -60,8 +60,8 @@ scatter = function (data, container) {
     
     const line = d3.line()
         .curve(d3.curveCatmullRom)
-        .x((d, i) => x(Date.parse(data.x[i])))
-        .y(d => y(d));
+        .x(d => x(Date.parse(d.x)))
+        .y(d => y(d.y));
 
     const svg = d3.select(container).append("svg")
         .attr("viewBox", [0, 0, width, height + margin.bottom])
@@ -73,12 +73,12 @@ scatter = function (data, container) {
     svg.append("g")
         .call(yAxis);
         
-    plot = function (arr, color, str) {
-        const l = length(line(arr));
+    plot = function (pl) {
+        const l = length(line(pl.xy));
         svg.append("path")
-            .datum(arr)
+            .datum(pl.xy)
             .attr("fill", "none")
-            .attr("stroke", color)
+            .attr("stroke", pl.color)
             .attr("stroke-width", 2.5)
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
@@ -91,22 +91,21 @@ scatter = function (data, container) {
 
         svg.append("g")
             .attr("fill", "white")
-            .attr("stroke", color)
+            .attr("stroke", pl.color)
             .attr("stroke-width", 2)
         .selectAll("circle")
-        .data(arr)
+            .data(pl.xy)
         .join("circle")
-            .attr("cx", (d, i) => x(Date.parse(data.x[i])))
-            .attr("cy", d => y(d))
+            .attr("cx", d => x(Date.parse(d.x)))
+            .attr("cy", d => y(d.y))
             .attr("r", 3)
             .append("title")
                 .text(
-                    (d, i) => `${str} ${d3.timeFormat("%b %y")(
-                        Date.parse(data.x[i])
-                    )}\n${d}`
+                    d => `${pl.label} ${d3.timeFormat("%b %y")(
+                        Date.parse(d.x))}\n${d.y}`
                 );
     }
 
-    data.ys.map((y, i) => plot(y, data.colors[i], data.labels[i]));
+    data.plots.map(pl => plot(pl));
 
 }

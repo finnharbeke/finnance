@@ -13,13 +13,13 @@ stairline = function (data, container) {
     }
 
     const x = d3.scaleTime().domain([
-        Date.parse(data.x[0]),
-        Date.parse(data.x[data.x.length - 1]),
+        Date.parse(d3.min(d3.map(data.plots, p => p.xy[0].x))),
+        Date.parse(d3.max(d3.map(data.plots, p => p.xy[p.xy.length - 1].x)))
     ]).range([margin.left, width - margin.right]);
 
     const y = d3.scaleLinear().domain([
-        Math.min(0, ...d3.map(data.ys, y => d3.min(y))), 
-        Math.max(...d3.map(data.ys, y => d3.max(y)))
+        Math.min(0, ...d3.map(data.plots, p => d3.min(d3.map(p.xy, xy => xy.y)))), 
+        Math.max(...d3.map(data.plots, p => d3.max(d3.map(p.xy, xy => xy.y))))
     ]).range([height - margin.bottom, margin.top]);
 
     const xAxis = g => g
@@ -67,21 +67,21 @@ stairline = function (data, container) {
     
     const line = d3.line()
         .curve(d3.curveStep)
-        .x((d, i) => x(Date.parse(data.x[i])))
-        .y(d => y(d));
+        .x(d => x(Date.parse(d.x)))
+        .y(d => y(d.y));
 
-    plot = function (arr, color, str) {
+    plot = function (pl) {
         svg.append("path")
-            .datum(arr)
+            .datum(pl.xy)
             .attr("fill", "none")
-            .attr("stroke", color)
+            .attr("stroke", pl.color)
             .attr("stroke-width", 1.5)
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
             .attr("d", line)
             .append("title")
-                .text(d => str);
+                .text(d => pl.label);
     }
 
-    data.ys.map((y, i) => plot(y, data.colors[i], data.labels[i]));
+    data.plots.map(pl => plot(pl));
 }
