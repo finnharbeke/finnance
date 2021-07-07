@@ -60,7 +60,7 @@ stairline = function (data, container) {
         .attr("font", font_size + " sans-serif");
     
     const line = d3.line()
-        .curve(d3.curveStep)
+        .curve(d3.curveStepAfter)
         .x(d => x(Date.parse(d.x)))
         .y(d => y(d.y));
 

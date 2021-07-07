@@ -1,4 +1,4 @@
-from finnance.models import Transaction, Category, Record, Agent, Currency, Account
+from finnance.models import Transaction, Category, Record, Agent, Currency, Account, AccountTransfer
 from flask import jsonify, Blueprint
 import sqlalchemy, datetime as dt
 from .controllers import anal
@@ -230,9 +230,9 @@ def acc_plot(acc, color=None, label=None):
 
     x = [acc.date_created] * 2 + (
         [change.date_issued for change in changes] + 
-        [dt.datetime.now()] * 2)
+        [dt.datetime.now()])
     x = [d.isoformat() for d in x]
-    y = [0, saldos[0]] + saldos[1:] + [saldos[-1], 0]
+    y = [0, saldos[0]] + saldos[1:] + [saldos[-1]]
 
     return plot_dict(x, y, 
         acc.desc if label is None else label,
@@ -250,10 +250,76 @@ def account(acc_id):
     })
 
 @api.route('net')
-def net():
-    accs = Account.query.filter_by(currency_id=1)
+@api.route('net/<int:currency_id>')
+def net(currency_id=1):
+    currency = Currency.query.get(currency_id)
+
+    transes = Transaction.query.filter_by(currency_id=currency.id).filter(
+        Transaction.account_id != None).order_by(Transaction.date_issued)
+    accounts = Account.query.filter_by(currency_id=currency.id).order_by(Account.date_created).all()
+    n = len(accounts)
+    accs = {a.id: {'label': a.desc, 'color': a.color, 'xy': []} for a in accounts}
+    acc_i = 0
+    transfers = AccountTransfer.query.order_by(AccountTransfer.date_issued).all()
+    trf_i = 0
+    acc_s = {a.id: 0 for a in accounts}
+    keys = [a.id for a in accounts]
+    started = [False for a in accounts]
+    xy = lambda dt, y: {'x': dt.isoformat(), 'y': y}
+    for t in transes:
+        while acc_i < len(accounts) and accounts[acc_i].date_created < t.date_issued:
+            acc = accounts[acc_i]
+            acc_s[acc.id] += acc.starting_saldo
+            started[keys.index(acc.id)] = True
+            off = 0
+            for j in range(acc_i):
+                if started[j]:
+                    off += acc_s[keys[j]]
+            
+            accs[acc.id]['xy'].append(xy(acc.date_created, off))
+            off += acc_s[acc.id]
+            accs[acc.id]['xy'].append(xy(acc.date_created, off))
+            for j in range(acc_i + 1, n):
+                if started[j]:
+                    off += acc_s[accounts[j].id]
+                    accs[keys[j]]['xy'].append(xy(acc.date_created, off))
+            acc_i += 1
+        
+        while trf_i < len(transfers) and transfers[trf_i].date_issued < t.date_issued:
+            trf = transfers[trf_i]
+            trf_i += 1
+            if trf.src.currency_id != currency.id and trf.dst.currency_id != currency.id:
+                continue
+            if trf.src.currency_id == currency.id:
+                acc_s[trf.src_id] -= trf.src_amount
+            if trf.dst.currency_id == currency.id:
+                acc_s[trf.dst_id] += trf.dst_amount
+            off = 0
+            for i in range(n):
+                if started[i]:
+                    off += acc_s[keys[i]]
+                    accs[keys[i]]['xy'].append(xy(trf.date_issued, off))
+        
+        acc_s[t.account_id] += -t.amount if t.is_expense else t.amount
+        i = keys.index(t.account_id)
+        off = 0
+        for j in range(i + 1):
+            if started[j]:
+                off += acc_s[keys[j]]
+        
+        accs[t.account_id]['xy'].append(xy(t.date_issued, off))
+        for j in range(i + 1, n):
+            if started[j]:
+                off += acc_s[keys[j]]
+                accs[keys[j]]['xy'].append(xy(t.date_issued, off))
+
+    off = 0
+    for i in range(n):
+        accs[keys[i]]['xy'].append(xy(dt.datetime.now(), off))
+        off += acc_s[keys[i]]
+        
     return jsonify({
-        'plots': [acc_plot(a) for a in accs],
+        'plots': [accs[key] for key in accs][::-1],
         'curr_code': 'CHF',
         'x_label': 'Time',
         'y_label': 'Net Worth',
