@@ -1,4 +1,4 @@
-from finnance.models import Transaction, Category, Record, Agent, Currency, Account, AccountTransfer
+from finnance.models import Transaction, Category, Record, Agent, Currency, Account, AccountTransfer, Flow
 from flask import jsonify, Blueprint
 import sqlalchemy, datetime as dt
 from .controllers import anal
@@ -266,6 +266,12 @@ def net(currency_id=1):
     keys = [a.id for a in accounts]
     started = [False for a in accounts]
     xy = lambda dt, y: {'x': dt.isoformat(), 'y': y}
+    flows = Flow.query.join(Transaction).filter(
+        Transaction.currency_id == currency.id
+        ).order_by(Transaction.date_issued).all()
+    f_i = 0
+    f = 0
+    fp = []
     for t in transes:
         while acc_i < len(accounts) and accounts[acc_i].date_created < t.date_issued:
             acc = accounts[acc_i]
@@ -283,6 +289,7 @@ def net(currency_id=1):
                 if started[j]:
                     off += acc_s[accounts[j].id]
                     accs[keys[j]]['xy'].append(xy(acc.date_created, off))
+            fp.append(xy(acc.date_created, off + f))
             acc_i += 1
         
         while trf_i < len(transfers) and transfers[trf_i].date_issued < t.date_issued:
@@ -299,6 +306,7 @@ def net(currency_id=1):
                 if started[i]:
                     off += acc_s[keys[i]]
                     accs[keys[i]]['xy'].append(xy(trf.date_issued, off))
+            fp.append(xy(trf.date_issued, off + f))
         
         acc_s[t.account_id] += -t.amount if t.is_expense else t.amount
         i = keys.index(t.account_id)
@@ -313,13 +321,22 @@ def net(currency_id=1):
                 off += acc_s[keys[j]]
                 accs[keys[j]]['xy'].append(xy(t.date_issued, off))
 
+        while f_i < len(flows) and flows[f_i].trans.date_issued <= t.date_issued:
+            f += -flows[f_i].amount if flows[f_i].is_debt else flows[f_i].amount
+            f_i += 1
+
+        fp.append(xy(t.date_issued, off + f))
+
     off = 0
     for i in range(n):
         accs[keys[i]]['xy'].append(xy(dt.datetime.now(), off))
         off += acc_s[keys[i]]
+    fp.append(xy(dt.datetime.now(), off + f))
         
     return jsonify({
-        'plots': [accs[key] for key in accs][::-1],
+        'plots': [{
+            'label': 'Flows', 'color': '#ff0000', 'xy': fp
+        }] + [accs[key] for key in accs][::-1],
         'curr_code': 'CHF',
         'x_label': 'Time',
         'y_label': 'Net Worth',
