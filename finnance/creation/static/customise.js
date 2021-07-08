@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    $('button.toggler').click(function () {
+    $('div.container').on('click', 'button.toggler', function () {
         prepare(this);
     });
 
