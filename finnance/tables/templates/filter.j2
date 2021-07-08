@@ -20,6 +20,12 @@
     </select>
 </div>
 {% endmacro %}
+{% macro agent(agents) %}
+<div class="form-group col-6 col-md-4">
+    <label for="agent">Agent</label>
+    <input class="form-control" type="text" list="agents" name="agent">
+</div>
+{% endmacro %}
 {% macro min() %}
 <div class="form-group col-3 col-md-2">
     <label for="min">Min</label>
@@ -61,6 +67,20 @@
     <div class="form-row">
         {{ currency(currencies) }}
         {{ category(categories) }}
+        {{ min() }}
+        {{ max() }}
+        {{ start() }}
+        {{ end() }}
+        {{ submit() }}
+    </div>
+</form>
+<script src="{{ url_for('tables.static', filename='filter.js') }}"></script>
+{% endmacro %}
+{% macro flows_filter(currencies, agents) %}
+<form id="filter">
+    <div class="form-row">
+        {{ currency(currencies) }}
+        {{ agent(agents) }}
         {{ min() }}
         {{ max() }}
         {{ start() }}

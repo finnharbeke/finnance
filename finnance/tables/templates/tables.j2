@@ -53,6 +53,13 @@
 </td>
 {% endmacro %}
 
+{% macro sum(amount) %}
+<td class ="min text-right text-{% if amount < 0 %}danger{% else %}success{% endif %}"
+    data-sort="{{ amount }}">
+    {{ amount }}
+</td>
+{% endmacro %}
+
 {% macro saldo_td(saldo, currency) %}
 <td class="min text-right" data-sort="{{ saldo }}">
     {{ currency.format(saldo) }} {{ currency.code }}
@@ -129,6 +136,23 @@
     {{ agent(rec.trans.agent) }}
     {{ amount(rec.amount, rec.trans.is_expense, rec.trans.currency) }}
     {{ comment(rec.trans.comment) }}
+</tr>
+{% endfor %}
+</tbody>
+{% endmacro %}
+
+{% macro flows_table(flows, sums) %}
+{{ head(['', 'Date', 'Time', 'Agent', 'Amount', 'Sum', 'Comment']) }}
+<tbody>
+{% for flow in flows %}
+<tr>
+    {{ trans_edit(flow.trans_id) }}
+    {{ date(flow.trans.date_issued) }}
+    {{ time(flow.trans.date_issued) }}
+    {{ agent(flow.agent) }}
+    {{ amount(flow.amount, flow.is_debt, flow.trans.currency) }}
+    {{ sum(sums[loop.index0]) }}
+    {{ comment(flow.trans.comment) }}
 </tr>
 {% endfor %}
 </tbody>

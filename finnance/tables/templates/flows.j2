@@ -1,0 +1,11 @@
+{% extends "datatable.j2" %}
+{% import "tables.j2" as tables %}
+{% import "filter.j2" as filter %}
+
+{% block header %}
+    <h1 class="display-3">Flows</h1>
+    {{ filter.flows_filter(currencies, categories) }}
+{% endblock header %}
+{% block table_macro %}
+    {{ tables.flows_table(flows, sums) }}
+{% endblock table_macro %}

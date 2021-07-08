@@ -4,6 +4,8 @@ $(document).ready(function () {
         $('#filter select[name=currency_id]').val(params.get('currency_id'))
     if (params.has('category_id'))
         $('#filter select[name=category_id]').val(params.get('category_id'))
+    if (params.has('agent'))
+        $('#filter input[name=agent]').val(params.get('agent'))
     if (params.has('min'))
         $('#filter input[name=min]').val(params.get('min'))
     if (params.has('max'))
