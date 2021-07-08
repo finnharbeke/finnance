@@ -11,7 +11,8 @@
 $(document).ready(function () {
     $('#table').DataTable({
         order: [[1, 'desc']], 
-        columnDefs: [{ orderable: false, targets: 0 }]
+        columnDefs: [{ orderable: false, targets: 0 }],
+        pageLength: 25
     });
 });
 </script>
