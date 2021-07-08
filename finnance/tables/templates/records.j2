@@ -1,101 +1,10 @@
 {% extends "datatable.j2" %}
 {% import "tables.j2" as tables %}
+{% import "filter.j2" as filter %}
 
 {% block header %}
     <h1 class="display-3">Records</h1>
-    <form id="filter">
-        <div class="form-row">
-        <div class="form-group col-6 col-md-4">
-            <label for="currency">Currency</label>
-            <select class="form-control" name="currency_id">
-                <option value="">--</option>
-            {% for curr in currencies %}
-                <option value="{{ curr.id }}">{{ curr.code }}</option>
-            {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-6 col-md-4">
-            <label for="currency">Category</label>
-            <select class="form-control" name="category_id">
-                <option value="">--</option>
-            {% for cat in categories %}
-                <option value="{{ cat.id }}">{{ cat.desc }}</option>
-            {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-3 col-md-2">
-            <label for="min">Min</label>
-            <input type="number" class="form-control" name="min" step="any">
-        </div>
-        <div class="form-group col-3 col-md-2">
-            <label for="max">Max</label>
-            <input type="number" class="form-control" name="max" step="any">
-        </div>
-        <div class="form-group col-6 col-md-4">
-            <label for="date_issued">From</label>
-            <input class="form-control" type="text" name="start_in" maxlength=16>
-            <small class="form-text text-muted">dd.mm.yyyy hh:mm</small>
-        </div>
-        <input type="hidden" name="start">
-        <div class="form-group col-6 col-md-4">
-            <label for="date_issued">Until</label>
-            <input class="form-control" type="text" name="end_in" maxlength=16>
-            <small class="form-text text-muted">dd.mm.yyyy hh:mm</small>
-        </div>
-        <input type="hidden" name="end">
-        <div class="form-group col-6 col-md-4">
-            <label for="filter" style="height: 1em;"></label>
-            <button type="submit" name="filter"
-                value="filter" class="form-control btn btn-primary">submit
-            </button>
-        </div>
-        </div>
-    </form>
-<script>
-$(document).ready(function () {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('currency_id'))
-        $('#filter select[name=currency_id]').val(params.get('currency_id'))
-    if (params.has('category_id'))
-        $('#filter select[name=category_id]').val(params.get('category_id'))
-    if (params.has('min'))
-        $('#filter input[name=min]').val(params.get('min'))
-    if (params.has('max'))
-        $('#filter input[name=max]').val(params.get('max'))
-    if (params.has('start') && params.get('start') != "") {
-        $('#filter input[name=start_in]').val(
-            luxon.DateTime.fromISO(params.get('start')).toFormat(DATE_FMT)
-        );
-        $('#filter input[name=start]').val(params.get('start'));
-    }
-    if (params.has('end') && params.get('end') != "") {
-        $('#filter input[name=end_in]').val(
-            luxon.DateTime.fromISO(params.get('end')).toFormat(DATE_FMT)
-        );
-        $('#filter input[name=end]').val(params.get('end'));
-    }
-    let makeiso = s => 
-        $(`#filter input[name=${s}_in]`).on('change', 
-        function() {
-            if ($(this).val() === "") {
-                $(`#filter input[name=${s}]`).val('');
-                return
-            }
-            let dt = luxon.DateTime.fromFormat($(this).val(), DATE_FMT);
-            if (!dt.isValid) {
-                alert(`${dt.invalidReason}:\n\t${dt.invalidExplanation}`);
-                $(`#filter input[name=${s}_in]`).val('');
-                return;
-            }
-            $(`#filter input[name=${s}]`).val(
-                dt.toISO()
-            );
-        });
-    makeiso('start');
-    makeiso('end');
-})
-
-</script>
+    {{ filter.records_filter(currencies, categories) }}
 {% endblock header %}
 {% block table_macro %}
     {{ tables.records_table(records) }}

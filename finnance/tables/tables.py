@@ -3,7 +3,8 @@ from finnance.main.controllers import dated_url_for, params
 from finnance.models import Account, Category, Currency, Record, Transaction
 import datetime as dt
 
-tables = Blueprint('tables', __name__, template_folder='templates')
+tables = Blueprint('tables', __name__, template_folder='templates',
+    static_folder='static', static_url_path='/static/tables')
 
 @tables.context_processor
 def override_url_for():
