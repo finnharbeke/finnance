@@ -10,13 +10,13 @@ tables = Blueprint('tables', __name__, template_folder='templates',
 def override_url_for():
     return dict(url_for=dated_url_for)
 
-@tables.route("/accounts/<int:account_id>/transactions")
-def account_transactions(account_id):
+@tables.route("/accounts/<int:account_id>/changes")
+def account_changes(account_id):
     account = Account.query.get(account_id)
     if account is None:
         return abort(404)
     changes, saldos = account.changes()
-    return render_template("transactions.j2", account=account,
+    return render_template("changes.j2", account=account,
         saldos=saldos, changes=changes, **params())
 
 @tables.route("/records")
