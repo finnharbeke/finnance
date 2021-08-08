@@ -100,20 +100,23 @@ function check_hasflowRecords() {
 function check_agents() {
     let used = [];
     let broke_out = false;
-    $('input[name=agent], input[name=remoteAgent], #flowRows input[type=text]').each(function () {
+    diff = function () {
         if ($(this).prop('name') == 'remoteAgent' && $(this).is(':hidden'))
-            return;
+        return;
         if (this.value != "" && used.indexOf(this.value) == -1) {
             used.push(this.value);
         } else {
             if (this.value == "")
-                alert('Agents must be non-empty Strings!');
+            alert('Agents must be non-empty Strings!');
             else
-                alert("Use distinct Agents for the Transaction and Flows!");
+            alert("Use distinct Agents for the Transaction and Flows!");
             broke_out = true;
             return false;
         }
-    });
+    }
+    $('#flowRows input[type=text]', $('#transactionForm')).each(diff);
+    used = [];
+    $('input[name=agent], input[name=remoteAgent]', $('#transactionForm')).each(diff);
     return !broke_out
 }
 
