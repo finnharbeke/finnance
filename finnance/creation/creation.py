@@ -65,7 +65,8 @@ def edit_trans(transaction_id):
 @creation.route("/transactions/edit_info/<int:transaction_id>")
 def trans_edit_info(transaction_id):
     trans = Transaction.query.get(transaction_id)
-    direct_flow = len(trans.flows) == 1 and trans.flows[0].agent_id == trans.agent_id
+    direct_flow = len(trans.records) == 0 and (
+        len(trans.flows) == 1 and trans.flows[0].agent_id == trans.agent_id)
     return jsonify({
         'trans': {
             'account_id': trans.account_id,
