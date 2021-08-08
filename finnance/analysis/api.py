@@ -215,8 +215,8 @@ def inc_vs_exp(curr_id):
 
     return jsonify({
         'plots': [
-            plot_dict(dates, inc, "Income", "#7ac56d"),
-            plot_dict(dates, exp, "Expenses", "#bf5164")
+            plot_dict(dates, inc, "Income", "#7ac74f"),
+            plot_dict(dates, exp, "Expenses", "#ff3e41")
         ],
         'curr_code': currency.code,
         'x_label': 'Income / Expenses',
