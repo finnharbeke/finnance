@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint, request, redirect, url_for, abort
 import sqlalchemy
+from config import DEBUG
 from finnance import db
 from finnance.models import Agent, Currency, Category, Transaction, Flow, Account
 import datetime as dt, os
@@ -66,6 +67,6 @@ def override_url_for():
     return dict(url_for=dated_url_for)
 
 def dated_url_for(endpoint, **values):
-    if endpoint.endswith('static'):
+    if endpoint.endswith('static') and DEBUG:
         values['q'] = int(dt.datetime.now().timestamp())
     return url_for(endpoint, **values)
