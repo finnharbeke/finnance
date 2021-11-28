@@ -3,14 +3,14 @@ from finnance.main.controllers import dated_url_for, params
 from finnance.models import Account, Category, Currency, Record, Transaction, Flow, Agent
 import datetime as dt
 
-tables = Blueprint('tables', __name__, template_folder='templates',
-    static_folder='static', static_url_path='/static/tables')
+queries = Blueprint('queries', __name__, template_folder='templates',
+    static_folder='static', static_url_path='/static/queries')
 
-@tables.context_processor
+@queries.context_processor
 def override_url_for():
     return dict(url_for=dated_url_for)
 
-@tables.route("/accounts/<int:account_id>/changes")
+@queries.route("/accounts/<int:account_id>/changes")
 def account_changes(account_id):
     account = Account.query.get(account_id)
     if account is None:
@@ -19,7 +19,7 @@ def account_changes(account_id):
     return render_template("changes.j2", account=account,
         saldos=saldos, changes=changes, **params())
 
-@tables.route("/records")
+@queries.route("/records")
 def records():
     records = Record.query.join(Category).join(Transaction)
     if request.args.get('currency_id'):
@@ -60,7 +60,7 @@ def records():
     
     return render_template("records.j2", records=records, **params())
 
-@tables.route("/flows")
+@queries.route("/flows")
 def flows():
     flows = Flow.query.join(Agent).join(Transaction, Flow.trans_id == Transaction.id)
     if request.args.get('currency_id'):

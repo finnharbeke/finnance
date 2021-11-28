@@ -74,7 +74,7 @@
         {{ submit() }}
     </div>
 </form>
-<script src="{{ url_for('tables.static', filename='filter.js') }}"></script>
+<script src="{{ url_for('queries.static', filename='filter.js') }}"></script>
 {% endmacro %}
 {% macro flows_filter(currencies, agents) %}
 <form id="filter">
@@ -88,5 +88,5 @@
         {{ submit() }}
     </div>
 </form>
-<script src="{{ url_for('tables.static', filename='filter.js') }}"></script>
+<script src="{{ url_for('queries.static', filename='filter.js') }}"></script>
 {% endmacro %}

@@ -19,7 +19,7 @@ from finnance.main import main
 from finnance.creation import creation
 from finnance.analysis import anal, anal_api
 from finnance.category import category
-from finnance.tables import tables
+from finnance.queries import queries
 
 # Register blueprints
 app.register_blueprint(main)
@@ -27,4 +27,4 @@ app.register_blueprint(creation)
 app.register_blueprint(anal)
 app.register_blueprint(anal_api)
 app.register_blueprint(category)
-app.register_blueprint(tables)
+app.register_blueprint(queries)
