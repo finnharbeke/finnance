@@ -1,8 +1,11 @@
 from finnance.models import Transaction, Category, Record, Agent, Currency, Account, AccountTransfer, Flow
-from flask import jsonify, Blueprint
+from flask import jsonify, Blueprint, request
 import sqlalchemy, datetime as dt
+
+from finnance.queries.queries import record_filter
 from .controllers import anal
 from finnance.main.controllers import dated_url_for
+from finnance.queries import record_filter
 
 api = Blueprint('anal_api', __name__, url_prefix=anal.url_prefix+'/api',
     static_folder='static', static_url_path='/static/analysis/api')
@@ -11,18 +14,12 @@ api = Blueprint('anal_api', __name__, url_prefix=anal.url_prefix+'/api',
 def override_url_for():
     return dict(url_for=dated_url_for)
 
-@api.route("/<int:year>/<int:month>")
-def stairs(year, month):
-    day = dt.datetime(year, month, 1)
-    end = dt.datetime(year + (month == 12), 1 if month == 12 else month + 1, 1)
-    records = Record.query.join(Transaction).filter(
-        Transaction.currency_id == 1
-    ).filter(sqlalchemy.and_(
-        day <= Transaction.date_issued,
-        Transaction.date_issued < end
-    )).order_by(
-        Transaction.date_issued
-    )
+@api.route("/stairs")
+def stairs():
+    req = request.args.to_dict()
+    records = record_filter(Record.query.join(Transaction), req)
+    day = dt.datetime.fromisoformat(req['start'])
+    end = dt.datetime.fromisoformat(req['end'])
     data = []
     days = []
     saldo = 0
@@ -52,18 +49,9 @@ def stairs(year, month):
 
     return jsonify({'entries': data, 'days': days})
 
-@api.route("/sunburst/income/<int:curr_id>")
-def sunburst_income(curr_id):
-    return sunburst_expenses(curr_id, is_expense=False)
-@api.route("/sunburst/expenses/<int:curr_id>")
-def sunburst_expenses(curr_id, is_expense=True):
-    currency = Currency.query.get(curr_id)
-    if currency is None:
-        return "invalid id", 404
-    categories = Category.query.filter_by(
-        is_expense=is_expense
-    )
-
+@api.route("/sunburst")
+def sunburst():
+    req = request.args.to_dict()
     def agents(cat):
         return [
             dict(
@@ -71,11 +59,9 @@ def sunburst_expenses(curr_id, is_expense=True):
                 id=cat.id,
                 **row._asdict()
             )
-        for row in Agent.query.join(Transaction).join(Record).filter(
+        for row in record_filter(Agent.query.join(Transaction).join(Record).join(Category).filter(
                 Record.category_id == cat.id
-            ).filter(
-                Transaction.currency_id == currency.id
-            ).group_by(Agent).with_entities(
+        ), req).group_by(Agent).with_entities(
                 sqlalchemy.func.sum(Record.amount).label('value'), 
                 Agent.desc.label('name')
             )
@@ -97,7 +83,7 @@ def sunburst_expenses(curr_id, is_expense=True):
         }
 
     data = []
-    for cat in categories:
+    for cat in Category.query.all():
         if cat.parent is not None:
             continue
         data.append(cat_obj(cat))
@@ -256,41 +242,47 @@ def net(currency_id=1):
 
     transes = Transaction.query.filter_by(currency_id=currency.id).filter(
         Transaction.account_id != None).order_by(Transaction.date_issued)
-    accounts = Account.query.filter_by(currency_id=currency.id).order_by(Account.date_created).all()
-    n = len(accounts)
-    accs = {a.id: {'label': a.desc, 'color': a.color, 'xy': []} for a in accounts}
-    acc_i = 0
     transfers = AccountTransfer.query.order_by(AccountTransfer.date_issued).all()
-    trf_i = 0
-    acc_s = {a.id: 0 for a in accounts}
-    keys = [a.id for a in accounts]
-    started = [False for a in accounts]
-    xy = lambda dt, y: {'x': dt.isoformat(), 'y': y}
+    
+    accounts = Account.query.filter_by(currency_id=currency.id).order_by(Account.order).all()
     flows = Flow.query.join(Transaction).filter(
         Transaction.currency_id == currency.id
         ).order_by(Transaction.date_issued).all()
+
+    n = len(accounts)
+    accs = {a.id: {'label': a.desc, 'color': a.color, 'xy': []} for a in accounts}
+    acc_i = 0
+    trf_i = 0
+    saldos = {a.id: 0 for a in accounts}
+    ix = {a.id: i for i, a in enumerate(accounts)}
+    id_ = {i: a.id for i, a in enumerate(accounts)}
+    started = {a.id: False for a in accounts}
+    def xy(what, dt, y):
+        d = {'x': dt.isoformat(), 'y': y}
+        if what == "f":
+            fp.append(d)
+        else:
+            assert what in ix
+            accs[what]['xy'].append(d)
     f_i = 0
     f = 0
     fp = []
     for t in transes:
-        while acc_i < len(accounts) and accounts[acc_i].date_created < t.date_issued:
-            acc = accounts[acc_i]
-            acc_s[acc.id] += acc.starting_saldo
-            started[keys.index(acc.id)] = True
-            off = 0
-            for j in range(acc_i):
-                if started[j]:
-                    off += acc_s[keys[j]]
+        for acc_i, acc in enumerate(accounts):
+            if started[acc.id] or acc.date_created > t.date_issued:
+                continue
+            saldos[acc.id] += acc.starting_saldo
+            started[acc.id] = True
+            off = sum(saldos[id_[j]] for j in range(acc_i))
             
-            accs[acc.id]['xy'].append(xy(acc.date_created, off))
-            off += acc_s[acc.id]
-            accs[acc.id]['xy'].append(xy(acc.date_created, off))
+            xy(acc.id, acc.date_created, off)
+            off += saldos[acc.id]
+            xy(acc.id, acc.date_created, off)
             for j in range(acc_i + 1, n):
-                if started[j]:
-                    off += acc_s[accounts[j].id]
-                    accs[keys[j]]['xy'].append(xy(acc.date_created, off))
-            fp.append(xy(acc.date_created, off + f))
-            acc_i += 1
+                if started[id_[j]]:
+                    off += saldos[id_[j]]
+                    xy(id_[j], acc.date_created, off)
+            xy('f', acc.date_created, off + f)
         
         while trf_i < len(transfers) and transfers[trf_i].date_issued < t.date_issued:
             trf = transfers[trf_i]
@@ -298,45 +290,46 @@ def net(currency_id=1):
             if trf.src.currency_id != currency.id and trf.dst.currency_id != currency.id:
                 continue
             if trf.src.currency_id == currency.id:
-                acc_s[trf.src_id] -= trf.src_amount
+                saldos[trf.src_id] -= trf.src_amount
             if trf.dst.currency_id == currency.id:
-                acc_s[trf.dst_id] += trf.dst_amount
+                saldos[trf.dst_id] += trf.dst_amount
             off = 0
             for i in range(n):
-                if started[i]:
-                    off += acc_s[keys[i]]
-                    accs[keys[i]]['xy'].append(xy(trf.date_issued, off))
-            fp.append(xy(trf.date_issued, off + f))
+                if started[id_[i]]:
+                    off += saldos[id_[i]]
+                    xy(id_[i], trf.date_issued, off)
+            xy('f', trf.date_issued, off + f)
         
-        acc_s[t.account_id] += -t.amount if t.is_expense else t.amount
-        i = keys.index(t.account_id)
+        saldos[t.account_id] += -t.amount if t.is_expense else t.amount
+        i = ix[t.account_id]
         off = 0
         for j in range(i + 1):
-            if started[j]:
-                off += acc_s[keys[j]]
+            if started[id_[j]]:
+                off += saldos[id_[j]]
         
-        accs[t.account_id]['xy'].append(xy(t.date_issued, off))
+        xy(t.account_id, t.date_issued, off)
         for j in range(i + 1, n):
-            if started[j]:
-                off += acc_s[keys[j]]
-                accs[keys[j]]['xy'].append(xy(t.date_issued, off))
+            if started[id_[j]]:
+                off += saldos[id_[j]]
+                xy(id_[j], t.date_issued, off)
 
         while f_i < len(flows) and flows[f_i].trans.date_issued <= t.date_issued:
             f += -flows[f_i].amount if flows[f_i].is_debt else flows[f_i].amount
             f_i += 1
 
-        fp.append(xy(t.date_issued, off + f))
+        xy('f', t.date_issued, off + f)
 
     off = 0
     for i in range(n):
-        accs[keys[i]]['xy'].append(xy(dt.datetime.now(), off))
-        off += acc_s[keys[i]]
-    fp.append(xy(dt.datetime.now(), off + f))
+        xy(id_[i], dt.datetime.now(), off)
+        off += saldos[id_[i]]
+    xy('f', dt.datetime.now(), off + f)
         
     return jsonify({
         'plots': [{
             'label': 'Flows', 'color': '#ff0000', 'xy': fp
         }] + [accs[key] for key in accs][::-1],
+        # 'plots': [accs[key] for key in accs][::-1],
         'curr_code': 'CHF',
         'x_label': 'Time',
         'y_label': 'Net Worth',

@@ -33,7 +33,7 @@ function load() {
     for (let i in conts)
         $(conts[i]).html("");
     
-    d3.json("{{ url_for('anal_api.sunburst_expenses', curr_id=0) }}".replace(0, curr_id))
+    d3.json(`{{ url_for('anal_api.sunburst') }}?{{query}}&currency_id=${curr_id}&expense=1`)
         .then((data) => sunburst(data, '#sunburst'));
     d3.json("{{ url_for('anal_api.divstackbars', curr_id=0) }}".replace(0, curr_id))
         .then((data) => divstackbars(data, '#divstackbars'));

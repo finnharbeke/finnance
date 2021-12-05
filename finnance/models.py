@@ -11,6 +11,7 @@ class Account(db.Model):
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey('currency.id'), nullable=False)
     color = db.Column(db.String(7), nullable=False)
+    order = db.Column(db.Integer, nullable=False, unique=True)
 
     currency = db.relationship("Currency", backref="accounts")
 

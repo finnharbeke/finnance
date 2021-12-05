@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, abort, request
 import datetime as dt
 from finnance.models import Currency, Account
 from finnance.main.controllers import dated_url_for
+from dateutil.relativedelta import relativedelta as delta
 
 anal = Blueprint('anal', __name__, url_prefix='/analysis', 
     static_folder='static', template_folder='templates',
@@ -19,7 +20,15 @@ def params():
 
 @anal.route('')
 def analysis():
-    return render_template('dashboard.j2', **params())
+    req = request.args.to_dict()
+    now = dt.datetime.now()
+    end = now.isoformat()
+    start = (dt.datetime(now.year, now.month, 1) - delta(months=11)).isoformat()
+    req.update({'start': start, 'end': end})
+    query = ""
+    for key in req:
+        query += f"&{key}={req[key]}"
+    return render_template('dashboard.j2', query=query[1:], **params())
 
 @anal.route("/<int:year>/<int:month>")
 def d3(year, month):
@@ -27,4 +36,11 @@ def d3(year, month):
         dt.datetime(year=year, month=month, day=1)
     except Exception as e:
         return abort(404)
-    return render_template("monthly.j2", year=year, month=month, **params())
+    req = request.args.to_dict()
+    start = dt.datetime(year, month, 1)
+    end = dt.datetime(year + (month == 12), 1 if month == 12 else month + 1, 1)
+    req.update({'start': start.isoformat(), 'end': end.isoformat()})
+    query = ""
+    for key in req:
+        query += f"&{key}={req[key]}"
+    return render_template("monthly.j2", year=year, month=month, query=query[1:], **params())
