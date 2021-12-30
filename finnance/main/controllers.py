@@ -40,10 +40,9 @@ def login():
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
-            return render_template("login.j2", loggingin=True, loginerr="Invalid user or wrong password", **params())
+            return render_template("login.j2", loggingin=True, loginerr="Invalid user or wrong password")
 
-        
-    return render_template("login.j2", **params())
+    return render_template("login.j2")
 
 @main.route("/register", methods=["POST"])
 def register():
@@ -53,7 +52,7 @@ def register():
     passwordRepeat = request.form.get("passwordRepeat")
     email_reg = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'
     if not re.match(email_reg, email):
-        return render_template("login.j2", registering=True, regerr="invalid E-Mail", **params())
+        return render_template("login.j2", registering=True, regerr="invalid E-Mail")
     emuser = User.query.filter_by(email=email).first()
     namuser = User.query.filter_by(username=username).first()
     if emuser or namuser:
@@ -63,25 +62,25 @@ def register():
         else:
             regerr += " is"
         regerr += " already taken"
-        return render_template("login.j2", registering=True, regerr=regerr, **params())
+        return render_template("login.j2", registering=True, regerr=regerr)
     allowed = r'^[_\da-zA-Z]{4,}$'
     if not re.match(allowed, username):
         if len(username) < 4:
             regerr = "Username must be at least 4 characters long"
         else:
             regerr = "Only use letters, digits and underscores for the username"
-        return render_template("login.j2", registering=True, regerr=regerr, **params())
+        return render_template("login.j2", registering=True, regerr=regerr)
     if len(password) < 6:
-        return render_template("login.j2", registering=True, regerr="Password must contain at least 6 characters", **params())
+        return render_template("login.j2", registering=True, regerr="Password must contain at least 6 characters")
     if password != passwordRepeat:
-        return render_template("login.j2", registering=True, regerr="Passwords don't match", **params())
+        return render_template("login.j2", registering=True, regerr="Passwords don't match")
     # add user
     pwhash = bcrypt.generate_password_hash(password).decode('utf-8')
     user = User(email=email, username=username, password=pwhash)
     db.session.add(user)
     db.session.commit()
     return render_template("login.j2", loggingin=True,
-        logininfo=f'Successfully registered user {user.username}, please log in', **params())
+        logininfo=f'Successfully registered user {user.username}, please log in')
 
 @main.route("/logout")
 def logout():

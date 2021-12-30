@@ -21,9 +21,7 @@ def add_trans():
         return result
     else:
         trans, records, flows = result
-        trans = Transaction(**trans)
-        if trans.account.user_id != current_user.id:
-            return False, ("User not authenticated for account", 409)
+        trans = Transaction(**trans, user_id=current_user.id)
         db.session.add(trans)
         db.session.commit()
         for record in records:
@@ -46,7 +44,7 @@ def edit_trans(transaction_id):
         return result
     else:
         old = Transaction.query.get(transaction_id)
-        if old.account.user_id != current_user.id:
+        if old.user_id != current_user.id:
             return False, ("User not authenticated for account", 409)
         trans, records, flows = result
         for key, value in trans.items():
@@ -72,7 +70,7 @@ def edit_trans(transaction_id):
 @login_required
 def trans_edit_info(transaction_id):
     trans = Transaction.query.get(transaction_id)
-    if trans.account.user_id != current_user:
+    if trans.user_id != current_user.id:
         abort(404)
     direct_flow = len(trans.records) == 0 and (
         len(trans.flows) == 1 and trans.flows[0].agent_id == trans.agent_id)
@@ -87,7 +85,8 @@ def trans_edit_info(transaction_id):
             'is_expense': trans.is_expense,
             'agent': trans.agent.desc,
             'direct_flow': direct_flow,
-            'remote_agent': trans.flows[0].agent.desc if trans.account_id is None else None
+            'remote_agent': trans.flows[0].agent.desc if trans.account_id is None else None,
+            'user_id': trans.user_id
         },
         'flows': [] if direct_flow or trans.account_id is None else [{
             'agent': flow.agent.desc,
@@ -106,6 +105,8 @@ def parseRequest(request, edit=None):
 
     if trans['account_id']:
         account = Account.query.get(trans['account_id'])
+        if account.user_id != current_user.id:
+            return False, ("User not authorized to account", 409)
         # check saldo
         saldo = account.saldo()
         if edit is None:
@@ -123,7 +124,7 @@ def parseRequest(request, edit=None):
             return None
         agent = Agent.query.filter_by(desc=agent_desc).first()
         if not agent:
-            agent = Agent(desc=agent_desc)
+            agent = Agent(desc=agent_desc, user_id=current_user.id)
             db.session.add(agent)
             db.session.commit()
         return agent

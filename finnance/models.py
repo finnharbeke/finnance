@@ -75,7 +75,9 @@ class Transaction(db.Model):
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
     date_issued = db.Column(db.DateTime, nullable=False)
     comment = db.Column(db.String(120))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    user = db.relationship("User", backref="transactions")
     account = db.relationship("Account", backref="transactions")
     agent = db.relationship("Agent", backref="transactions")
     currency = db.relationship("Currency", backref="transactions")
@@ -150,19 +152,20 @@ class Agent(db.Model):
         return func.count(Transaction.id) + func.count(Flow.id)
 
 class Category(db.Model):
-    # pylint: disable=no-member
-
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False)
     is_expense = db.Column(db.Boolean, nullable=False)
     usable = db.Column(db.Boolean, nullable=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     color = db.Column(db.String(7), nullable=False)
-    order = db.Column(db.Integer, nullable=False, unique=True)
+    order = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship("User", backref="categories")
 
     parent = db.relationship("Category", backref="children", remote_side=[id])
 
     __table_args__ = (
         CheckConstraint('parent_id != id'),
-        UniqueConstraint('desc', 'is_expense')
+        UniqueConstraint('user_id', 'desc', 'is_expense'),
+        UniqueConstraint('user_id', 'order')
     )
