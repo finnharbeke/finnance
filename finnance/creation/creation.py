@@ -167,4 +167,4 @@ def add_transfer(src_id, dst_id):
 
     db.session.add(AccountTransfer(src_id=src_id, dst_id=dst_id, src_amount=src_amount, dst_amount=dst_amount, date_issued=date_issued, comment=comment))
     db.session.commit()
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.home'))

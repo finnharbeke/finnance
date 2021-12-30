@@ -1,9 +1,11 @@
 from flask import render_template, Blueprint, request, redirect, url_for, abort
 import sqlalchemy
 from config import DEBUG
-from finnance import db
-from finnance.models import Agent, Currency, Category, Transaction, Flow, Account
+from finnance import db, bcrypt
+from finnance.models import Agent, Currency, Category, Transaction, Flow, Account, User
 import datetime as dt, os
+from flask_login import login_user, current_user, logout_user, login_required
+import re
 
 main = Blueprint('main', __name__, static_url_path='/static/main',
     static_folder='static', template_folder='templates')
@@ -20,20 +22,90 @@ def params():
         currencies=Currency.query.all()
     )
 
+
 @main.route("/", methods=["GET"])
-def index():
+@main.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.home'))
+    if request.method == "POST":
+        user_tag = request.form.get("user")
+        password = request.form.get("password")
+        user = User.query.filter_by(username=user_tag).first()
+        if not user:
+            user = User.query.filter_by(email=user_tag).first()
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+        else:
+            return render_template("login.j2", loggingin=True, loginerr="Invalid user or wrong password", **params())
+
+        
+    return render_template("login.j2", **params())
+
+@main.route("/register", methods=["POST"])
+def register():
+    email = request.form.get("email")
+    username = request.form.get("username")
+    password = request.form.get("password")
+    passwordRepeat = request.form.get("passwordRepeat")
+    email_reg = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'
+    if not re.match(email_reg, email):
+        return render_template("login.j2", registering=True, regerr="invalid E-Mail", **params())
+    emuser = User.query.filter_by(email=email).first()
+    namuser = User.query.filter_by(username=username).first()
+    if emuser or namuser:
+        regerr = "E-Mail" if emuser else "Username"
+        if emuser and namuser:
+            regerr += " and Username are"
+        else:
+            regerr += " is"
+        regerr += " already taken"
+        return render_template("login.j2", registering=True, regerr=regerr, **params())
+    allowed = r'^[_\da-zA-Z]{4,}$'
+    if not re.match(allowed, username):
+        if len(username) < 4:
+            regerr = "Username must be at least 4 characters long"
+        else:
+            regerr = "Only use letters, digits and underscores for the username"
+        return render_template("login.j2", registering=True, regerr=regerr, **params())
+    if len(password) < 6:
+        return render_template("login.j2", registering=True, regerr="Password must contain at least 6 characters", **params())
+    if password != passwordRepeat:
+        return render_template("login.j2", registering=True, regerr="Passwords don't match", **params())
+    # add user
+    pwhash = bcrypt.generate_password_hash(password).decode('utf-8')
+    user = User(email=email, username=username, password=pwhash)
+    db.session.add(user)
+    db.session.commit()
+    return render_template("login.j2", loggingin=True,
+        logininfo=f'Successfully registered user {user.username}, please log in', **params())
+
+@main.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('main.login'))
+
+@main.route("/dashboard", methods=["GET"])
+def home():
     return render_template("home.j2", **params())
 
 @main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
+@login_required
 def account(account_id):
     account = Account.query.get(account_id)
     if not account:
         return abort(404)
+    if account.user_id != current_user.id:
+        return abort(403)
     changes, saldos = account.changes(num=5)
     return render_template("account.j2", account=account,
         last_5=changes, saldos=saldos, **params())
 
 @main.route("/add/account", methods=["GET", "POST"])
+@login_required
 def add_account():
     if request.method == "GET":
         return render_template("add_acc.j2", **params())
@@ -46,7 +118,8 @@ def add_account():
         if date_created > dt.datetime.now():
             return abort(409)
         currency_id = int(request.form.get("currency"))
-        account = Account(desc=desc, starting_saldo=starting_saldo, date_created=date_created, currency_id=currency_id)
+        account = Account(desc=desc, starting_saldo=starting_saldo,
+            date_created=date_created, currency_id=currency_id, user_id=current_user.id)
         db.session.add(account) # pylint: disable=no-member
         try:
             db.session.commit() # pylint: disable=no-member
@@ -55,9 +128,10 @@ def add_account():
         return redirect(url_for('main.add_account'))
 
 @main.route("/agents/<int:agent_id>")
+@login_required
 def agent(agent_id):
     agent = Agent.query.get(agent_id)
-    if not agent:
+    if not agent or agent.user_id != current_user.id:
         return abort(404)
     return render_template("agent.j2", agent=agent, **params())
 
