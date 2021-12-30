@@ -11,14 +11,14 @@ main = Blueprint('main', __name__, static_url_path='/static/main',
     static_folder='static', template_folder='templates')
 
 def params():
-    agents = Agent.query.join(Transaction, isouter=True).join(
+    agents = Agent.query.filter_by(user_id=current_user.id).join(Transaction, isouter=True).join(
         Flow, sqlalchemy.and_(Agent.id == Flow.agent_id, 
         Transaction.id == Flow.trans_id), isouter=True).group_by(
             Agent.id).order_by(Agent.uses.desc(), Agent.desc).all()
     return dict(
-        accounts=Account.query.all(),
+        accounts=Account.query.filter_by(user_id=current_user.id).all(),
         agents=agents,
-        categories=Category.query.order_by(Category.desc).all(),
+        categories=Category.query.filter_by(user_id=current_user.id).order_by(Category.desc).all(),
         currencies=Currency.query.all()
     )
 
@@ -91,9 +91,6 @@ def logout():
 @main.route("/dashboard", methods=["GET"])
 @login_required
 def home():
-    max_order, = db.session.query(sqlalchemy.func.max(Account.order)).filter_by(user_id=current_user.id).first()
-    max_order = 0 if max_order is None else max_order
-    print(max_order)
     return render_template("home.j2", **params())
 
 @main.route("/accounts/<int:account_id>", methods=["GET", "POST"])

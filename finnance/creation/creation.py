@@ -14,6 +14,7 @@ def override_url_for():
     return dict(url_for=dated_url_for)
 
 @creation.route("/transactions/add", methods=["POST"])
+@login_required
 def add_trans():
     success, result = parseRequest(request)
     if not success:
@@ -21,6 +22,8 @@ def add_trans():
     else:
         trans, records, flows = result
         trans = Transaction(**trans)
+        if trans.account.user_id != current_user.id:
+            return False, ("User not authenticated for account", 409)
         db.session.add(trans)
         db.session.commit()
         for record in records:
@@ -36,13 +39,15 @@ def add_trans():
     return "New Transaction successfully created!", 201
 
 @creation.route("/transactions/edit/<int:transaction_id>", methods=["PUT"])
+@login_required
 def edit_trans(transaction_id):
-    print('edit:', transaction_id)
     success, result = parseRequest(request, edit=transaction_id)
     if not success:
         return result
     else:
         old = Transaction.query.get(transaction_id)
+        if old.account.user_id != current_user.id:
+            return False, ("User not authenticated for account", 409)
         trans, records, flows = result
         for key, value in trans.items():
             setattr(old, key, value)
@@ -64,8 +69,11 @@ def edit_trans(transaction_id):
         return "Transaction successfully changed!", 200
 
 @creation.route("/transactions/edit_info/<int:transaction_id>")
+@login_required
 def trans_edit_info(transaction_id):
     trans = Transaction.query.get(transaction_id)
+    if trans.account.user_id != current_user:
+        abort(404)
     direct_flow = len(trans.records) == 0 and (
         len(trans.flows) == 1 and trans.flows[0].agent_id == trans.agent_id)
     return jsonify({
@@ -146,9 +154,12 @@ def parseRequest(request, edit=None):
     return True, (trans, records, flows)
 
 @creation.route("/transfers/add/<int:src_id>-<int:dst_id>", methods=["POST"])
+@login_required
 def add_transfer(src_id, dst_id):
     src = Account.query.get(src_id)
     dst = Account.query.get(dst_id)
+    if src.user_id != current_user.id or dst.user_id != current_user.id:
+        abort(409)
     src_amount = float(request.form.get("src_amount"))
     saldo = src.saldo()
     if saldo - src_amount < 0:
