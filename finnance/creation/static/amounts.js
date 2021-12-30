@@ -5,7 +5,7 @@ function regulateAmounts(node) {
     const step = parseFloat(
         $(amount_sel).prop('step')
     );
-    const total = parseFloat($(amount_sel).val()) || 0;
+    const total = parseFloat($(amount_sel).val()) || 0;
     const decimals = parseInt(
         $('#transactionForm select[name=currency] option:selected').data('decimals')
     );

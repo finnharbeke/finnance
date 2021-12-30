@@ -1,11 +1,10 @@
 function update_currency(input_selector, d, zero=false, positive=true) {
-    console.log('start');
     const step = Math.pow(10, -d);
     $(input_selector).each(function () {
         let val = parseFloat($(this).val());
         $(this).prop({
             "step": step,
-            "value": (zero || isNaN(val)) ? 
+            "value": (zero || isNaN(val)) ? 
                 0 : val.toFixed(d),
             "min": positive ? step : 0
         });

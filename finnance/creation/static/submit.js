@@ -143,7 +143,7 @@ function check_categories() {
 
 function check_amount() {
     let total = parseFloat($('#transactionForm input[name=amount]').val());
-    if (isNaN(total) || total == 0) {
+    if (isNaN(total) || total == 0) {
         alert("Enter an amount >= 0!");
         return false
     }

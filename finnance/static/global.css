@@ -30,3 +30,18 @@ td.long {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.color-form-control {
+    width: 100%;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0px;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.color-form-control::-webkit-color-swatch-wrapper {
+    padding: 0; 
+}
+.color-form-control::-webkit-color-swatch {
+    border-radius: 0.25rem;
+}

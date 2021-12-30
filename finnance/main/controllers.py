@@ -89,7 +89,11 @@ def logout():
     return redirect(url_for('main.login'))
 
 @main.route("/dashboard", methods=["GET"])
+@login_required
 def home():
+    max_order, = db.session.query(sqlalchemy.func.max(Account.order)).filter_by(user_id=current_user.id).first()
+    max_order = 0 if max_order is None else max_order
+    print(max_order)
     return render_template("home.j2", **params())
 
 @main.route("/accounts/<int:account_id>", methods=["GET", "POST"])
@@ -103,29 +107,6 @@ def account(account_id):
     changes, saldos = account.changes(num=5)
     return render_template("account.j2", account=account,
         last_5=changes, saldos=saldos, **params())
-
-@main.route("/add/account", methods=["GET", "POST"])
-@login_required
-def add_account():
-    if request.method == "GET":
-        return render_template("add_acc.j2", **params())
-    else:
-        desc = request.form.get("description")
-        starting_saldo = float(request.form.get("starting_saldo"))
-        date_created = dt.datetime.strptime(
-            request.form.get("date_created"), "%d.%m.%Y"
-        )
-        if date_created > dt.datetime.now():
-            return abort(409)
-        currency_id = int(request.form.get("currency"))
-        account = Account(desc=desc, starting_saldo=starting_saldo,
-            date_created=date_created, currency_id=currency_id, user_id=current_user.id)
-        db.session.add(account) # pylint: disable=no-member
-        try:
-            db.session.commit() # pylint: disable=no-member
-        except sqlalchemy.exc.IntegrityError:
-            abort(409)
-        return redirect(url_for('main.add_account'))
 
 @main.route("/agents/<int:agent_id>")
 @login_required

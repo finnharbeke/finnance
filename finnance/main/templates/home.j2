@@ -10,7 +10,7 @@ data-curr_id={{ account.currency.id }} data-curr_dec={{ account.currency.decimal
 {% macro drop_goal(account) %}
 ondragover="allow_drop_color(event, 'rgb(0, 170, 0, 0.5)')"
 ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
-{{ data(account) }}
+{{ data(account) }}
 {% endmacro %}
 
 {% block body %}
@@ -26,7 +26,7 @@ ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
     <div class="col-2 col-lg-1 pb-1 acc{{account.id}}" {{ drop_goal(account) }}>
         <button class="btn btn-info btn-block text-white"
             draggable="true" ondragstart="drag(event)"
-            {{ data(account) }}>
+            {{ data(account) }}>
             <i class="fa fa-exchange" aria-hidden="true"></i>
         </button>
     </div>
@@ -41,7 +41,7 @@ ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
     <div class="col-2 col-lg-1 acc{{account.id}}" {{ drop_goal(account) }}>
         <button class="btn btn-success btn-block toggler"
             data-toggle="modal"
-            data-info="new{{ account.id }}" data-target="#transModal">+
+            data-info="new{{ account.id }}" data-target="#transModal">+
         </button>
     </div>
     {% endfor %}
@@ -53,13 +53,14 @@ ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
     Remote
 </button>
 
-<a class="btn btn-primary btn-lg btn-block mb-3"
-    href="{{ url_for('main.add_account') }}">
+<a class="btn btn-primary btn-lg btn-block mb-3 toggler"
+    data-toggle="modal" data-target="#accModal">
     Create Account
 </a>
 
 {% include "transfer_modal.j2" %}
 {% include "trans_modal.j2" %}
+{% include "account_modal.j2" %}
 
 <script>
 $('.row > div').hover(function () {

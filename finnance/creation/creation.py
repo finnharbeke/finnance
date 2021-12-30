@@ -1,8 +1,10 @@
 from flask import Blueprint, request, redirect, url_for, abort, jsonify
 import datetime as dt
+from sqlalchemy import func
 from finnance import db
 from finnance.models import AccountTransfer, Transaction, Agent, Record, Flow, Account
 from finnance.main.controllers import dated_url_for
+from flask_login import login_required, current_user
 
 creation = Blueprint('creation', __name__, static_url_path='/static/creation',
     static_folder='static', template_folder='templates')
@@ -11,9 +13,8 @@ creation = Blueprint('creation', __name__, static_url_path='/static/creation',
 def override_url_for():
     return dict(url_for=dated_url_for)
 
-@creation.route("/transactions/add/", methods=["POST"])
+@creation.route("/transactions/add", methods=["POST"])
 def add_trans():
-    print('add')
     success, result = parseRequest(request)
     if not success:
         return result
@@ -92,7 +93,6 @@ def trans_edit_info(transaction_id):
 
 def parseRequest(request, edit=None):
     trans = request.json
-    print(trans)
 
     trans['date_issued'] = dt.datetime.fromisoformat(trans.pop('date_issued'))
 
@@ -140,15 +140,12 @@ def parseRequest(request, edit=None):
                 not trans['is_expense'] if trans['directflow'] else trans['is_expense'],
             'agent_id': agent.id if trans['directflow'] else remote_agent.id
         })
-    trans.pop('directflow')
-        
-
-    records = trans.pop('records')
     
-    print(trans, flows, records, sep="\n")
+    trans.pop('directflow')
+    records = trans.pop('records')
     return True, (trans, records, flows)
 
-@creation.route("/transfers/add/<int:src_id>-<int:dst_id>/", methods=["POST"])
+@creation.route("/transfers/add/<int:src_id>-<int:dst_id>", methods=["POST"])
 def add_transfer(src_id, dst_id):
     src = Account.query.get(src_id)
     dst = Account.query.get(dst_id)
@@ -168,3 +165,23 @@ def add_transfer(src_id, dst_id):
     db.session.add(AccountTransfer(src_id=src_id, dst_id=dst_id, src_amount=src_amount, dst_amount=dst_amount, date_issued=date_issued, comment=comment))
     db.session.commit()
     return redirect(url_for('main.home'))
+
+@creation.route("/accounts/add", methods=["POST"])
+@login_required
+def add_account():
+    desc = request.form.get("description")
+    starting_saldo = float(request.form.get("starting_saldo"))
+    date_created = dt.datetime.strptime(
+        request.form.get("date_created"), "%d.%m.%Y"
+    )
+    if date_created > dt.datetime.now():
+        return abort(409)
+    currency_id = int(request.form.get("currency"))
+    color = request.form.get("color")
+    max_order, = db.session.query(func.max(Account.order)).filter_by(user_id=current_user.id).first()
+    max_order = 0 if max_order is None else max_order
+    account = Account(desc=desc, starting_saldo=starting_saldo, order=max_order + 1, color=color,
+        date_created=date_created, currency_id=currency_id, user_id=current_user.id)
+    db.session.add(account)
+    db.session.commit()
+    return redirect(url_for('main.account', account_id=account.id))

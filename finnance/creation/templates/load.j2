@@ -6,7 +6,7 @@
 </datalist>
 <datalist id="accounts">
 {% for account in accounts %}
-    <option value="{{ account.id }}" data-desc="{{ account.desc }}"
+    <option value="{{ account.id }}" data-desc="{{ account.desc }}"
         data-curr_id="{{ account.currency_id }}"
         data-date_created="{{ account.date_created.strftime('%d.%m.%Y %H:%M') }}"/>
 {% endfor %}
@@ -21,7 +21,7 @@ const EDIT_TRANS_URL = (id) =>
 const EDITINFO_TRANS_URL = (id) =>
     "{{ url_for('creation.trans_edit_info', transaction_id=0) }}".replace('0', id);
 </script>
-<script src="{{ url_for('creation.static', filename='amounts.js') }}"></script>
-<script src="{{ url_for('creation.static', filename='currency.js') }}"></script>
-<script src="{{ url_for('creation.static', filename='customise.js') }}"></script>
-<script src="{{ url_for('creation.static', filename='submit.js') }}"></script>
+<script src="{{ url_for('creation.static', filename='amounts.js') }}"></script>
+<script src="{{ url_for('creation.static', filename='currency.js') }}"></script>
+<script src="{{ url_for('creation.static', filename='customise.js') }}"></script>
+<script src="{{ url_for('creation.static', filename='submit.js') }}"></script>

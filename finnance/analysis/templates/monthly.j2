@@ -26,9 +26,9 @@ function load() {
     for (let i in conts)
         $(conts[i]).html("");
     
-    d3.json(`{{ url_for('anal_api.stairs') }}?{{ query }}&currency_id=${curr_id}`)
+    d3.json(`{{ url_for('anal_api.stairs') }}?{{ query }}&currency_id=${curr_id}`)
         .then((data) => stairs(data, '#stairs'));
-    d3.json(`{{ url_for('anal_api.sunburst') }}?{{ query }}&currency_id=${curr_id}`)
+    d3.json(`{{ url_for('anal_api.sunburst') }}?{{ query }}&currency_id=${curr_id}`)
         .then((data) => sunburst(data, '#sunburst'));
 }
 load();

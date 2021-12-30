@@ -67,26 +67,26 @@
     <div class="form-row">
         {{ currency(currencies) }}
         {{ category(categories) }}
-        {{ min() }}
+        {{ min() }}
         {{ max() }}
         {{ start() }}
         {{ end() }}
         {{ submit() }}
     </div>
 </form>
-<script src="{{ url_for('queries.static', filename='filter.js') }}"></script>
+<script src="{{ url_for('queries.static', filename='filter.js') }}"></script>
 {% endmacro %}
 {% macro flows_filter(currencies, agents) %}
 <form id="filter">
     <div class="form-row">
         {{ currency(currencies) }}
         {{ agent(agents) }}
-        {{ min() }}
+        {{ min() }}
         {{ max() }}
         {{ start() }}
         {{ end() }}
         {{ submit() }}
     </div>
 </form>
-<script src="{{ url_for('queries.static', filename='filter.js') }}"></script>
+<script src="{{ url_for('queries.static', filename='filter.js') }}"></script>
 {% endmacro %}

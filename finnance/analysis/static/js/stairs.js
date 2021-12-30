@@ -45,7 +45,7 @@ stairs = function(data, container) {
     svg.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%a %d.%m.%y"))
-            .tickValues(x.domain().filter((d, i) => !(i % Math.floor(x.domain().length / 7)) || i == x.domain().length - 1)));
+            .tickValues(x.domain().filter((d, i) => !(i % Math.floor(x.domain().length / 7)) || i == x.domain().length - 1)));
         // .call(g => g.select(".domain").remove())
         // .call(g => g.selectAll(".tick line").clone()
         //     .attr("y2", -height)

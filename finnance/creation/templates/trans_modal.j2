@@ -31,7 +31,7 @@
 {% macro top(currencies) %}
 <div class="form-row">
     <div class="col-md-4 order-md-2">
-        {{ expinc() }}
+        {{ expinc() }}
         <button id="directFlowBtn" type="button"
             class="btn btn-secondary float-right" data-toggle="button"
             aria-pressed="false">
@@ -59,7 +59,7 @@
 {% macro agentForm(id, name, label) %}
 <div class="form-group" id="{{ id }}">
     <label for="{{ name }}"">{{label}}</label>
-    <input class="form-control" type="text" list="agents" name="{{ name }}" required>
+    <input class="form-control" type="text" list="agents" name="{{ name }}" required>
 </div>
 {% endmacro %}
 
