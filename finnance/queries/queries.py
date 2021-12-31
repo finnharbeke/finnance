@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, abort, request
+from flask_login import login_required, current_user
 from finnance.main.controllers import dated_url_for, params
 from finnance.models import Account, Category, Currency, Record, Transaction, Flow, Agent
 import datetime as dt
@@ -11,9 +12,10 @@ def override_url_for():
     return dict(url_for=dated_url_for)
 
 @queries.route("/accounts/<int:account_id>/changes")
+@login_required
 def account_changes(account_id):
     account = Account.query.get(account_id)
-    if account is None:
+    if account is None or current_user.id != account.user_id:
         return abort(404)
     changes, saldos = account.changes()
     return render_template("changes.j2", account=account,
@@ -94,15 +96,17 @@ def flow_filter(query, req: dict):
     return query
 
 @queries.route("/records")
+@login_required
 def records():
-    records = Record.query.join(Category).join(Transaction)
+    records = Record.query.join(Category).join(Transaction).filter_by(user_id=current_user.id)
     req = request.args.to_dict()
     records = record_filter(records, req)
     return render_template("records.j2", records=records, **params())
 
 @queries.route("/flows")
+@login_required
 def flows():
-    flows = Flow.query.join(Agent).join(Transaction, Flow.trans_id == Transaction.id)
+    flows = Flow.query.join(Agent).join(Transaction).filter(Transaction.user_id==current_user.id)
     req = request.args.to_dict()
     flows = flow_filter(flows, req)
 
