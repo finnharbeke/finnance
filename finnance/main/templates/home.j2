@@ -53,14 +53,20 @@ ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
     Remote
 </button>
 
-<a class="btn btn-primary btn-lg btn-block mb-3 toggler"
+<button type="button" class="btn btn-primary btn-lg btn-block mb-3"
     data-toggle="modal" data-target="#accModal">
     Create Account
-</a>
+</button>
+
+<button type="button" class="btn btn-primary btn-lg btn-block mb-3"
+    data-toggle="modal" data-target="#catModal">
+    Add Category
+</button>
 
 {% include "transfer_modal.j2" %}
 {% include "trans_modal.j2" %}
 {% include "account_modal.j2" %}
+{% include "cat_modal.j2" %}
 
 <script>
 $('.row > div').hover(function () {

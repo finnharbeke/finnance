@@ -15,7 +15,7 @@
                         <input class="form-control" type="text" name="description" maxlength=32 required>
                     </div>
                     <div class="form-row">
-                        <div class="col-6 form-group">
+                        <div class="col-md-6 form-group">
                             <label for="currency">Currency</label>
                             <select class="form-control" name="currency" required>
                                 {% for currency in currencies %}
@@ -24,7 +24,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-6 form-group">
+                        <div class="col-md-6 form-group">
                             <label for="color">Color</label>
                             <input class="color-form-control" type="color" name="color" value="#5cd1ff" required>
                         </div>
@@ -42,9 +42,7 @@
                         <small class="form-text text-muted">dd.mm.yyyy</small>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary float-right" data-dismiss="modal">Cancel</button>
                 <button type="submit" form="accForm" class="btn btn-primary">Submit</button>
             </div>
         </div>
