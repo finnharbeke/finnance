@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, request
 from flask_login import login_required, current_user
 from finnance.main.controllers import dated_url_for, params
-from finnance.models import Account, Category, Currency, Record, Transaction, Flow, Agent
+from finnance.models import Account, Category, Currency, Record, Transaction, Flow, Agent, AccountTransfer
 import datetime as dt
 
 queries = Blueprint('queries', __name__, template_folder='templates',
@@ -21,7 +21,9 @@ def account_changes(account_id):
     return render_template("changes.j2", account=account,
         saldos=saldos, changes=changes, **params())
 
-def trans_filter(query, req: dict):
+def trans_filter(query=None, **req):
+    query = Transaction.query.join(Currency) if query is None else query
+    query = query.filter(Transaction.user_id==current_user.id)
     if req.get('currency_id'):
         curr = Currency.query.get(req.get('currency_id'))
         if curr is not None:
@@ -31,13 +33,15 @@ def trans_filter(query, req: dict):
             
     if req.get('start'):
         try:
-            start = dt.datetime.fromisoformat(req.get('start'))
+            start = req.get('start')
+            start = dt.datetime.fromisoformat(start) if type(start) != dt.datetime else start
             query = query.filter(Transaction.date_issued >= start)
         except ValueError:
             query = query.filter(False)
     if req.get('end'):
         try:
-            end = dt.datetime.fromisoformat(req.get('end'))
+            end = req.get('end')
+            end = dt.datetime.fromisoformat(end) if type(end) != dt.datetime else end
             query = query.filter(Transaction.date_issued <= end)
         except ValueError:
             query = query.filter(False)
@@ -47,12 +51,20 @@ def trans_filter(query, req: dict):
             query = query.filter(Transaction.is_expense == is_exp)
         except ValueError:
             query = query.filter(False)
+    
+    if req.get('remote'):
+        rem = bool(req.get('remote')) if req.get('remote') not in ['false', 'False', '0'] else False
+        if rem:
+            query = query.filter(Transaction.account_id == None)
+        else:
+            query = query.filter(Transaction.account_id != None)
 
     query = query.order_by(Transaction.date_issued)
     return query
 
-def record_filter(query, req: dict):
-    query = trans_filter(query, req)
+def record_filter(query=None, **req):
+    query = Record.query.join(Transaction).join(Category).join(Currency) if query is None else query
+    query = trans_filter(query=query, **req)
     if req.get('category_id'):
         cat = Category.query.get(req.get('category_id'))
         if cat is not None:
@@ -73,8 +85,9 @@ def record_filter(query, req: dict):
             query = query.filter(False)
     return query
 
-def flow_filter(query, req: dict):
-    query = trans_filter(query, req)
+def flow_filter(query=None, **req):
+    query = Flow.query.join(Agent).join(Transaction).join(Currency) if query is None else query
+    query = trans_filter(query=query, **req)
     if req.get('agent'):
         agent = Agent.query.filter_by(desc=req.get('agent')).first()
         if agent is None:
@@ -95,24 +108,62 @@ def flow_filter(query, req: dict):
             query = query.filter(False)
     return query
 
+def account_filter(query=None, **req):
+    query = Account.query if query is None else query
+    query = query.filter(Account.user_id == current_user.id)
+    if req.get('currency_id'):
+        curr = Currency.query.get(req.get('currency_id'))
+        if curr is not None:
+            query = query.filter(Account.currency_id == curr.id)
+        else:
+            query = query.filter(False)
+    
+    query = query.order_by(Account.order)
+    return query
+
+def transfer_filter(query=None, **req):
+    query = AccountTransfer.query if query is None else query
+    query = query.filter(AccountTransfer.user_id == current_user.id)
+    query = query.order_by(AccountTransfer.date_issued)
+    return query
+
+def category_filter(query=None, **req):
+    query = Category.query if query is None else query
+    query = query.filter(Category.user_id == current_user.id)
+    if req.get('is_expense'):
+        is_exp = bool(req.get('is_expense'))
+        if req.get('is_expense') in ['0', 'false', 'False']:
+            is_exp = False
+        query = query.filter(Category.is_expense == is_exp)
+    if req.get('parent_id'):
+        parid = req.get('parent_id')
+        if type(parid) is str:
+            if parid in ['none', 'None', 'null']:
+                parid = None
+            try:
+                parid = int(parid)
+            except ValueError:
+                query = query.filter(False)
+        query.filter(Category.parent_id == parid)
+    query = query.order_by(Category.is_expense.desc(), Category.order)
+    return query
+
 @queries.route("/records")
 @login_required
 def records():
-    records = Record.query.join(Category).join(Transaction).filter_by(user_id=current_user.id)
     req = request.args.to_dict()
-    records = record_filter(records, req)
+    records = record_filter(**req)
     return render_template("records.j2", records=records, **params())
 
 @queries.route("/flows")
 @login_required
 def flows():
-    flows = Flow.query.join(Agent).join(Transaction).filter(Transaction.user_id==current_user.id)
     req = request.args.to_dict()
-    flows = flow_filter(flows, req)
+    flows = flow_filter(**req)
 
     s = 0
     sums = []
     for f in flows:
         s += -f.amount if f.is_debt else f.amount
-        sums.append(round(s, max([c.decimals for c in Currency.query.all()])))
+        sums.append(round(s, f.trans.currency.decimals))
     return render_template("flows.j2", flows=flows, sums=sums, **params())

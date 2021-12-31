@@ -117,7 +117,9 @@ class AccountTransfer(db.Model):
     dst_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     date_issued = db.Column(db.DateTime)
     comment = db.Column(db.String(120))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    user = db.relationship("User", backref="transfers")
     src = db.relationship("Account", backref="out_transfers", foreign_keys=[src_id])
     dst = db.relationship("Account", backref="in_transfers", foreign_keys=[dst_id])
 

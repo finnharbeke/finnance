@@ -1,11 +1,11 @@
 from finnance.models import Transaction, Category, Record, Agent, Currency, Account, AccountTransfer, Flow
-from flask import jsonify, Blueprint, request
+from flask import jsonify, Blueprint, request, abort
+from flask_login import login_required, current_user
 import sqlalchemy, datetime as dt
 
-from finnance.queries.queries import record_filter
+from finnance.queries import account_filter, category_filter, record_filter, flow_filter, transfer_filter, trans_filter
 from .controllers import anal
 from finnance.main.controllers import dated_url_for
-from finnance.queries import record_filter
 
 api = Blueprint('anal_api', __name__, url_prefix=anal.url_prefix+'/api',
     static_folder='static', static_url_path='/static/analysis/api')
@@ -15,9 +15,10 @@ def override_url_for():
     return dict(url_for=dated_url_for)
 
 @api.route("/stairs")
+@login_required
 def stairs():
     req = request.args.to_dict()
-    records = record_filter(Record.query.join(Transaction), req)
+    records = record_filter(**req)
     day = dt.datetime.fromisoformat(req['start'])
     end = dt.datetime.fromisoformat(req['end'])
     data = []
@@ -50,18 +51,21 @@ def stairs():
     return jsonify({'entries': data, 'days': days})
 
 @api.route("/sunburst")
+@login_required
 def sunburst():
     req = request.args.to_dict()
     def agents(cat):
+        myreq = req.copy()
+        myreq.update({'category_id': cat.id})
         return [
             dict(
                 color=cat.color,
                 id=cat.id,
                 **row._asdict()
             )
-        for row in record_filter(Agent.query.join(Transaction).join(Record).join(Category).filter(
-                Record.category_id == cat.id
-        ), req).group_by(Agent).with_entities(
+        for row in record_filter(**myreq,
+                query=Agent.query.join(Transaction).join(Record).join(Category)
+            ).group_by(Agent).with_entities(
                 sqlalchemy.func.sum(Record.amount).label('value'), 
                 Agent.desc.label('name')
             )
@@ -83,9 +87,7 @@ def sunburst():
         }
 
     data = []
-    for cat in Category.query.all():
-        if cat.parent is not None:
-            continue
+    for cat in category_filter(parent_id=None):
         data.append(cat_obj(cat))
     return jsonify({'name': 'exp', 'children': data})
 
@@ -102,13 +104,14 @@ def months_dates():
     return dates
 
 @api.route("/divstackbars/<int:curr_id>")
+@login_required
 def divstackbars(curr_id):
     currency = Currency.query.get(curr_id)
     dates = months_dates()
     
     exp = set()
     desc_dict = {}
-    for cat in Category.query.order_by(Category.is_expense.desc()):
+    for cat in category_filter():
         desc_dict[cat.id] = cat.desc
         if cat.is_expense:
             exp.add(cat.desc)
@@ -117,13 +120,8 @@ def divstackbars(curr_id):
 
     data = []
     for i, start in enumerate(dates[:-1]):
-        query = Record.query.join(Category).join(Transaction).join(Currency).filter(
-            sqlalchemy.and_(
-                start <= Transaction.date_issued,
-                Transaction.date_issued < dates[i+1],
-                Transaction.currency_id == currency.id
-            )
-        ).group_by(Category.id).with_entities(
+        query = record_filter(start=start, end=dates[i+1], currency_id=currency.id)
+        query = query.group_by(Category.id).with_entities(
             sqlalchemy.func.round(
                 sqlalchemy.func.sum(Record.amount),
                 Currency.decimals
@@ -150,11 +148,8 @@ def divstackbars(curr_id):
  
 
     # reverse expenses so that order is correct in the negative part
-    cats = [
-        cat for cat in Category.query.filter_by(is_expense=False).order_by(Category.order.asc())
-    ] + [
-        cat for cat in Category.query.filter_by(is_expense=True).order_by(Category.order.desc())
-    ]
+    cats = category_filter(is_expense=False).order_by(Category.order.asc()).all() + (
+           category_filter(is_expense=True).all())
     return jsonify({
         'categories': data,
         'positives': [desc_dict[cat.id] for cat in filter(lambda cat: not cat.is_expense, cats)],
@@ -172,6 +167,7 @@ def plot_dict(x, y, label, color):
     }
 
 @api.route("/12incexp/<int:curr_id>")
+@login_required
 def inc_vs_exp(curr_id):
     currency = Currency.query.get(curr_id)
     if currency is None:
@@ -181,11 +177,7 @@ def inc_vs_exp(curr_id):
     inc = [0] * 12
     exp = [0] * 12
 
-    for record in Record.query.join(Transaction).join(Category).filter(
-        sqlalchemy.and_(dates[0] <= Transaction.date_issued,
-            Transaction.date_issued < dates[-1]),
-            Transaction.currency_id == currency.id
-        ).order_by(Transaction.date_issued):
+    for record in record_filter(start=dates[0], end=dates[-1], currency_id=currency.id):
         while record.trans.date_issued >= dates[i+1]:
             i += 1
         if record.category.is_expense:
@@ -226,8 +218,11 @@ def acc_plot(acc, color=None, label=None):
     )
 
 @api.route('account/<int:acc_id>')
+@login_required
 def account(acc_id):
     account = Account.query.get(acc_id)
+    if account.user_id != current_user.id:
+        abort(404)
     return jsonify({
         'plots': [acc_plot(account, label='Saldo')],
         'curr_code': account.currency.code,
@@ -237,18 +232,15 @@ def account(acc_id):
 
 @api.route('net')
 @api.route('net/<int:currency_id>')
+@login_required
 def net(currency_id=1):
     currency = Currency.query.get(currency_id)
 
-    transes = Transaction.query.filter_by(currency_id=currency.id).filter(
-        Transaction.account_id != None).order_by(Transaction.date_issued)
-    transfers = AccountTransfer.query.order_by(AccountTransfer.date_issued).all()
+    transes = trans_filter(currency_id=currency.id, remote=False)
+    transfers = transfer_filter().all()
     
-    accounts = Account.query.filter_by(currency_id=currency.id).order_by(Account.order).all()
-    flows = Flow.query.join(Transaction).filter(
-        Transaction.currency_id == currency.id
-        ).order_by(Transaction.date_issued).all()
-
+    accounts = account_filter(currency_id=currency_id).all()
+    flows = flow_filter(currency_id=currency_id).all()
     n = len(accounts)
     accs = {a.id: {'label': a.desc, 'color': a.color, 'xy': []} for a in accounts}
     acc_i = 0
@@ -267,9 +259,10 @@ def net(currency_id=1):
     f_i = 0
     f = 0
     fp = []
-    for t in transes:
+    # None is used as the last closure, for new accounts and transfers after the last trans
+    for t in transes.all() + [None]:
         for acc_i, acc in enumerate(accounts):
-            if started[acc.id] or acc.date_created > t.date_issued:
+            if started[acc.id] or (t is not None and acc.date_created > t.date_issued):
                 continue
             saldos[acc.id] += acc.starting_saldo
             started[acc.id] = True
@@ -284,7 +277,7 @@ def net(currency_id=1):
                     xy(id_[j], acc.date_created, off)
             xy('f', acc.date_created, off + f)
         
-        while trf_i < len(transfers) and transfers[trf_i].date_issued < t.date_issued:
+        while trf_i < len(transfers) and (t is None or transfers[trf_i].date_issued < t.date_issued):
             trf = transfers[trf_i]
             trf_i += 1
             if trf.src.currency_id != currency.id and trf.dst.currency_id != currency.id:
@@ -300,6 +293,8 @@ def net(currency_id=1):
                     xy(id_[i], trf.date_issued, off)
             xy('f', trf.date_issued, off + f)
         
+        if t is None:
+            break
         saldos[t.account_id] += -t.amount if t.is_expense else t.amount
         i = ix[t.account_id]
         off = 0
@@ -323,7 +318,7 @@ def net(currency_id=1):
     for i in range(n):
         xy(id_[i], dt.datetime.now(), off)
         off += saldos[id_[i]]
-    xy('f', dt.datetime.now(), off + f)
+    xy('f', dt.datetime.now(), off)
         
     return jsonify({
         'plots': [{
