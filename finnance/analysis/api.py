@@ -148,8 +148,8 @@ def divstackbars(curr_id):
  
 
     # reverse expenses so that order is correct in the negative part
-    cats = category_filter(is_expense=False, descending=True).all() + (
-           category_filter(is_expense=True).all())
+    cats = category_filter(is_expense=True, descending=True).all() + (
+           category_filter(is_expense=False).all())
     return jsonify({
         'categories': data,
         'positives': [desc_dict[cat.id] for cat in filter(lambda cat: not cat.is_expense, cats)],
