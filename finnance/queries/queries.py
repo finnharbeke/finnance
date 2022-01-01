@@ -7,6 +7,12 @@ import datetime as dt
 queries = Blueprint('queries', __name__, template_folder='templates',
     static_folder='static', static_url_path='/static/queries')
 
+def clear_argsdict(d: dict):
+    for key, val in list(d.items()):
+        if val == '':
+            d.pop(key)
+    return d
+
 @queries.context_processor
 def override_url_for():
     return dict(url_for=dated_url_for)
@@ -42,7 +48,7 @@ def trans_filter(query=None, **req):
         try:
             end = req.get('end')
             end = dt.datetime.fromisoformat(end) if type(end) != dt.datetime else end
-            query = query.filter(Transaction.date_issued <= end)
+            query = query.filter(Transaction.date_issued < end)
         except ValueError:
             query = query.filter(False)
     if 'expense' in req:
@@ -65,6 +71,7 @@ def trans_filter(query=None, **req):
 def record_filter(query=None, **req):
     query = Record.query.join(Transaction).join(Category).join(Currency) if query is None else query
     query = trans_filter(query=query, **req)
+    print(req)
     if 'category_id' in req:
         cat = Category.query.get(req.get('category_id'))
         if cat is not None:
@@ -152,16 +159,14 @@ def category_filter(query=None, **req):
 @queries.route("/records")
 @login_required
 def records():
-    req = request.args.to_dict()
+    req = clear_argsdict(request.args.to_dict())
     records = record_filter(**req)
     return render_template("records.j2", records=records, **params())
 
 @queries.route("/flows")
 @login_required
 def flows():
-    req = request.args.to_dict()
-    flows = flow_filter(**req)
-
+    req = clear_argsdict(request.args.to_dict())
     s = 0
     sums = []
     for f in flows:

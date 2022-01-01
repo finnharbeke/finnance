@@ -3,7 +3,7 @@ from flask import jsonify, Blueprint, request, abort
 from flask_login import login_required, current_user
 import sqlalchemy, datetime as dt
 
-from finnance.queries import account_filter, category_filter, record_filter, flow_filter, transfer_filter, trans_filter
+from finnance.queries import account_filter, category_filter, record_filter, flow_filter, transfer_filter, trans_filter, clear_argsdict
 from .controllers import anal
 from finnance.main.controllers import dated_url_for
 
@@ -17,7 +17,7 @@ def override_url_for():
 @api.route("/stairs")
 @login_required
 def stairs():
-    req = request.args.to_dict()
+    req = clear_argsdict(request.args.to_dict())
     records = record_filter(**req)
     day = dt.datetime.fromisoformat(req['start'])
     end = dt.datetime.fromisoformat(req['end'])
@@ -53,7 +53,7 @@ def stairs():
 @api.route("/sunburst")
 @login_required
 def sunburst():
-    req = request.args.to_dict()
+    req = clear_argsdict(request.args.to_dict())
     def agents(cat):
         myreq = req.copy()
         myreq.update({'category_id': cat.id})
