@@ -135,7 +135,7 @@ def transfer_filter(query=None, **req):
     query = query.order_by(AccountTransfer.date_issued)
     return query
 
-def category_filter(query=None, **req):
+def category_filter(query=None, descending=False, **req):
     query = Category.query if query is None else query
     query = query.filter(Category.user_id == current_user.id)
     if 'is_expense' in req:
@@ -153,7 +153,11 @@ def category_filter(query=None, **req):
             except ValueError:
                 query = query.filter(False)
         query = query.filter(Category.parent_id == parid)
-    query = query.order_by(Category.is_expense.desc(), Category.order)
+    if not descending:
+        query = query.order_by(Category.is_expense.desc(), Category.order)
+    else:
+        query = query.order_by(Category.is_expense.desc(), Category.order.desc())
+
     return query
 
 @queries.route("/records")
