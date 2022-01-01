@@ -45,14 +45,14 @@ def trans_filter(query=None, **req):
             query = query.filter(Transaction.date_issued <= end)
         except ValueError:
             query = query.filter(False)
-    if req.get('expense'):
+    if 'expense' in req:
         try:
             is_exp = bool(req.get('expense'))
             query = query.filter(Transaction.is_expense == is_exp)
         except ValueError:
             query = query.filter(False)
     
-    if req.get('remote'):
+    if 'remote' in req:
         rem = bool(req.get('remote')) if req.get('remote') not in ['false', 'False', '0'] else False
         if rem:
             query = query.filter(Transaction.account_id == None)
@@ -86,7 +86,8 @@ def record_filter(query=None, **req):
     return query
 
 def flow_filter(query=None, **req):
-    query = Flow.query.join(Agent).join(Transaction).join(Currency) if query is None else query
+    query = Flow.query.join(Agent, Flow.agent_id == Agent.id).join(
+        Transaction, Flow.trans_id == Transaction.id).join(Currency) if query is None else query
     query = trans_filter(query=query, **req)
     if req.get('agent'):
         agent = Agent.query.filter_by(desc=req.get('agent')).first()

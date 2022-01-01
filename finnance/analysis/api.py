@@ -236,7 +236,7 @@ def account(acc_id):
 def net(currency_id=1):
     currency = Currency.query.get(currency_id)
 
-    transes = trans_filter(currency_id=currency.id, remote=False)
+    transes = trans_filter(currency_id=currency.id, remote=False).all()
     transfers = transfer_filter().all()
     
     accounts = account_filter(currency_id=currency_id).all()
@@ -260,7 +260,7 @@ def net(currency_id=1):
     f = 0
     fp = []
     # None is used as the last closure, for new accounts and transfers after the last trans
-    for t in transes.all() + [None]:
+    for t in transes + [None]:
         for acc_i, acc in enumerate(accounts):
             if started[acc.id] or (t is not None and acc.date_created > t.date_issued):
                 continue
@@ -293,26 +293,27 @@ def net(currency_id=1):
                     xy(id_[i], trf.date_issued, off)
             xy('f', trf.date_issued, off + f)
         
-        if t is None:
-            break
-        saldos[t.account_id] += -t.amount if t.is_expense else t.amount
-        i = ix[t.account_id]
-        off = 0
-        for j in range(i + 1):
-            if started[id_[j]]:
-                off += saldos[id_[j]]
-        
-        xy(t.account_id, t.date_issued, off)
-        for j in range(i + 1, n):
-            if started[id_[j]]:
-                off += saldos[id_[j]]
-                xy(id_[j], t.date_issued, off)
+        if t is not None:
+            saldos[t.account_id] += -t.amount if t.is_expense else t.amount
+            i = ix[t.account_id]
+            off = 0
+            for j in range(i + 1):
+                if started[id_[j]]:
+                    off += saldos[id_[j]]
+            
+            xy(t.account_id, t.date_issued, off)
+            for j in range(i + 1, n):
+                if started[id_[j]]:
+                    off += saldos[id_[j]]
+                    xy(id_[j], t.date_issued, off)
 
-        while f_i < len(flows) and flows[f_i].trans.date_issued <= t.date_issued:
+            xy('f', t.date_issued, off+f)
+
+        while f_i < len(flows) and (t is None or flows[f_i].trans.date_issued <= t.date_issued):
             f += -flows[f_i].amount if flows[f_i].is_debt else flows[f_i].amount
+            xy('f', flows[f_i].trans.date_issued, off + f)
             f_i += 1
 
-        xy('f', t.date_issued, off + f)
 
     off = 0
     for i in range(n):
