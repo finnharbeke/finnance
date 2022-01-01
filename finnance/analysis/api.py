@@ -148,7 +148,7 @@ def divstackbars(curr_id):
  
 
     # reverse expenses so that order is correct in the negative part
-    cats = category_filter(is_expense=False).order_by(Category.order.asc()).all() + (
+    cats = category_filter(is_expense=False).order_by(Category.order.desc()).all() + (
            category_filter(is_expense=True).all())
     return jsonify({
         'categories': data,
