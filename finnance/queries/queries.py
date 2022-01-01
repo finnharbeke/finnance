@@ -24,21 +24,21 @@ def account_changes(account_id):
 def trans_filter(query=None, **req):
     query = Transaction.query.join(Currency) if query is None else query
     query = query.filter(Transaction.user_id==current_user.id)
-    if req.get('currency_id'):
+    if 'currency_id' in req:
         curr = Currency.query.get(req.get('currency_id'))
         if curr is not None:
             query = query.filter(Transaction.currency_id == curr.id)
         else:
             query = query.filter(False)
             
-    if req.get('start'):
+    if 'start' in req:
         try:
             start = req.get('start')
             start = dt.datetime.fromisoformat(start) if type(start) != dt.datetime else start
             query = query.filter(Transaction.date_issued >= start)
         except ValueError:
             query = query.filter(False)
-    if req.get('end'):
+    if 'end' in req:
         try:
             end = req.get('end')
             end = dt.datetime.fromisoformat(end) if type(end) != dt.datetime else end
@@ -53,7 +53,7 @@ def trans_filter(query=None, **req):
             query = query.filter(False)
     
     if 'remote' in req:
-        rem = bool(req.get('remote')) if req.get('remote') not in ['false', 'False', '0'] else False
+        rem = bool(req.get('remote')) if 'remote' in req not in ['false', 'False', '0'] else False
         if rem:
             query = query.filter(Transaction.account_id == None)
         else:
@@ -65,19 +65,19 @@ def trans_filter(query=None, **req):
 def record_filter(query=None, **req):
     query = Record.query.join(Transaction).join(Category).join(Currency) if query is None else query
     query = trans_filter(query=query, **req)
-    if req.get('category_id'):
+    if 'category_id' in req:
         cat = Category.query.get(req.get('category_id'))
         if cat is not None:
             query = query.filter(Category.id == cat.id)
         else:
             query = query.filter(False)
-    if req.get('min'):
+    if 'min' in req:
         try:
             min_ = float(req.get('min'))
             query = query.filter(Record.amount >= min_)
         except ValueError:
             query = query.filter(False)
-    if req.get('max'):
+    if 'max' in req:
         try:
             max_ = float(req.get('max'))
             query = query.filter(Record.amount <= max_)
@@ -89,19 +89,19 @@ def flow_filter(query=None, **req):
     query = Flow.query.join(Agent, Flow.agent_id == Agent.id).join(
         Transaction, Flow.trans_id == Transaction.id).join(Currency) if query is None else query
     query = trans_filter(query=query, **req)
-    if req.get('agent'):
+    if 'agent' in req:
         agent = Agent.query.filter_by(desc=req.get('agent')).first()
         if agent is None:
             query = query.filter(False)
         else:
             query = query.filter(Flow.agent_id == agent.id)
-    if req.get('min'):
+    if 'min' in req:
         try:
             min_ = float(req.get('min'))
             query = query.filter(Flow.amount >= min_)
         except ValueError:
             query = query.filter(False)
-    if req.get('max'):
+    if 'max' in req:
         try:
             max_ = float(req.get('max'))
             query = query.filter(Flow.amount <= max_)
@@ -112,7 +112,7 @@ def flow_filter(query=None, **req):
 def account_filter(query=None, **req):
     query = Account.query if query is None else query
     query = query.filter(Account.user_id == current_user.id)
-    if req.get('currency_id'):
+    if 'currency_id' in req:
         curr = Currency.query.get(req.get('currency_id'))
         if curr is not None:
             query = query.filter(Account.currency_id == curr.id)
@@ -131,12 +131,12 @@ def transfer_filter(query=None, **req):
 def category_filter(query=None, **req):
     query = Category.query if query is None else query
     query = query.filter(Category.user_id == current_user.id)
-    if req.get('is_expense'):
+    if 'is_expense' in req:
         is_exp = bool(req.get('is_expense'))
-        if req.get('is_expense') in ['0', 'false', 'False']:
+        if 'is_expense' in req in ['0', 'false', 'False']:
             is_exp = False
         query = query.filter(Category.is_expense == is_exp)
-    if req.get('parent_id'):
+    if 'parent_id' in req:
         parid = req.get('parent_id')
         if type(parid) is str:
             if parid in ['none', 'None', 'null']:
@@ -145,7 +145,7 @@ def category_filter(query=None, **req):
                 parid = int(parid)
             except ValueError:
                 query = query.filter(False)
-        query.filter(Category.parent_id == parid)
+        query = query.filter(Category.parent_id == parid)
     query = query.order_by(Category.is_expense.desc(), Category.order)
     return query
 
