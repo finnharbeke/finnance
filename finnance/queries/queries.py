@@ -171,6 +171,7 @@ def records():
 @login_required
 def flows():
     req = clear_argsdict(request.args.to_dict())
+    flows = flow_filter(**req)
     s = 0
     sums = []
     for f in flows:
