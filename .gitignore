@@ -4,4 +4,4 @@
 *.pyc
 app.db
 backups
-keys.txt
+secret.py

@@ -71,7 +71,6 @@ def trans_filter(query=None, **req):
 def record_filter(query=None, **req):
     query = Record.query.join(Transaction).join(Category).join(Currency) if query is None else query
     query = trans_filter(query=query, **req)
-    print(req)
     if 'category_id' in req:
         cat = Category.query.get(req.get('category_id'))
         if cat is not None:
