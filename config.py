@@ -13,7 +13,7 @@ MYSQL_USER = 'root'
 MYSQL_PASSWORD = ROOTPW
 MYSQL_DB = 'finnance'
 # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db')
-SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://root:{ROOTPW}@localhost/finnance'
+SQLALCHEMY_DATABASE_URI = f'mariadb+mariadbconnector://root:{ROOTPW}@localhost/finnance'
 DATABASE_CONNECT_OPTIONS = {}
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False

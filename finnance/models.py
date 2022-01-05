@@ -167,7 +167,6 @@ class Category(db.Model):
     parent = db.relationship("Category", backref="children", remote_side=[id])
 
     __table_args__ = (
-        CheckConstraint('parent_id != id'),
         UniqueConstraint('user_id', 'desc', 'is_expense'),
         UniqueConstraint('user_id', 'order')
     )
