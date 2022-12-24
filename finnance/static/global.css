@@ -1,3 +1,7 @@
+:root{
+    --primary: #C57221;
+}
+
 .h1-link:hover {
     cursor: pointer;
 }
