@@ -1,11 +1,13 @@
 # Import flask and template operators
 from flask import Flask
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 
 # Define the WSGI application object
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Configurations
 app.config.from_object('config')
@@ -27,6 +29,7 @@ from finnance.creation import creation
 from finnance.analysis import anal, anal_api
 from finnance.category import category
 from finnance.queries import queries
+from finnance.api import api_bp
 
 # Register blueprints
 app.register_blueprint(main)
@@ -35,3 +38,4 @@ app.register_blueprint(anal)
 app.register_blueprint(anal_api)
 app.register_blueprint(category)
 app.register_blueprint(queries)
+app.register_blueprint(api_bp)

@@ -1,5 +1,5 @@
 # Statement for enabling the development environment
-DEBUG = False
+DEBUG = True
 
 # Define the application directory
 import os
@@ -12,9 +12,11 @@ MYSQL_HOST = 'localhost'
 MYSQL_USER = 'root'
 MYSQL_PASSWORD = ROOTPW
 MYSQL_DB = 'finnance'
-# SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db')
-SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True, 'pool_recycle': 300}
-SQLALCHEMY_DATABASE_URI = f'mariadb+mariadbconnector://root:{ROOTPW}@localhost/finnance'
+if DEBUG:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db')
+else:
+    SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True, 'pool_recycle': 300}
+    SQLALCHEMY_DATABASE_URI = f'mariadb+mariadbconnector://root:{ROOTPW}@localhost/finnance'
 DATABASE_CONNECT_OPTIONS = {}
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
