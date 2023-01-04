@@ -108,7 +108,7 @@ def parseRequest(request, edit=None):
         if account.user_id != current_user.id:
             return False, ("User not authorized to account", 409)
         # check saldo
-        saldo = account.saldo()
+        saldo = account.saldo
         if edit is None:
             diff = -trans['amount'] if trans['is_expense'] else trans['amount']
         else:
@@ -162,7 +162,7 @@ def add_transfer(src_id, dst_id):
     if src.user_id != current_user.id or dst.user_id != current_user.id:
         abort(409)
     src_amount = float(request.form.get("src_amount"))
-    saldo = src.saldo()
+    saldo = src.saldo
     if saldo - src_amount < 0:
         return abort(409)
     dst_amount = float(request.form.get("dst_amount"))

@@ -1,10 +1,43 @@
+import sqlalchemy
 from sqlalchemy.sql.schema import CheckConstraint, UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import func
 from finnance import db, login_manager
 from flask_login import UserMixin
 
-class User(db.Model, UserMixin):
+class JSONModel:
+    json_relations = []
+    json_ignore = []
+
+    @staticmethod
+    def jsonValue(obj):
+        if isinstance(obj, db.Model):
+            return obj.json(deep=False)
+        if isinstance(obj, sqlalchemy.orm.collections.InstrumentedList):
+            return [item.json(deep=False) for item in obj]
+        return obj
+
+    def json(self, deep: bool):
+        d = {
+            key: self.jsonValue(value)
+            for key, value in self.__dict__.items()
+            if not (key.startswith('_') or key in self.json_ignore)
+        }
+        # properties
+        d.update({
+            key: self.jsonValue(getattr(self, key))
+            for key in vars(type(self))
+            if isinstance(getattr(type(self), key), property)
+        })
+        d["type"] = type(self).__name__.lower()
+        if deep:
+            d.update({
+                key: self.jsonValue(getattr(self, key))
+                for key in self.json_relations
+            })
+        return d
+
+class User(db.Model, JSONModel, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), nullable=False, unique=True)
     email = db.Column(db.String(64), nullable=False, unique=True)
@@ -18,7 +51,10 @@ class User(db.Model, UserMixin):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-class Account(db.Model):
+    json_relations = ["accounts", "categories", "agents"]
+    json_ignore = ["password"]
+        
+class Account(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
 
     desc = db.Column(db.String(32), nullable=False)
@@ -36,6 +72,8 @@ class Account(db.Model):
         UniqueConstraint('desc', 'user_id'),
         UniqueConstraint('order', 'user_id')
     )
+
+    json_relations = ["currency", "user", "transactions", "in_transfers", "out_transfers"]
 
     def changes(self, num=None):
         saldos = [self.starting_saldo]
@@ -57,13 +95,14 @@ class Account(db.Model):
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
+    @property
     def saldo(self):
-        return self.changes()[1][0]
+        return self.changes(num=1)[1][0]
     
     def starting(self):
         return self.currency.format(self.starting_saldo)
 
-class Transaction(db.Model):
+class Transaction(db.Model, JSONModel):
     __tablename__ = 'trans'
     input_format = "%d.%m.%Y %H:%M"
 
@@ -82,7 +121,9 @@ class Transaction(db.Model):
     agent = db.relationship("Agent", backref="transactions")
     currency = db.relationship("Currency", backref="transactions")
 
-class Record(db.Model):
+    json_relations = ["user", "account", "agent", "currency", "records", "flows"]
+
+class Record(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
@@ -95,7 +136,9 @@ class Record(db.Model):
         UniqueConstraint('category_id', 'trans_id'),
     )
 
-class Flow(db.Model):
+    json_relations = ["trans", "category"]
+
+class Flow(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
     is_debt = db.Column(db.Boolean, nullable=False)
@@ -109,7 +152,9 @@ class Flow(db.Model):
         UniqueConstraint('agent_id', 'trans_id'),
     )
 
-class AccountTransfer(db.Model):
+    json_relations = ["trans", "agent"]
+
+class AccountTransfer(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
     src_amount = db.Column(db.Float, nullable=False)
     dst_amount = db.Column(db.Float, nullable=False)
@@ -127,7 +172,9 @@ class AccountTransfer(db.Model):
         CheckConstraint('src_id != dst_id'),
     )
 
-class Currency(db.Model):
+    json_relations = ["user", "src", "dst"]
+
+class Currency(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(3), nullable=False, unique=True)
     decimals = db.Column(db.Integer, CheckConstraint("decimals >= 0"), nullable=False)
@@ -135,7 +182,7 @@ class Currency(db.Model):
     def format(self, number: float) -> str:
         return "{n:,.{d}f}".format(n=number, d=self.decimals)
 
-class Agent(db.Model):
+class Agent(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -145,6 +192,8 @@ class Agent(db.Model):
         UniqueConstraint('desc', 'user_id'),
     )
 
+    json_relations = ["user", "transactions", "flows"]
+
     @hybrid_property
     def uses(self):
         return len(self.transactions) + len(self.flows)
@@ -153,7 +202,7 @@ class Agent(db.Model):
     def uses(cls):
         return func.count(Transaction.id) + func.count(Flow.id)
 
-class Category(db.Model):
+class Category(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
     desc = db.Column(db.String(64), nullable=False)
     is_expense = db.Column(db.Boolean, nullable=False)
@@ -170,3 +219,5 @@ class Category(db.Model):
         UniqueConstraint('user_id', 'desc', 'is_expense'),
         UniqueConstraint('user_id', 'order')
     )
+
+    json_relations = ["parent", "user", "records"]

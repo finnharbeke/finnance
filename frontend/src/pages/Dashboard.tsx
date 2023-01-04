@@ -2,13 +2,14 @@ import { ActionIcon, Button, Collapse, createStyles, Divider, Grid, Skeleton, St
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { useLoaderData } from "react-router";
+import { Link } from "react-router-dom";
 
 interface dataType {
     accounts?: { id: number, desc: string, saldo: number }[]
 }
 
 export async function loader(): Promise<dataType> {
-    const response = await fetch("api/saldos").then(
+    const response = await fetch("/api/me").then(
         r => {
             return r.json()
         }).catch(e => {
@@ -29,7 +30,7 @@ export default function DashboardPage() {
 
     const cols = data.accounts.map(acc => (
         <Grid.Col sm={6} key={acc.id}>
-            <Button fullWidth classNames={{ label: classes.apart }}>
+            <Button component={Link} to={`accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}>
                 <Text>
                 {acc.desc}
                 </Text>
@@ -62,7 +63,7 @@ export default function DashboardPage() {
             <Button fullWidth>Analysis</Button>
             </Stack>
             <Divider my="lg"/>
-            <Skeleton width="100%" height={150} animate={false}/>
+            <Skeleton width="100%" height={150}/>
             <Divider my="lg"/>
             <Stack>
             <Button fullWidth variant="light">Manage Accounts</Button>

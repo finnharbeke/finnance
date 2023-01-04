@@ -77,9 +77,9 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function FinnanceHeader() {
-    const [opened, { toggle }] = useDisclosure(false);
+    const [ opened, { toggle }] = useDisclosure(false);
     const { classes, cx } = useStyles();
-    const { token } = useAuth();
+    const { auth } = useAuth();
 
     const links = [
         { link: "/", label: "home" },
@@ -104,7 +104,7 @@ export default function FinnanceHeader() {
                     <LightDarkToggle />
                     <FinnanceLogo text size={28} />
                 </Group>
-                {token &&
+                {auth &&
                     <>
                         <Group spacing={5} className={classes.links}>
                             {items}
