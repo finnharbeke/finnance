@@ -2,6 +2,7 @@ import json
 from http import HTTPStatus
 import traceback
 
+import datetime as dt
 import sqlalchemy
 from flask import Blueprint, abort, current_app, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -109,7 +110,26 @@ def account(account_id):
         user_id=current_user.id, id=account_id).first()
     if acc is None:
         raise APIError(HTTPStatus.UNAUTHORIZED)
-    return jsonify(acc.json(deep=True))
+    return acc.api()
+
+@api.route("accounts/<int:account_id>/changes")
+@login_required
+def changes(account_id):
+    acc: Account = Account.query.filter_by(
+        user_id=current_user.id, id=account_id).first()
+    if acc is None:
+        raise APIError(HTTPStatus.UNAUTHORIZED)
+    
+    kwargs = {"start": None, "end": None}
+    
+    for key, val in request.args.to_dict().items():
+        if key in kwargs and val != '':
+            try:
+                kwargs[key] = dt.datetime.fromisoformat(val)
+            except ValueError:
+                raise APIError(HTTPStatus.BAD_REQUEST)
+    
+    return acc.jsonify_changes(**kwargs)
 
 
 @api.route("/me")

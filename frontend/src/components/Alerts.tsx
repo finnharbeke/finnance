@@ -29,6 +29,24 @@ export function ServerSideErrorAlert({ open, msg }: AlertProps) {
     </Alert>
 }
 
+export function FrontendErrorAlert({ open, msg }: AlertProps) {
+    const { classes } = useStyles();
+    return <Alert
+        icon={<IconAlertCircle size={16} />}
+        title="Oops!" color="red"
+        variant="filled"
+        className={ open ? null : classes.hidden }
+        >
+        Something terrible happened!
+        <br/>
+        The Frontend didn't render due to
+        <br/>
+        <Code>{msg}</Code>
+        <br/>
+        Please contact the developer or try again later!
+    </Alert>
+}
+
 export function TimeoutAlert({ open }: AlertProps) {
     const { classes } = useStyles();
     return <Alert

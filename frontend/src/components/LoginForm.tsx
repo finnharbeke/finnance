@@ -80,7 +80,7 @@ export function LoginForm({ url }: { url?: string }) {
     const navigate = useNavigate();
     const { login, exists } = useAuth();
     const location = useLocation();
-    const { handleFetchErrors } = useErrorHandler();
+    const { handleErrors } = useErrorHandler();
 
     function handleUsername(values: UsernameInputType) {
         setLoading(true);
@@ -93,7 +93,7 @@ export function LoginForm({ url }: { url?: string }) {
                 setContinued(true);
             } else
                 unForm.setFieldError('username', "username doesn't exist")
-        }).catch(handleFetchErrors)
+        }).catch(handleErrors)
             .finally(() => setLoading(false));
     }
 
@@ -112,7 +112,7 @@ export function LoginForm({ url }: { url?: string }) {
                 navigate(location.state?.from?.pathname || '/');
             else
                 pwForm.setFieldError('password', "wrong password");
-        }).catch(handleFetchErrors)
+        }).catch(handleErrors)
             .finally(() => setLoading(false));
     }
 
