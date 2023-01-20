@@ -142,6 +142,7 @@ class Account(db.Model, JSONModel):
             if start <= change.date_issued and change.date_issued < end:
                 out.append({
                     "type": "account_change",
+                    "acc_id": self.id,
                     "saldo": saldo,
                     "data": change.json(deep=True)
                 })

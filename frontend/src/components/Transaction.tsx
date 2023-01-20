@@ -1,10 +1,96 @@
-import { Box, Center, createStyles, Text, Tooltip, useMantineTheme } from "@mantine/core";
+import { Box, Center, createStyles, MantineTheme, Text, Tooltip, useMantineTheme } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons";
 import * as moment from "moment";
 import { useRef } from "react";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import { AccountChangeTransaction } from "../Types/AccountChange";
-import { TransactionDeep } from "../Types/Transaction";
+
+export const HeadStyles = createStyles((theme: MantineTheme) => ({
+    head: {
+        background: theme.colorScheme === 'light' ?
+            theme.colors['gray'][1] : theme.colors['gray'][9]
+        ,
+        '&:hover': {
+            background: theme.colorScheme === 'light' ?
+                theme.colors['gray'][2] : theme.colors['gray'][8]
+        },
+        borderRadius: theme.fn.radius(),
+        display: 'flex',
+        marginTop: 3,
+        '& > *': {
+            '&:first-of-type': {
+                borderTopLeftRadius: theme.fn.radius(),
+                borderBottomLeftRadius: theme.fn.radius(),
+            },
+            border: 1,
+            borderColor: theme.colorScheme === 'light' ?
+                theme.colors['gray'][3] : theme.colors['gray'][7],
+            borderStyle: 'solid',
+
+            '&:not(:last-of-type)': {
+                borderRight: 'none',
+            },
+            '&:last-of-type': {
+                borderTopRightRadius: theme.fn.radius(),
+                borderBottomRightRadius: theme.fn.radius(),
+            },
+            padding: theme.spacing.xs,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            flexGrow: 0,
+            flexShrink: 0,
+        }
+    },
+    child: {
+    },
+    transferIcon: {
+        background: theme.colors.violet[
+            theme.colorScheme === 'light' ? 3 : 6
+        ],
+    },
+    incomeIcon: {
+        background: theme.colors.blue[
+            theme.colorScheme === 'light' ? 3 : 6
+        ],
+    },
+    expenseIcon: {
+        background: theme.colors.cinnabar[
+            theme.colorScheme === 'light' ? 3 : 6
+        ],
+    },
+    date: {
+        flexBasis: 69 + 2 * theme.spacing.xs + 2,
+        textAlign: 'center'
+    },
+    time: {
+        flexBasis: 45 + 2 * theme.spacing.xs + 2,
+        textAlign: 'center'
+    },
+    amount: {
+        flexBasis: 64 + 2 * theme.spacing.xs + 2,
+        textAlign: 'right',
+    },
+    incomeAmount: {
+        color: theme.colors.blue[
+            theme.colorScheme === 'light' ? 3 : 6
+        ],
+    },
+    expenseAmount: {
+        color: theme.colors.cinnabar[
+            theme.colorScheme === 'light' ? 3 : 6
+        ],
+    },
+    other: {
+        flexBasis: '25%'
+    },
+    agent: {
+        flexBasis: '25%'
+    },
+    comment: {
+        flex: 'auto',
+    }
+}));
 
 export function TransactionHead(props: AccountChangeTransaction) {
     const theme = useMantineTheme();
@@ -15,77 +101,7 @@ export function TransactionHead(props: AccountChangeTransaction) {
         theme.colorScheme === 'light' ? 3 : 6
     ];
     const radius = theme.fn.radius();
-    const useStyles = createStyles({
-        head: {
-            background: theme.colorScheme === 'light' ?
-                theme.colors['gray'][1] : theme.colors['gray'][9]
-            ,
-            '&:hover': {
-                background: theme.colorScheme === 'light' ?
-                    theme.colors['gray'][2] : theme.colors['gray'][8]
-            },
-            borderRadius: radius,
-            display: 'flex',
-            // marginTop: 3,
-            '& > *': {
-                '&:first-of-type': {
-                    borderTopLeftRadius: radius,
-                    borderBottomLeftRadius: radius,
-                },
-                border: 1,
-                borderColor: theme.colorScheme === 'light' ?
-                    theme.colors['gray'][3] : theme.colors['gray'][7],
-                borderStyle: 'solid',
-    
-                '&:not(:last-of-type)': {
-                    borderRight: 'none',
-                },
-                '&:last-of-type': {
-                    borderTopRightRadius: radius,
-                    borderBottomRightRadius: radius,
-                },
-                padding: theme.spacing.xs,
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                flexGrow: 0,
-                flexShrink: 0,
-            }
-        },
-        child: {
-        },
-        incomeIcon: {
-            background: incomeColor,
-        },
-        expenseIcon: {
-            background: expenseColor,
-        },
-        date: {
-            flexBasis: 69 + 2 * theme.spacing.xs + 2,
-            textAlign: 'center'
-        },
-        time: {
-            flexBasis: 45 + 2 * theme.spacing.xs + 2,
-            textAlign: 'center'
-        },
-        amount: {
-            flexBasis: 64 + 2 * theme.spacing.xs + 2,
-            textAlign: 'right',
-        },
-        incomeAmount: {
-            color: incomeColor,
-        },
-        expenseAmount: {
-            color: expenseColor,
-        },
-        agent: {
-            flexBasis: '25%'
-        },
-        comment: {
-            flex: 'auto',
-        }
-    });
-    const { classes, cx } = useStyles();
+    const { classes, cx } = HeadStyles();
 
     const { saldo } = props;
     const { is_expense, comment, amount, agent, currency } = props.data;

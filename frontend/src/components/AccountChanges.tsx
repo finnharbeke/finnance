@@ -5,6 +5,7 @@ import { throwOrReturnFromResponse } from "../contexts/ErrorHandlerProvider";
 import useErrorHandler from "../hooks/useErrorHandler";
 import { AccountChange, isAccountChangeTransaction } from "../Types/AccountChange";
 import { TransactionHead } from "./Transaction";
+import { TransferHead } from "./Transfer";
 
 interface AccountChangesProps {
     id: number,
@@ -32,17 +33,18 @@ export function AccountChanges(props: AccountChangesProps) {
                     return isAccountChangeTransaction(change) ?
                         <TransactionHead {...change} key={ix}/>
                         :
-                        <Text key={ix}>heyy</Text>
+                        <TransferHead {...change} key={ix}/>
                     }
                 ))
             ).catch(handleErrors).finally(() => setLoading(false))
-    }, []);
+    }, [id, start, end]);
 
-    const useStyles = createStyles({
+    const useStyles = createStyles((theme) => ({
         opaqueImage: {
-            opacity: 0.2
+            opacity: 0.2,
+            filter: theme.colorScheme === 'light' ? '' : 'invert(100%)'
         }
-    })
+    }))
 
     const { classes } = useStyles();
 

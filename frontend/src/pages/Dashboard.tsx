@@ -30,7 +30,7 @@ export default function DashboardPage() {
 
     const cols = data.accounts.map(acc => (
         <Grid.Col sm={6} key={acc.id}>
-            <Button component={Link} to={`accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}>
+            <Button component={Link} to={`/accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}>
                 <Text>
                 {acc.desc}
                 </Text>
@@ -53,7 +53,7 @@ export default function DashboardPage() {
                     {cols.slice(2)}
                 </Grid>
             </Collapse>
-            <Divider my="lg" labelPosition="ceneter" label={
+            <Divider my="lg" labelPosition="center" label={
                 <ActionIcon size="xs" onClick={handlers.toggle}>
                     {opened ? <IconChevronUp/> : <IconChevronDown/>}
                 </ActionIcon>
