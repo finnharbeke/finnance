@@ -48,7 +48,7 @@ export const throwOrReturnFromResponse = (response: Response) => (
 
 export const ErrorHandlerContext = createContext<ErrorHandlerContextType>(null);
 
-export default function AuthProvider({ children }: { children: ReactNode }) {
+export default function ErrorHandlerProvider({ children }: { children: ReactNode }) {
     enum Variant {
         timeout, response, frontend
     }
