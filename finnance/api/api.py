@@ -147,6 +147,16 @@ def category(category_id):
         raise APIError(HTTPStatus.UNAUTHORIZED)
     return jsonify(cat.json(deep=True))
 
+@api.route("/agents")
+@login_required
+def agents():
+    # raise APIError(HTTPStatus.UNAUTHORIZED)
+    agents = Agent.query.filter_by(user_id=current_user.id).join(Transaction, isouter=True).join(
+        Flow, sqlalchemy.and_(Agent.id == Flow.agent_id, 
+        Transaction.id == Flow.trans_id), isouter=True).group_by(
+            Agent.id).order_by(Agent.uses.desc(), Agent.desc).all()
+    return jsonify([agent.json(deep=False) for agent in agents])
+
 @api.errorhandler(APIError)
 def handle_apierror(err: APIError):
     return jsonify({

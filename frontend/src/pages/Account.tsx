@@ -1,26 +1,14 @@
 import { Button, Grid, Text, Title } from "@mantine/core";
 import { IconCirclePlus } from "@tabler/icons";
 import * as moment from "moment";
+import { useState } from "react";
 import { Params, useLoaderData } from "react-router";
 import { AccountChanges } from "../components/AccountChanges";
-import { TransactionHead } from "../components/Transaction";
+import { openTransactionModal } from "../components/modals/Transaction";
 import { throwOrReturnFromResponse } from "../contexts/ErrorHandlerProvider";
+import { AccountDeep } from "../Types/Account";
 
-interface AccountProps {
-    id?: number,
-    desc?: string,
-    starting_saldo?: number,
-    saldo?: number,
-    date_created?: string,
-    currency?: {
-        id?: number,
-        code?: string,
-        decimals?: number
-    },
-    transactions?: any[]
-}
-
-export function loader({ params }: { params: Params }): Promise<AccountProps> {
+export function loader({ params }: { params: Params }): Promise<AccountDeep> {
     if (!params.id.match(/\d+/)) {
         throw new Response("Invalid account id", { status: 400, statusText: "BAD REQUEST" });
     }
@@ -31,10 +19,10 @@ export function loader({ params }: { params: Params }): Promise<AccountProps> {
 }
 
 export default function AccountPage() {
-    const data: AccountProps = useLoaderData();
+    const data = useLoaderData() as AccountDeep;
     const { id, desc, saldo, currency } = data;
 
-
+    const [loading, setLoading] = useState(false);
     const date_created = moment(data.date_created);
 
     return <>
@@ -50,12 +38,14 @@ export default function AccountPage() {
         </Grid>
         <Button size="lg" my="md" fullWidth leftIcon={
             <IconCirclePlus size={40} />
-        }></Button>
-        <AccountChanges id={id} start={moment().startOf('M')} end={moment()}/>
+        } onClick={() => {
+            setLoading(true);
+            openTransactionModal({
+                innerProps: {
+                    currency: currency
+                }
+            }).then(() => setLoading(false))
+        }}></Button>
+        <AccountChanges id={id} start={moment().startOf('M')} end={moment()} />
     </>;
-    // return <>
-    //     <Title>{data.desc}</Title>
-    //     <Text>{data.date_created}</Text>
-    // </>
-
 }

@@ -1,4 +1,4 @@
-import { Anchor, Center, createStyles, Image, Skeleton, Stack, Text } from "@mantine/core";
+import { Anchor, Center, createStyles, Image, Skeleton, Stack } from "@mantine/core";
 import * as moment from "moment";
 import { useEffect, useState } from "react";
 import { throwOrReturnFromResponse } from "../contexts/ErrorHandlerProvider";
@@ -37,7 +37,7 @@ export function AccountChanges(props: AccountChangesProps) {
                     }
                 ))
             ).catch(handleErrors).finally(() => setLoading(false))
-    }, [id, start, end]);
+    }, [id, start, end, handleErrors]);
 
     const useStyles = createStyles((theme) => ({
         opaqueImage: {

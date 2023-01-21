@@ -1,5 +1,5 @@
-import { Box, Center, createStyles, Text, Tooltip, useMantineTheme } from "@mantine/core";
-import { IconArrowsLeftRight, IconMinus, IconPlus } from "@tabler/icons";
+import { Box, Center, Text, Tooltip } from "@mantine/core";
+import { IconArrowsLeftRight } from "@tabler/icons";
 import * as moment from "moment";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
@@ -15,7 +15,7 @@ export function TransferHead(props: AccountChangeTransfer) {
     const { src, dst, comment, src_amount, dst_amount } = props.data;
     const is_expense = src.id === acc_id;
     const amount = is_expense ? src_amount : dst_amount;
-    const acc = is_expense ? src : dst;
+    // const acc = is_expense ? src : dst;
     const other = is_expense ? dst : src;
 
     const date = moment(props.data.date_issued);

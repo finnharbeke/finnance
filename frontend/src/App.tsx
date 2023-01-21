@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { RouterProvider } from "react-router-dom";
 import AuthProvider from './contexts/AuthProvider';
 import ErrorHandlerProvider from './contexts/ErrorHandlerProvider';
+import FinnanceModalProvider from './contexts/ModalProvider';
 import { FinnanceRouter } from './routes/Router';
 import theme from './theme';
 
@@ -19,7 +20,9 @@ function App() {
             <MantineProvider theme={{ ...theme, colorScheme }} withGlobalStyles withNormalizeCSS>
                 <ErrorHandlerProvider>
                     <AuthProvider>
-                        <RouterProvider router={FinnanceRouter} />
+                        <FinnanceModalProvider>
+                            <RouterProvider router={FinnanceRouter} />
+                        </FinnanceModalProvider>
                     </AuthProvider>
                 </ErrorHandlerProvider>
             </MantineProvider>

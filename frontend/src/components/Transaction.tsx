@@ -1,4 +1,4 @@
-import { Box, Center, createStyles, MantineTheme, Text, Tooltip, useMantineTheme } from "@mantine/core";
+import { Box, Center, createStyles, MantineTheme, Text, Tooltip } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons";
 import * as moment from "moment";
 import { useRef } from "react";
@@ -55,7 +55,7 @@ export const HeadStyles = createStyles((theme: MantineTheme) => ({
         ],
     },
     expenseIcon: {
-        background: theme.colors.cinnabar[
+        background: theme.colors.red[
             theme.colorScheme === 'light' ? 3 : 6
         ],
     },
@@ -77,7 +77,7 @@ export const HeadStyles = createStyles((theme: MantineTheme) => ({
         ],
     },
     expenseAmount: {
-        color: theme.colors.cinnabar[
+        color: theme.colors.red[
             theme.colorScheme === 'light' ? 3 : 6
         ],
     },
@@ -93,14 +93,6 @@ export const HeadStyles = createStyles((theme: MantineTheme) => ({
 }));
 
 export function TransactionHead(props: AccountChangeTransaction) {
-    const theme = useMantineTheme();
-    const incomeColor = theme.colors.blue[
-        theme.colorScheme === 'light' ? 3 : 6
-    ];
-    const expenseColor = theme.colors.cinnabar[
-        theme.colorScheme === 'light' ? 3 : 6
-    ];
-    const radius = theme.fn.radius();
     const { classes, cx } = HeadStyles();
 
     const { saldo } = props;
