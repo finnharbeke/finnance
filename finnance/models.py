@@ -34,7 +34,8 @@ class JSONModel:
     def jsonValue(obj):
         if isinstance(obj, db.Model):
             return obj.json(deep=False)
-        if isinstance(obj, sqlalchemy.orm.collections.InstrumentedList):
+        if isinstance(obj, sqlalchemy.orm.collections.InstrumentedList
+            ) or isinstance(obj, list):
             return [item.json(deep=False) for item in obj]
         return obj
 
@@ -122,7 +123,6 @@ class Account(db.Model, JSONModel):
 
     def jsonify_changes(self, start=None, end=None):
         saldo = self.starting_saldo
-        print(start, end)
         changes = sorted(
             self.transactions + self.out_transfers + self.in_transfers,
             key=lambda ch: ch.date_issued
@@ -280,11 +280,16 @@ class Category(db.Model, JSONModel):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="categories")
 
-    parent = db.relationship("Category", backref="children", remote_side=[id])
+    parent = db.relationship("Category", remote_side=[id])
+
+    @property
+    def children(self):
+        return Category.query.filter_by(parent_id=self.id
+                ).order_by(Category.order).all()
 
     __table_args__ = (
         UniqueConstraint('user_id', 'desc', 'is_expense'),
         UniqueConstraint('user_id', 'order')
     )
 
-    json_relations = ["parent", "user", "records"]
+    json_relations = ["user", "records"]

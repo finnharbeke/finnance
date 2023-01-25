@@ -36,11 +36,12 @@ export default function AccountPage() {
                 <Title order={1}>{saldo.toFixed(currency.decimals)} {currency.code}</Title>
             </Grid.Col>
         </Grid>
-        <Button size="lg" my="md" fullWidth leftIcon={
+        <Button size="lg" my="md" fullWidth loading={loading} leftIcon={
             <IconCirclePlus size={40} />
         } onClick={() => {
             setLoading(true);
             openTransactionModal({
+                title: `new transaction - ${desc}`,
                 innerProps: {
                     currency: currency
                 }

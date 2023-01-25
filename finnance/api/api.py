@@ -157,6 +157,12 @@ def agents():
             Agent.id).order_by(Agent.uses.desc(), Agent.desc).all()
     return jsonify([agent.json(deep=False) for agent in agents])
 
+@api.route("/categories")
+@login_required
+def categories():
+    categories = Category.query.filter_by(user_id=current_user.id, parent=None).all()
+    return jsonify([cat.json(deep=False) for cat in categories])
+
 @api.errorhandler(APIError)
 def handle_apierror(err: APIError):
     return jsonify({
