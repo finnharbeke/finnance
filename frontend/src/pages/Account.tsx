@@ -43,7 +43,8 @@ export default function AccountPage() {
             openTransactionModal({
                 title: `new transaction - ${desc}`,
                 innerProps: {
-                    currency: currency
+                    currency: currency,
+                    account: data
                 }
             }).then(() => setLoading(false))
         }}></Button>
