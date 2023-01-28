@@ -280,12 +280,12 @@ class Category(db.Model, JSONModel):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="categories")
 
-    parent = db.relationship("Category", remote_side=[id])
+    # parent = db.relationship("Category", remote_side=[id])
 
     @property
-    def children(self):
-        return Category.query.filter_by(parent_id=self.id
-                ).order_by(Category.order).all()
+    def parent(self):
+        return Category.query.filter_by(id=self.parent_id
+                ).order_by(Category.order).first()
 
     __table_args__ = (
         UniqueConstraint('user_id', 'desc', 'is_expense'),

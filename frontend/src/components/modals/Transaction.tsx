@@ -56,7 +56,7 @@ export const openTransactionModal = async (props?: OpenContextModal<OpenTransact
 interface Record {
     type: 'record'
     amount: number,
-    category: number,
+    category_id: number,
     ix: number
 }
 
@@ -76,21 +76,36 @@ interface FormValues {
     account_id: number
     date: Date
     time: Date
-    datetime: Date
     amount: number
     isExpense: boolean
     agent: string
     isDirect: boolean
-    flows: Flow[]
-    records: Record[]
     n_flows: number
     n_records: number
     items: Item[]
     comment: string
 }
 
-const submitForm = (values: FormValues) => {
-    console.log(values)
+interface transformedFormValues {
+    account_id: number
+    date_issued: string
+    amount: number
+    isExpense: boolean
+    agent: string
+    flows: {
+        amount: number
+        agent: string
+    }[],
+    records: {
+        amount: number
+        category_id: number
+    }[]
+}
+
+type Transform = (values: FormValues) => transformedFormValues
+
+const submitForm = (values: transformedFormValues) => {
+    console.log(values);
 }
 
 export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
@@ -137,18 +152,15 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
     const { classes, cx } = useStyles();
     const { currency, agents, categories, account } = innerProps;
 
-    const form = useForm<FormValues>({
+    const form = useForm<FormValues, Transform>({
         initialValues: {
             account_id: account.id,
             date: null,
             time: new Date(),
-            datetime: null,
             amount: null,
             isExpense: true,
             agent: '',
             isDirect: false,
-            flows: null,
-            records: null,
             n_flows: 0,
             n_records: 0,
             items: [],
@@ -177,15 +189,15 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                     }
                     return null;
                 },
-                category: (id, values, path) => {
+                category_id: (id, values, path) => {
                     const i = parseInt(path.replace(/^\D+/g, ''));
                     if (isFlow(values.items[i]))
                         return null;
                     if (id === null)
                         return 'select category';
-                    for (let j = 0; j < i; j++){
+                    for (let j = 0; j < i; j++) {
                         const item = values.items[j];
-                        if (!isFlow(item) && item.category === id)
+                        if (!isFlow(item) && item.category_id === id)
                             return 'duplicate category';
                     }
                     return null;
@@ -208,20 +220,27 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                 }
             }
         },
-        transformValues: (values) => ({
-            ...values,
-            datetime: moment(values.date)
+        transformValues: (values: FormValues) => ({
+            account_id: values.account_id,
+            amount: values.amount,
+            isExpense: values.isExpense,
+            agent: values.agent,
+            date_issued: moment(values.date)
                 .add(moment(values.time).hour(), 'hour')
                 .add(moment(values.time).minute(), 'minute')
-                .toDate(),
-            flows: values.items.filter(isFlow)
-                .map(item => item),
-            records: values.items.filter(isRecord)
-                .map(item => item)
+                .toISOString(true).replace(/\+.*/, ''), // no timezone
+            flows: values.isDirect ?
+                [{ amount: values.amount, agent: values.agent }]
+                :
+                values.items.filter(isFlow)
+                    .map(item => item),
+            records: values.isDirect ?
+                [] : values.items.filter(isRecord)
+                    .map(item => item)
         })
     });
 
-    return <form onSubmit={form.onSubmit(submitForm)}>
+    return <form onSubmit={form.onSubmit(submitForm, console.log)}>
         <Group grow align='flex-start'>
             <DatePicker
                 data-autofocus label="date" placeholder="dd.mm.yyyy" withAsterisk
@@ -265,7 +284,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                                 if (form.values.isExpense) {
                                     form.values.items
                                         .forEach((item, i) => isRecord(item) ? form.setFieldValue(
-                                            `items.${i}.category`, null
+                                            `items.${i}.category_id`, null
                                         ) : null)
                                 }
                                 form.setFieldValue('isExpense', false);
@@ -276,7 +295,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                                 if (!form.values.isExpense) {
                                     form.values.items
                                         .forEach((item, i) => isRecord(item) ? form.setFieldValue(
-                                            `items.${i}.category`, null
+                                            `items.${i}.category_id`, null
                                         ) : null)
                                 }
                                 form.setFieldValue('isExpense', true);
@@ -312,11 +331,11 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                                 type: 'record',
                                 ix: form.values.n_records,
                                 amount: null,
-                                category: null
+                                category_id: null
                             };
                             form.insertListItem('items', item);
                             form.insertListItem('records', item);
-                            form.setFieldValue('n_records', form.values.n_records+1)
+                            form.setFieldValue('n_records', form.values.n_records + 1)
                         }}
                     >
                         Add Record
@@ -337,7 +356,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                             };
                             form.insertListItem('items', item)
                             form.insertListItem('flows', item)
-                            form.setFieldValue('n_flows', form.values.n_flows+1)
+                            form.setFieldValue('n_flows', form.values.n_flows + 1)
                         }}
                     >
                         Add Flow
@@ -395,7 +414,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                                                 )
                                                 form.removeListItem('items', i);
                                                 form.removeListItem('flows', data.ix);
-                                                form.setFieldValue('n_flows', form.values.n_flows-1)
+                                                form.setFieldValue('n_flows', form.values.n_flows - 1)
                                             }}>
                                             <IconEraser size={18} />
                                         </ActionIcon>
@@ -427,14 +446,15 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                                             searchable clearable
                                             placeholder={`Category #${data.ix}`}
                                             data={categories.filter(
-                                                cat => cat.is_expense === form.values.isExpense
+                                                cat => cat.usable && cat.is_expense === form.values.isExpense
                                             ).map(
                                                 cat => ({
                                                     value: cat.id,
                                                     label: cat.desc,
+                                                    group: cat.parent_id === null ? cat.desc : cat.parent.desc
                                                 })
                                             )}
-                                            {...form.getInputProps(`items.${i}.category`)}
+                                            {...form.getInputProps(`items.${i}.category_id`)}
                                         />
                                     </Grid.Col>
                                     <Grid.Col span='content'>
@@ -449,7 +469,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                                                 )
                                                 form.removeListItem('items', i);
                                                 form.removeListItem('records', data.ix);
-                                                form.setFieldValue('n_records', form.values.n_records-1)
+                                                form.setFieldValue('n_records', form.values.n_records - 1)
                                             }}>
                                             <IconEraser size={18} />
                                         </ActionIcon>
