@@ -5,6 +5,7 @@ import { closeModal, ContextModalProps, openContextModal } from "@mantine/modals
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { IconArrowWaveRightUp, IconEraser, IconMinus, IconPlus, IconTrendingDown, IconTrendingUp } from "@tabler/icons";
 import { DateTime, Duration } from "luxon";
+import { useSubmit } from "react-router-dom";
 import { formatDiagnostic } from "typescript";
 import { throwOrReturnFromResponse } from "../../contexts/ErrorHandlerProvider";
 import { AccountDeep } from "../../Types/Account";
@@ -250,6 +251,8 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         })
     });
 
+    // const submit = useSubmit();
+    // TODO: let react router know of the change
     const submitForm = (values: transformedFormValues) =>
         fetch(`/api/transactions/add`, {
             method: 'post',

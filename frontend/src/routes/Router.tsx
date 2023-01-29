@@ -14,8 +14,8 @@ import { PrivateRoute, StrictPublicRoute } from "./Route";
 
 const routes = (
 
-    <Route element={<Layout />}>
-        <Route element={<Outlet/>} errorElement={<LoaderError/>}>
+    <Route element={<Layout />} errorElement={<LoaderError/>}>
+        <Route element={<Outlet/>}>
             {/* <Route index element={<HomePage />}></Route> */}
             <Route element={<StrictPublicRoute />}>
                 <Route path="login" element={<LoginForm />} />
