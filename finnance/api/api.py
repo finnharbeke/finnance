@@ -128,7 +128,7 @@ def changes(account_id):
                 kwargs[key] = dt.datetime.fromisoformat(val)
             except ValueError:
                 raise APIError(HTTPStatus.BAD_REQUEST)
-    
+
     return acc.jsonify_changes(**kwargs)
 
 
@@ -216,6 +216,7 @@ def handle_exception(err: Exception):
     "required": ["amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
 })
 def add_trans(edit=None, **data):
+    print(data)
     data['date_issued'] = dt.datetime.fromisoformat(data.pop('date_issued'))
 
     if data['account_id']:

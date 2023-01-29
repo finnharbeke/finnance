@@ -111,16 +111,6 @@ interface transformedFormValues {
 
 type Transform = (values: FormValues) => transformedFormValues
 
-const submitForm = (values: transformedFormValues) => {
-    console.log(values);
-    return fetch(`/api/transactions/add`, {
-        method: 'post',
-        body: JSON.stringify(values),
-        signal: AbortSignal.timeout(3000)
-    }).then(throwOrReturnFromResponse)
-};
-
-
 export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
     const useStyles = createStyles((theme: MantineTheme) => {
         const inc = theme.colors.blue[
@@ -259,6 +249,13 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                     }))
         })
     });
+
+    const submitForm = (values: transformedFormValues) =>
+        fetch(`/api/transactions/add`, {
+            method: 'post',
+            body: JSON.stringify(values),
+            signal: AbortSignal.timeout(3000)
+        }).then(throwOrReturnFromResponse);
 
     return <form onSubmit={form.onSubmit((vals) => submitForm(vals).then(() => context.closeModal(id)))}>
         <Group grow align='flex-start'>
@@ -501,7 +498,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
             )
         }
         <Divider my='sm' />
-        <TextInput label='comment' />
+        <TextInput label='comment' {...form.getInputProps('comment')} />
         <Button fullWidth mt="md" type='submit'>
             add transaction
         </Button>
