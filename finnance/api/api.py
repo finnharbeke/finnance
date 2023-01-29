@@ -30,7 +30,7 @@ def check_input(schema):
             self.schema = schema
             self.validator = Draft202012Validator(schema=schema)
 
-        def __call__(self):
+        def __call__(self, **kwargs):
             try:
                 data = json.loads(request.data.decode())
                 self.validator.validate(instance=data)
@@ -39,7 +39,7 @@ def check_input(schema):
             except ValidationError as err:
                 raise APIError(HTTPStatus.BAD_REQUEST,
                                f"Invalid JSON schema: {err.message}")
-            return self.foo(**data)
+            return self.foo(**data, **kwargs)
 
     return lambda foo: Wrapper(foo, schema)
 
@@ -120,7 +120,7 @@ def changes(account_id):
     if acc is None:
         raise APIError(HTTPStatus.UNAUTHORIZED)
     
-    kwargs = {"start": None, "end": None}
+    kwargs = {"start": acc.date_created, "end": dt.datetime.now()}
     
     for key, val in request.args.to_dict().items():
         if key in kwargs and val != '':
@@ -160,7 +160,7 @@ def agents():
 @api.route("/categories")
 @login_required
 def categories():
-    categories = Category.query.filter_by(user_id=current_user.id, parent=None).all()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
     return jsonify([cat.json(deep=False) for cat in categories])
 
 @api.errorhandler(APIError)
@@ -181,6 +181,102 @@ def handle_exception(err: Exception):
         "msg": f"{type(err).__name__}: {str(err)}"
     }), 500
 
+@api.route("/transactions/add", methods=["POST"])
+@login_required
+@check_input({
+    "type": "object",
+    "properties": {
+        "account_id": {"type": "number"},
+        "amount": {"type": "number"},
+        "date_issued": {"type": "string"},
+        "is_expense": {"type": "boolean"},
+        "agent": {"type": "string"},
+        "comment": {"type": "string"},
+        "flows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "amount": {"type": "number"},
+                    "agent": {"type": "string"},
+                }
+            }
+        },
+        "records": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "amount": {"type": "number"},
+                    "category_id": {"type": "number"},
+                }
+            }
+        },
+    },
+    "required": ["amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
+})
+def add_trans(edit=None, **data):
+    data['date_issued'] = dt.datetime.fromisoformat(data.pop('date_issued'))
+
+    if data['account_id']:
+        account = Account.query.get(data['account_id'])
+        if account.user_id != current_user.id:
+            return APIError(HTTPStatus.UNAUTHORIZED)
+        # check saldo
+        saldo = account.saldo
+        # TODO: saldo at date_issued
+        if edit is None:
+            diff = -data['amount'] if data['is_expense'] else data['amount']
+        else:
+            tr = Transaction.query.get(edit)
+            diff = tr.amount if tr.is_expense else -tr.amount
+            diff += -data['amount'] if data['is_expense'] else data['amount']
+
+        if saldo + diff < 0:
+            return APIError(HTTPStatus.BAD_REQUEST,
+                               "Transaction results in negative Account Saldo!")
+
+        data['currency_id'] = account.currency_id
+
+    def agent_createif(agent_desc):
+        if agent_desc is None:
+            return None
+        agent = Agent.query.filter_by(desc=agent_desc).first()
+        if not agent:
+            agent = Agent(desc=agent_desc, user_id=current_user.id)
+            db.session.add(agent)
+            db.session.commit()
+        return agent
+    
+    # AGENTs
+    agent = agent_createif(data.pop('agent'))
+    data['agent_id'] = agent.id
+    # remote_agent = agent_createif(data.pop('remote_agent'))
+    
+    flows = data.pop('flows')
+
+    for flow in flows:
+        flow['agent_id'] = agent_createif(flow.pop('agent')).id
+        flow['is_debt'] = not data['is_expense']
+    
+    records = data.pop('records')
+
+    trans = Transaction(**data, user_id=current_user.id)
+    db.session.add(trans)
+    db.session.commit()
+    for record in records:
+        db.session.add(
+            Record(**record, trans_id=trans.id)
+        )
+    for flow in flows:
+        db.session.add(
+            Flow(**flow, trans_id=trans.id)
+        )
+    db.session.commit()
+        
+    return jsonify({
+        "success": True
+    })
 
 @login_manager.unauthorized_handler
 def unauthorized():

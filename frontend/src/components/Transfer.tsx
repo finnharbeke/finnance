@@ -1,6 +1,6 @@
 import { Box, Center, Text, Tooltip } from "@mantine/core";
 import { IconArrowsLeftRight } from "@tabler/icons";
-import * as moment from "moment";
+import { DateTime } from "luxon";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useIsOverflow } from "../hooks/useIsOverflow";
@@ -18,7 +18,7 @@ export function TransferHead(props: AccountChangeTransfer) {
     // const acc = is_expense ? src : dst;
     const other = is_expense ? dst : src;
 
-    const date = moment(props.data.date_issued);
+    const date = DateTime.fromISO(props.data.date_issued);
 
     const otherRef = useRef();
     const otherOverflow = useIsOverflow(otherRef);
@@ -30,8 +30,8 @@ export function TransferHead(props: AccountChangeTransfer) {
             <Center className={cx(classes.child, classes.transferIcon)}>
                 <IconArrowsLeftRight />
             </Center>
-            <Text className={cx(classes.child, classes.date)}>{date.format("DD.MM.YY")}</Text>
-            <Text className={cx(classes.child, classes.time)}>{date.format("HH:mm")}</Text>
+            <Text className={cx(classes.child, classes.date)}>{date.toFormat("dd.MM.yy")}</Text>
+            <Text className={cx(classes.child, classes.time)}>{date.toFormat("HH:mm")}</Text>
             <Text className={cx(classes.child, classes.amount,
                 is_expense ? classes.expenseAmount : classes.incomeAmount)}>{amount.toFixed(2)}</Text>
             <Tooltip label={other.desc} disabled={!otherOverflow} openDelay={250}>

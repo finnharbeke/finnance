@@ -1,4 +1,3 @@
-import * as moment from "moment"
 import { AccountFlat } from "./Account"
 import { AgentFlat } from "./Agent"
 import { CurrencyFlat } from "./Currency"

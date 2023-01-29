@@ -1,4 +1,3 @@
-import * as moment from "moment"
 import { AccountFlat } from "./Account"
 
 export interface TransferFlat {

@@ -1,10 +1,10 @@
 import { ActionIcon, Autocomplete, Button, createStyles, Divider, Grid, Group, Input, MantineTheme, NumberInput, Select, Switch, TextInput, useMantineTheme } from "@mantine/core";
 import { DatePicker, TimeInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
+import { closeModal, ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { IconArrowWaveRightUp, IconEraser, IconMinus, IconPlus, IconTrendingDown, IconTrendingUp } from "@tabler/icons";
-import * as moment from "moment";
+import { DateTime, Duration } from "luxon";
 import { formatDiagnostic } from "typescript";
 import { throwOrReturnFromResponse } from "../../contexts/ErrorHandlerProvider";
 import { AccountDeep } from "../../Types/Account";
@@ -53,17 +53,23 @@ export const openTransactionModal = async (props?: OpenContextModal<OpenTransact
 
 }
 
-interface Record {
-    type: 'record'
+interface RecordPost {
     amount: number,
     category_id: number,
+}
+
+interface Record extends RecordPost {
+    type: 'record'
     ix: number
 }
 
-interface Flow {
-    type: 'flow'
+interface FlowPost {
     amount: number,
     agent: string,
+}
+
+interface Flow extends FlowPost {
+    type: 'flow'
     ix: number
 }
 
@@ -90,8 +96,9 @@ interface transformedFormValues {
     account_id: number
     date_issued: string
     amount: number
-    isExpense: boolean
+    is_expense: boolean
     agent: string
+    comment: string
     flows: {
         amount: number
         agent: string
@@ -106,7 +113,13 @@ type Transform = (values: FormValues) => transformedFormValues
 
 const submitForm = (values: transformedFormValues) => {
     console.log(values);
-}
+    return fetch(`/api/transactions/add`, {
+        method: 'post',
+        body: JSON.stringify(values),
+        signal: AbortSignal.timeout(3000)
+    }).then(throwOrReturnFromResponse)
+};
+
 
 export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
     const useStyles = createStyles((theme: MantineTheme) => {
@@ -169,7 +182,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         validate: {
             date: val => val === null ? 'choose date' : null,
             time: (val, vals) => val === null ? 'choose time' :
-                moment(vals.date).isSame(moment(), 'day') && moment(val).isAfter(moment()) ?
+                DateTime.fromJSDate(vals.date).hasSame(DateTime.now(), 'day') && DateTime.now() < DateTime.fromJSDate(val) ?
                     'in the future' : null,
             agent: desc => desc.length === 0 ? "at least one character" : null,
             amount: val => val === null ? 'enter amount' : val === 0 ? 'non-zero amount' : null,
@@ -223,32 +236,39 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         transformValues: (values: FormValues) => ({
             account_id: values.account_id,
             amount: values.amount,
-            isExpense: values.isExpense,
+            is_expense: values.isExpense,
             agent: values.agent,
-            date_issued: moment(values.date)
-                .add(moment(values.time).hour(), 'hour')
-                .add(moment(values.time).minute(), 'minute')
-                .toISOString(true).replace(/\+.*/, ''), // no timezone
+            comment: values.comment,
+            date_issued: DateTime.fromJSDate(values.date).plus(Duration.fromObject({
+                hour: DateTime.fromJSDate(values.time).hour,
+                minute: DateTime.fromJSDate(values.time).minute
+            })).toISO({ includeOffset: false }),
             flows: values.isDirect ?
                 [{ amount: values.amount, agent: values.agent }]
                 :
                 values.items.filter(isFlow)
-                    .map(item => item),
+                    .map(item => ({
+                        amount: item.amount,
+                        agent: item.agent
+                    })),
             records: values.isDirect ?
                 [] : values.items.filter(isRecord)
-                    .map(item => item)
+                    .map(item => ({
+                        amount: item.amount,
+                        category_id: item.category_id
+                    }))
         })
     });
 
-    return <form onSubmit={form.onSubmit(submitForm, console.log)}>
+    return <form onSubmit={form.onSubmit((vals) => submitForm(vals).then(() => context.closeModal(id)))}>
         <Group grow align='flex-start'>
             <DatePicker
                 data-autofocus label="date" placeholder="dd.mm.yyyy" withAsterisk
                 inputFormat="DD.MM.YYYY" clearable={false}
-                minDate={moment(account.date_created).toDate()}
-                maxDate={moment().toDate()}
+                minDate={DateTime.fromISO(account.date_created).toJSDate()}
+                maxDate={DateTime.now().toJSDate()}
                 allowFreeInput dateParser={(dateString: string) => {
-                    return moment(dateString, 'DD.MM.YYYY').toDate()
+                    return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
                 }}
                 {...form.getInputProps('date')}
             />

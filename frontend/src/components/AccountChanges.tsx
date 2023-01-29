@@ -1,16 +1,16 @@
 import { Anchor, Center, createStyles, Image, Skeleton, Stack } from "@mantine/core";
-import * as moment from "moment";
 import { useEffect, useState } from "react";
 import { throwOrReturnFromResponse } from "../contexts/ErrorHandlerProvider";
 import useErrorHandler from "../hooks/useErrorHandler";
 import { AccountChange, isAccountChangeTransaction } from "../Types/AccountChange";
 import { TransactionHead } from "./Transaction";
 import { TransferHead } from "./Transfer";
+import { DateTime } from "luxon";
 
 interface AccountChangesProps {
     id: number,
-    start: moment.Moment,
-    end: moment.Moment,
+    start: DateTime,
+    end: DateTime,
 }
 
 export function AccountChanges(props: AccountChangesProps) {
@@ -21,8 +21,8 @@ export function AccountChanges(props: AccountChangesProps) {
     useEffect(() => {
         setLoading(true);
         var searchParams = new URLSearchParams();
-        const naiveStart = start.toISOString(false).replace('Z', '');
-        const naiveEnd = end.toISOString(false).replace('Z', '');
+        const naiveStart = start.toISO({ includeOffset: false });
+        const naiveEnd = end.toISO({ includeOffset: false });
         searchParams.append('start', naiveStart);
         searchParams.append('end', naiveEnd);
         fetch(`/api/accounts/${id}/changes?` + searchParams.toString(), {

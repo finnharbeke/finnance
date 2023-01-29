@@ -1,6 +1,6 @@
 import { Button, Grid, Text, Title } from "@mantine/core";
 import { IconCirclePlus } from "@tabler/icons";
-import * as moment from "moment";
+import { DateTime } from "luxon";
 import { useState } from "react";
 import { Params, useLoaderData } from "react-router";
 import { AccountChanges } from "../components/AccountChanges";
@@ -23,13 +23,13 @@ export default function AccountPage() {
     const { id, desc, saldo, currency } = data;
 
     const [loading, setLoading] = useState(false);
-    const date_created = moment(data.date_created);
+    const date_created = DateTime.fromISO(data.date_created);
 
     return <>
         <Grid justify="space-between">
             <Grid.Col span="content">
                 <Title order={1}>{desc}</Title>
-                <Text fz="md">Tracking since {date_created.fromNow()}</Text>
+                <Text fz="md">Tracking since {date_created.toRelative()}</Text>
             </Grid.Col>
 
             <Grid.Col span="content">
@@ -48,6 +48,6 @@ export default function AccountPage() {
                 }
             }).then(() => setLoading(false))
         }}></Button>
-        <AccountChanges id={id} start={moment().startOf('M')} end={moment()} />
+        <AccountChanges id={id} start={DateTime.now().startOf('month')} end={DateTime.now()} />
     </>;
 }

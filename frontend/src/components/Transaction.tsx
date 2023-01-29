@@ -1,6 +1,6 @@
 import { Box, Center, createStyles, MantineTheme, Text, Tooltip } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons";
-import * as moment from "moment";
+import { DateTime } from "luxon";
 import { useRef } from "react";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import { AccountChangeTransaction } from "../Types/AccountChange";
@@ -98,7 +98,7 @@ export function TransactionHead(props: AccountChangeTransaction) {
     const { saldo } = props;
     const { is_expense, comment, amount, agent, currency } = props.data;
 
-    const date = moment(props.data.date_issued);
+    const date = DateTime.fromISO(props.data.date_issued);
 
     const agentRef = useRef();
     const agentOverflow = useIsOverflow(agentRef);
@@ -110,8 +110,8 @@ export function TransactionHead(props: AccountChangeTransaction) {
             <Center className={cx(classes.child, is_expense ? classes.expenseIcon : classes.incomeIcon)}>
                 {is_expense ? <IconMinus /> : <IconPlus />}
             </Center>
-            <Text className={cx(classes.child, classes.date)}>{date.format("DD.MM.YY")}</Text>
-            <Text className={cx(classes.child, classes.time)}>{date.format("HH:mm")}</Text>
+            <Text className={cx(classes.child, classes.date)}>{date.toFormat("dd.MM.yy")}</Text>
+            <Text className={cx(classes.child, classes.time)}>{date.toFormat("HH:mm")}</Text>
             <Text className={cx(classes.child, classes.amount,
                 is_expense ? classes.expenseAmount : classes.incomeAmount)}>{amount.toFixed(currency.decimals)}</Text>
             <Tooltip label={agent.desc} disabled={!agentOverflow} openDelay={250}>
