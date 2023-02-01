@@ -1,17 +1,21 @@
-import { ActionIcon, Autocomplete, Button, createStyles, Divider, Grid, Group, Input, MantineTheme, NumberInput, Select, Switch, TextInput, useMantineTheme } from "@mantine/core";
-import { DatePicker, TimeInput } from "@mantine/dates";
+import { Autocomplete, Button, Divider, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { closeModal, ContextModalProps, openContextModal } from "@mantine/modals";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
-import { IconArrowWaveRightUp, IconEraser, IconMinus, IconPlus, IconTrendingDown, IconTrendingUp } from "@tabler/icons";
 import { DateTime, Duration } from "luxon";
-import { useSubmit } from "react-router-dom";
-import { formatDiagnostic } from "typescript";
+import { useQueryClient } from "react-query";
+import { Form, useFetcher, useNavigate, useSubmit } from "react-router-dom";
+import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 import { throwOrReturnFromResponse } from "../../contexts/ErrorHandlerProvider";
+import { useAddTransaction } from "../../hooks/useMutation";
+import { useAgents, useCategories } from "../../hooks/useQuery";
 import { AccountDeep } from "../../Types/Account";
 import { AgentFlat } from "../../Types/Agent";
 import { CategoryFlat } from "../../Types/Category";
 import { CurrencyFlat } from "../../Types/Currency";
+import AmountInput from "./AmountInput";
+import DateTimeInput from "./DateTimeInput";
+import FlowsNRecordsInput from "./FlowsNRecords";
 
 type OpenTransactionModalProps = {
     currency?: CurrencyFlat,
@@ -21,37 +25,17 @@ type OpenTransactionModalProps = {
 type TransactionModalProps = {
     currency?: CurrencyFlat,
     account?: AccountDeep,
-    agents: AgentFlat[],
-    categories: CategoryFlat[]
 }
 
 export const openTransactionModal = async (props?: OpenContextModal<OpenTransactionModalProps>) => {
-    fetch('/api/agents', {
-        signal: AbortSignal.timeout(3000)
-    }).then(throwOrReturnFromResponse)
-        .then((agents: AgentFlat[]) =>
-            fetch('/api/categories', {
-                signal: AbortSignal.timeout(3000)
-            }).then(throwOrReturnFromResponse)
-                .then((categories: CategoryFlat[]) =>
-                    openContextModal({
-                        ...{
-                            modal: 'transaction',
-                            title: 'new transaction',
-                        },
-                        ...props,
-                        innerProps: {
-                            ...{
-                                agents,
-                                categories
-                            },
-                            ...props.innerProps
-                        }
-                    })
-                )
-        )
-    // TODO catch this!
-
+    openContextModal({
+        ...{
+            modal: 'transaction',
+            title: 'new transaction',
+        },
+        ...props,
+        innerProps: props.innerProps
+    })
 }
 
 interface RecordPost {
@@ -59,7 +43,7 @@ interface RecordPost {
     category_id: number,
 }
 
-interface Record extends RecordPost {
+export interface Record extends RecordPost {
     type: 'record'
     ix: number
 }
@@ -69,17 +53,17 @@ interface FlowPost {
     agent: string,
 }
 
-interface Flow extends FlowPost {
+export interface Flow extends FlowPost {
     type: 'flow'
     ix: number
 }
 
-type Item = Record | Flow;
+export type Item = Record | Flow;
 
-const isFlow = (val: Item): val is Flow => val.type === 'flow';
-const isRecord = (val: Item): val is Record => val.type === 'record';
+export const isFlow = (val: Item): val is Flow => val.type === 'flow';
+export const isRecord = (val: Item): val is Record => val.type === 'record';
 
-interface FormValues {
+export interface FormValues {
     account_id: number
     date: Date
     time: Date
@@ -93,7 +77,7 @@ interface FormValues {
     comment: string
 }
 
-interface transformedFormValues {
+export interface transformedFormValues {
     account_id: number
     date_issued: string
     amount: number
@@ -112,49 +96,12 @@ interface transformedFormValues {
 
 type Transform = (values: FormValues) => transformedFormValues
 
-export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
-    const useStyles = createStyles((theme: MantineTheme) => {
-        const inc = theme.colors.blue[
-            theme.colorScheme === 'light' ? 6 : 5
-        ];
-        const exp = theme.colors.red[
-            theme.colorScheme === 'light' ? 6 : 5
-        ];
-        const off = 0.5;
-        return {
-            incExpButton: {
-                border: 0
-            },
-            incomeOff: {
-                backgroundColor: theme.fn.rgba(inc, off),
-                '&:hover': {
-                    backgroundColor: inc,
-                }
-            },
-            incomeOn: {
-                backgroundColor: inc,
-                '&:hover': {
-                    backgroundColor: inc
-                }
-            },
-            expenseOff: {
-                backgroundColor: theme.fn.rgba(exp, off),
-                '&:hover': {
-                    backgroundColor: exp
-                }
-            },
-            expenseOn: {
-                backgroundColor: exp,
-                '&:hover': {
-                    backgroundColor: exp
-                }
-            },
-        }
-    });
+export const action = ({ request }: { request: Request }): number => { console.log(request); return null }
 
-    const theme = useMantineTheme();
-    const { classes, cx } = useStyles();
-    const { currency, agents, categories, account } = innerProps;
+export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
+    const { currency, account } = innerProps;
+
+    const agents = useAgents();
 
     const form = useForm<FormValues, Transform>({
         initialValues: {
@@ -182,7 +129,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
             items: {
                 agent: (desc, values, path) => {
                     const i = parseInt(path.replace(/^\D+/g, ''));
-                    if (!isFlow(values.items[i]))
+                    if (values.isDirect || !isFlow(values.items[i]))
                         return null;
                     if (desc.length === 0)
                         return 'at least one character';
@@ -195,7 +142,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                 },
                 category_id: (id, values, path) => {
                     const i = parseInt(path.replace(/^\D+/g, ''));
-                    if (isFlow(values.items[i]))
+                    if (values.isDirect || isFlow(values.items[i]))
                         return null;
                     if (id === null)
                         return 'select category';
@@ -208,6 +155,8 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                 },
                 // records & flows amounts
                 amount: (value, values, path) => {
+                    if (values.isDirect)
+                        return null;
                     if (value === null)
                         return 'enter amount';
                     if (value === 0)
@@ -250,256 +199,27 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                     }))
         })
     });
-
-    // const submit = useSubmit();
     // TODO: let react router know of the change
-    const submitForm = (values: transformedFormValues) =>
-        fetch(`/api/transactions/add`, {
-            method: 'post',
-            body: JSON.stringify(values),
-            signal: AbortSignal.timeout(3000)
-        }).then(throwOrReturnFromResponse);
 
-    return <form onSubmit={form.onSubmit((vals) => submitForm(vals).then(() => context.closeModal(id)))}>
-        <Group grow align='flex-start'>
-            <DatePicker
-                data-autofocus label="date" placeholder="dd.mm.yyyy" withAsterisk
-                inputFormat="DD.MM.YYYY" clearable={false}
-                minDate={DateTime.fromISO(account.date_created).toJSDate()}
-                maxDate={DateTime.now().toJSDate()}
-                allowFreeInput dateParser={(dateString: string) => {
-                    return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
-                }}
-                {...form.getInputProps('date')}
-            />
-            <TimeInput
-                defaultValue={new Date()}
-                label="time"
-                withAsterisk
-                {...form.getInputProps('time')}
-            />
-        </Group>
-        <Input.Wrapper
-            label='amount' withAsterisk
-        >
-            <Grid>
-                <Grid.Col span='auto'>
-                    <NumberInput
-                        precision={currency?.decimals} hideControls
-                        min={0}
-                        formatter={(value: string) =>
-                            !Number.isNaN(parseFloat(value))
-                                ? `${currency?.code} ${value}`
-                                : `${currency?.code} `
-                        }
-                        parser={(value: string) => value.replace(/\D+\s/g, '')}
-                        {...form.getInputProps('amount')}
-                    />
-                </Grid.Col>
-                <Grid.Col span='content'>
-                    <Button.Group>
-                        <Button
-                            className={cx(classes.incExpButton, form.values.isExpense ? classes.incomeOff : classes.incomeOn)}
-                            onClick={() => {
-                                if (form.values.isExpense) {
-                                    form.values.items
-                                        .forEach((item, i) => isRecord(item) ? form.setFieldValue(
-                                            `items.${i}.category_id`, null
-                                        ) : null)
-                                }
-                                form.setFieldValue('isExpense', false);
-                            }}><IconPlus /></Button>
-                        <Button
-                            className={cx(classes.incExpButton, form.values.isExpense ? classes.expenseOn : classes.expenseOff)}
-                            onClick={() => {
-                                if (!form.values.isExpense) {
-                                    form.values.items
-                                        .forEach((item, i) => isRecord(item) ? form.setFieldValue(
-                                            `items.${i}.category_id`, null
-                                        ) : null)
-                                }
-                                form.setFieldValue('isExpense', true);
-                            }}><IconMinus /></Button>
-                    </Button.Group>
-                </Grid.Col>
-            </Grid>
-        </Input.Wrapper>
+    const addTrans = useAddTransaction()
+    
+    const submitForm = (vals: transformedFormValues) => {
+        addTrans.mutateAsync(vals);
+        context.closeModal(id);
+    }
+
+    return <form onSubmit={form.onSubmit(submitForm)}>
+        <DateTimeInput form={form} minDate={account.date_created} />
+        <AmountInput form={form} currency={currency} />
         <Autocomplete
             withAsterisk label='agent'
-            data={agents.map(
+            data={agents.isLoading ? [] : agents.data.map(
                 agent => agent.desc
             )}
             {...form.getInputProps('agent')}
         />
         <Divider my='sm' />
-        <Input.Wrapper
-            label='add records & flows | direct flow'
-            withAsterisk
-            {...form.getInputProps('isDirect')}
-        >
-            <Grid>
-                <Grid.Col span='auto'>
-                    <Button
-                        fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                        leftIcon={
-                            form.values.isExpense ? <IconTrendingDown /> : <IconTrendingUp />
-                        }
-                        disabled={form.values.isDirect}
-                        onClick={() => {
-                            form.clearFieldError('isDirect');
-                            const item: Item = {
-                                type: 'record',
-                                ix: form.values.n_records,
-                                amount: null,
-                                category_id: null
-                            };
-                            form.insertListItem('items', item);
-                            form.insertListItem('records', item);
-                            form.setFieldValue('n_records', form.values.n_records + 1)
-                        }}
-                    >
-                        Add Record
-                    </Button>
-                </Grid.Col>
-                <Grid.Col span='auto'>
-                    <Button
-                        fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                        leftIcon={<IconArrowWaveRightUp />}
-                        disabled={form.values.isDirect} color='pink'
-                        onClick={() => {
-                            form.clearFieldError('isDirect');
-                            const item: Item = {
-                                type: 'flow',
-                                ix: form.values.n_flows,
-                                amount: null,
-                                agent: ''
-                            };
-                            form.insertListItem('items', item)
-                            form.insertListItem('flows', item)
-                            form.setFieldValue('n_flows', form.values.n_flows + 1)
-                        }}
-                    >
-                        Add Flow
-                    </Button>
-                </Grid.Col>
-                <Grid.Col span='content'>
-                    <Switch
-                        size='lg' color='pink'
-                        onLabel={<IconArrowWaveRightUp />}
-                        offLabel={<IconArrowWaveRightUp />}
-                        checked={form.values.isDirect}
-                        onChange={() => form.setFieldValue('isDirect', !form.values.isDirect)}
-                    />
-                </Grid.Col>
-            </Grid>
-        </Input.Wrapper>
-        {
-            !form.values.isDirect && form.values.items.map((data, i) =>
-                isFlow(data) ?
-                    <Grid key={i}>
-                        <Grid.Col span={4}>
-                            <NumberInput
-                                label={`#${i} flow`} withAsterisk
-                                precision={currency?.decimals} hideControls
-                                formatter={(value: string) =>
-                                    !Number.isNaN(parseFloat(value))
-                                        ? `${currency?.code} ${value}`
-                                        : `${currency?.code} `
-                                }
-                                parser={(value: string) => value.replace(/\D+\s/g, '')}
-                                {...form.getInputProps(`items.${i}.amount`)}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={8}>
-                            <Input.Wrapper label='agent' withAsterisk>
-                                <Grid>
-                                    <Grid.Col span='auto'>
-                                        <Autocomplete
-                                            placeholder={`Agent #${data.ix}`}
-                                            data={agents.map(
-                                                agent => agent.desc
-                                            )}
-                                            {...form.getInputProps(`items.${i}.agent`)}
-                                        />
-                                    </Grid.Col>
-                                    <Grid.Col span='content'>
-                                        <ActionIcon
-                                            color="red" size='lg' variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                                            onClick={() => {
-                                                form.values.items.forEach(
-                                                    (item, ix) => {
-                                                        if (item.type === 'flow' && item.ix > data.ix)
-                                                            form.setFieldValue(`items.${ix}.ix`, item.ix - 1)
-                                                    }
-                                                )
-                                                form.removeListItem('items', i);
-                                                form.removeListItem('flows', data.ix);
-                                                form.setFieldValue('n_flows', form.values.n_flows - 1)
-                                            }}>
-                                            <IconEraser size={18} />
-                                        </ActionIcon>
-                                    </Grid.Col>
-                                </Grid>
-                            </Input.Wrapper>
-                        </Grid.Col>
-                    </Grid>
-                    :
-                    <Grid key={i}>
-                        <Grid.Col span={4}>
-                            <NumberInput
-                                label={`#${i} record`} withAsterisk
-                                precision={currency?.decimals} hideControls
-                                formatter={(value: string) =>
-                                    !Number.isNaN(parseFloat(value))
-                                        ? `${currency?.code} ${value}`
-                                        : `${currency?.code} `
-                                }
-                                parser={(value: string) => value.replace(/\D+\s/g, '')}
-                                {...form.getInputProps(`items.${i}.amount`)}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={8}>
-                            <Input.Wrapper label='category' withAsterisk>
-                                <Grid>
-                                    <Grid.Col span='auto'>
-                                        <Select
-                                            searchable clearable
-                                            placeholder={`Category #${data.ix}`}
-                                            data={categories.filter(
-                                                cat => cat.usable && cat.is_expense === form.values.isExpense
-                                            ).map(
-                                                cat => ({
-                                                    value: cat.id,
-                                                    label: cat.desc,
-                                                    group: cat.parent_id === null ? cat.desc : cat.parent.desc
-                                                })
-                                            )}
-                                            {...form.getInputProps(`items.${i}.category_id`)}
-                                        />
-                                    </Grid.Col>
-                                    <Grid.Col span='content'>
-                                        <ActionIcon
-                                            color="red" size='lg' variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                                            onClick={() => {
-                                                form.values.items.forEach(
-                                                    (item, ix) => {
-                                                        if (item.type === 'record' && item.ix > data.ix)
-                                                            form.setFieldValue(`items.${ix}.ix`, item.ix - 1)
-                                                    }
-                                                )
-                                                form.removeListItem('items', i);
-                                                form.removeListItem('records', data.ix);
-                                                form.setFieldValue('n_records', form.values.n_records - 1)
-                                            }}>
-                                            <IconEraser size={18} />
-                                        </ActionIcon>
-                                    </Grid.Col>
-                                </Grid>
-                            </Input.Wrapper>
-                        </Grid.Col>
-                    </Grid>
-            )
-        }
+        <FlowsNRecordsInput form={form} currency={currency} />
         <Divider my='sm' />
         <TextInput label='comment' {...form.getInputProps('comment')} />
         <Button fullWidth mt="md" type='submit'>

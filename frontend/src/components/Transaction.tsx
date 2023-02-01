@@ -1,5 +1,5 @@
 import { Box, Center, createStyles, MantineTheme, Text, Tooltip } from "@mantine/core";
-import { IconMinus, IconPlus } from "@tabler/icons";
+import { TbMinus, TbPlus } from "react-icons/tb";
 import { DateTime } from "luxon";
 import { useRef } from "react";
 import { useIsOverflow } from "../hooks/useIsOverflow";
@@ -108,7 +108,7 @@ export function TransactionHead(props: AccountChangeTransaction) {
     return <>
         <Box className={classes.head}>
             <Center className={cx(classes.child, is_expense ? classes.expenseIcon : classes.incomeIcon)}>
-                {is_expense ? <IconMinus /> : <IconPlus />}
+                {is_expense ? <TbMinus size={18} /> : <TbPlus size={18} />}
             </Center>
             <Text className={cx(classes.child, classes.date)}>{date.toFormat("dd.MM.yy")}</Text>
             <Text className={cx(classes.child, classes.time)}>{date.toFormat("HH:mm")}</Text>

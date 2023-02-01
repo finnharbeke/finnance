@@ -1,71 +1,36 @@
-import { Anchor, Center, createStyles, Image, Skeleton, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { throwOrReturnFromResponse } from "../contexts/ErrorHandlerProvider";
-import useErrorHandler from "../hooks/useErrorHandler";
+import { Skeleton } from "@mantine/core";
+import { DateTime } from "luxon";
+import { useChanges } from "../hooks/useQuery";
 import { AccountChange, isAccountChangeTransaction } from "../Types/AccountChange";
 import { TransactionHead } from "./Transaction";
 import { TransferHead } from "./Transfer";
-import { DateTime } from "luxon";
 
 interface AccountChangesProps {
     id: number,
-    start: DateTime,
-    end: DateTime,
+    start?: DateTime,
+    end?: DateTime,
+    n: number,
 }
 
 export function AccountChanges(props: AccountChangesProps) {
-    const { id, start, end } = props;
-    const [loading, setLoading] = useState(true);
-    const [items, setItems] = useState(null);
-    const { handleErrors } = useErrorHandler();
-    useEffect(() => {
-        setLoading(true);
-        var searchParams = new URLSearchParams();
-        const naiveStart = start.toISO({ includeOffset: false });
-        const naiveEnd = end.toISO({ includeOffset: false });
-        searchParams.append('start', naiveStart);
-        searchParams.append('end', naiveEnd);
-        fetch(`/api/accounts/${id}/changes?` + searchParams.toString(), {
-            signal: AbortSignal.timeout(3000)
-        }).then(throwOrReturnFromResponse)
-            .then((data: any) =>
-                setItems(data.map((change: AccountChange, ix: number) => {
+    const { id, start, end, n } = props;
+
+    const { data, isLoading } = useChanges(id, { start, end, n });
+
+    return <>
+        {
+            isLoading ?
+                <Skeleton height={200} />
+                :
+                data.map((change: AccountChange, ix: number) => {
+                    console.log(change)
                     return isAccountChangeTransaction(change) ?
-                        <TransactionHead {...change} key={ix}/>
+                        <TransactionHead {...change} key={ix} />
                         :
-                        <TransferHead {...change} key={ix}/>
-                    }
-                ))
-            ).catch(handleErrors).finally(() => setLoading(false))
-    }, [id, start, end, handleErrors]);
+                        <TransferHead {...change} key={ix} />
+                }
+                )
 
-    const useStyles = createStyles((theme) => ({
-        opaqueImage: {
-            opacity: 0.2,
-            filter: theme.colorScheme === 'light' ? '' : 'invert(100%)'
         }
-    }))
-
-    const { classes } = useStyles();
-
-    return <Skeleton visible={loading}>
-        {(items !== null && items.length !== 0) ? items :
-            <Stack>
-                <Center>
-                    <Image
-                        alt="no results"
-                        src="/static/no-results.png"
-                        caption="No Transactions this Month"
-                        width={200}
-                        classNames={{
-                            imageWrapper: classes.opaqueImage
-                        }}
-                    />
-                </Center>
-                <Center mt='xl'>
-                    <Anchor fz='xs' href="https://www.flaticon.com/free-icons/no-results" title="no results icons">No results icons created by Freepik - Flaticon</Anchor>
-                </Center>
-            </Stack>
-        }
-    </Skeleton>
+    </>
 }

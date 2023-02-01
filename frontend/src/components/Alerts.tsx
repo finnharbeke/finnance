@@ -1,5 +1,6 @@
 import { Alert, Code, createStyles } from "@mantine/core";
-import { IconAlertCircle, IconZzz } from "@tabler/icons";
+import { TbAlertCircle } from "react-icons/tb";
+import { RiZzzFill } from "react-icons/ri";
 
 interface AlertProps {
     open: boolean,
@@ -14,7 +15,7 @@ const useStyles = createStyles({
 export function ServerSideErrorAlert({ open, msg }: AlertProps) {
     const { classes } = useStyles();
     return <Alert
-        icon={<IconAlertCircle size={16} />}
+        icon={<TbAlertCircle />}
         title="Oops!" color="red"
         variant="filled"
         className={ open ? null : classes.hidden }
@@ -32,7 +33,7 @@ export function ServerSideErrorAlert({ open, msg }: AlertProps) {
 export function FrontendErrorAlert({ open, msg }: AlertProps) {
     const { classes } = useStyles();
     return <Alert
-        icon={<IconAlertCircle size={16} />}
+        icon={<TbAlertCircle />}
         title="Oops!" color="red"
         variant="filled"
         className={ open ? null : classes.hidden }
@@ -50,7 +51,7 @@ export function FrontendErrorAlert({ open, msg }: AlertProps) {
 export function TimeoutAlert({ open }: AlertProps) {
     const { classes } = useStyles();
     return <Alert
-        icon={<IconZzz size={16} />}
+        icon={<RiZzzFill size={16} />}
         title="Server Timeout" color="yellow"
         variant="filled"
         className={ open ? null : classes.hidden }

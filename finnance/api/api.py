@@ -120,12 +120,15 @@ def changes(account_id):
     if acc is None:
         raise APIError(HTTPStatus.UNAUTHORIZED)
     
-    kwargs = {"start": acc.date_created, "end": dt.datetime.now()}
+    kwargs = {"start": None, "end": None, "n": None}
     
     for key, val in request.args.to_dict().items():
         if key in kwargs and val != '':
             try:
-                kwargs[key] = dt.datetime.fromisoformat(val)
+                if key == 'n':
+                    kwargs[key] = int(val)
+                else:
+                    kwargs[key] = dt.datetime.fromisoformat(val)
             except ValueError:
                 raise APIError(HTTPStatus.BAD_REQUEST)
 
@@ -216,7 +219,6 @@ def handle_exception(err: Exception):
     "required": ["amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
 })
 def add_trans(edit=None, **data):
-    print(data)
     data['date_issued'] = dt.datetime.fromisoformat(data.pop('date_issued'))
 
     if data['account_id']:

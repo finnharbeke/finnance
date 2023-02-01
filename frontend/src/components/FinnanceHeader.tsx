@@ -1,7 +1,7 @@
 import { Burger, Container, createStyles, Group, Header, Paper, Transition } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { NavLink } from 'react-router-dom';
-import { LightDarkToggle } from '../components/LightDarkToggle';
+import { LightDarkToggle } from './LightDarkToggle';
 import useAuth from '../hooks/useAuth';
 import FinnanceLogo from './FinnanceLogo';
 
@@ -91,7 +91,7 @@ export default function FinnanceHeader() {
         return <NavLink
             key={link.label}
             to={link.link}
-            className={(state) => cx(classes.link, { [classes.linkActive]: state.isActive })}
+            className={(state: { isActive: boolean; }) => cx(classes.link, { [classes.linkActive]: state.isActive })}
         >
             {link.label}
         </NavLink>

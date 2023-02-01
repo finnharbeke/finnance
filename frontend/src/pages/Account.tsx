@@ -1,53 +1,48 @@
-import { Button, Grid, Text, Title } from "@mantine/core";
-import { IconCirclePlus } from "@tabler/icons";
+import { Button, Grid, Skeleton, Text, Title } from "@mantine/core";
+import { TbCirclePlus } from "react-icons/tb";
 import { DateTime } from "luxon";
 import { useState } from "react";
-import { Params, useLoaderData } from "react-router";
+import { useParams } from "react-router";
 import { AccountChanges } from "../components/AccountChanges";
 import { openTransactionModal } from "../components/modals/Transaction";
-import { throwOrReturnFromResponse } from "../contexts/ErrorHandlerProvider";
-import { AccountDeep } from "../Types/Account";
+import { useAccount } from "../hooks/useQuery";
 
-export function loader({ params }: { params: Params }): Promise<AccountDeep> {
-    if (!params.id.match(/\d+/)) {
+export default function AccountPage() {
+    const params = useParams();
+    if (!params.id?.match(/\d+/)) {
         throw new Response("Invalid account id", { status: 400, statusText: "BAD REQUEST" });
     }
 
-    return fetch(`/api/accounts/${params.id}`, {
-        signal: AbortSignal.timeout(3000)
-    }).then(throwOrReturnFromResponse)
-}
-
-export default function AccountPage() {
-    const data = useLoaderData() as AccountDeep;
-    const { id, desc, saldo, currency } = data;
+    const { data, isLoading } = useAccount(parseInt(params.id))
 
     const [loading, setLoading] = useState(false);
-    const date_created = DateTime.fromISO(data.date_created);
+    const date_created = DateTime.fromISO(data?.date_created);
 
+    if (isLoading)
+        return <Skeleton height={200}></Skeleton>
     return <>
         <Grid justify="space-between">
             <Grid.Col span="content">
-                <Title order={1}>{desc}</Title>
+                <Title order={1}>{data?.desc}</Title>
                 <Text fz="md">Tracking since {date_created.toRelative()}</Text>
             </Grid.Col>
 
             <Grid.Col span="content">
-                <Title order={1}>{saldo.toFixed(currency.decimals)} {currency.code}</Title>
+                <Title order={1}>{data?.saldo.toFixed(data?.currency.decimals)} {data?.currency.code}</Title>
             </Grid.Col>
         </Grid>
         <Button size="lg" my="md" fullWidth loading={loading} leftIcon={
-            <IconCirclePlus size={40} />
+            <TbCirclePlus size={40} />
         } onClick={() => {
             setLoading(true);
             openTransactionModal({
-                title: `new transaction - ${desc}`,
+                title: `new transaction - ${data?.desc}`,
                 innerProps: {
-                    currency: currency,
+                    currency: data?.currency,
                     account: data
                 }
             }).then(() => setLoading(false))
         }}></Button>
-        <AccountChanges id={id} start={DateTime.now().startOf('month')} end={DateTime.now()} />
+        <AccountChanges id={data?.id} n={10} />
     </>;
 }

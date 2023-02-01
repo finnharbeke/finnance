@@ -1,22 +1,10 @@
 import { ActionIcon, Button, Collapse, createStyles, Divider, Grid, Skeleton, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconChevronDown, IconChevronUp } from "@tabler/icons";
+import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { useLoaderData } from "react-router";
 import { Link } from "react-router-dom";
-
-interface dataType {
-    accounts?: { id: number, desc: string, saldo: number }[]
-}
-
-export async function loader(): Promise<dataType> {
-    const response = await fetch("/api/me").then(
-        r => {
-            return r.json()
-        }).catch(e => {
-            return e.message
-        })
-    return response;
-}
+import { useCurrentUser } from "../hooks/useQuery";
+import { AccountFlat } from "../Types/Account";
 
 export default function DashboardPage() {
     const useStyles = createStyles({
@@ -26,9 +14,14 @@ export default function DashboardPage() {
         }
     });
     const { classes } = useStyles();
-    const data: dataType = useLoaderData();
+    const { data, isSuccess, isLoading } = useCurrentUser();
+    // const data: {
+    //     accounts: AccountFlat[]
+    // } = {
+    //     accounts: []
+    // };
 
-    const cols = data.accounts.map(acc => (
+    const cols = (!isLoading && isSuccess) ? data.accounts?.map(acc => (
         <Grid.Col sm={6} key={acc.id}>
             <Button component={Link} to={`/accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}>
                 <Text>
@@ -39,23 +32,23 @@ export default function DashboardPage() {
                 </Text>
             </Button>
         </Grid.Col>
-    ));
+    )) : [];
 
     const [ opened, handlers ] = useDisclosure(false);
     
     return (
         <>
             <Grid mb={opened ? 0 : undefined}>
-                {cols.slice(0, 2)}
+                {cols?.slice(0, 2)}
             </Grid>
             <Collapse in={opened}>
                 <Grid mt={0}>
-                    {cols.slice(2)}
+                    {cols?.slice(2)}
                 </Grid>
             </Collapse>
             <Divider my="lg" labelPosition="center" label={
                 <ActionIcon size="xs" onClick={handlers.toggle}>
-                    {opened ? <IconChevronUp/> : <IconChevronDown/>}
+                    {opened ? <TbChevronUp/> : <TbChevronDown/>}
                 </ActionIcon>
             }/>
             <Stack>

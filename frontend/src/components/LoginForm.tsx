@@ -1,7 +1,7 @@
 import { Button, Card, Flex, FocusTrap, Group, PasswordInput, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { createStyles, useMantineTheme } from "@mantine/styles";
-import { IconChevronDown } from "@tabler/icons";
+import { TbChevronDown } from "react-icons/tb";
 import { ReactNode, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
@@ -138,7 +138,7 @@ export function LoginForm({ url }: { url?: string }) {
             <FormTop>
                 <Button onClick={reset}
                     size='xs' variant='light' compact radius="lg"
-                    rightIcon={<IconChevronDown size={16} />}
+                    rightIcon={<TbChevronDown size={16} />}
                 >{username}</Button>
             </FormTop>
             <FocusTrap active={continued}>

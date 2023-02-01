@@ -1,5 +1,5 @@
 import { Box, Center, Text, Tooltip } from "@mantine/core";
-import { IconArrowsLeftRight } from "@tabler/icons";
+import { TbArrowsLeftRight } from "react-icons/tb";
 import { DateTime } from "luxon";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
@@ -28,7 +28,7 @@ export function TransferHead(props: AccountChangeTransfer) {
     return <>
         <Box className={classes.head}>
             <Center className={cx(classes.child, classes.transferIcon)}>
-                <IconArrowsLeftRight />
+                <TbArrowsLeftRight size={18} />
             </Center>
             <Text className={cx(classes.child, classes.date)}>{date.toFormat("dd.MM.yy")}</Text>
             <Text className={cx(classes.child, classes.time)}>{date.toFormat("HH:mm")}</Text>

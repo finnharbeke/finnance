@@ -75,7 +75,7 @@ class User(db.Model, JSONModel, UserMixin):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    json_relations = ["accounts", "categories", "agents"]
+    json_relations = ["accounts"]
     json_ignore = ["password"]
 
 
@@ -121,14 +121,17 @@ class Account(db.Model, JSONModel):
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
-    def jsonify_changes(self, start=None, end=None):
+    def jsonify_changes(self, start=None, end=None, n=None):
         saldo = self.starting_saldo
         changes = sorted(
             self.transactions + self.out_transfers + self.in_transfers,
             key=lambda ch: ch.date_issued
         )
         out = []
-        for change in changes:
+        total = len(changes)
+        n = len(changes) if n is None else n
+
+        for i, change in enumerate(changes):
             if type(change) is AccountTransfer:
                 exp = change.src_id == self.id
                 amount = change.src_amount if exp else change.dst_amount
@@ -139,7 +142,9 @@ class Account(db.Model, JSONModel):
             saldo = round(saldo + (amount if not exp else -amount),
                 self.currency.decimals)
             
-            if start <= change.date_issued and change.date_issued < end:
+            if (start is None or start <= change.date_issued) and (
+                end is None or change.date_issued < end) and (
+                total - i <= n):
                 out.append({
                     "type": "account_change",
                     "acc_id": self.id,
