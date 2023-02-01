@@ -28,8 +28,6 @@ function AccountInfos({ data, ix }: { data: AccountDeep, ix: number }) {
         }
     })
 
-    useEffect(() => console.log(form.values), [form.values]);
-
     const currencies = useCurrencies();
 
     if (!currencies.isSuccess)
@@ -42,38 +40,30 @@ function AccountInfos({ data, ix }: { data: AccountDeep, ix: number }) {
                 </Grid.Col>
                 <Grid.Col span='auto'>
 
-                            <Title order={3}>{form.values.desc}</Title>
+                    <Title order={3}>{form.values.desc}</Title>
                     {/* <Input component={Title} {...form.getInputProps('desc')}/> */}
                     {/* <input/> */}
                 </Grid.Col>
                 <Grid.Col span={1}>
                     <Group grow spacing={0}>
                         <ActionIcon >
-                            <TbChevronUp/>
+                            <TbChevronUp />
                         </ActionIcon>
                         <ActionIcon>
-                            <TbChevronDown/>
+                            <TbChevronDown />
                         </ActionIcon>
                     </Group>
                 </Grid.Col>
             </Grid>
             <Grid>
                 <Grid.Col span={3}>
-                    <AmountInput
-                        currency={
-                            currencies.data.filter(cur => cur.id === form.values.currency_id)[0]
-                        }
-                        {...form.getInputProps('starting_saldo')}
+                    <ColorInput
+                        {...form.getInputProps('color')}
                     />
                 </Grid.Col>
                 <Grid.Col span={3}>
                     <DatePicker
                         {...form.getInputProps('date_created')}
-                    />
-                </Grid.Col>
-                <Grid.Col span={3}>
-                    <ColorInput
-                        {...form.getInputProps('color')}
                     />
                 </Grid.Col>
                 <Grid.Col span={3}>
@@ -85,6 +75,14 @@ function AccountInfos({ data, ix }: { data: AccountDeep, ix: number }) {
                             })
                         )}
                         {...form.getInputProps('currency_id')}
+                    />
+                </Grid.Col>
+                <Grid.Col span={3}>
+                    <AmountInput
+                        currency={
+                            currencies.data.filter(cur => cur.id === form.values.currency_id)[0]
+                        }
+                        {...form.getInputProps('starting_saldo')}
                     />
                 </Grid.Col>
             </Grid>
