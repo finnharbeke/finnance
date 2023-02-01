@@ -22,15 +22,12 @@ export function AccountChanges(props: AccountChangesProps) {
             isLoading ?
                 <Skeleton height={200} />
                 :
-                data.map((change: AccountChange, ix: number) => {
-                    console.log(change)
-                    return isAccountChangeTransaction(change) ?
+                data.map((change: AccountChange, ix: number) => (
+                    isAccountChangeTransaction(change) ?
                         <TransactionHead {...change} key={ix} />
                         :
                         <TransferHead {...change} key={ix} />
-                }
-                )
-
+                ))
         }
     </>
 }

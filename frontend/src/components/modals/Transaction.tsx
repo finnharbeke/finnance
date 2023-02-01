@@ -96,8 +96,6 @@ export interface transformedFormValues {
 
 type Transform = (values: FormValues) => transformedFormValues
 
-export const action = ({ request }: { request: Request }): number => { console.log(request); return null }
-
 export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
     const { currency, account } = innerProps;
 
