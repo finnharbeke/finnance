@@ -1,8 +1,8 @@
 import { createStyles, Title, Text, Button, Container, Group } from '@mantine/core';
+import { Link } from 'react-router-dom';
 
 const useStyles = createStyles((theme) => ({
   root: {
-    paddingTop: 80,
     paddingBottom: 80,
   },
 
@@ -50,7 +50,7 @@ export default function NotFound() {
         been moved to another URL.
       </Text>
       <Group position="center">
-        <Button variant="subtle" size="md">
+        <Button component={Link} to={'/'} variant="subtle" size="md">
           Take me back to home page
         </Button>
       </Group>

@@ -11,33 +11,38 @@ const handleResponse = (r: Response) => r.json().then(data => {
     if (r.ok)
         return data
     else
-        showNotification({
-            title: `${r.status} ${r.statusText}`,
-            message: data.msg,
-            color: 'red',
-            autoClose: false
-        })
+        if (r.status !== 404)
+            showNotification({
+                title: `${r.status} ${r.statusText}`,
+                message: data.msg,
+                color: 'red',
+                autoClose: false
+            })
     throw new Response(data.msg, { status: r.status, statusText: r.statusText })
 })
 
 export const useCurrentUser = () =>
-    useQuery("me", (): Promise<UserDeep> =>
-        fetch("/api/me").then(handleResponse)
+    useQuery<UserDeep, Response>("me", () =>
+        fetch("/api/me").then(handleResponse),
+        { retry: false }
     );
 
 export const useAccount = (account_id: number) =>
-    useQuery(["account", account_id], (): Promise<AccountDeep> =>
-        fetch(`/api/accounts/${account_id}`).then(handleResponse)
+    useQuery<AccountDeep, Response>(["account", account_id], () =>
+        fetch(`/api/accounts/${account_id}`).then(handleResponse),
+        { retry: false }
     );
 
 export const useAgents = () =>
-    useQuery("agents", (): Promise<AgentFlat[]> =>
-        fetch("/api/agents").then(handleResponse)
+    useQuery<AgentFlat[], Response>("agents", () =>
+        fetch("/api/agents").then(handleResponse),
+        { retry: false }
     );
 
 export const useCategories = () =>
-    useQuery("categories", (): Promise<CategoryFlat[]> =>
-        fetch("/api/categories").then(handleResponse)
+    useQuery<CategoryFlat[], Response>("categories", () =>
+        fetch("/api/categories").then(handleResponse),
+        { retry: false }
     );
 
 interface useChangesProps {
@@ -57,8 +62,10 @@ export const useChanges = (id: number, { start, end, n }: useChangesProps) => {
     }
     if (n !== undefined)
         searchParams.append('n', n.toString());
-    return useQuery("changes", (): Promise<AccountChange[]> =>
-        fetch(`/api/accounts/${id}/changes?` + searchParams.toString()).then(handleResponse)
+    return useQuery<AccountChange[], Response>("changes", () =>
+        fetch(`/api/accounts/${id}/changes?${searchParams.toString()}`)
+            .then(handleResponse),
+        { retry: false }
     );
 }
 

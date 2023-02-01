@@ -1,6 +1,7 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import LoaderError from "../components/LoaderError";
 import { LoginForm } from "../components/LoginForm";
+import NotFound from "../pages/404";
 import AccountPage from "../pages/Account";
 import AdminPage from "../pages/Admin";
 import DashboardPage from "../pages/Dashboard";
@@ -11,16 +12,16 @@ import { PrivateRoute, StrictPublicRoute } from "./Route";
 export const FinnanceRouter = createBrowserRouter([
     {
         element: <Layout />,
-        errorElement: <LoaderError />,
-        action: () => "doing update",
         children: [{
             element: <StrictPublicRoute />,
+            errorElement: <LoaderError />,
             children: [{
                 path: "login",
                 element: <LoginForm />
             }]
         }, {
             element: <PrivateRoute />,
+            errorElement: <LoaderError />,
             children: [{
                 index: true,
                 element: <DashboardPage />,
@@ -34,6 +35,9 @@ export const FinnanceRouter = createBrowserRouter([
                 path: "accounts/:id",
                 element: <AccountPage />,
             }]
+        }, {
+            path: "*",
+            element: <NotFound/>
         }]
     }
 ]);

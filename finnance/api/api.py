@@ -105,11 +105,10 @@ def session():
 @api.route("/accounts/<int:account_id>")
 @login_required
 def account(account_id):
-    # raise APIError(HTTPStatus.UNAUTHORIZED)
     acc = Account.query.filter_by(
         user_id=current_user.id, id=account_id).first()
     if acc is None:
-        raise APIError(HTTPStatus.UNAUTHORIZED)
+        raise APIError(HTTPStatus.NOT_FOUND)
     return acc.api()
 
 @api.route("accounts/<int:account_id>/changes")

@@ -1,9 +1,7 @@
-import { Skeleton } from "@mantine/core";
-import { ErrorResponse, isRouteErrorResponse } from "@remix-run/router";
 import { useEffect } from "react";
-import { Outlet, useRouteError } from "react-router";
+import { useRouteError } from "react-router";
 import useErrorHandler from "../hooks/useErrorHandler";
-import BackButton from "./BackButton";
+import { ReloadButton } from "./NavButtons";
 
 export default function LoaderError() {
     const err = useRouteError();
@@ -11,6 +9,6 @@ export default function LoaderError() {
 
     useEffect(() => handleErrors(err), []);
     return <>
-        <BackButton/>
+        <ReloadButton/>
     </>
 }
