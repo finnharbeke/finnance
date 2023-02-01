@@ -2,14 +2,15 @@ import { Button, createStyles, Grid, Input, MantineTheme, NumberInput } from "@m
 import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyFlat } from "../../Types/Currency";
+import AmountInput from "../Inputs/AmountInput";
 import { FormValues, isRecord, transformedFormValues } from "./Transaction";
 
-interface AmountInputProps {
+interface TransactionAmountInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     currency: CurrencyFlat
 }
 
-export default function AmountInput(props: AmountInputProps) {
+export default function TransactionAmountInput(props: TransactionAmountInputProps) {
     const { form, currency } = props;
     const useStyles = createStyles((theme: MantineTheme) => {
         const inc = theme.colors.blue[
@@ -56,15 +57,8 @@ export default function AmountInput(props: AmountInputProps) {
     >
         <Grid>
             <Grid.Col span='auto'>
-                <NumberInput
-                    precision={currency?.decimals} hideControls
-                    min={0}
-                    formatter={(value: string) =>
-                        !Number.isNaN(parseFloat(value))
-                            ? `${currency?.code} ${value}`
-                            : `${currency?.code} `
-                    }
-                    parser={(value: string) => value.replace(/\D+\s/g, '')}
+                <AmountInput
+                    currency={currency}
                     {...form.getInputProps('amount')}
                 />
             </Grid.Col>

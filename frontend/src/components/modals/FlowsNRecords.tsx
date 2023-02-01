@@ -4,6 +4,7 @@ import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "reac
 import { CurrencyFlat } from "../../Types/Currency";
 import { Flow, FormValues, isFlow, isRecord, Record, transformedFormValues } from "./Transaction";
 import { useAgents, useCategories } from "../../hooks/useQuery";
+import AmountInput from "../Inputs/AmountInput";
 
 interface FlowsNRecordsButtonProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
@@ -86,15 +87,9 @@ function FlowInput(props: FlowInputProps) {
     const agents = useAgents();
     return <Grid>
         <Grid.Col span={4}>
-            <NumberInput
+            <AmountInput
                 label={`#${i} flow`} withAsterisk
-                precision={currency.decimals} hideControls
-                formatter={(value: string) =>
-                    !Number.isNaN(parseFloat(value))
-                        ? `${currency.code} ${value}`
-                        : `${currency.code} `
-                }
-                parser={(value: string) => value.replace(/\D+\s/g, '')}
+                currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
             />
         </Grid.Col>
@@ -146,15 +141,9 @@ function RecordInput(props: RecordInputProps) {
 
     return <Grid>
         <Grid.Col span={4}>
-            <NumberInput
+            <AmountInput
                 label={`#${i} record`} withAsterisk
-                precision={currency.decimals} hideControls
-                formatter={(value: string) =>
-                    !Number.isNaN(parseFloat(value))
-                        ? `${currency.code} ${value}`
-                        : `${currency.code} `
-                }
-                parser={(value: string) => value.replace(/\D+\s/g, '')}
+                currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
             />
         </Grid.Col>
@@ -163,7 +152,6 @@ function RecordInput(props: RecordInputProps) {
                 <Grid>
                     <Grid.Col span='auto'>
                         <Select
-                            searchable clearable
                             placeholder={`Category #${record.ix}`}
                             data={categories.isLoading ? [] : categories.data.filter(
                                 cat => cat.usable && cat.is_expense === form.values.isExpense

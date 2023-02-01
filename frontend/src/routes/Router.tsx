@@ -3,6 +3,7 @@ import LoaderError from "../components/LoaderError";
 import { LoginForm } from "../components/LoginForm";
 import NotFound from "../pages/404";
 import AccountPage from "../pages/Account";
+import AccountsPage from "../pages/Accounts";
 import AdminPage from "../pages/Admin";
 import DashboardPage from "../pages/Dashboard";
 import Layout from "../pages/Layout";
@@ -34,6 +35,9 @@ export const FinnanceRouter = createBrowserRouter([
             }, {
                 path: "accounts/:id",
                 element: <AccountPage />,
+            }, {
+                path: "accounts",
+                element: <AccountsPage />
             }]
         }, {
             path: "*",

@@ -2,7 +2,7 @@ import { ActionIcon, Button, Collapse, createStyles, Divider, Grid, Skeleton, St
 import { useDisclosure } from "@mantine/hooks";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { Link } from "react-router-dom";
-import { useCurrentUser } from "../hooks/useQuery";
+import { useAccounts, useCurrentUser } from "../hooks/useQuery";
 
 export default function DashboardPage() {
     const useStyles = createStyles({
@@ -12,10 +12,10 @@ export default function DashboardPage() {
         }
     });
     const { classes } = useStyles();
-    const { data, isSuccess } = useCurrentUser();
+    const { data, isSuccess } = useAccounts();
 
-    const cols = isSuccess ? data.accounts.map(acc => (
-        <Grid.Col sm={data.accounts.length === 1 ? 12 : 6} key={acc.id}>
+    const cols = isSuccess ? data.map(acc => (
+        <Grid.Col sm={data.length === 1 ? 12 : 6} key={acc.id}>
             <Button component={Link} to={`/accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}>
                 <Text>
                     {acc.desc}

@@ -13,13 +13,9 @@ export default function DateTimeInput(props: DateTimeInputProps) {
     const { minDate, form } = props;
     return <Group grow align='flex-start'>
     <DatePicker
-        data-autofocus label="date" placeholder="dd.mm.yyyy" withAsterisk
-        inputFormat="DD.MM.YYYY" clearable={false}
+        data-autofocus label="date" withAsterisk
         minDate={DateTime.fromISO(minDate).toJSDate()}
         maxDate={DateTime.now().toJSDate()}
-        allowFreeInput dateParser={(dateString: string) => {
-            return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
-        }}
         {...form.getInputProps('date')}
     />
     <TimeInput

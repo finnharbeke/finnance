@@ -1,5 +1,6 @@
 import { DefaultMantineColor, Tuple } from '@mantine/core';
 import { MantineThemeOverride } from "@mantine/styles";
+import { DateTime } from 'luxon';
 
 type ExtendedCustomColors = DefaultMantineColor;
 
@@ -24,6 +25,25 @@ const theme: MantineThemeOverride = {
   },
   spacing: {
     xs: 8
+  },
+  components: {
+    DatePicker: {
+      defaultProps: {
+        placeholder: "dd.mm.yyyy",
+        inputFormat: "DD.MM.YYYY",
+        clearable: false,
+        allowFreeInput: true,
+        dateParser: (dateString: string) => {
+          return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
+        }
+      },
+    },
+    Select: {
+      defaultProps: {
+        searchable: true,
+        clearable: true
+      },
+    },
   }
 }
 

@@ -10,7 +10,7 @@ from jsonschema import Draft202012Validator, ValidationError, validate
 
 from finnance import bcrypt, login_manager, db
 from finnance.models import (Account, AccountTransfer, Agent, Category,
-                             Currency, Flow, Record, Transaction, User)
+                             Currency, Flow, JSONModel, Record, Transaction, User)
 
 api = Blueprint('api', __name__, url_prefix='/api',
                 static_folder='static', static_url_path='/static/api')
@@ -102,6 +102,13 @@ def session():
             "auth": True
         })
 
+@api.route("/accounts")
+@login_required
+def accounts():
+    accs = Account.query.filter_by(
+        user_id=current_user.id).order_by(Account.order.asc()).all()
+    return JSONModel.obj_to_api([acc.json(deep=True) for acc in accs])
+
 @api.route("/accounts/<int:account_id>")
 @login_required
 def account(account_id):
@@ -137,7 +144,7 @@ def changes(account_id):
 @api.route("/me")
 @login_required
 def me():
-    return jsonify(current_user.json(deep=True))
+    return current_user.api()
 
 @api.route("/categories/<int:category_id>")
 @login_required
@@ -147,7 +154,7 @@ def category(category_id):
         user_id=current_user.id, id=category_id).first()
     if cat is None:
         raise APIError(HTTPStatus.UNAUTHORIZED)
-    return jsonify(cat.json(deep=True))
+    return cat.api()
 
 @api.route("/agents")
 @login_required
@@ -157,13 +164,19 @@ def agents():
         Flow, sqlalchemy.and_(Agent.id == Flow.agent_id, 
         Transaction.id == Flow.trans_id), isouter=True).group_by(
             Agent.id).order_by(Agent.uses.desc(), Agent.desc).all()
-    return jsonify([agent.json(deep=False) for agent in agents])
+    return JSONModel.obj_to_api([agent.json(deep=True) for agent in agents])
 
 @api.route("/categories")
 @login_required
 def categories():
     categories = Category.query.filter_by(user_id=current_user.id).all()
-    return jsonify([cat.json(deep=False) for cat in categories])
+    return JSONModel.obj_to_api([cat.json(deep=True) for cat in categories])
+
+@api.route("/currencies")
+@login_required
+def currencies():
+    currencies = Currency.query.all()
+    return JSONModel.obj_to_api([cur.json(deep=False) for cur in currencies])
 
 @api.errorhandler(APIError)
 def handle_apierror(err: APIError):

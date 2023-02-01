@@ -5,7 +5,8 @@ import { AccountDeep } from '../Types/Account';
 import { AccountChange } from '../Types/AccountChange';
 import { AgentFlat } from '../Types/Agent';
 import { CategoryFlat } from '../Types/Category';
-import { UserDeep } from "../Types/User";
+import { CurrencyFlat } from '../Types/Currency';
+import { UserDeep, UserFlat } from "../Types/User";
 
 const handleResponse = (r: Response) => r.json().then(data => {
     if (r.ok)
@@ -22,8 +23,14 @@ const handleResponse = (r: Response) => r.json().then(data => {
 })
 
 export const useCurrentUser = () =>
-    useQuery<UserDeep, Response>("me", () =>
+    useQuery<UserFlat, Response>("me", () =>
         fetch("/api/me").then(handleResponse),
+        { retry: false }
+    );
+
+export const useAccounts = () =>
+    useQuery<AccountDeep[], Response>("accounts", () =>
+        fetch("/api/accounts").then(handleResponse),
         { retry: false }
     );
 
@@ -42,6 +49,12 @@ export const useAgents = () =>
 export const useCategories = () =>
     useQuery<CategoryFlat[], Response>("categories", () =>
         fetch("/api/categories").then(handleResponse),
+        { retry: false }
+    );
+
+export const useCurrencies = () =>
+    useQuery<CurrencyFlat[], Response>("currencies", () =>
+        fetch("/api/currencies").then(handleResponse),
         { retry: false }
     );
 

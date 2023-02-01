@@ -3,19 +3,13 @@ import { useForm } from "@mantine/form";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { DateTime, Duration } from "luxon";
-import { useQueryClient } from "react-query";
-import { Form, useFetcher, useNavigate, useSubmit } from "react-router-dom";
-import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
-import { throwOrReturnFromResponse } from "../../contexts/ErrorHandlerProvider";
 import { useAddTransaction } from "../../hooks/useMutation";
-import { useAgents, useCategories } from "../../hooks/useQuery";
+import { useAgents } from "../../hooks/useQuery";
 import { AccountDeep } from "../../Types/Account";
-import { AgentFlat } from "../../Types/Agent";
-import { CategoryFlat } from "../../Types/Category";
 import { CurrencyFlat } from "../../Types/Currency";
-import AmountInput from "./AmountInput";
 import DateTimeInput from "./DateTimeInput";
 import FlowsNRecordsInput from "./FlowsNRecords";
+import AmountInput from "./TransactionAmountInput";
 
 type OpenTransactionModalProps = {
     currency?: CurrencyFlat,
