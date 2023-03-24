@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  db:
+    image: mariadb:latest
+    restart: always
+    env_file:
+      .env
+    volumes:
+      - ${MARIADB_VOLUME_PATH}:/var/lib/mysql
+    expose:
+      - 3306
+
+  backend:
+    image: backend
+    build:
+      context: .
+    ports:
+      - 5050:5050
+    depends_on:
+      - db
+        
+
+  frontend:
+    image: frontend
+    build:
+      context: ./frontend
+    ports:
+      - 3000:3000
+  
+    
