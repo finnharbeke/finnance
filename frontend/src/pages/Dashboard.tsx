@@ -2,7 +2,8 @@ import { ActionIcon, Button, Collapse, createStyles, Divider, Grid, Skeleton, St
 import { useDisclosure } from "@mantine/hooks";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { Link } from "react-router-dom";
-import { useAccounts, useCurrentUser } from "../hooks/useQuery";
+import LinkButton from "../components/LinkButton";
+import { useAccounts } from "../hooks/useQuery";
 
 export default function DashboardPage() {
     const useStyles = createStyles({
@@ -59,8 +60,8 @@ export default function DashboardPage() {
             </>
         }
         <Stack>
-            <Button component={Link} to={'/accounts'} fullWidth variant="light">Manage Accounts</Button>
-            <Button component={Link} to={'/categories'} fullWidth variant="light">Manage Categories</Button>
+            <LinkButton to='/accounts' label="Manage Accounts"></LinkButton>
+            <LinkButton to='/categories' label="Manage Categories"></LinkButton>
         </Stack>
     </>;
 }

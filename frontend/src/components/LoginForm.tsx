@@ -1,8 +1,8 @@
-import { Button, Card, Flex, FocusTrap, Group, PasswordInput, TextInput, Title } from "@mantine/core";
+import { Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, TextInput, Text, Title, Anchor } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { createStyles, useMantineTheme } from "@mantine/styles";
-import { TbChevronDown } from "react-icons/tb";
 import { ReactNode, useState } from "react";
+import { TbChevronDown } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
 import useErrorHandler from "../hooks/useErrorHandler";
@@ -16,9 +16,13 @@ interface PasswordInputType {
     password: string
 }
 
-export function NextButton({ loading }: { loading: boolean }) {
+interface NextButtonProps extends GroupProps {
+    loading: boolean
+}
+
+export function NextButton({ loading, ...others }: NextButtonProps) {
     return (
-        <Group position="right" mt="md">
+        <Group position="right" {...others}>
             <Button
                 type="submit" radius="lg"
                 loading={loading}
@@ -33,7 +37,11 @@ export function FormTop({ children }: { children: ReactNode }) {
     </Group>
 }
 
-export function LoginForm({ url }: { url?: string }) {
+interface LoginFormProps extends Omit<CardProps, 'children'> {
+    url?: string
+}
+
+export function LoginForm({ url, ...others }: LoginFormProps) {
     url = url === undefined ? 'dashboard' : url;
     const theme = useMantineTheme();
     const useStyles = createStyles({
@@ -120,6 +128,7 @@ export function LoginForm({ url }: { url?: string }) {
         className={classes.LoginCard}
         withBorder
         shadow='sm'
+        {...others}
     >
         <Flex justify="center" align="center" direction="column">
             <FinnanceLogo size={40} />
@@ -131,7 +140,13 @@ export function LoginForm({ url }: { url?: string }) {
             <FocusTrap active={!continued}>
                 <TextInput label="username" radius="lg" variant="filled" {...unForm.getInputProps('username')} />
             </FocusTrap>
-            <NextButton loading={loading} />
+            <NextButton loading={loading} my='sm'/>
+            <Text fz='sm' align='center'>
+                no account?
+                <Anchor ml='xs' href='/register'>
+                    sign up
+                </Anchor>
+            </Text>
         </form>
         <form onSubmit={pwForm.onSubmit(handlePassword)}
             className={continued ? null : classes.hidden}>
@@ -144,7 +159,7 @@ export function LoginForm({ url }: { url?: string }) {
             <FocusTrap active={continued}>
                 <PasswordInput label="enter your password" radius="lg" variant="filled" {...pwForm.getInputProps('password')} />
             </FocusTrap>
-            <NextButton loading={loading} />
+            <NextButton loading={loading} mt='sm'/>
         </form>
     </Card>
 }
