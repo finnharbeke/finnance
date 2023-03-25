@@ -1,6 +1,6 @@
 import { Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, TextInput, Text, Title, Anchor } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { createStyles, useMantineTheme } from "@mantine/styles";
+import { createStyles } from "@mantine/styles";
 import { ReactNode, useState } from "react";
 import { TbChevronDown } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router";
@@ -37,32 +37,31 @@ export function FormTop({ children }: { children: ReactNode }) {
     </Group>
 }
 
-interface LoginFormProps extends Omit<CardProps, 'children'> {
-    url?: string
+export interface LoginFormProps extends Omit<CardProps, 'children'> {
+    
 }
 
-export function LoginForm({ url, ...others }: LoginFormProps) {
-    url = url === undefined ? 'dashboard' : url;
-    const theme = useMantineTheme();
-    const useStyles = createStyles({
-        LoginCard: {
-            maxWidth: '50%',
-            margin: 'auto',
-            [theme.fn.smallerThan('md')]: {
-                maxWidth: '60%'
-            },
-            [theme.fn.smallerThan('sm')]: {
-                maxWidth: '70%'
-            },
-            [theme.fn.smallerThan('xs')]: {
-                maxWidth: '90%'
-            },
+export const useLoginFormStyles = createStyles(theme => ({
+    LoginCard: {
+        maxWidth: '50%',
+        margin: 'auto',
+        [theme.fn.smallerThan('md')]: {
+            maxWidth: '60%'
         },
-        hidden: {
-            display: 'none'
-        }
-    });
-    const { classes } = useStyles();
+        [theme.fn.smallerThan('sm')]: {
+            maxWidth: '70%'
+        },
+        [theme.fn.smallerThan('xs')]: {
+            maxWidth: '90%'
+        },
+    },
+    hidden: {
+        display: 'none'
+    }
+}))
+
+export function LoginForm({ ...others }: LoginFormProps) {
+    const { classes } = useLoginFormStyles();
 
     const unForm = useForm<UsernameInputType>({
         initialValues: {

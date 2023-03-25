@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import LoaderError from "../components/LoaderError";
 import { LoginForm } from "../components/LoginForm";
+import { SignUpForm } from "../components/SignUpForm";
 import NotFound from "../pages/404";
 import AccountPage from "../pages/Account";
 import AccountsPage from "../pages/Accounts";
@@ -19,6 +20,9 @@ export const FinnanceRouter = createBrowserRouter([
             children: [{
                 path: "login",
                 element: <LoginForm />
+            }, {
+                path: "register",
+                element: <SignUpForm />
             }]
         }, {
             element: <PrivateRoute />,

@@ -1,5 +1,6 @@
 import json
 from http import HTTPStatus
+import re
 import traceback
 
 import datetime as dt
@@ -59,6 +60,21 @@ def exists_user(username: str):
         "exists": exists
     })
 
+@api.route("/existsMail", methods=["POST"])
+@check_input({
+    "type": "object",
+    "properties": {
+        "email": {"type": "string"}
+    },
+    "required": ["email"]
+})
+def exists_mail(email: str):
+    user = User.query.filter_by(email=email).first()
+    exists = user is not None
+    return jsonify({
+        "exists": exists
+    })
+
 
 @api.route("/login", methods=["POST"])
 @check_input({
@@ -80,6 +96,50 @@ def login(username: str, password: str):
 
     return jsonify({
         "auth": success,
+    })
+
+@api.route("/register", methods=["POST"])
+@check_input({
+    "type": "object",
+    "properties": {
+        "username": {"type": "string"},
+        "email": {"type": "string"},
+        "password": {"type": "string"}
+    },
+    "required": ["username", "email", "password"]
+})
+def register(username: str, email: str, password: str):
+    emuser = User.query.filter_by(email=email).first()
+    namuser = User.query.filter_by(username=username).first()
+    if emuser or namuser:
+        regerr = "E-Mail" if emuser else "Username"
+        if emuser and namuser:
+            regerr += " and Username are"
+        else:
+            regerr += " is"
+        regerr += " already taken"
+        raise APIError(HTTPStatus.BAD_REQUEST, regerr)
+    allowed = r'^[_\da-zA-Z]{3,}$'
+    if not re.match(allowed, username):
+        if len(username) < 3:
+            regerr = "Username must be at least 3 characters long"
+        else:
+            regerr = "Only use letters, digits and underscores for the username"
+        raise APIError(HTTPStatus.BAD_REQUEST, regerr)
+    email_reg = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'
+    if not re.match(email_reg, email):
+        raise APIError(HTTPStatus.BAD_REQUEST, "invalid E-Mail")
+    if len(password) < 6:
+        raise APIError(HTTPStatus.BAD_REQUEST, "Password must contain at least 6 characters")
+
+    # add user
+    pwhash = bcrypt.generate_password_hash(password).decode('utf-8')
+    user = User(email=email, username=username, password=pwhash)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({
+        "success": User.query.filter_by(username=username).first() is not None,
     })
 
 

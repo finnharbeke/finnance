@@ -5,13 +5,18 @@ import { NotOKResponseProps } from "./ErrorHandlerProvider";
 export interface AuthContextType {
     auth: boolean,
     exists: (username: string) => Promise<FetchReturnProps & ExistsReturnProps>,
+    existsMail: (email: string) => Promise<FetchReturnProps & ExistsReturnProps>,
     login: (username: string, password: string) => Promise<FetchReturnProps & LoginReturnProps>,
+    register: (username: string, email: string, password: string) => Promise<FetchReturnProps & RegisterReturnProps>,
     logout: () => Promise<FetchReturnProps & LogoutReturnProps>,
     checkingSession: boolean
 }
 
 interface LoginReturnProps {
     auth?: boolean,
+}
+interface RegisterReturnProps {
+    success?: boolean,
 }
 interface LogoutReturnProps {
     success?: boolean,
@@ -44,6 +49,22 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
                 else
                     responseErrorFromResponseAndData(r, (data as NotOKResponseProps))
                 return { ok: r.ok, ...(data as LoginReturnProps) }
+            })
+        ))
+    );
+    
+    const handleRegister = async (username: string, email: string, password: string) => (
+        fetch("/api/register",
+            {
+                method: 'post',
+                body: JSON.stringify({ username, email, password }),
+                signal: AbortSignal.timeout(3000)
+            }
+        ).then(async r => (
+            r.json().then((data: RegisterReturnProps | NotOKResponseProps) => {
+                if (!r.ok)
+                    responseErrorFromResponseAndData(r, (data as NotOKResponseProps))
+                return { ok: r.ok, ...(data as RegisterReturnProps) }
             })
         ))
     );
@@ -80,6 +101,22 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             })
         ))
     )
+    
+    const handleExistsMail = (email: string) => (
+        fetch("/api/existsMail",
+            {
+                method: 'post',
+                body: JSON.stringify({ email }),
+                signal: AbortSignal.timeout(3000)
+            }
+        ).then(async r => (
+            r.json().then((data: ExistsReturnProps | NotOKResponseProps) => {
+                if (!r.ok)
+                    responseErrorFromResponseAndData(r, (data as NotOKResponseProps));
+                return { ok: r.ok, ...(data as ExistsReturnProps) }
+            })
+        ))
+    )
 
     const checkSession = () => {
         fetch("/api/session", {
@@ -96,8 +133,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const value = {
         auth,
         login: handleLogin,
+        register: handleRegister,
         logout: handleLogout,
         exists: handleExists,
+        existsMail: handleExistsMail,
         checkingSession: checkingSession,
     };
 
