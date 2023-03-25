@@ -17,6 +17,8 @@ services:
       context: .
     ports:
       - 5050:5050
+    expose:
+      - 5050
     depends_on:
       - db
         
@@ -25,7 +27,10 @@ services:
     image: frontend
     build:
       context: ./frontend
+      dockerfile: Dockerfile-dev
     ports:
-      - 3000:3000
+      - 3000:80
+    environment: 
+      - FLASK_SERVER_ADDR=backend:5050
   
     
