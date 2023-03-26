@@ -33,7 +33,7 @@ export const AuthContext = createContext<AuthContextType>(null);
 export default function AuthProvider({ children }: { children: ReactNode }) {
     const [auth, setAuth] = useState(false);
     const [checkingSession, setChecking] = useState(true);
-    const { responseError, responseErrorFromResponseAndData } = useErrorHandler();
+    const { responseErrorFromResponseAndData } = useErrorHandler();
 
     const handleLogin = async (username: string, password: string) => (
         fetch("/api/login",

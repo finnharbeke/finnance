@@ -1,10 +1,10 @@
-import { ActionIcon, Autocomplete, Button, Grid, Input, NumberInput, Select, Switch, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Autocomplete, Button, Grid, Input, Select, Switch, useMantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
-import { CurrencyFlat } from "../../Types/Currency";
-import { Flow, FormValues, isFlow, isRecord, Record, transformedFormValues } from "./Transaction";
 import { useAgents, useCategories } from "../../hooks/useQuery";
+import { CurrencyFlat } from "../../Types/Currency";
 import AmountInput from "../Inputs/AmountInput";
+import { Flow, FormValues, isFlow, isRecord, Record, transformedFormValues } from "./Transaction";
 
 interface FlowsNRecordsButtonProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>

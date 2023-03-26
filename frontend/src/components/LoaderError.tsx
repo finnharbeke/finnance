@@ -7,7 +7,7 @@ export default function LoaderError() {
     const err = useRouteError();
     const { handleErrors } = useErrorHandler();
 
-    useEffect(() => handleErrors(err), []);
+    useEffect(() => handleErrors(err), [err, handleErrors]);
     return <>
         <ReloadButton/>
     </>

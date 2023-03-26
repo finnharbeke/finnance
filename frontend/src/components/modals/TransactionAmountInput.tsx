@@ -1,4 +1,4 @@
-import { Button, createStyles, Grid, Input, MantineTheme, NumberInput } from "@mantine/core";
+import { Button, createStyles, Grid, Input, MantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyFlat } from "../../Types/Currency";

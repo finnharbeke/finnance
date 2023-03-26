@@ -6,7 +6,7 @@ import { AccountChange } from '../Types/AccountChange';
 import { AgentFlat } from '../Types/Agent';
 import { CategoryFlat } from '../Types/Category';
 import { CurrencyFlat } from '../Types/Currency';
-import { UserDeep, UserFlat } from "../Types/User";
+import { UserFlat } from "../Types/User";
 
 const handleResponse = (r: Response) => r.json().then(data => {
     if (r.ok)
