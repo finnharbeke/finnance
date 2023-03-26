@@ -17,6 +17,7 @@ services:
       retries: 10
 
   backend:
+    image: finnharbeke/finnance:backend
     env_file:
       .env
     build:
@@ -29,9 +30,9 @@ services:
         
 
   frontend:
+    image: finnharbeke/finnance:frontend
     env_file:
       .env
-    image: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
