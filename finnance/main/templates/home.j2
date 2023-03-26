@@ -36,7 +36,7 @@ ondragleave="allow_drop_color(event, '')" ondrop="drop(event)"
     </div>
     <div class="col-4 col-lg-2 acc{{account.id}}" {{ drop_goal(account) }}
         onclick="document.location = `{{ url_for('main.account', account_id=account.id) }}`;">
-        {{ account.currency.code }} {{ account.saldo() }}
+        {{ account.currency.code }} {{ account.saldo }}
     </div>
     <div class="col-2 col-lg-1 acc{{account.id}}" {{ drop_goal(account) }}>
         <button class="btn btn-success btn-block toggler"
