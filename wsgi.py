@@ -1,3 +1,4 @@
 from finnance import app
 if __name__ == "__main__":
-    app.run(port=5050)
+    if input("running without docker? y/[n]") == 'y':
+        app.run(port=5050)

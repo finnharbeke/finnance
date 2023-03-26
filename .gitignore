@@ -6,4 +6,4 @@ app.db
 backups
 secret.py
 .env
-db/
+db_data/
