@@ -3,7 +3,14 @@ name: Build & Push
 on:
   push:
     branches:
-      - "main"
+      - main
+    paths:
+      - frontend/**
+      - finnance/**
+      - wsgi.py
+      - environment.yml
+      - Dockerfile
+      
 
 jobs:
   build:
