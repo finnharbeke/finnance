@@ -2,7 +2,6 @@ version: '3.4'
 
 services:
   db:
-    platform: linux/amd64
     image: mariadb:latest
     restart: always
     env_file:
@@ -12,13 +11,11 @@ services:
     ports:
       - 3306:3306
     healthcheck:
-      # mysqladmin ping -h localhost -u root -p$MARIADB_ROOT_PASSWORD
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p$MARIADB_ROOT_PASSWORD"]
       timeout: 5s
       retries: 10
 
   backend:
-    platform: linux/amd64
     image: finnharbeke/finnance:backend
     env_file:
       .env
@@ -32,7 +29,6 @@ services:
         
 
   frontend:
-    platform: linux/amd64
     image: finnharbeke/finnance:frontend
     env_file:
       .env
