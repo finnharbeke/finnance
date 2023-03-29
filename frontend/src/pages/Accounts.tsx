@@ -1,44 +1,42 @@
-import { Center, Loader } from "@mantine/core";
-import { DateTime } from "luxon";
-import AccountInfos from "../components/AccountInfos";
-import { useAccounts } from "../hooks/useQuery";
+import { Center, Divider, Grid, Loader, Title } from "@mantine/core";
+import AccountFormList from "../components/account/AccountFormList";
+import { CurrencyCard, CurrencyForm } from "../components/Currency";
+import { useAccounts, useCurrencies } from "../hooks/useQuery";
 
 
 
 export default function AccountsPage() {
 
-    const { data, isSuccess, isLoading, isError } = useAccounts();
+    const { data: accounts, isSuccess: successAccs, isLoading: loadingAccs, isError: errorAccs } = useAccounts();
+    const { data: currencies, isSuccess: successCurrs, isLoading: loadingCurrs, isError: errorCurrs } = useCurrencies();
 
-    if (isSuccess)
-        return <>{
-            data.map((acc, i) => <AccountInfos data={acc} ix={i} key={i} />)
-        }
-            <AccountInfos data={{
-                id: 1, date_created: DateTime.now().toISO(),
-                user_id: 1,
-                order: 1,
-                desc: "account desc",
-                starting_saldo: 0,
-                currency_id: 1,
-                color: "#ff0000",
-                saldo: 0,
-                type: "account",
-                currency: {
-                    id: 1,
-                    code: "CHF",
-                    decimals: 2,
-                    type: "currency"
-                },
-                user: {
-                    id: 1,
-                    username: "test",
-                    email: "test@somewhere.com",
+
+
+    if (successAccs && successCurrs)
+        return <>
+            <Title order={1} mb='sm'>accounts</Title>
+            <AccountFormList accounts={accounts}/>
+            {
+                accounts.length === 0 &&
+                
+                <Title order={2} align="center">no accounts yet</Title>
+            }
+            <Divider my='sm'/>
+            <Title order={2} mb='xs'>currencies</Title>
+            <Grid mb='sm'>
+                {
+                    currencies.map((curr, i) =>(
+                        <Grid.Col md={4} sm={6} xs={12} key={i}>
+                            <CurrencyCard currency={curr}/>
+                        </Grid.Col>
+                    ))
                 }
-            }} ix={data.length}/>
+            </Grid>
+            <CurrencyForm/>
         </>
-    if (isLoading)
+    if (loadingAccs || loadingCurrs)
         return <Center><Loader size='lg' /></Center>
-    if (isError)
+    if (errorAccs || errorCurrs)
         return <>Error</>
 
 }

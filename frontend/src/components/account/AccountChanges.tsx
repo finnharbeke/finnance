@@ -1,9 +1,9 @@
 import { Skeleton } from "@mantine/core";
 import { DateTime } from "luxon";
-import { useChanges } from "../hooks/useQuery";
-import { AccountChange, isAccountChangeTransaction } from "../Types/AccountChange";
-import { TransactionHead } from "./Transaction";
-import { TransferHead } from "./Transfer";
+import { useChanges } from "../../hooks/useQuery";
+import { AccountChange, isAccountChangeTransaction } from "../../Types/AccountChange";
+import { TransactionHead } from "../Transaction";
+import { TransferHead } from "../Transfer";
 
 interface AccountChangesProps {
     id: number,

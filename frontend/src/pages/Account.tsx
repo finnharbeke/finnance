@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { useState } from "react";
 import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
-import { AccountChanges } from "../components/AccountChanges";
+import { AccountChanges } from "../components/account/AccountChanges";
 import { openTransactionModal } from "../components/modals/Transaction";
 import { useAccount } from "../hooks/useQuery";
 import NotFound from "./404";

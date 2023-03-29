@@ -238,6 +238,28 @@ def currencies():
     currencies = Currency.query.all()
     return JSONModel.obj_to_api([cur.json(deep=False) for cur in currencies])
 
+@api.route("/currencies/add", methods=["POST"])
+@login_required
+@check_input({
+    "type": "object",
+    "properties": {
+        "code": {"type": "string"},
+        "decimals": {"type": "number"},
+    },
+    "required": ["code", "decimals"]
+})
+def add_currency(code, decimals):
+    if Currency.query.filter_by(code=code).first() is not None:
+        raise APIError(HTTPStatus.BAD_REQUEST, "code already in use")
+    if int(decimals) != decimals or decimals < 0:
+        raise APIError(HTTPStatus.BAD_REQUEST, "decimals must be integer >= 0")
+    curr = Currency(code=code, decimals=decimals)
+    db.session.add(curr)
+    db.session.commit()
+    return jsonify({
+        "success": True
+    })
+
 @api.errorhandler(APIError)
 def handle_apierror(err: APIError):
     return jsonify({

@@ -5,8 +5,7 @@ interface AmountInputProps extends NumberInputProps {
     currency: CurrencyFlat
 }
 
-export default function AmountInput(props : AmountInputProps) {
-    const { currency } = props;
+export default function AmountInput({currency, ...others} : AmountInputProps) {
     return <NumberInput
         precision={currency?.decimals} hideControls
         min={0}
@@ -17,6 +16,6 @@ export default function AmountInput(props : AmountInputProps) {
                 : `${currency?.code} `
         }
         parser={(value: string) => value.replace(/\D+\s/g, '')}
-        {...props}
+        {...others}
     />
 }
