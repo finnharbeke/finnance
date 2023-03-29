@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Configurations
-app.config.from_object('config')
+app.config.from_object('finnance.config')
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'main.login'

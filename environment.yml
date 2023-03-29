@@ -13,5 +13,6 @@ dependencies:
   - jsonschema
   - python-dateutil
   - gunicorn
+  - python-dotenv
   - pip:
     - mariadb==1.0.*

@@ -16,7 +16,6 @@ RUN conda env create -p /env --file environment.yml && conda clean -afy
 
 COPY wsgi.py /app
 COPY config.py /app
-COPY secret.py /app
 COPY finnance /app/finnance
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
