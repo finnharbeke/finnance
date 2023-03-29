@@ -33,15 +33,15 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/arm64
+          platforms: linux/arm/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/finnance-backend:latest
       -
-        name: Build and push backend
+        name: Build and push frontend
         uses: docker/build-push-action@v3
         with:
           context: ./frontend
-          platforms: linux/arm64
+          platforms: linux/arm/v8
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/finnance-frontend:latest
       
