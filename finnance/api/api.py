@@ -318,7 +318,7 @@ def add_trans(edit=None, **data):
     if data['account_id']:
         account = Account.query.get(data['account_id'])
         if account.user_id != current_user.id:
-            return APIError(HTTPStatus.UNAUTHORIZED)
+            raise APIError(HTTPStatus.UNAUTHORIZED)
         # check saldo
         saldo = account.saldo
         # TODO: saldo at date_issued
@@ -330,7 +330,7 @@ def add_trans(edit=None, **data):
             diff += -data['amount'] if data['is_expense'] else data['amount']
 
         if saldo + diff < 0:
-            return APIError(HTTPStatus.BAD_REQUEST,
+            raise APIError(HTTPStatus.BAD_REQUEST,
                                "Transaction results in negative Account Saldo!")
 
         data['currency_id'] = account.currency_id
