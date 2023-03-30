@@ -4,6 +4,7 @@ import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "reac
 import { useAgents, useCategories } from "../../hooks/useQuery";
 import { CurrencyFlat } from "../../Types/Currency";
 import AmountInput from "../Inputs/AmountInput";
+import { RedIcon } from "../Inputs/Icons";
 import { Flow, FormValues, isFlow, isRecord, Record, transformedFormValues } from "./Transaction";
 
 interface FlowsNRecordsButtonProps {
@@ -82,7 +83,6 @@ interface FlowInputProps {
 }
 
 function FlowInput(props: FlowInputProps) {
-    const theme = useMantineTheme();
     const { form, i, flow, currency } = props;
     const agents = useAgents();
     return <Grid>
@@ -106,8 +106,7 @@ function FlowInput(props: FlowInputProps) {
                         />
                     </Grid.Col>
                     <Grid.Col span='content'>
-                        <ActionIcon
-                            color="red" size='lg' variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
+                        <RedIcon icon={TbEraser}
                             onClick={() => {
                                 form.values.items.forEach(
                                     (item, ix) => {
@@ -117,9 +116,7 @@ function FlowInput(props: FlowInputProps) {
                                 )
                                 form.removeListItem('items', i);
                                 form.setFieldValue('n_flows', form.values.n_flows - 1)
-                            }}>
-                            <TbEraser size={18} />
-                        </ActionIcon>
+                            }} />
                     </Grid.Col>
                 </Grid>
             </Input.Wrapper>

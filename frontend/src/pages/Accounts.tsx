@@ -14,7 +14,6 @@ export default function AccountsPage() {
 
     if (successAccs && successCurrs)
         return <>
-            <Title order={1} mb='sm'>accounts</Title>
             <AccountFormList accounts={accounts}/>
             {
                 accounts.length === 0 &&

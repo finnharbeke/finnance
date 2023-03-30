@@ -1,13 +1,15 @@
-import { ActionIcon, Button, ColorInput, Grid, Group, Paper, Select, Skeleton, Title, useMantineTheme } from "@mantine/core"
+import { ActionIcon, Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, Title, Tooltip, useMantineTheme } from "@mantine/core"
 import { DatePicker } from "@mantine/dates"
 import { useForm } from "@mantine/form"
+import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
 import { useEffect } from "react"
-import { TbChevronDown, TbChevronUp, TbDeviceFloppy } from "react-icons/tb"
+import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate, TbRotate2, TbX } from "react-icons/tb"
 import { useCurrencies } from "../../hooks/useQuery"
 import { AccountDeep } from "../../Types/Account"
-import { useAccountFormList } from "./AccountFormList"
 import AmountInput from "../Inputs/AmountInput"
+import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
+import { useAccountFormList } from "./AccountFormList"
 
 export interface AccountFormValues {
     ix: number
@@ -21,8 +23,9 @@ export interface AccountFormValues {
 }
 
 export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
-    const theme = useMantineTheme();
     const currencies = useCurrencies();
+
+    const [open, { toggle }] = useDisclosure(false);
 
     const form = useForm<AccountFormValues>({
         initialValues: {
@@ -45,25 +48,34 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
     if (!currencies.isSuccess)
         return <Skeleton height={100}></Skeleton>
     return <Grid.Col span={12} order={form.values.ix}>
-        <Paper withBorder p='xs' mb='sm'>
-            <Grid align='flex-end'>
-                <Grid.Col span={1}>
-                    <Title order={3} color='dimmed'>#{form.values.ix}</Title>
-                </Grid.Col>
-                <Grid.Col span={9}>
-
-                    <Title order={3}>{form.values.desc}</Title>
+        <Paper withBorder p='xs'>
+            <Grid>
+                <Grid.Col span='auto'>
+                    <Group spacing='xs'>
+                        <SecondaryIcon
+                            icon={open ? TbChevronDown : TbChevronRight}
+                            onClick={toggle}
+                        />
+                        <ColorSwatch color={form.values.color} />
+                        <Title order={3}>{form.values.desc}</Title>
+                    </Group>
                     {/* <Input component={Title} {...form.getInputProps('desc')}/> */}
                     {/* <input/> */}
                 </Grid.Col>
-                <Grid.Col span={2}>
+                <Grid.Col span='content'>
                     <Group position='right' spacing='xs'>
                         {
                             form.isDirty() &&
-                            <ActionIcon variant='filled' type='submit' color={theme.primaryColor}
-                                onClick={form.onSubmit(() => console.log('hi'))}>
-                                <TbDeviceFloppy />
-                            </ActionIcon>
+                            <>
+                                <PrimaryIcon type='submit' icon={TbDeviceFloppy}
+                                    onClick={form.onSubmit(() => console.log('hi'))}
+                                    tooltip='save'
+                                />
+                                <RedIcon icon={TbRotate2}
+                                    onClick={form.reset}
+                                    tooltip='discard'
+                                />
+                            </>
                         }
                         <ActionIcon
                             onClick={() => moveUp(form.values.ix)}>
@@ -75,36 +87,40 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                         </ActionIcon>
                     </Group>
                 </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <ColorInput
-                        {...form.getInputProps('color')}
-                    />
-                </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <DatePicker
-                        {...form.getInputProps('date_created')}
-                    />
-                </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <Select label="currency"
-                        data={currencies.isLoading ? [] : currencies.data.map(
-                            cur => ({
-                                value: cur.id,
-                                label: cur.code,
-                            })
-                        )}
-                        {...form.getInputProps('currency_id')}
-                    />
-                </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <AmountInput label="saldo"
-                        currency={
-                            currencies.data.filter(cur => cur.id === form.values.currency_id)[0]
-                        }
-                        {...form.getInputProps('starting_saldo')}
-                    />
-                </Grid.Col>
             </Grid>
+            <Collapse in={open}>
+                <Grid align='flex-end'>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <ColorInput label="color"
+                            {...form.getInputProps('color')}
+                        />
+                    </Grid.Col>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <DatePicker label="tracking since"
+                            {...form.getInputProps('date_created')}
+                        />
+                    </Grid.Col>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <Select label="currency"
+                            data={currencies.isLoading ? [] : currencies.data.map(
+                                cur => ({
+                                    value: cur.id,
+                                    label: cur.code,
+                                })
+                            )}
+                            {...form.getInputProps('currency_id')}
+                        />
+                    </Grid.Col>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <AmountInput label="saldo"
+                            currency={
+                                currencies.data.filter(cur => cur.id === form.values.currency_id)[0]
+                            }
+                            {...form.getInputProps('starting_saldo')}
+                        />
+                    </Grid.Col>
+                </Grid>
+            </Collapse>
         </Paper>
     </Grid.Col>
 }
