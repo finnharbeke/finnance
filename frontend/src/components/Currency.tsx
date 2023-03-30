@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Flex, Grid, Group, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
+import { Button, Flex, Grid, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { TbEraser } from "react-icons/tb";
 import { useAddCurrency } from "../hooks/useMutation";
