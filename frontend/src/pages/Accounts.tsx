@@ -22,7 +22,7 @@ export default function AccountsPage() {
             }
             <Divider my='sm'/>
             <Title order={2} mb='xs'>currencies</Title>
-            <Grid mb='sm'>
+            <Grid mb='sm' grow>
                 {
                     currencies.map((curr, i) =>(
                         <Grid.Col md={4} sm={6} xs={12} key={i}>
