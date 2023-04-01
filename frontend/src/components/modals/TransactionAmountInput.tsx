@@ -7,7 +7,7 @@ import { FormValues, isRecord, transformedFormValues } from "./Transaction";
 
 interface TransactionAmountInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
-    currency: CurrencyFlat
+    currency?: CurrencyFlat
 }
 
 export default function TransactionAmountInput(props: TransactionAmountInputProps) {

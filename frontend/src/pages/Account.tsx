@@ -10,9 +10,9 @@ import NotFound from "./404";
 
 export default function AccountPage() {
     const params = useParams();
-    const { data, isLoading, isError, error } = useAccount(parseInt(params.id))
+    const { data, isLoading, isError, error } = useAccount(parseInt(params.id as string))
     const [loading, setLoading] = useState(false);
-    const date_created = DateTime.fromISO(data?.date_created);
+    const date_created = DateTime.fromISO(data?.date_created as string);
 
     if (!params.id?.match(/\d+/) || (isError && error.status === 404))
         return <NotFound/>
@@ -41,6 +41,6 @@ export default function AccountPage() {
                 }
             }).then(() => setLoading(false))
         }}></Button>
-        <AccountChanges id={data?.id} n={10} />
+        <AccountChanges id={data?.id as number} n={10} />
     </>;
 }

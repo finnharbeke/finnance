@@ -134,7 +134,7 @@ export function LoginForm({ ...others }: LoginFormProps) {
             <Title order={1} fw={250}>{title}</Title>
         </Flex>
         <form onSubmit={unForm.onSubmit(handleUsername)}
-            className={continued ? classes.hidden : null}>
+            className={continued ? classes.hidden : undefined}>
             <FormTop>to continue</FormTop>
             <FocusTrap active={!continued}>
                 <TextInput label="username" radius="lg" variant="filled" {...unForm.getInputProps('username')} />
@@ -148,7 +148,7 @@ export function LoginForm({ ...others }: LoginFormProps) {
             </Text>
         </form>
         <form onSubmit={pwForm.onSubmit(handlePassword)}
-            className={continued ? null : classes.hidden}>
+            className={continued ? undefined : classes.hidden}>
             <FormTop>
                 <Button onClick={reset}
                     size='xs' variant='light' compact radius="lg"

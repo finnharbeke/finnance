@@ -45,7 +45,7 @@ export function CurrencyForm({ ...others }: PaperProps) {
         addCurrency.mutateAsync(values);
     }
 
-    return <Paper withBorder p='xs' {...others}>
+    return <Paper withBorder p='sm' {...others}>
         <Title order={3}>add currency</Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
             <Grid align="flex-end">

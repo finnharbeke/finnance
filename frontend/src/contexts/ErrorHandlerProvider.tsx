@@ -46,7 +46,12 @@ export const throwOrReturnFromResponse = (response: Response) => (
     })
 )
 
-export const ErrorHandlerContext = createContext<ErrorHandlerContextType>(null);
+export const ErrorHandlerContext = createContext<ErrorHandlerContextType>({
+    responseError: () => {},
+    frontendError: () => {},
+    responseErrorFromResponseAndData: () => {},
+    handleErrors: () => {}
+});
 
 export default function ErrorHandlerProvider({ children }: { children: ReactNode }) {
     enum Variant {

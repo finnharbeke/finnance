@@ -18,7 +18,7 @@ export function ServerSideErrorAlert({ open, msg }: AlertProps) {
         icon={<TbAlertCircle />}
         title="Oops!" color="red"
         variant="filled"
-        className={ open ? null : classes.hidden }
+        className={ open ? undefined : classes.hidden }
         >
         Something terrible happened!
         <br/>
@@ -36,7 +36,7 @@ export function FrontendErrorAlert({ open, msg }: AlertProps) {
         icon={<TbAlertCircle />}
         title="Oops!" color="red"
         variant="filled"
-        className={ open ? null : classes.hidden }
+        className={ open ? undefined : classes.hidden }
         >
         Something terrible happened!
         <br/>
@@ -54,7 +54,7 @@ export function TimeoutAlert({ open }: AlertProps) {
         icon={<RiZzzFill size={16} />}
         title="Server Timeout" color="yellow"
         variant="filled"
-        className={ open ? null : classes.hidden }
+        className={ open ? undefined : classes.hidden }
         >
         The Server isn't responding!
         <br/>

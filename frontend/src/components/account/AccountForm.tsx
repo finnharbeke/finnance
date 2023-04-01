@@ -1,5 +1,5 @@
 import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, TextInput, Title } from "@mantine/core"
-import { DatePicker } from "@mantine/dates"
+import { DatePickerInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
@@ -90,7 +90,7 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                                 tooltip='save'
                             />
                             <RedIcon icon={TbRotate2}
-                                onClick={form.reset}
+                                onClick={() => form.reset()}
                                 tooltip='discard'
                             />
                         </>
@@ -112,7 +112,7 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                     />
                 </Grid.Col>
                 <Grid.Col md={3} sm={6} xs={12}>
-                    <DatePicker label="tracking since"
+                    <DatePickerInput label="tracking since"
                         {...form.getInputProps('date_created')}
                     />
                 </Grid.Col>
@@ -120,7 +120,7 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                     <Select label="currency"
                         data={currencies.isLoading ? [] : currencies.data.map(
                             cur => ({
-                                value: cur.id,
+                                value: cur.id.toFixed(0),
                                 label: cur.code,
                             })
                         )}

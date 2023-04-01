@@ -21,7 +21,7 @@ type TransactionModalProps = {
     account?: AccountDeep,
 }
 
-export const openTransactionModal = async (props?: OpenContextModal<OpenTransactionModalProps>) => {
+export const openTransactionModal = async (props: OpenContextModal<OpenTransactionModalProps>) => {
     openContextModal({
         ...{
             modal: 'transaction',
@@ -58,7 +58,7 @@ export const isFlow = (val: Item): val is Flow => val.type === 'flow';
 export const isRecord = (val: Item): val is Record => val.type === 'record';
 
 export interface FormValues {
-    account_id: number
+    account_id: number | undefined
     date: Date
     time: Date
     amount: number
@@ -72,7 +72,7 @@ export interface FormValues {
 }
 
 export interface transformedFormValues {
-    account_id: number
+    account_id: number | undefined
     date_issued: string
     amount: number
     is_expense: boolean
@@ -97,10 +97,10 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
 
     const form = useForm<FormValues, Transform>({
         initialValues: {
-            account_id: account.id,
-            date: null,
+            account_id: account?.id,
+            date: new Date(),
             time: new Date(),
-            amount: null,
+            amount: 0,
             isExpense: true,
             agent: '',
             isDirect: false,
@@ -201,11 +201,11 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
     }
 
     return <form onSubmit={form.onSubmit(submitForm)}>
-        <DateTimeInput form={form} minDate={account.date_created} />
+        <DateTimeInput form={form} minDate={account?.date_created} />
         <AmountInput form={form} currency={currency} />
         <Autocomplete
             withAsterisk label='agent'
-            data={agents.isLoading ? [] : agents.data.map(
+            data={agents.isLoading || agents.data === undefined ? [] : agents.data.map(
                 agent => agent.desc
             )}
             {...form.getInputProps('agent')}

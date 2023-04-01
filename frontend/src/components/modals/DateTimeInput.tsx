@@ -1,5 +1,5 @@
 import { Group } from "@mantine/core"
-import { DatePicker, TimeInput } from "@mantine/dates"
+import { DatePickerInput, TimeInput } from "@mantine/dates"
 import { UseFormReturnType } from "@mantine/form"
 import { DateTime } from "luxon"
 import { FormValues, transformedFormValues } from "./Transaction"
@@ -12,14 +12,14 @@ interface DateTimeInputProps {
 export default function DateTimeInput(props: DateTimeInputProps) {
     const { minDate, form } = props;
     return <Group grow align='flex-start'>
-    <DatePicker
+    <DatePickerInput
         data-autofocus label="date" withAsterisk
-        minDate={DateTime.fromISO(minDate).toJSDate()}
+        minDate={minDate === undefined ? undefined : DateTime.fromISO(minDate).toJSDate()}
         maxDate={DateTime.now().toJSDate()}
         {...form.getInputProps('date')}
     />
     <TimeInput
-        defaultValue={new Date()}
+        defaultValue={DateTime.now().toFormat('mm:hh')}
         label="time"
         withAsterisk
         {...form.getInputProps('time')}

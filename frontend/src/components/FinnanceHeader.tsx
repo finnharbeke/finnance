@@ -100,7 +100,7 @@ export default function FinnanceHeader() {
     return (
         <Header height={HEADER_HEIGHT} mb='xl' className={classes.root}>
             <Container className={classes.header}>
-                <Group spacinng={5}>
+                <Group spacing='sm'>
                     <LightDarkToggle />
                     <FinnanceLogo text size={28} />
                 </Group>

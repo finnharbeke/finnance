@@ -14,6 +14,10 @@ Deployment: [tutorial](https://www.javacodemonk.com/part-2-deploy-flask-api-in-p
 ```
 conda env create -n finnance --file environment.yml
 ```
+from `/frontend` dir:
+```
+yarn
+```
 
 ### run
 

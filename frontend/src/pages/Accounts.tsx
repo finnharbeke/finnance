@@ -7,8 +7,8 @@ import { useAccounts, useCurrencies } from "../hooks/useQuery";
 
 export default function AccountsPage() {
 
-    const { data: accounts, isSuccess: successAccs, isLoading: loadingAccs, isError: errorAccs } = useAccounts();
-    const { data: currencies, isSuccess: successCurrs, isLoading: loadingCurrs, isError: errorCurrs } = useCurrencies();
+    const { data: accounts, isSuccess: successAccs, isLoading: loadingAccs } = useAccounts();
+    const { data: currencies, isSuccess: successCurrs, isLoading: loadingCurrs } = useCurrencies();
 
 
 
@@ -35,7 +35,5 @@ export default function AccountsPage() {
         </>
     if (loadingAccs || loadingCurrs)
         return <Center><Loader size='lg' /></Center>
-    if (errorAccs || errorCurrs)
-        return <>Error</>
-
+    return <>Error</>
 }

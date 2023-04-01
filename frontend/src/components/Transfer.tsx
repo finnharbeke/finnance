@@ -20,9 +20,9 @@ export function TransferHead(props: AccountChangeTransfer) {
 
     const date = DateTime.fromISO(props.data.date_issued);
 
-    const otherRef = useRef();
+    const otherRef = useRef<HTMLDivElement>(null);
     const otherOverflow = useIsOverflow(otherRef);
-    const commentRef = useRef();
+    const commentRef = useRef<HTMLDivElement>(null);
     const commentOverflow = useIsOverflow(commentRef);
 
     return <>

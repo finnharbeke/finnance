@@ -13,22 +13,34 @@ export interface AuthContextType {
 }
 
 interface LoginReturnProps {
-    auth?: boolean,
+    auth: boolean,
 }
 interface RegisterReturnProps {
-    success?: boolean,
+    success: boolean,
 }
 interface LogoutReturnProps {
-    success?: boolean,
+    success: boolean,
 }
 interface ExistsReturnProps {
-    exists?: boolean,
+    exists: boolean,
 }
 interface FetchReturnProps {
     ok: boolean
 }
 
-export const AuthContext = createContext<AuthContextType>(null);
+export function not_defined<T>(): Promise<T> {
+    throw new Error("Context function not yet defined.");
+}
+
+export const AuthContext = createContext<AuthContextType>({
+    auth: false,
+    exists: not_defined<FetchReturnProps & ExistsReturnProps>,
+    existsMail: not_defined<FetchReturnProps & ExistsReturnProps>,
+    login: not_defined<FetchReturnProps & LoginReturnProps>,
+    register: not_defined<FetchReturnProps & RegisterReturnProps>,
+    logout: not_defined<FetchReturnProps & LogoutReturnProps>,
+    checkingSession: false
+});
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
     const [auth, setAuth] = useState(false);

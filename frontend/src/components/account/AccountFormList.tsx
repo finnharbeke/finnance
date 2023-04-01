@@ -11,7 +11,11 @@ interface AccountFormListContextType {
     moveDown: (ix: number) => void
 }
 
-const AccountFormListContext = createContext<AccountFormListContextType>(null);
+const AccountFormListContext = createContext<AccountFormListContextType>({
+    moveDown: () => {},
+    moveUp: () => {},
+});
+
 export function useAccountFormList() {
     return useContext(AccountFormListContext);
 }
@@ -38,14 +42,12 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
 
     const nextOrder = (order: number) => {
         let next = undefined;
-        let maxNext = undefined;
+        let minNext = Infinity;
         for (let other in orderForm.values.orders) {
             const other_order = orderForm.values.orders[other];
-            if (other_order > order && (
-                next === undefined || other_order < maxNext
-            )) {
+            if (other_order > order && other_order < minNext) {
                 next = parseInt(other);
-                maxNext = other_order;
+                minNext = other_order;
             }
         }
         return next;
@@ -53,12 +55,10 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
 
     const lastOrder = (order: number) => {
         let last = undefined;
-        let maxLast = undefined;
+        let maxLast = -Infinity;
         for (let other in orderForm.values.orders) {
             const other_order = orderForm.values.orders[other];
-            if (other_order < order && (
-                last === undefined || other_order > maxLast
-            )) {
+            if (other_order < order && other_order > maxLast) {
                 last = parseInt(other);
                 maxLast = other_order;
             }
@@ -78,7 +78,8 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
         if (leastOrder(order))
             return;
         const other = lastOrder(order);
-        swap(ix, other);
+        if (other !== undefined)
+            swap(ix, other);
     }
 
     const moveDown = (ix: number) => {
@@ -86,7 +87,8 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
         if (largestOrder(order))
             return;
         const other = nextOrder(order);
-        swap(ix, other);
+        if (other !== undefined)
+            swap(ix, other);
     }
 
     const value: AccountFormListContextType = {
@@ -101,7 +103,7 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
                     <Group spacing='xs'>
                         <PrimaryIcon icon={TbDeviceFloppy} tooltip='save new order' />
                         <RedIcon icon={TbRotate2} tooltip='discard new order'
-                            onClick={orderForm.reset} />
+                            onClick={() => orderForm.reset()} />
                     </Group>
                 }
             </Flex>

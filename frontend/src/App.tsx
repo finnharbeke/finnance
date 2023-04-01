@@ -1,6 +1,6 @@
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
-import { NotificationsProvider } from '@mantine/notifications';
+import { Notifications } from '@mantine/notifications';
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { RouterProvider } from "react-router-dom";
@@ -21,13 +21,12 @@ function App() {
         <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
             <MantineProvider theme={{ ...theme, colorScheme }} withGlobalStyles withNormalizeCSS>
                 <QueryClientProvider client={queryClient}>
-                    <NotificationsProvider>
-                        <ErrorHandlerProvider>
-                            <AuthProvider>
-                                <RouterProvider router={FinnanceRouter} />
-                            </AuthProvider>
-                        </ErrorHandlerProvider>
-                    </NotificationsProvider>
+                    <Notifications />
+                    <ErrorHandlerProvider>
+                        <AuthProvider>
+                            <RouterProvider router={FinnanceRouter} />
+                        </AuthProvider>
+                    </ErrorHandlerProvider>
                 </QueryClientProvider>
             </MantineProvider>
         </ColorSchemeProvider>

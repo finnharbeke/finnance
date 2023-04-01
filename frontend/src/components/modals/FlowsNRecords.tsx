@@ -32,8 +32,8 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
                         const item: Record = {
                             type: 'record',
                             ix: form.values.n_records,
-                            amount: null,
-                            category_id: null
+                            amount: 0,
+                            category_id: -1
                         };
                         form.insertListItem('items', item);
                         form.setFieldValue('n_records', form.values.n_records + 1)
@@ -52,7 +52,7 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
                         const item: Flow = {
                             type: 'flow',
                             ix: form.values.n_flows,
-                            amount: null,
+                            amount: 0,
                             agent: ''
                         };
                         form.insertListItem('items', item)
@@ -79,7 +79,7 @@ interface FlowInputProps {
     flow: Flow
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
-    currency: CurrencyFlat
+    currency?: CurrencyFlat
 }
 
 function FlowInput(props: FlowInputProps) {
@@ -99,7 +99,7 @@ function FlowInput(props: FlowInputProps) {
                     <Grid.Col span='auto'>
                         <Autocomplete
                             placeholder={`Agent #${flow.ix}`}
-                            data={agents.isLoading ? [] : agents.data.map(
+                            data={agents.isLoading || agents.data === undefined ? [] : agents.data.map(
                                 agent => agent.desc
                             )}
                             {...form.getInputProps(`items.${i}.agent`)}
@@ -128,7 +128,7 @@ interface RecordInputProps {
     record: Record
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
-    currency: CurrencyFlat
+    currency?: CurrencyFlat
 }
 
 function RecordInput(props: RecordInputProps) {
@@ -150,11 +150,11 @@ function RecordInput(props: RecordInputProps) {
                     <Grid.Col span='auto'>
                         <Select
                             placeholder={`Category #${record.ix}`}
-                            data={categories.isLoading ? [] : categories.data.filter(
+                            data={categories.isLoading || categories.data === undefined ? [] : categories.data.filter(
                                 cat => cat.usable && cat.is_expense === form.values.isExpense
                             ).map(
                                 cat => ({
-                                    value: cat.id,
+                                    value: cat.id.toFixed(0),
                                     label: cat.desc,
                                     group: cat.parent_id === null ? cat.desc : cat.parent.desc
                                 })
@@ -186,7 +186,7 @@ function RecordInput(props: RecordInputProps) {
 
 interface FlowsNRecordsProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
-    currency: CurrencyFlat
+    currency?: CurrencyFlat
 }
 
 export default function FlowsNRecordsInput(props: FlowsNRecordsProps) {

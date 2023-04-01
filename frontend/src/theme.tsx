@@ -16,15 +16,10 @@ const theme: MantineThemeOverride = {
   primaryColor: 'violet',
 
   headings: {
-    fontWeight: 300,  
-    sizes: {
-      h1: {
-        fontSize: 48
-      }
-    }
+    fontWeight: 250,
   },
   spacing: {
-    xs: 8
+    xs: '6pt'
   },
   components: {
     DatePicker: {

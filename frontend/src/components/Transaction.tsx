@@ -60,15 +60,15 @@ export const HeadStyles = createStyles((theme: MantineTheme) => ({
         ],
     },
     date: {
-        flexBasis: 69 + 2 * theme.spacing.xs + 2,
+        flexBasis: 69 + 2 * 8 + 2,
         textAlign: 'center'
     },
     time: {
-        flexBasis: 45 + 2 * theme.spacing.xs + 2,
+        flexBasis: 45 + 2 * 8 + 2,
         textAlign: 'center'
     },
     amount: {
-        flexBasis: 64 + 2 * theme.spacing.xs + 2,
+        flexBasis: 64 + 2 * 8 + 2,
         textAlign: 'right',
     },
     incomeAmount: {
@@ -100,9 +100,9 @@ export function TransactionHead(props: AccountChangeTransaction) {
 
     const date = DateTime.fromISO(props.data.date_issued);
 
-    const agentRef = useRef();
+    const agentRef = useRef<HTMLDivElement>(null);
     const agentOverflow = useIsOverflow(agentRef);
-    const commentRef = useRef();
+    const commentRef = useRef<HTMLDivElement>(null);
     const commentOverflow = useIsOverflow(commentRef);
 
     return <>
