@@ -100,7 +100,8 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
                 {orderForm.isDirty() &&
                     <Group spacing='xs'>
                         <PrimaryIcon icon={TbDeviceFloppy} tooltip='save new order' />
-                        <RedIcon icon={TbRotate2} tooltip='discard new order' />
+                        <RedIcon icon={TbRotate2} tooltip='discard new order'
+                            onClick={orderForm.reset} />
                     </Group>
                 }
             </Flex>

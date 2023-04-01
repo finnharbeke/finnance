@@ -375,6 +375,67 @@ def add_trans(edit=None, **data):
         "success": True
     })
 
+@api.route("/accounts/edit/<int:account_id>", methods=["PUT"])
+@login_required
+@check_input({
+    "type": "object",
+    "properties": {
+        "desc": {"type": "string"},
+        "color": {"type": "string"},
+        "date_created": {"type": "string"},
+        "starting_saldo": {"type": "number"},
+        "currency_id": {"type": "number"},
+    }
+})
+def edit_account(account_id: int, **data):
+    account: Account = Account.query.filter_by(user_id=current_user.id, id=account_id).first()
+    if account is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    changed = False
+    if 'desc' in data:
+        changed = account.desc != data['desc']
+        account.desc = data['desc']
+    
+    if 'color' in data:
+        if not re.match('^#[a-fA-F0-9]{6}$', data['color']):
+            raise APIError(HTTPStatus.BAD_REQUEST, "color: invalid color hex-string")
+        changed = changed or account.color != data['color']
+        account.color = data['color']
+
+    if 'date_created' in data:
+        try:
+            new_date = dt.datetime.fromisoformat(data['date_created'])
+            for ch in account.changes()[0]:
+                if ch.date_issued < new_date:
+                    raise APIError(HTTPStatus.BAD_REQUEST, "date_created: there exist account changes before this date")
+            changed = changed or account.date_created != new_date
+            account.date_created = new_date
+        except ValueError:
+            raise APIError(HTTPStatus.BAD_REQUEST, "date_created: invalid isoformat string")
+    
+    if 'starting_saldo' in data:
+        changed = changed or account.starting_saldo != data['starting_saldo']
+        if data['starting_saldo'] < 0:
+            raise APIError(HTTPStatus.BAD_REQUEST, "negative starting_saldo")
+        account.starting_saldo = data['starting_saldo']
+
+    if 'currency_id' in data:
+        changed = changed or account.currency_id != data['currency_id']
+        if Currency.query.get(data['currency_id']) is None:
+            raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
+        account.currency_id = data['currency_id']
+        for trans in account.transactions:
+            trans.currency_id = data['currency_id']
+
+    if not changed:
+        raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
+        
+    db.session.commit()
+    return jsonify({
+        "success": True
+    })
+
 @login_manager.unauthorized_handler
 def unauthorized():
     if request.blueprint == 'api':

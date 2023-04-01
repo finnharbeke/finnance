@@ -35,7 +35,7 @@ export const useAccounts = () =>
     );
 
 export const useAccount = (account_id: number) =>
-    useQuery<AccountDeep, Response>(["account", account_id], () =>
+    useQuery<AccountDeep, Response>(["accounts", account_id], () =>
         fetch(`/api/accounts/${account_id}`).then(handleResponse),
         { retry: false }
     );
