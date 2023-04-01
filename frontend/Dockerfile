@@ -2,13 +2,13 @@ FROM node:latest as build
 WORKDIR /build
 
 COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY yarn.lock yarn.lock
 COPY tsconfig.json tsconfig.json
-RUN npm ci
+RUN yarn
 
 COPY public/ public
 COPY src/ src
-RUN npm run build
+RUN yarn build
 
 FROM nginx:alpine
 
@@ -23,5 +23,8 @@ RUN rm -rf ./*
 COPY --from=build /build/build/ .
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/default.conf /etc/nginx/sites-available/default
+RUN addgroup -S -g 33 www-data \
+ && adduser -S -D -u 33 -s /sbin/nologin -h /var/www -G www-data www-data
+RUN chown -R www-data:www-data /var/www/
 # Containers run nginx with global directives and daemon off
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
