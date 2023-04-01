@@ -1,6 +1,6 @@
 import { showNotification } from '@mantine/notifications';
 import { DateTime } from 'luxon';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { AccountDeep } from '../Types/Account';
 import { AccountChange } from '../Types/AccountChange';
 import { AgentFlat } from '../Types/Agent';
@@ -23,48 +23,55 @@ const handleResponse = (r: Response) => r.json().then(data => {
 })
 
 export const useCurrentUser = () =>
-    useQuery<UserFlat, Response>("me", () =>
-        fetch("/api/me").then(handleResponse),
-        { retry: false }
-    );
+    useQuery<UserFlat, Response>({
+        queryKey: ["me"],
+        queryFn: () =>
+            fetch("/api/me").then(handleResponse),
+    });
 
 export const useAccounts = () =>
-    useQuery<AccountDeep[], Response>("accounts", () =>
-        fetch("/api/accounts").then(handleResponse),
-        { retry: false }
-    );
+    useQuery<AccountDeep[], Response>({
+        queryKey: ["accounts"],
+        queryFn: () =>
+            fetch("/api/accounts").then(handleResponse),
+    });
 
 export const useAccount = (account_id: number) =>
-    useQuery<AccountDeep, Response>(["accounts", account_id], () =>
-        fetch(`/api/accounts/${account_id}`).then(handleResponse),
-        { retry: false }
-    );
+    useQuery<AccountDeep, Response>({
+        queryKey: ["accounts", account_id],
+        queryFn: () =>
+            fetch(`/api/accounts/${account_id}`).then(handleResponse),
+    });
 
 export const useAgents = () =>
-    useQuery<AgentFlat[], Response>("agents", () =>
-        fetch("/api/agents").then(handleResponse),
-        { retry: false }
-    );
+    useQuery<AgentFlat[], Response>({
+        queryKey: ["agents"],
+        queryFn: () =>
+            fetch("/api/agents").then(handleResponse),
+    });
 
 export const useCategories = () =>
-    useQuery<CategoryFlat[], Response>("categories", () =>
-        fetch("/api/categories").then(handleResponse),
-        { retry: false }
-    );
+    useQuery<CategoryFlat[], Response>({
+        queryKey: ["categories"],
+        queryFn: () =>
+            fetch("/api/categories").then(handleResponse),
+    });
 
 export const useCurrencies = () =>
-    useQuery<CurrencyFlat[], Response>("currencies", () =>
-        fetch("/api/currencies").then(handleResponse),
-        { retry: false }
-    );
+    useQuery<CurrencyFlat[], Response>({
+        queryKey: ["currencies"],
+        queryFn: () =>
+            fetch("/api/currencies").then(handleResponse),
+    });
 
 interface useChangesProps {
     start?: DateTime
     end?: DateTime
     n?: number
 }
-export const useChanges = (id: number, { start, end, n }: useChangesProps) => {
-    var searchParams = new URLSearchParams();
+
+const changesSearchParams = ({ start, end, n }: useChangesProps) => {
+    let searchParams = new URLSearchParams();
     if (start !== undefined) {
         const naiveStart = start.toISO({ includeOffset: false });
         searchParams.append('start', naiveStart);
@@ -75,10 +82,12 @@ export const useChanges = (id: number, { start, end, n }: useChangesProps) => {
     }
     if (n !== undefined)
         searchParams.append('n', n.toString());
-    return useQuery<AccountChange[], Response>("changes", () =>
-        fetch(`/api/accounts/${id}/changes?${searchParams.toString()}`)
-            .then(handleResponse),
-        { retry: false }
-    );
+    return searchParams.toString();
 }
+
+export const useChanges = (id: number, props: useChangesProps) =>
+    useQuery<AccountChange[], Response>({
+        queryKey: ["changes"],
+        queryFn: () => fetch(`/api/accounts/${id}/changes?${changesSearchParams(props)}`).then(handleResponse)
+    });
 
