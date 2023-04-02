@@ -16,7 +16,7 @@ conda env create -n finnance --file environment.yml
 ```
 from `/frontend` dir:
 ```
-yarn
+npm i
 ```
 
 ### run
