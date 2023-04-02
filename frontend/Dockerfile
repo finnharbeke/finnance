@@ -10,7 +10,7 @@ COPY public/ public
 COPY src/ src
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:bullseye
 
 # COPY --from=build /build/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
