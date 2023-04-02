@@ -32,6 +32,8 @@ services:
     image: finnharbeke/finnance-frontend:latest
     env_file:
       .env
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
     build:
       context: ./frontend
       dockerfile: Dockerfile
