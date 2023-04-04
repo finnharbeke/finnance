@@ -26,6 +26,7 @@ export const openTransactionModal = async (props: OpenContextModal<OpenTransacti
         ...{
             modal: 'transaction',
             title: 'new transaction',
+            size: 'lg'
         },
         ...props,
         innerProps: props.innerProps
@@ -34,7 +35,7 @@ export const openTransactionModal = async (props: OpenContextModal<OpenTransacti
 
 interface RecordPost {
     amount: number,
-    category_id: number,
+    category_id: string,
 }
 
 export interface Record extends RecordPost {
@@ -60,7 +61,7 @@ export const isRecord = (val: Item): val is Record => val.type === 'record';
 export interface FormValues {
     account_id: number | undefined
     date: Date
-    time: Date
+    time: string
     amount: number
     isExpense: boolean
     agent: string
@@ -99,7 +100,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         initialValues: {
             account_id: account?.id,
             date: new Date(),
-            time: new Date(),
+            time: DateTime.now().toFormat("HH:mm"),
             amount: 0,
             isExpense: true,
             agent: '',
@@ -112,7 +113,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         validate: {
             date: val => val === null ? 'choose date' : null,
             time: (val, vals) => val === null ? 'choose time' :
-                DateTime.fromJSDate(vals.date).hasSame(DateTime.now(), 'day') && DateTime.now() < DateTime.fromJSDate(val) ?
+                DateTime.fromJSDate(vals.date).hasSame(DateTime.now(), 'day') && DateTime.now() < DateTime.fromFormat(val, "HH:mm") ?
                     'in the future' : null,
             agent: desc => desc.length === 0 ? "at least one character" : null,
             amount: val => val === null ? 'enter amount' : val === 0 ? 'non-zero amount' : null,
@@ -171,9 +172,9 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
             is_expense: values.isExpense,
             agent: values.agent,
             comment: values.comment,
-            date_issued: DateTime.fromJSDate(values.date).plus(Duration.fromObject({
-                hour: DateTime.fromJSDate(values.time).hour,
-                minute: DateTime.fromJSDate(values.time).minute
+            date_issued: DateTime.fromJSDate(values.date).startOf('day').plus(Duration.fromObject({
+                hour: DateTime.fromFormat(values.time, "HH:mm").hour,
+                minute: DateTime.fromFormat(values.time, "HH:mm").minute
             })).toISO({ includeOffset: false }),
             flows: values.isDirect ?
                 [{ amount: values.amount, agent: values.agent }]
@@ -187,7 +188,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                 [] : values.items.filter(isRecord)
                     .map(item => ({
                         amount: item.amount,
-                        category_id: item.category_id
+                        category_id: parseInt(item.category_id)
                     }))
         })
     });

@@ -20,12 +20,12 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
         {...form.getInputProps('isDirect')}
     >
         <Grid>
-            <Grid.Col span='auto'>
+            <Grid.Col md='auto' span={12}>
                 <Button
                     fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
                     leftIcon={
-                        form.values.isExpense ? <TbTrendingDown size={24} /> : <TbTrendingUp size={24} />
-                    }
+                        form.values.isExpense ? <TbTrendingDown size={32} /> : <TbTrendingUp size={32} />
+                    } size="md"
                     disabled={form.values.isDirect}
                     onClick={() => {
                         form.clearFieldError('isDirect');
@@ -33,19 +33,19 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
                             type: 'record',
                             ix: form.values.n_records,
                             amount: 0,
-                            category_id: -1
+                            category_id: ""
                         };
                         form.insertListItem('items', item);
                         form.setFieldValue('n_records', form.values.n_records + 1)
                     }}
                 >
-                    Add Record
+                    record
                 </Button>
             </Grid.Col>
             <Grid.Col span='auto'>
                 <Button
                     fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                    leftIcon={<TbArrowWaveRightUp size={24} />}
+                    leftIcon={<TbArrowWaveRightUp size={32} />} size="md"
                     disabled={form.values.isDirect} color='pink'
                     onClick={() => {
                         form.clearFieldError('isDirect');
@@ -59,14 +59,14 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
                         form.setFieldValue('n_flows', form.values.n_flows + 1)
                     }}
                 >
-                    Add Flow
+                    flow
                 </Button>
             </Grid.Col>
             <Grid.Col span='content'>
                 <Switch
-                    size='lg' color='pink'
-                    onLabel={<TbArrowWaveRightUp size={24}/>}
-                    offLabel={<TbArrowWaveRightUp size={24}/>}
+                    size='xl' color='pink'
+                    onLabel={<TbArrowWaveRightUp size={32}/>}
+                    offLabel={<TbArrowWaveRightUp size={32}/>}
                     checked={form.values.isDirect}
                     onChange={() => form.setFieldValue('isDirect', !form.values.isDirect)}
                 />
@@ -106,7 +106,7 @@ function FlowInput(props: FlowInputProps) {
                         />
                     </Grid.Col>
                     <Grid.Col span='content'>
-                        <RedIcon icon={TbEraser}
+                        <RedIcon icon={TbEraser} size={'lg'}
                             onClick={() => {
                                 form.values.items.forEach(
                                     (item, ix) => {

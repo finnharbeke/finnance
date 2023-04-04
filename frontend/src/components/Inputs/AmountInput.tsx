@@ -15,6 +15,7 @@ export default function AmountInput({currency, ...others} : AmountInputProps) {
                 ? `${currency?.code} ${value}`
                 : `${currency?.code} `
         }
+        step={0.01}
         parser={(value: string) => value.replace(/\D+\s/g, '')}
         {...others}
     />

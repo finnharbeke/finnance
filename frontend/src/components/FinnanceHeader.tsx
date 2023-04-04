@@ -1,9 +1,9 @@
-import { Burger, Container, createStyles, Group, Header, Paper, Transition } from '@mantine/core';
+import { Burger, createStyles, Grid, Group, Header, Paper, Transition } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { NavLink } from 'react-router-dom';
-import { LightDarkToggle } from './LightDarkToggle';
 import useAuth from '../hooks/useAuth';
 import FinnanceLogo from './FinnanceLogo';
+import { LightDarkToggle } from './LightDarkToggle';
 
 const HEADER_HEIGHT = 60;
 
@@ -27,13 +27,6 @@ const useStyles = createStyles((theme) => ({
         [theme.fn.largerThan('sm')]: {
             display: 'none',
         },
-    },
-
-    header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: '100%',
     },
 
     links: {
@@ -77,7 +70,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function FinnanceHeader() {
-    const [ opened, { toggle }] = useDisclosure(false);
+    const [opened, { toggle, close }] = useDisclosure(false);
     const { classes, cx } = useStyles();
     const { auth } = useAuth();
 
@@ -92,6 +85,7 @@ export default function FinnanceHeader() {
             key={link.label}
             to={link.link}
             className={(state: { isActive: boolean; }) => cx(classes.link, { [classes.linkActive]: state.isActive })}
+            onClick={close}
         >
             {link.label}
         </NavLink>
@@ -99,19 +93,22 @@ export default function FinnanceHeader() {
 
     return (
         <Header height={HEADER_HEIGHT} mb='xl' className={classes.root}>
-            <Container className={classes.header}>
-                <Group spacing='sm'>
-                    <LightDarkToggle />
-                    <FinnanceLogo text size={28} />
-                </Group>
+            <Grid justify='space-between' p='xs'>
+                <Grid.Col span='content'>
+                    <Group noWrap={true}>
+                        <LightDarkToggle />
+                        <FinnanceLogo text size={28} />
+                    </Group>
+                </Grid.Col>
                 {auth &&
-                    <>
-                        <Group spacing={5} className={classes.links}>
+                    <Grid.Col span='content'>
+
+                        <Group spacing={5} className={classes.links} grow position='right'>
                             {items}
                         </Group>
 
 
-                        <Group spacing={5} className={classes.burger}>
+                        <Group spacing={5} className={classes.burger} position='right'>
                             <Burger opened={opened} onClick={toggle} size="sm" />
                         </Group>
 
@@ -122,9 +119,9 @@ export default function FinnanceHeader() {
                                 </Paper>
                             )}
                         </Transition>
-                    </>
+                    </Grid.Col>
                 }
-            </Container>
+            </Grid>
         </Header>
     );
 }

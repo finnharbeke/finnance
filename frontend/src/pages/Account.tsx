@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Loader, Text, Title } from "@mantine/core";
+import { Button, Center, Grid, Loader, Text, Title, useMantineTheme } from "@mantine/core";
 import { DateTime } from "luxon";
 import { useState } from "react";
 import { TbCirclePlus } from "react-icons/tb";
@@ -7,8 +7,11 @@ import { AccountChanges } from "../components/account/AccountChanges";
 import { openTransactionModal } from "../components/modals/Transaction";
 import { useAccount } from "../hooks/useQuery";
 import NotFound from "./404";
+import { useMediaQuery } from "@mantine/hooks";
 
 export default function AccountPage() {
+    const theme = useMantineTheme()
+    const small = useMediaQuery(theme.fn.smallerThan('sm').replace('@media ', ''));
     const params = useParams();
     const { data, isLoading, isError, error } = useAccount(parseInt(params.id as string))
     const [loading, setLoading] = useState(false);
@@ -35,12 +38,13 @@ export default function AccountPage() {
             setLoading(true);
             openTransactionModal({
                 title: `new transaction - ${data?.desc}`,
+                fullScreen: small,
                 innerProps: {
                     currency: data?.currency,
                     account: data
                 }
             }).then(() => setLoading(false))
-        }}></Button>
+        }}/>
         <AccountChanges id={data?.id as number} n={10} />
     </>;
 }

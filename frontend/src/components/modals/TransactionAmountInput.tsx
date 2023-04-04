@@ -74,7 +74,9 @@ export default function TransactionAmountInput(props: TransactionAmountInputProp
                                     ) : null)
                             }
                             form.setFieldValue('isExpense', false);
-                        }}><TbPlus size={24} /></Button>
+                        }}
+                        size='md'
+                    ><TbPlus size={24} /></Button>
                     <Button
                         className={cx(classes.incExpButton, form.values.isExpense ? classes.expenseOn : classes.expenseOff)}
                         onClick={() => {
@@ -85,7 +87,9 @@ export default function TransactionAmountInput(props: TransactionAmountInputProp
                                     ) : null)
                             }
                             form.setFieldValue('isExpense', true);
-                        }}><TbMinus size={24} /></Button>
+                        }}
+                        size='md'
+                    ><TbMinus size={24} /></Button>
                 </Button.Group>
             </Grid.Col>
         </Grid>

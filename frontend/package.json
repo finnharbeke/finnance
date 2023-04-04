@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:5050",
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@mantine/core": "^6.0.5",

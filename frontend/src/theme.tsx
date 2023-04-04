@@ -10,6 +10,8 @@ declare module '@mantine/core' {
   }
 }
 
+const InputSize = "md";
+
 const theme: MantineThemeOverride = {
   colors: {
   },
@@ -22,7 +24,7 @@ const theme: MantineThemeOverride = {
     xs: '6pt'
   },
   components: {
-    DatePicker: {
+    DatePickerInput: {
       defaultProps: {
         placeholder: "dd.mm.yyyy",
         inputFormat: "DD.MM.YYYY",
@@ -30,14 +32,36 @@ const theme: MantineThemeOverride = {
         allowFreeInput: true,
         dateParser: (dateString: string) => {
           return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
-        }
+        },
+        size: InputSize
       },
     },
     Select: {
       defaultProps: {
         searchable: true,
-        clearable: true
+        clearable: true,
+        size: InputSize
       },
+    },
+    TextInput: {
+      defaultProps: {
+        size: InputSize
+      }
+    },
+    NumberInput: {
+      defaultProps: {
+        size: InputSize
+      }
+    },
+    Autocomplete: {
+      defaultProps: {
+        size: InputSize
+      }
+    },
+    InputWrapper: {
+      defaultProps: {
+        size: InputSize
+      }
     },
   }
 }

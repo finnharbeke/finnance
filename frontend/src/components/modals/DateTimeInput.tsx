@@ -19,7 +19,6 @@ export default function DateTimeInput(props: DateTimeInputProps) {
         {...form.getInputProps('date')}
     />
     <TimeInput
-        defaultValue={DateTime.now().toFormat('mm:hh')}
         label="time"
         withAsterisk
         {...form.getInputProps('time')}
