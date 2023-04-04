@@ -26,7 +26,7 @@ interface OrderFormValues {
 
 export default function AccountFormList({ accounts }: { accounts: AccountDeep[] }) {
 
-    const orderForm = useForm<OrderFormValues>({
+    let orderForm = useForm<OrderFormValues>({
         initialValues: {
             orders: accounts.map(a => a.order),
         }

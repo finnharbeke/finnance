@@ -4,8 +4,8 @@ import { useForm } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
-import { useEditAccount } from "../../hooks/useMutation"
-import { useCurrencies } from "../../hooks/useQuery"
+import { useEditAccount } from "../../hooks/api/useMutation"
+import { useCurrencies } from "../../hooks/api/useQuery"
 import { AccountDeep } from "../../Types/Account"
 import AmountInput from "../Inputs/AmountInput"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
@@ -16,7 +16,7 @@ export interface AccountFormValues {
     starting_saldo: number
     date_created: Date
     color: string
-    currency_id: number
+    currency_id: string
 }
 
 export interface TransformedAccountFormValues {
@@ -41,11 +41,12 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
             starting_saldo: data.starting_saldo,
             date_created: DateTime.fromISO(data.date_created).toJSDate(),
             color: data.color,
-            currency_id: data.currency_id,
+            currency_id: data.currency_id.toFixed(0),
         },
 
         transformValues: (values: AccountFormValues) => ({
             ...values,
+            currency_id: parseInt(values.currency_id),
             date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
         })
     })
@@ -56,10 +57,17 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
 
     const handleSubmit = (values: TransformedAccountFormValues) => {
         startEdit();
-        editAccount.mutate({id: data.id, values});
-        endEdit();
+        editAccount.mutate(
+            {id: data.id, values},
+            {
+                onSuccess: () => {
+                    form.resetDirty();
+                    editAccount.reset();
+                }, onSettled: endEdit
+            }
+        );
     }
-
+    
     if (!currencies.isSuccess)
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
@@ -130,7 +138,7 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                 <Grid.Col md={3} sm={6} xs={12}>
                     <AmountInput label={`saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`}
                         currency={
-                            currencies.data.filter(cur => cur.id === form.values.currency_id)[0]
+                            currencies.data.filter(cur => cur.id.toFixed(0) === form.values.currency_id)[0]
                         }
                         {...form.getInputProps('starting_saldo')}
                     />

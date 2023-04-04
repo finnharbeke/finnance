@@ -1,7 +1,7 @@
 import { ActionIcon, Autocomplete, Button, ButtonProps, Grid, Input, MantineSize, Select, Switch, useMantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
-import { useAgents, useCategories } from "../../hooks/useQuery";
+import { useAgents, useCategories } from "../../hooks/api/useQuery";
 import { CurrencyFlat } from "../../Types/Currency";
 import AmountInput from "../Inputs/AmountInput";
 import { RedIcon } from "../Inputs/Icons";

@@ -1,15 +1,14 @@
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
 import { useColorScheme, useDocumentTitle } from '@mantine/hooks';
 import { Notifications } from '@mantine/notifications';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { RouterProvider } from "react-router-dom";
 import AuthProvider from './contexts/AuthProvider';
 import ErrorHandlerProvider from './contexts/ErrorHandlerProvider';
+import { queryClient } from './hooks/api/defaults';
 import { FinnanceRouter } from './routes/Router';
 import theme from './theme';
-
-const queryClient = new QueryClient();
 
 function App() {
     const preferredColorScheme = useColorScheme();

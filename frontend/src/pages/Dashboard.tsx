@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import LinkButton from "../components/LinkButton";
-import { useAccounts } from "../hooks/useQuery";
+import { useAccounts } from "../hooks/api/useQuery";
 
 export default function DashboardPage() {
     const useStyles = createStyles({

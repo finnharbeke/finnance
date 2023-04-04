@@ -22,12 +22,11 @@ const theme: MantineThemeOverride = {
     xs: '6pt'
   },
   components: {
-    DatePickerInput: {
+    DateInput: {
       defaultProps: {
         placeholder: "dd.mm.yyyy",
-        inputFormat: "DD.MM.YYYY",
+        valueFormat: "DD.MM.YYYY",
         clearable: false,
-        allowFreeInput: true,
         dateParser: (dateString: string) => {
           return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
         },

@@ -1,6 +1,6 @@
 import { Skeleton } from "@mantine/core";
 import { DateTime } from "luxon";
-import { useChanges } from "../../hooks/useQuery";
+import { useChanges } from "../../hooks/api/useQuery";
 import { AccountChange, isAccountChangeTransaction } from "../../Types/AccountChange";
 import { TransactionHead } from "../Transaction";
 import { TransferHead } from "../Transfer";

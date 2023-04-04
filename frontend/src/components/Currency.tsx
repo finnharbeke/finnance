@@ -1,8 +1,8 @@
 import { Button, Flex, Grid, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { TbEraser } from "react-icons/tb";
-import { useAddCurrency } from "../hooks/useMutation";
 import { CurrencyFlat } from "../Types/Currency";
+import { useAddCurrency } from "../hooks/api/useMutation";
 import { RedIcon } from "./Inputs/Icons";
 
 interface CurrencyCardProps extends PaperProps {

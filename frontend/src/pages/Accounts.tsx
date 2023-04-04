@@ -1,7 +1,7 @@
 import { Center, Divider, Grid, Loader, Title } from "@mantine/core";
 import AccountFormList from "../components/account/AccountFormList";
 import { CurrencyCard, CurrencyForm } from "../components/Currency";
-import { useAccounts, useCurrencies } from "../hooks/useQuery";
+import { useAccounts, useCurrencies } from "../hooks/api/useQuery";
 
 
 

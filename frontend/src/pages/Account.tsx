@@ -5,14 +5,14 @@ import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
 import { AccountChanges } from "../components/account/AccountChanges";
 import { openTransactionModal } from "../components/modals/Transaction";
-import { useAccount } from "../hooks/useQuery";
+import { useAccount } from "../hooks/api/useQuery";
 import NotFound from "./404";
 import { useMediaQuery } from "@mantine/hooks";
 
 export default function AccountPage() {
     const theme = useMantineTheme()
     const params = useParams();
-    const { data, isLoading, isError, error } = useAccount(parseInt(params.id as string))
+    const { data, isLoading, isError, error } = useAccount(parseInt(params.id as string));
     const [loading, setLoading] = useState(false);
     const date_created = DateTime.fromISO(data?.date_created as string);
 
