@@ -1,4 +1,4 @@
-import { Button, createStyles, Grid, Input, MantineTheme } from "@mantine/core";
+import { Button, createStyles, Grid, Input, MantineSize, MantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyFlat } from "../../Types/Currency";
@@ -8,10 +8,10 @@ import { FormValues, isRecord, transformedFormValues } from "./Transaction";
 interface TransactionAmountInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     currency?: CurrencyFlat
+    size: MantineSize
 }
 
-export default function TransactionAmountInput(props: TransactionAmountInputProps) {
-    const { form, currency } = props;
+export default function TransactionAmountInput({ form, currency, size }: TransactionAmountInputProps) {
     const useStyles = createStyles((theme: MantineTheme) => {
         const inc = theme.colors.blue[
             theme.colorScheme === 'light' ? 6 : 5
@@ -60,6 +60,7 @@ export default function TransactionAmountInput(props: TransactionAmountInputProp
                 <AmountInput
                     currency={currency}
                     {...form.getInputProps('amount')}
+                    size={size}
                 />
             </Grid.Col>
             <Grid.Col span='content'>
@@ -75,8 +76,8 @@ export default function TransactionAmountInput(props: TransactionAmountInputProp
                             }
                             form.setFieldValue('isExpense', false);
                         }}
-                        size='md'
-                    ><TbPlus size={24} /></Button>
+                        size={size}
+                    ><TbPlus size={28} /></Button>
                     <Button
                         className={cx(classes.incExpButton, form.values.isExpense ? classes.expenseOn : classes.expenseOff)}
                         onClick={() => {
@@ -88,8 +89,8 @@ export default function TransactionAmountInput(props: TransactionAmountInputProp
                             }
                             form.setFieldValue('isExpense', true);
                         }}
-                        size='md'
-                    ><TbMinus size={24} /></Button>
+                        size={size}
+                    ><TbMinus size={28} /></Button>
                 </Button.Group>
             </Grid.Col>
         </Grid>

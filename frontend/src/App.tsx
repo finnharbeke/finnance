@@ -1,5 +1,5 @@
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
-import { useColorScheme } from '@mantine/hooks';
+import { useColorScheme, useDocumentTitle } from '@mantine/hooks';
 import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -16,6 +16,8 @@ function App() {
     const [colorScheme, setColorScheme] = useState<ColorScheme>(preferredColorScheme);
     const toggleColorScheme = (value?: ColorScheme) =>
         setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+
+    useDocumentTitle('Finnance');
 
     return (
         <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>

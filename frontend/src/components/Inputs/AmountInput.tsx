@@ -10,7 +10,7 @@ export default function AmountInput({currency, ...others} : AmountInputProps) {
         precision={currency?.decimals} hideControls
         min={0}
         formatter={(value: string) =>
-            currency === undefined ? value :
+            !currency ? value :
             !Number.isNaN(parseFloat(value))
                 ? `${currency?.code} ${value}`
                 : `${currency?.code} `

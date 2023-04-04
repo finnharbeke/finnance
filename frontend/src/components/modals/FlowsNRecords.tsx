@@ -1,4 +1,4 @@
-import { ActionIcon, Autocomplete, Button, Grid, Input, Select, Switch, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Autocomplete, Button, ButtonProps, Grid, Input, MantineSize, Select, Switch, useMantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { useAgents, useCategories } from "../../hooks/useQuery";
@@ -7,12 +7,11 @@ import AmountInput from "../Inputs/AmountInput";
 import { RedIcon } from "../Inputs/Icons";
 import { Flow, FormValues, isFlow, isRecord, Record, transformedFormValues } from "./Transaction";
 
-interface FlowsNRecordsButtonProps {
+interface FlowsNRecordsButtonProps extends ButtonProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
 }
 
-function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
-    const { form } = props;
+function FlowsNRecordsButtons({ form, ...other }: FlowsNRecordsButtonProps) {
     const theme = useMantineTheme();
     return <Input.Wrapper
         label='add records & flows | direct flow'
@@ -20,12 +19,12 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
         {...form.getInputProps('isDirect')}
     >
         <Grid>
-            <Grid.Col md='auto' span={12}>
+            <Grid.Col xs='auto' span={12}>
                 <Button
                     fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
                     leftIcon={
                         form.values.isExpense ? <TbTrendingDown size={32} /> : <TbTrendingUp size={32} />
-                    } size="md"
+                    }
                     disabled={form.values.isDirect}
                     onClick={() => {
                         form.clearFieldError('isDirect');
@@ -38,6 +37,7 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
                         form.insertListItem('items', item);
                         form.setFieldValue('n_records', form.values.n_records + 1)
                     }}
+                    {...other}
                 >
                     record
                 </Button>
@@ -45,7 +45,7 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
             <Grid.Col span='auto'>
                 <Button
                     fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                    leftIcon={<TbArrowWaveRightUp size={32} />} size="md"
+                    leftIcon={<TbArrowWaveRightUp size={32} />}
                     disabled={form.values.isDirect} color='pink'
                     onClick={() => {
                         form.clearFieldError('isDirect');
@@ -58,6 +58,7 @@ function FlowsNRecordsButtons(props: FlowsNRecordsButtonProps) {
                         form.insertListItem('items', item)
                         form.setFieldValue('n_flows', form.values.n_flows + 1)
                     }}
+                    {...other}
                 >
                     flow
                 </Button>
@@ -80,10 +81,10 @@ interface FlowInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
     currency?: CurrencyFlat
+    size: MantineSize
 }
 
-function FlowInput(props: FlowInputProps) {
-    const { form, i, flow, currency } = props;
+function FlowInput({ form, i, flow, currency, size }: FlowInputProps) {
     const agents = useAgents();
     return <Grid>
         <Grid.Col span={4}>
@@ -91,6 +92,7 @@ function FlowInput(props: FlowInputProps) {
                 label={`#${i} flow`} withAsterisk
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
+                size={size}
             />
         </Grid.Col>
         <Grid.Col span={8}>
@@ -99,9 +101,10 @@ function FlowInput(props: FlowInputProps) {
                     <Grid.Col span='auto'>
                         <Autocomplete
                             placeholder={`Agent #${flow.ix}`}
-                            data={agents.isLoading || agents.data === undefined ? [] : agents.data.map(
+                            data={agents.isLoading || !agents.data ? [] : agents.data.map(
                                 agent => agent.desc
                             )}
+                            size={size}
                             {...form.getInputProps(`items.${i}.agent`)}
                         />
                     </Grid.Col>
@@ -129,11 +132,11 @@ interface RecordInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
     currency?: CurrencyFlat
+    size: MantineSize
 }
 
-function RecordInput(props: RecordInputProps) {
+function RecordInput({ form, record, currency, i, size }: RecordInputProps) {
     const theme = useMantineTheme();
-    const { form, record, currency, i } = props;
     const categories = useCategories();
 
     return <Grid>
@@ -142,6 +145,7 @@ function RecordInput(props: RecordInputProps) {
                 label={`#${i} record`} withAsterisk
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
+                size={size}
             />
         </Grid.Col>
         <Grid.Col span={8}>
@@ -150,7 +154,7 @@ function RecordInput(props: RecordInputProps) {
                     <Grid.Col span='auto'>
                         <Select
                             placeholder={`Category #${record.ix}`}
-                            data={categories.isLoading || categories.data === undefined ? [] : categories.data.filter(
+                            data={categories.isLoading || !categories.data ? [] : categories.data.filter(
                                 cat => cat.usable && cat.is_expense === form.values.isExpense
                             ).map(
                                 cat => ({
@@ -159,6 +163,7 @@ function RecordInput(props: RecordInputProps) {
                                     group: cat.parent_id === null ? cat.desc : cat.parent.desc
                                 })
                             )}
+                            size={size}
                             {...form.getInputProps(`items.${i}.category_id`)}
                         />
                     </Grid.Col>
@@ -187,20 +192,18 @@ function RecordInput(props: RecordInputProps) {
 interface FlowsNRecordsProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     currency?: CurrencyFlat
+    size: MantineSize
 }
 
-export default function FlowsNRecordsInput(props: FlowsNRecordsProps) {
-
-    const { form, currency } = props;
-
+export default function FlowsNRecordsInput({ form, currency, size }: FlowsNRecordsProps) {
     return <>
-        <FlowsNRecordsButtons form={form} />
+        <FlowsNRecordsButtons form={form} size={size}/>
         {
             !form.values.isDirect && form.values.items.map((data, i) =>
                 isFlow(data) ?
-                    <FlowInput form={form} currency={currency} flow={data} i={i} key={i} />
+                    <FlowInput form={form} currency={currency} flow={data} i={i} key={i} size={size}/>
                     :
-                    <RecordInput form={form} currency={currency} record={data} i={i} key={i} />
+                    <RecordInput form={form} currency={currency} record={data} i={i} key={i} size={size}/>
             )
         }
 

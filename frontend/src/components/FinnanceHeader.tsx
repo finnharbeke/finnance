@@ -1,4 +1,4 @@
-import { Burger, createStyles, Grid, Group, Header, Paper, Transition } from '@mantine/core';
+import { Burger, Container, createStyles, Grid, Group, Header, Paper, Transition } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
@@ -93,35 +93,37 @@ export default function FinnanceHeader() {
 
     return (
         <Header height={HEADER_HEIGHT} mb='xl' className={classes.root}>
-            <Grid justify='space-between' p='xs'>
-                <Grid.Col span='content'>
-                    <Group noWrap={true}>
-                        <LightDarkToggle />
-                        <FinnanceLogo text size={28} />
-                    </Group>
-                </Grid.Col>
-                {auth &&
+            <Container>
+                <Grid justify='space-between' p='xs'>
                     <Grid.Col span='content'>
-
-                        <Group spacing={5} className={classes.links} grow position='right'>
-                            {items}
+                        <Group noWrap={true}>
+                            <LightDarkToggle />
+                            <FinnanceLogo text size={28} />
                         </Group>
-
-
-                        <Group spacing={5} className={classes.burger} position='right'>
-                            <Burger opened={opened} onClick={toggle} size="sm" />
-                        </Group>
-
-                        <Transition transition="pop-top-right" duration={200} mounted={opened}>
-                            {(styles) => (
-                                <Paper className={classes.dropdown} withBorder style={styles}>
-                                    {items}
-                                </Paper>
-                            )}
-                        </Transition>
                     </Grid.Col>
-                }
-            </Grid>
+                    {auth &&
+                        <Grid.Col span='content'>
+
+                            <Group spacing={5} className={classes.links} grow position='right'>
+                                {items}
+                            </Group>
+
+
+                            <Group spacing={5} className={classes.burger} position='right'>
+                                <Burger opened={opened} onClick={toggle} size="sm" />
+                            </Group>
+
+                            <Transition transition="pop-top-right" duration={200} mounted={opened}>
+                                {(styles) => (
+                                    <Paper className={classes.dropdown} withBorder style={styles}>
+                                        {items}
+                                    </Paper>
+                                )}
+                            </Transition>
+                        </Grid.Col>
+                    }
+                </Grid>
+            </Container>
         </Header>
     );
 }

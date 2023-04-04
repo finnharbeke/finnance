@@ -9,7 +9,7 @@ interface IconProps extends PolymorphicComponentProps<"button", ActionIconProps>
 }
 
 function MyIcon({ icon, tooltip, iconSize = 20, ...others }: IconProps) {
-    if (tooltip === undefined)
+    if (!tooltip)
         return <ActionIcon {...others}>
             {icon({ size: iconSize })}
         </ActionIcon>

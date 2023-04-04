@@ -11,11 +11,12 @@ import { useMediaQuery } from "@mantine/hooks";
 
 export default function AccountPage() {
     const theme = useMantineTheme()
-    const small = useMediaQuery(theme.fn.smallerThan('sm').replace('@media ', ''));
     const params = useParams();
     const { data, isLoading, isError, error } = useAccount(parseInt(params.id as string))
     const [loading, setLoading] = useState(false);
     const date_created = DateTime.fromISO(data?.date_created as string);
+
+    const isPhone = useMediaQuery(theme.fn.smallerThan('xs').replace('@media ', ''));
 
     if (!params.id?.match(/\d+/) || (isError && error.status === 404))
         return <NotFound/>
@@ -38,7 +39,7 @@ export default function AccountPage() {
             setLoading(true);
             openTransactionModal({
                 title: `new transaction - ${data?.desc}`,
-                fullScreen: small,
+                fullScreen: isPhone,
                 innerProps: {
                     currency: data?.currency,
                     account: data
