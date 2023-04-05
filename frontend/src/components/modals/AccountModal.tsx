@@ -48,7 +48,7 @@ export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
             desc: (val) => (val && val.length > 0) ? null : "enter account name",
             starting_saldo: (val) => val !== undefined ? null : "enter starting saldo",
             date_created: (val) => val ? null : "enter starting date",
-            color: (val) => (val && val.length == 7) ? null : "enter hex color",
+            color: (val) => (val && val.length === 7) ? null : "enter hex color",
             currency_id: (val) => (val && val.length > 0) ? null : "enter hex color",
         },
         transformValues: (values: AccountFormValues) => ({

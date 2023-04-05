@@ -1,17 +1,15 @@
-import { Autocomplete, Button, Divider, TextInput, useMantineTheme } from "@mantine/core";
+import { Autocomplete, Button, Divider, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { DateTime, Duration } from "luxon";
-import { useAddTransaction } from "../../hooks/api/useMutation";
-import { useAgents } from "../../hooks/api/useQuery";
 import { AccountDeep } from "../../Types/Account";
 import { CurrencyFlat } from "../../Types/Currency";
+import { useAddTransaction } from "../../hooks/api/useMutation";
+import { useAgents } from "../../hooks/api/useQuery";
 import DateTimeInput from "./DateTimeInput";
 import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
-import { useMediaQuery } from "@mantine/hooks";
-import useIsPhone from "../../hooks/useIsPhone";
 
 type TransactionModalProps = {
     currency?: CurrencyFlat,
@@ -197,8 +195,6 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         addTrans.mutateAsync(vals);
         context.closeModal(id);
     }
-
-    const isPhone = useIsPhone();
 
     return <form onSubmit={form.onSubmit(submitForm)}>
         <DateTimeInput form={form}

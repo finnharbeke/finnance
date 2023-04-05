@@ -1,5 +1,4 @@
-import { useMantineTheme } from "@mantine/core";
-import { useMediaQuery, useOs } from "@mantine/hooks";
+import { useOs } from "@mantine/hooks";
 
 export default function useIsPhone() {
     // const theme = useMantineTheme();

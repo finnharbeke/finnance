@@ -1,9 +1,9 @@
-import { Group, MantineSize } from "@mantine/core"
+import { Group } from "@mantine/core"
 import { DateInput, DatePickerInput, TimeInput } from "@mantine/dates"
 import { UseFormReturnType } from "@mantine/form"
 import { DateTime } from "luxon"
-import { FormValues, transformedFormValues } from "./TransactionModal"
 import useIsPhone from "../../hooks/useIsPhone"
+import { FormValues, transformedFormValues } from "./TransactionModal"
 
 interface DateTimeInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>

@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Loader, Text, Title, useMantineTheme } from "@mantine/core";
+import { Button, Center, Grid, Loader, Text, Title } from "@mantine/core";
 import { DateTime } from "luxon";
 import { useState } from "react";
 import { TbCirclePlus } from "react-icons/tb";
@@ -6,12 +6,10 @@ import { useParams } from "react-router";
 import { AccountChanges } from "../components/account/AccountChanges";
 import { openTransactionModal } from "../components/modals/TransactionModal";
 import { useAccount } from "../hooks/api/useQuery";
-import NotFound from "./404";
-import { useMediaQuery } from "@mantine/hooks";
 import useIsPhone from "../hooks/useIsPhone";
+import NotFound from "./404";
 
 export default function AccountPage() {
-    const theme = useMantineTheme()
     const params = useParams();
     const { data, isLoading, isError, error } = useAccount(parseInt(params.id as string));
     const [loading, setLoading] = useState(false);
