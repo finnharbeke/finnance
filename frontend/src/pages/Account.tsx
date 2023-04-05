@@ -4,10 +4,11 @@ import { useState } from "react";
 import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
 import { AccountChanges } from "../components/account/AccountChanges";
-import { openTransactionModal } from "../components/modals/Transaction";
+import { openTransactionModal } from "../components/modals/TransactionModal";
 import { useAccount } from "../hooks/api/useQuery";
 import NotFound from "./404";
 import { useMediaQuery } from "@mantine/hooks";
+import useIsPhone from "../hooks/useIsPhone";
 
 export default function AccountPage() {
     const theme = useMantineTheme()
@@ -16,7 +17,7 @@ export default function AccountPage() {
     const [loading, setLoading] = useState(false);
     const date_created = DateTime.fromISO(data?.date_created as string);
 
-    const isPhone = useMediaQuery(theme.fn.smallerThan('xs').replace('@media ', ''));
+    const isPhone = useIsPhone();
 
     if (!params.id?.match(/\d+/) || (isError && error.status === 404))
         return <NotFound/>

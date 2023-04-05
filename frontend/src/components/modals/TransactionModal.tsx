@@ -11,18 +11,14 @@ import DateTimeInput from "./DateTimeInput";
 import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
 import { useMediaQuery } from "@mantine/hooks";
-
-type OpenTransactionModalProps = {
-    currency?: CurrencyFlat,
-    account?: AccountDeep
-}
+import useIsPhone from "../../hooks/useIsPhone";
 
 type TransactionModalProps = {
     currency?: CurrencyFlat,
     account?: AccountDeep,
 }
 
-export const openTransactionModal = async (props: OpenContextModal<OpenTransactionModalProps>) => {
+export const openTransactionModal = async (props: OpenContextModal<TransactionModalProps>) => {
     openContextModal({
         ...{
             modal: 'transaction',
@@ -202,26 +198,24 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         context.closeModal(id);
     }
 
-    const theme = useMantineTheme();
-    const isPhone = useMediaQuery(theme.fn.smallerThan('xs').replace('@media ', ''));
+    const isPhone = useIsPhone();
 
     return <form onSubmit={form.onSubmit(submitForm)}>
         <DateTimeInput form={form}
-            minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined}
-            size={isPhone ? 'md' : 'sm'} />
-        <AmountInput form={form} currency={currency} size={isPhone ? 'md' : 'sm'} />
+            minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined}/>
+        <AmountInput form={form} currency={currency}/>
         <Autocomplete
-            withAsterisk label='agent' size={isPhone ? 'md' : 'sm'}
+            withAsterisk label='agent' 
             data={agents.isLoading || !agents.data ? [] : agents.data.map(
                 agent => agent.desc
             )}
             {...form.getInputProps('agent')}
         />
         <Divider my='sm' />
-        <FlowsNRecordsInput form={form} currency={currency} size={isPhone ? 'md' : 'sm'} />
+        <FlowsNRecordsInput form={form} currency={currency}/>
         <Divider my='sm' />
-        <TextInput label='comment' {...form.getInputProps('comment')} size={isPhone ? 'md' : 'sm'} />
-        <Button fullWidth mt="md" type='submit' size={isPhone ? 'md' : 'sm'}>
+        <TextInput label='comment' {...form.getInputProps('comment')}  />
+        <Button fullWidth mt="md" type='submit' >
             add transaction
         </Button>
     </form >

@@ -1,9 +1,7 @@
 import { Button, Flex, Grid, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { TbEraser } from "react-icons/tb";
 import { CurrencyFlat } from "../Types/Currency";
 import { useAddCurrency } from "../hooks/api/useMutation";
-import { RedIcon } from "./Inputs/Icons";
 
 interface CurrencyCardProps extends PaperProps {
     currency: CurrencyFlat
@@ -15,10 +13,10 @@ export function CurrencyCard({ currency, ...others }: CurrencyCardProps) {
     return <Paper withBorder p='xs' {...others}>
         <Flex justify='space-between' align='center'>
             <Text><Text span fw={700}>{code}:</Text> {decimals} decimals</Text>
-            <RedIcon icon={TbEraser}
+            {/* <RedIcon icon={TbEraser}
                 onClick={() => console.log('delete curr ', currency)}
                 tooltip='delete'
-            />
+            /> */}
         </Flex>
     </Paper>
 }

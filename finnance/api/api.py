@@ -484,6 +484,32 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         "success": True
     })
 
+@api.route("/accounts/add", methods=["POST"])
+@login_required
+@check_input({
+    "type": "object",
+    "properties": {
+        "desc": {"type": "string"},
+        "color": {"type": "string"},
+        "date_created": {"type": "string"},
+        "starting_saldo": {"type": "number"},
+        "currency_id": {"type": "number"},
+    }
+})
+def add_acc(desc: str, starting_saldo: float, date_created: str, currency_id: int, color: str):
+    date_created = dt.datetime.fromisoformat(date_created)
+    if date_created > dt.datetime.now():
+        raise APIError(HTTPStatus.BAD_REQUEST, "account starting date in the future")
+    order = max([acc.order for acc in current_user.accounts] + [0]) + 1
+    account = Account(desc=desc, starting_saldo=starting_saldo, order=order, color=color,
+        date_created=date_created, currency_id=currency_id, user_id=current_user.id)
+    db.session.add(account)
+    db.session.commit()
+    return jsonify({
+        "success": True
+    })
+
+
 @login_manager.unauthorized_handler
 def unauthorized():
     if request.blueprint == 'api':

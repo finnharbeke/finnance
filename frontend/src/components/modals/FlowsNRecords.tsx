@@ -1,11 +1,12 @@
-import { ActionIcon, Autocomplete, Button, ButtonProps, Grid, Input, MantineSize, Select, Switch, useMantineTheme } from "@mantine/core";
+import { Autocomplete, Button, ButtonProps, Grid, Input, Select, Switch, useMantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
-import { useAgents, useCategories } from "../../hooks/api/useQuery";
 import { CurrencyFlat } from "../../Types/Currency";
+import { useAgents, useCategories } from "../../hooks/api/useQuery";
+import useIsPhone from "../../hooks/useIsPhone";
 import AmountInput from "../Inputs/AmountInput";
 import { RedIcon } from "../Inputs/Icons";
-import { Flow, FormValues, isFlow, isRecord, Record, transformedFormValues } from "./Transaction";
+import { Flow, FormValues, Record, isFlow, isRecord, transformedFormValues } from "./TransactionModal";
 
 interface FlowsNRecordsButtonProps extends ButtonProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
@@ -66,8 +67,8 @@ function FlowsNRecordsButtons({ form, ...other }: FlowsNRecordsButtonProps) {
             <Grid.Col span='content'>
                 <Switch
                     size='xl' color='pink'
-                    onLabel={<TbArrowWaveRightUp size={32}/>}
-                    offLabel={<TbArrowWaveRightUp size={32}/>}
+                    onLabel={<TbArrowWaveRightUp size={32} />}
+                    offLabel={<TbArrowWaveRightUp size={32} />}
                     checked={form.values.isDirect}
                     onChange={() => form.setFieldValue('isDirect', !form.values.isDirect)}
                 />
@@ -81,48 +82,40 @@ interface FlowInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
     currency?: CurrencyFlat
-    size: MantineSize
 }
 
-function FlowInput({ form, i, flow, currency, size }: FlowInputProps) {
+function FlowInput({ form, i, flow, currency }: FlowInputProps) {
     const agents = useAgents();
-    return <Grid>
+    return <Grid align='flex-end'>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} flow`} withAsterisk
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
-                size={size}
             />
         </Grid.Col>
-        <Grid.Col span={8}>
-            <Input.Wrapper label='agent' withAsterisk>
-                <Grid>
-                    <Grid.Col span='auto'>
-                        <Autocomplete
-                            placeholder={`Agent #${flow.ix}`}
-                            data={agents.isLoading || !agents.data ? [] : agents.data.map(
-                                agent => agent.desc
-                            )}
-                            size={size}
-                            {...form.getInputProps(`items.${i}.agent`)}
-                        />
-                    </Grid.Col>
-                    <Grid.Col span='content'>
-                        <RedIcon icon={TbEraser} size={'lg'}
-                            onClick={() => {
-                                form.values.items.forEach(
-                                    (item, ix) => {
-                                        if (isFlow(item) && item.ix > flow.ix)
-                                            form.setFieldValue(`items.${ix}.ix`, item.ix - 1)
-                                    }
-                                )
-                                form.removeListItem('items', i);
-                                form.setFieldValue('n_flows', form.values.n_flows - 1)
-                            }} />
-                    </Grid.Col>
-                </Grid>
-            </Input.Wrapper>
+        <Grid.Col span='auto'>
+            <Autocomplete
+                label='agent' withAsterisk withinPortal
+                placeholder={`Agent #${flow.ix}`}
+                data={agents.isLoading || !agents.data ? [] : agents.data.map(
+                    agent => agent.desc
+                )}
+                {...form.getInputProps(`items.${i}.agent`)}
+            />
+        </Grid.Col>
+        <Grid.Col span='content'>
+            <RedIcon icon={TbEraser} size={'lg'}
+                onClick={() => {
+                    form.values.items.forEach(
+                        (item, ix) => {
+                            if (isFlow(item) && item.ix > flow.ix)
+                                form.setFieldValue(`items.${ix}.ix`, item.ix - 1)
+                        }
+                    )
+                    form.removeListItem('items', i);
+                    form.setFieldValue('n_flows', form.values.n_flows - 1)
+                }} />
         </Grid.Col>
     </Grid>
 }
@@ -132,59 +125,53 @@ interface RecordInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
     currency?: CurrencyFlat
-    size: MantineSize
 }
 
-function RecordInput({ form, record, currency, i, size }: RecordInputProps) {
+function RecordInput({ form, record, currency, i }: RecordInputProps) {
     const theme = useMantineTheme();
     const categories = useCategories();
+    const isPhone = useIsPhone();
 
-    return <Grid>
+    return <Grid align='flex-end'>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} record`} withAsterisk
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
-                size={size}
             />
         </Grid.Col>
-        <Grid.Col span={8}>
-            <Input.Wrapper label='category' withAsterisk>
-                <Grid>
-                    <Grid.Col span='auto'>
-                        <Select
-                            placeholder={`Category #${record.ix}`}
-                            data={categories.isLoading || !categories.data ? [] : categories.data.filter(
-                                cat => cat.usable && cat.is_expense === form.values.isExpense
-                            ).map(
-                                cat => ({
-                                    value: cat.id.toFixed(0),
-                                    label: cat.desc,
-                                    group: cat.parent_id === null ? cat.desc : cat.parent.desc
-                                })
-                            )}
-                            size={size}
-                            {...form.getInputProps(`items.${i}.category_id`)}
-                        />
-                    </Grid.Col>
-                    <Grid.Col span='content'>
-                        <ActionIcon
-                            color="red" size='lg' variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                            onClick={() => {
-                                form.values.items.forEach(
-                                    (item, ix) => {
-                                        if (isRecord(item) && item.ix > record.ix)
-                                            form.setFieldValue(`items.${ix}.ix`, item.ix - 1)
-                                    }
-                                )
-                                form.removeListItem('items', i);
-                                form.setFieldValue('n_records', form.values.n_records - 1)
-                            }}>
-                            <TbEraser size={18} />
-                        </ActionIcon>
-                    </Grid.Col>
-                </Grid>
-            </Input.Wrapper>
+        <Grid.Col span='auto'>
+            <Select
+                label='category' withAsterisk
+                searchable={!isPhone} withinPortal
+                placeholder={`Category #${record.ix}`}
+                data={categories.isLoading || !categories.data ? [] : categories.data.filter(
+                    cat => cat.usable && cat.is_expense === form.values.isExpense
+                ).map(
+                    cat => ({
+                        value: cat.id.toFixed(0),
+                        label: cat.desc,
+                        group: cat.parent_id === null ? cat.desc : cat.parent.desc
+                    })
+                )}
+                {...form.getInputProps(`items.${i}.category_id`)}
+            />
+        </Grid.Col>
+        <Grid.Col span='content'>
+            <RedIcon
+                color="red" size='lg' variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
+                icon={TbEraser}
+                onClick={() => {
+                    form.values.items.forEach(
+                        (item, ix) => {
+                            if (isRecord(item) && item.ix > record.ix)
+                                form.setFieldValue(`items.${ix}.ix`, item.ix - 1);
+                        }
+                    );
+                    form.removeListItem('items', i);
+                    form.setFieldValue('n_records', form.values.n_records - 1);
+                }} />
+
         </Grid.Col>
     </Grid>
 }
@@ -192,18 +179,17 @@ function RecordInput({ form, record, currency, i, size }: RecordInputProps) {
 interface FlowsNRecordsProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     currency?: CurrencyFlat
-    size: MantineSize
 }
 
-export default function FlowsNRecordsInput({ form, currency, size }: FlowsNRecordsProps) {
+export default function FlowsNRecordsInput({ form, currency }: FlowsNRecordsProps) {
     return <>
-        <FlowsNRecordsButtons form={form} size={size}/>
+        <FlowsNRecordsButtons form={form} />
         {
             !form.values.isDirect && form.values.items.map((data, i) =>
                 isFlow(data) ?
-                    <FlowInput form={form} currency={currency} flow={data} i={i} key={i} size={size}/>
+                    <FlowInput form={form} currency={currency} flow={data} i={i} key={i} />
                     :
-                    <RecordInput form={form} currency={currency} record={data} i={i} key={i} size={size}/>
+                    <RecordInput form={form} currency={currency} record={data} i={i} key={i} />
             )
         }
 

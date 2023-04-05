@@ -8,7 +8,8 @@ import AuthProvider from './contexts/AuthProvider';
 import ErrorHandlerProvider from './contexts/ErrorHandlerProvider';
 import { queryClient } from './hooks/api/defaults';
 import { FinnanceRouter } from './routes/Router';
-import theme from './theme';
+import { useTheme } from './theme';
+import useIsPhone from './hooks/useIsPhone';
 
 function App() {
     const preferredColorScheme = useColorScheme();
@@ -17,6 +18,7 @@ function App() {
         setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
 
     useDocumentTitle('Finnance');
+    const theme = useTheme();
 
     return (
         <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>

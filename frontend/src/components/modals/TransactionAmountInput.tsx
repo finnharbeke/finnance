@@ -3,15 +3,15 @@ import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyFlat } from "../../Types/Currency";
 import AmountInput from "../Inputs/AmountInput";
-import { FormValues, isRecord, transformedFormValues } from "./Transaction";
+import { FormValues, isRecord, transformedFormValues } from "./TransactionModal";
+import useIsPhone from "../../hooks/useIsPhone";
 
 interface TransactionAmountInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     currency?: CurrencyFlat
-    size: MantineSize
 }
 
-export default function TransactionAmountInput({ form, currency, size }: TransactionAmountInputProps) {
+export default function TransactionAmountInput({ form, currency }: TransactionAmountInputProps) {
     const useStyles = createStyles((theme: MantineTheme) => {
         const inc = theme.colors.blue[
             theme.colorScheme === 'light' ? 6 : 5
@@ -60,7 +60,6 @@ export default function TransactionAmountInput({ form, currency, size }: Transac
                 <AmountInput
                     currency={currency}
                     {...form.getInputProps('amount')}
-                    size={size}
                 />
             </Grid.Col>
             <Grid.Col span='content'>
@@ -76,7 +75,6 @@ export default function TransactionAmountInput({ form, currency, size }: Transac
                             }
                             form.setFieldValue('isExpense', false);
                         }}
-                        size={size}
                     ><TbPlus size={28} /></Button>
                     <Button
                         className={cx(classes.incExpButton, form.values.isExpense ? classes.expenseOn : classes.expenseOff)}
@@ -89,7 +87,6 @@ export default function TransactionAmountInput({ form, currency, size }: Transac
                             }
                             form.setFieldValue('isExpense', true);
                         }}
-                        size={size}
                     ><TbMinus size={28} /></Button>
                 </Button.Group>
             </Grid.Col>

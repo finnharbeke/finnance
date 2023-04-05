@@ -1,5 +1,5 @@
-import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, TextInput, Title } from "@mantine/core"
-import { DatePickerInput } from "@mantine/dates"
+import { Center, Collapse, ColorInput, ColorSwatch, Flex, Grid, Group, Paper, Select, Skeleton, TextInput, Title } from "@mantine/core"
+import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
@@ -10,27 +10,12 @@ import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
 import AmountInput from "../Inputs/AmountInput"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
+import { AccountFormValues, TransformedAccountFormValues } from "../modals/AccountModal"
 import { useAccountFormList } from "./AccountFormList"
-
-export interface AccountFormValues {
-    desc: string
-    starting_saldo: number
-    date_created: Date
-    color: string
-    currency_id: string
-}
-
-export interface TransformedAccountFormValues {
-    desc: string
-    starting_saldo: number
-    date_created: string
-    color: string
-    currency_id: number
-}
 
 type Transform = (values: AccountFormValues) => TransformedAccountFormValues
 
-export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
+export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number, order: number }) {
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
@@ -68,7 +53,7 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
     // on change of data
     // eslint-disable-next-line
     useEffect(reset, [data.desc, data.starting_saldo,
-        data.date_created, data.color, data.currency_id])
+    data.date_created, data.color, data.currency_id])
 
     const handleSubmit = (values: TransformedAccountFormValues) => {
         startEdit();
@@ -86,20 +71,22 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Grid>
+            <Grid gutter='xs' align='center'>
+                <Grid.Col span='content'>
+                    <SecondaryIcon
+                        icon={open ? TbChevronDown : TbChevronRight}
+                        onClick={toggle}
+                    />
+                </Grid.Col>
+                <Grid.Col span='content'>
+                    <ColorSwatch color={form.values.color} size={20} />
+                </Grid.Col>
                 <Grid.Col span='auto'>
-                    <Group spacing='xs'>
-                        <SecondaryIcon
-                            icon={open ? TbChevronDown : TbChevronRight}
-                            onClick={toggle}
-                        />
-                        <ColorSwatch color={form.values.color} />
-                        {open ?
-                            <TextInput {...form.getInputProps('desc')} />
-                            :
-                            <Title order={3}>{form.values.desc}</Title>
-                        }
-                    </Group>
+                    {open ?
+                        <TextInput {...form.getInputProps('desc')} />
+                        :
+                        <Title order={3} lineClamp={1}>{form.values.desc}</Title>
+                    }
                 </Grid.Col>
                 <Grid.Col span='content'>
                     <Group position='right' spacing='xs'>
@@ -132,7 +119,7 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                         />
                     </Grid.Col>
                     <Grid.Col md={3} sm={6} xs={12}>
-                        <DatePickerInput label="tracking since"
+                        <DateInput label="tracking since"
                             {...form.getInputProps('date_created')}
                         />
                     </Grid.Col>

@@ -30,8 +30,8 @@ export interface OrderFormValues {
 export default function AccountFormList({ accounts }: { accounts: AccountDeep[] }) {
 
     const initials = () => ({
-        orders: accounts.map(a => a.order),
-        ids: accounts.map(a => a.id),
+        orders: accounts.sort((a, b) => a.id - b.id).map(a => a.order),
+        ids: accounts.sort((a, b) => a.id - b.id).map(a => a.id),
     })
     let orderForm = useForm<OrderFormValues>({
         initialValues: initials()
@@ -104,7 +104,7 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
     // disable: missing dependency form, but should only reset
     // on change of accounts orders
     // eslint-disable-next-line
-    useEffect(reset, accounts.map(a => a.order))
+    useEffect(reset, [...accounts.map(a => a.order), accounts.length])
 
     const value: AccountFormListContextType = {
         moveUp, moveDown
@@ -141,7 +141,7 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
             <Grid>{
                 accounts.sort((a, b) => a.id - b.id).map((d, ix) =>
                     <Grid.Col key={ix} span={12} order={orderForm.values.orders[ix]}>
-                        <AccountForm data={d} ix={ix} />
+                        <AccountForm data={d} ix={ix} order={orderForm.values.orders[ix]} />
                     </Grid.Col>
                 )
             }</Grid>
