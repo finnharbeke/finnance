@@ -10,6 +10,7 @@ import { AccountDeep } from "../../Types/Account"
 import AmountInput from "../Inputs/AmountInput"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
 import { useAccountFormList } from "./AccountFormList"
+import { useEffect } from "react"
 
 export interface AccountFormValues {
     desc: string
@@ -35,116 +36,127 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
     const [open, { toggle }] = useDisclosure(false);
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
 
+    const initials = () => ({
+        desc: data.desc,
+        starting_saldo: data.starting_saldo,
+        date_created: DateTime.fromISO(data.date_created).toJSDate(),
+        color: data.color,
+        currency_id: data.currency_id.toFixed(0)
+    })
+
     const form = useForm<AccountFormValues, Transform>({
-        initialValues: {
-            desc: data.desc,
-            starting_saldo: data.starting_saldo,
-            date_created: DateTime.fromISO(data.date_created).toJSDate(),
-            color: data.color,
-            currency_id: data.currency_id.toFixed(0),
-        },
+        initialValues: initials(),
 
         transformValues: (values: AccountFormValues) => ({
             ...values,
             currency_id: parseInt(values.currency_id),
             date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
-        })
+        }),
     })
 
     const { moveUp, moveDown } = useAccountFormList();
 
     const editAccount = useEditAccount();
 
+    const reset = () => {
+        form.setValues(initials());
+        form.resetDirty(initials());
+    }
+
+    // disable: missing dependency form, but should only reset
+    // on change of data
+    // eslint-disable-next-line
+    useEffect(reset, [data])
+
     const handleSubmit = (values: TransformedAccountFormValues) => {
         startEdit();
         editAccount.mutate(
-            {id: data.id, values},
+            { id: data.id, values },
             {
                 onSuccess: () => {
-                    form.resetDirty();
                     editAccount.reset();
                 }, onSettled: endEdit
             }
         );
     }
-    
+
     if (!currencies.isSuccess)
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Grid>
-            <Grid.Col span='auto'>
-                <Group spacing='xs'>
-                    <SecondaryIcon
-                        icon={open ? TbChevronDown : TbChevronRight}
-                        onClick={toggle}
-                    />
-                    <ColorSwatch color={form.values.color} />
-                    { open ?
-                        <TextInput {...form.getInputProps('desc')}/>
-                        :
-                        <Title order={3}>{form.values.desc}</Title>
-                    }
-                </Group>
-                {/* <Input component={Title} {...form.getInputProps('desc')}/> */}
-                {/* <input/> */}
-            </Grid.Col>
-            <Grid.Col span='content'>
-                <Group position='right' spacing='xs'>
-                    {
-                        form.isDirty() &&
-                        <>
-                            <PrimaryIcon type='submit' icon={TbDeviceFloppy} loading={editing}
-                                tooltip='save'
-                            />
-                            <RedIcon icon={TbRotate2}
-                                onClick={() => form.reset()}
-                                tooltip='discard'
-                            />
-                        </>
-                    }
-                    <SecondaryIcon icon={TbChevronUp}
-                        onClick={() => moveUp(ix)}
-                    />
-                    <SecondaryIcon icon={TbChevronDown}
-                        onClick={() => moveDown(ix)}
-                    />
-                </Group>
-            </Grid.Col>
-        </Grid>
-        <Collapse in={open}>
-            <Grid align='flex-end'>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <ColorInput label="color"
-                        {...form.getInputProps('color')}
-                    />
-                </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <DatePickerInput label="tracking since"
-                        {...form.getInputProps('date_created')}
-                    />
-                </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <Select label="currency"
-                        data={currencies.isLoading ? [] : currencies.data.map(
-                            cur => ({
-                                value: cur.id.toFixed(0),
-                                label: cur.code,
-                            })
-                        )}
-                        {...form.getInputProps('currency_id')}
-                    />
-                </Grid.Col>
-                <Grid.Col md={3} sm={6} xs={12}>
-                    <AmountInput label={`saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`}
-                        currency={
-                            currencies.data.filter(cur => cur.id.toFixed(0) === form.values.currency_id)[0]
+            <Grid>
+                <Grid.Col span='auto'>
+                    <Group spacing='xs'>
+                        <SecondaryIcon
+                            icon={open ? TbChevronDown : TbChevronRight}
+                            onClick={toggle}
+                        />
+                        <ColorSwatch color={form.values.color} />
+                        {open ?
+                            <TextInput {...form.getInputProps('desc')} />
+                            :
+                            <Title order={3}>{form.values.desc}</Title>
                         }
-                        {...form.getInputProps('starting_saldo')}
-                    />
+                    </Group>
+                    {/* <Input component={Title} {...form.getInputProps('desc')}/> */}
+                    {/* <input/> */}
+                </Grid.Col>
+                <Grid.Col span='content'>
+                    <Group position='right' spacing='xs'>
+                        {
+                            form.isDirty() &&
+                            <>
+                                <PrimaryIcon type='submit' icon={TbDeviceFloppy} loading={editing}
+                                    tooltip='save'
+                                />
+                                <RedIcon icon={TbRotate2}
+                                    onClick={reset}
+                                    tooltip='discard'
+                                />
+                            </>
+                        }
+                        <SecondaryIcon icon={TbChevronUp}
+                            onClick={() => moveUp(ix)}
+                        />
+                        <SecondaryIcon icon={TbChevronDown}
+                            onClick={() => moveDown(ix)}
+                        />
+                    </Group>
                 </Grid.Col>
             </Grid>
-        </Collapse>
+            <Collapse in={open}>
+                <Grid align='flex-end'>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <ColorInput label="color"
+                            {...form.getInputProps('color')}
+                        />
+                    </Grid.Col>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <DatePickerInput label="tracking since"
+                            {...form.getInputProps('date_created')}
+                        />
+                    </Grid.Col>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <Select label="currency"
+                            data={currencies.isLoading ? [] : currencies.data.map(
+                                cur => ({
+                                    value: cur.id.toFixed(0),
+                                    label: cur.code,
+                                })
+                            )}
+                            {...form.getInputProps('currency_id')}
+                        />
+                    </Grid.Col>
+                    <Grid.Col md={3} sm={6} xs={12}>
+                        <AmountInput label={`saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`}
+                            currency={
+                                currencies.data.filter(cur => cur.id.toFixed(0) === form.values.currency_id)[0]
+                            }
+                            {...form.getInputProps('starting_saldo')}
+                        />
+                    </Grid.Col>
+                </Grid>
+            </Collapse>
         </form>
     </Paper>
 }
