@@ -436,6 +436,54 @@ def edit_account(account_id: int, **data):
         "success": True
     })
 
+@api.route("/accounts/edit/orders", methods=["PUT"])
+@login_required
+@check_input({
+    "type": "object",
+    "properties": {
+        "orders": {
+            "type": "array",
+            "items": {"type": "number"}
+        },
+        "ids": {
+            "type": "array",
+            "items": {"type": "number"}
+        },
+        "required": ["orders", "ids"]
+    }
+})
+def edit_account_orders(orders: list[int], ids: list[int]):
+    if len(orders) != len(ids):
+        raise APIError(HTTPStatus.BAD_REQUEST, "orders and ids must have same length")
+
+    n_changed = 0
+
+
+    for acc_id, order in zip(orders, ids):
+        account: Account = Account.query.filter_by(user_id=current_user.id, id=acc_id).first()
+        if account is None:
+            raise APIError(HTTPStatus.BAD_REQUEST, "non-existent account id")
+        if order < 0:
+            raise APIError(HTTPStatus.BAD_REQUEST, "order must be non-negative")
+        if account.order == order:
+            continue
+        n_changed += 1
+        account.order = -n_changed
+
+    if n_changed == 0:
+        raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
+
+    for acc_id, order in zip(orders, ids):
+        account: Account = Account.query.filter_by(user_id=current_user.id, id=acc_id).first()
+        if account.order == order:
+            continue
+        account.order = order
+
+    db.session.commit()
+    return jsonify({
+        "success": True
+    })
+
 @login_manager.unauthorized_handler
 def unauthorized():
     if request.blueprint == 'api':

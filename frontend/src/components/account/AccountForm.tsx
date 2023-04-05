@@ -3,14 +3,14 @@ import { DatePickerInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
+import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
+import { AccountDeep } from "../../Types/Account"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
-import { AccountDeep } from "../../Types/Account"
 import AmountInput from "../Inputs/AmountInput"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
 import { useAccountFormList } from "./AccountFormList"
-import { useEffect } from "react"
 
 export interface AccountFormValues {
     desc: string
@@ -61,12 +61,14 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
     const reset = () => {
         form.setValues(initials());
         form.resetDirty(initials());
+        // close();
     }
 
     // disable: missing dependency form, but should only reset
     // on change of data
     // eslint-disable-next-line
-    useEffect(reset, [data])
+    useEffect(reset, [data.desc, data.starting_saldo,
+        data.date_created, data.color, data.currency_id])
 
     const handleSubmit = (values: TransformedAccountFormValues) => {
         startEdit();
@@ -98,8 +100,6 @@ export function AccountForm({ data, ix }: { data: AccountDeep, ix: number }) {
                             <Title order={3}>{form.values.desc}</Title>
                         }
                     </Group>
-                    {/* <Input component={Title} {...form.getInputProps('desc')}/> */}
-                    {/* <input/> */}
                 </Grid.Col>
                 <Grid.Col span='content'>
                     <Group position='right' spacing='xs'>

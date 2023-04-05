@@ -1,8 +1,10 @@
 import { Flex, Grid, Group, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { createContext, useContext } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { createContext, useContext, useEffect } from "react";
 import { TbDeviceFloppy, TbRotate2 } from "react-icons/tb";
 import { AccountDeep } from "../../Types/Account";
+import { useEditAccountOrders } from "../../hooks/api/useMutation";
 import { PrimaryIcon, RedIcon } from "../Inputs/Icons";
 import { AccountForm } from "./AccountForm";
 
@@ -20,16 +22,19 @@ export function useAccountFormList() {
     return useContext(AccountFormListContext);
 }
 
-interface OrderFormValues {
+export interface OrderFormValues {
     orders: number[]
+    ids: number[]
 }
 
 export default function AccountFormList({ accounts }: { accounts: AccountDeep[] }) {
 
+    const initials = () => ({
+        orders: accounts.map(a => a.order),
+        ids: accounts.map(a => a.id),
+    })
     let orderForm = useForm<OrderFormValues>({
-        initialValues: {
-            orders: accounts.map(a => a.order),
-        }
+        initialValues: initials()
     });
 
     const leastOrder = (order: number) => {
@@ -91,24 +96,50 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
             swap(ix, other);
     }
 
+    const reset = () => {
+        orderForm.setValues(initials());
+        orderForm.resetDirty(initials());
+    }
+
+    // disable: missing dependency form, but should only reset
+    // on change of accounts orders
+    // eslint-disable-next-line
+    useEffect(reset, accounts.map(a => a.order))
+
     const value: AccountFormListContextType = {
         moveUp, moveDown
     }
 
+    const editAccountOrders = useEditAccountOrders();
+    const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
+    const handleSubmit = (values: OrderFormValues) => {
+        startEdit();
+        editAccountOrders.mutate(values,
+            {
+                onSuccess: () => {
+                    editAccountOrders.reset();
+                }, onSettled: endEdit
+            }
+        );
+    }
+
     return (
         <AccountFormListContext.Provider value={value}>
+            <form onSubmit={orderForm.onSubmit(handleSubmit)}>
             <Flex justify='space-between' align='flex-end' pb='sm'>
                 <Title order={1}>accounts</Title>
                 {orderForm.isDirty() &&
                     <Group spacing='xs'>
-                        <PrimaryIcon icon={TbDeviceFloppy} tooltip='save new order' />
+                        <PrimaryIcon icon={TbDeviceFloppy} tooltip='save new order'
+                            type='submit' loading={editing} />
                         <RedIcon icon={TbRotate2} tooltip='discard new order'
-                            onClick={() => orderForm.reset()} />
+                            onClick={reset} />
                     </Group>
                 }
             </Flex>
+            </form>
             <Grid>{
-                accounts.map((d, ix) =>
+                accounts.sort((a, b) => a.id - b.id).map((d, ix) =>
                     <Grid.Col key={ix} span={12} order={orderForm.values.orders[ix]}>
                         <AccountForm data={d} ix={ix} />
                     </Grid.Col>
