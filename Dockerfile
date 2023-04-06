@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install conda env requirements
 COPY environment.yml .
-# RUN apt update && conda update --all
+RUN apt update && conda update --all
 RUN apt install gcc libmariadb3 libmariadb-dev -y
 RUN conda env create -p /env --file environment.yml && conda clean -afy
 # conda env create -n flask-new --file environment.yml && conda clean -afy
