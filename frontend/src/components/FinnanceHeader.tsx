@@ -93,7 +93,7 @@ export default function FinnanceHeader() {
     });
 
     return (
-        <Header height={HEADER_HEIGHT} mb='xl' className={classes.root}>
+        <Header height={HEADER_HEIGHT} className={classes.root}>
             <Container>
                 <Grid justify='space-between' p='xs'>
                     <Grid.Col span='content'>

@@ -1,10 +1,11 @@
-import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, TextInput, Title } from "@mantine/core"
+import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
 import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
+import { Link } from "react-router-dom"
 import { AccountDeep } from "../../Types/Account"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
@@ -14,6 +15,13 @@ import { AccountFormValues, TransformedAccountFormValues } from "../modals/Accou
 import { useAccountFormList } from "./AccountFormList"
 
 type Transform = (values: AccountFormValues) => TransformedAccountFormValues
+
+const useStyles = createStyles((theme) => ({
+    AccountLink: {
+        textDecoration: 'none',
+        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
+    }
+}));
 
 export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number, order: number }) {
     const currencies = useCurrencies();
@@ -67,6 +75,8 @@ export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number
         );
     }
 
+    const { classes } = useStyles();
+
     if (!currencies.isSuccess)
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
@@ -85,7 +95,11 @@ export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number
                     {open ?
                         <TextInput {...form.getInputProps('desc')} />
                         :
-                        <Title order={3} lineClamp={1}>{form.values.desc}</Title>
+                        <Link to={`${data.id}`} className={classes.AccountLink}>
+                            <Title order={3} lineClamp={1} >
+                                {form.values.desc}
+                            </Title>
+                        </Link>
                     }
                 </Grid.Col>
                 <Grid.Col span='content'>

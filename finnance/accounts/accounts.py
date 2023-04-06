@@ -33,7 +33,7 @@ def changes(account_id):
     acc: Account = Account.query.filter_by(
         user_id=current_user.id, id=account_id).first()
     if acc is None:
-        raise APIError(HTTPStatus.UNAUTHORIZED)
+        raise APIError(HTTPStatus.NOT_FOUND)
     
     kwargs = {"start": None, "end": None, "n": None}
     

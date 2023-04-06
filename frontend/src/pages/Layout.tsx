@@ -7,7 +7,7 @@ export default function Layout() {
     return (
         <FinnanceModalProvider>
             <FinnanceHeader />
-            <Container my='md'>
+            <Container my='lg'>
                 <Outlet />
             </Container>
         </FinnanceModalProvider>

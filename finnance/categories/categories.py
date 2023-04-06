@@ -12,11 +12,10 @@ categories = Blueprint('categories', __name__, url_prefix='/api/categories')
 @categories.route("/<int:category_id>")
 @login_required
 def category(category_id):
-    # raise APIError(HTTPStatus.UNAUTHORIZED)
     cat = Category.query.filter_by(
         user_id=current_user.id, id=category_id).first()
     if cat is None:
-        raise APIError(HTTPStatus.UNAUTHORIZED)
+        raise APIError(HTTPStatus.NOT_FOUND)
     return cat.api()
 
 @categories.route("")

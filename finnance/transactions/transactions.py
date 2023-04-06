@@ -44,22 +44,22 @@ transactions = Blueprint('transactions', __name__, url_prefix='/api/transactions
     },
     "required": ["amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
 })
-def add_trans(edit=None, **data):
+def add_trans(**data):
     data['date_issued'] = datetime.fromisoformat(data.pop('date_issued'))
 
     if data['account_id']:
         account = Account.query.get(data['account_id'])
         if account.user_id != current_user.id:
-            raise APIError(HTTPStatus.UNAUTHORIZED)
+            raise APIError(HTTPStatus.NOT_FOUND)
         # check saldo
         saldo = account.saldo
         # TODO: saldo at date_issued
-        if edit is None:
-            diff = -data['amount'] if data['is_expense'] else data['amount']
-        else:
-            tr = Transaction.query.get(edit)
-            diff = tr.amount if tr.is_expense else -tr.amount
-            diff += -data['amount'] if data['is_expense'] else data['amount']
+        diff = -data['amount'] if data['is_expense'] else data['amount']
+        # if edit is None:
+        # else:
+        #     tr = Transaction.query.get(edit)
+        #     diff = tr.amount if tr.is_expense else -tr.amount
+        #     diff += -data['amount'] if data['is_expense'] else data['amount']
 
         if saldo + diff < 0:
             raise APIError(HTTPStatus.BAD_REQUEST,
