@@ -11,7 +11,7 @@ declare module '@mantine/core' {
   }
 }
 
-export const useTheme: () => MantineThemeOverride = () => {
+export const useCustomTheme: () => MantineThemeOverride = () => {
   const isPhone = useIsPhone();
   return {
     colors: {

@@ -1,23 +1,26 @@
 import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
-import { useColorScheme, useDocumentTitle } from '@mantine/hooks';
+import { useColorScheme } from '@mantine/hooks';
 import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RouterProvider } from "react-router-dom";
 import AuthProvider from './contexts/AuthProvider';
 import ErrorHandlerProvider from './contexts/ErrorHandlerProvider';
 import { queryClient } from './hooks/api/defaults';
 import { FinnanceRouter } from './routes/Router';
-import { useTheme } from './theme';
+import { useCustomTheme } from './theme';
 
 function App() {
     const preferredColorScheme = useColorScheme();
-    const [colorScheme, setColorScheme] = useState<ColorScheme>(preferredColorScheme);
+    const [colorScheme, setColorScheme] = useState<ColorScheme>('dark');
     const toggleColorScheme = (value?: ColorScheme) =>
         setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
 
-    useDocumentTitle('Finnance');
-    const theme = useTheme();
+    useEffect(() => {
+        setColorScheme(preferredColorScheme);
+    }, [preferredColorScheme]);
+
+    const theme = useCustomTheme();
 
     return (
         <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
