@@ -1,7 +1,8 @@
-import { ActionIcon, Button, Collapse, createStyles, Divider, Grid, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, Button, Center, Collapse, createStyles, Divider, Grid, Stack, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { Link } from "react-router-dom";
+import FinnanceLogo from "../components/FinnanceLogo";
 import LinkButton from "../components/LinkButton";
 import { useAccounts } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
@@ -76,5 +77,8 @@ export default function DashboardPage() {
             <LinkButton to='/accounts' label="manage accounts"></LinkButton>
             <LinkButton to='/categories' label="manage categories"></LinkButton>
         </Stack>
+        <Center mt={25}>
+            <FinnanceLogo opacity={0.1} size={200}/>
+        </Center>
     </>;
 }

@@ -75,9 +75,10 @@ export default function FinnanceHeader() {
     const { auth } = useAuth();
 
     const links = [
-        { link: "/", label: "home" },
-        { link: "/admin", label: "admin" },
-        { link: "/logout", label: "logout" }
+        { link: "", label: "home" },
+        { link: "accounts", label: "accounts" },
+        { link: "categories", label: "categories" },
+        { link: "logout", label: "logout" }
     ]
 
     const items = links.map((link) => {
@@ -98,13 +99,13 @@ export default function FinnanceHeader() {
                     <Grid.Col span='content'>
                         <Group noWrap={true}>
                             <LightDarkToggle />
-                            <FinnanceLogo text size={28} />
+                            <FinnanceLogo text link size={28} />
                         </Group>
                     </Grid.Col>
                     {auth &&
                         <Grid.Col span='content'>
 
-                            <Group spacing={5} className={classes.links} grow position='right'>
+                            <Group spacing={5} className={classes.links} position='right'>
                                 {items}
                             </Group>
 

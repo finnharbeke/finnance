@@ -1,11 +1,13 @@
 import { Button, Container, Group, Text, Title, useMantineTheme } from '@mantine/core';
 import { Link } from 'react-router-dom';
+import useIsPhone from '../hooks/useIsPhone';
 
 export default function NotFound() {
   const theme = useMantineTheme();
+  const isPhone = useIsPhone();
   return (
     <Container>
-      <Title size={220} fw={900} align='center'
+      <Title size={isPhone ? 160 : 220} fw={900} align='center'
         color={theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}
       >
         404

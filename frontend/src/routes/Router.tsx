@@ -5,7 +5,6 @@ import { SignUpForm } from "../components/SignUpForm";
 import NotFound from "../pages/404";
 import AccountPage from "../pages/Account";
 import AccountsPage from "../pages/Accounts";
-import AdminPage from "../pages/Admin";
 import DashboardPage from "../pages/Dashboard";
 import Layout from "../pages/Layout";
 import LogoutPage from "../pages/Logout";
@@ -30,9 +29,6 @@ export const FinnanceRouter = createBrowserRouter([
             children: [{
                 index: true,
                 element: <DashboardPage />,
-            }, {
-                path: "admin",
-                element: <AdminPage />
             }, {
                 path: "logout",
                 element: <LogoutPage />
