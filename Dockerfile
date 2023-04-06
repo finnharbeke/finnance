@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:latest as conda
+FROM condaforge/miniforge3:latest as conda
 WORKDIR /app
 
 # Keeps Python from generating .pyc files in the container
