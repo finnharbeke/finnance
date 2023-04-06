@@ -1,11 +1,10 @@
 import re
 from http import HTTPStatus
 
-import bcrypt
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required, login_user, logout_user
 
-from finnance import db
+from finnance import db, bcrypt
 from finnance.errors import APIError, validate
 from finnance.models import User
 
