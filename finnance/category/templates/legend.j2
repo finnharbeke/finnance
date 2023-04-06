@@ -1,4 +1,0 @@
-<script src="{{ url_for('category.static', filename='legend.js') }}"></script>
-<script>
-    d3.json("{{ url_for('category.categories') }}").then((data) => legend(data, '#legend'));
-</script>

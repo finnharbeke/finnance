@@ -14,7 +14,7 @@ export const get = async (url: string) => {
 }
 
 export const useCurrentUser = () =>
-    useQuery<UserFlat, Response>({ queryKey: ["me"] });
+    useQuery<UserFlat, Response>({ queryKey: ["auth", "me"] });
 
 export const useAccounts = () =>
     useQuery<AccountDeep[], Response>({ queryKey: ["accounts"] });

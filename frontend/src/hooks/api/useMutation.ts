@@ -45,7 +45,7 @@ export const useEditAccountOrders = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (values: OrderFormValues) =>
-            axios.put(`/api/accounts/edit/orders`, values),
+            axios.put(`/api/accounts/orders`, values),
         onSuccess: () => queryClient.invalidateQueries(["accounts"])
     });
 }

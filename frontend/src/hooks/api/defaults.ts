@@ -7,7 +7,7 @@ const handleAxiosError = (error: unknown) => {
     const e = (error as AxiosError);
     if (e.response) {
         showNotification({
-            title: `status ${e.status}: ${e.response.statusText}`,
+            title: `${e.response.status}: ${e.response.statusText}`,
             message: JSON.stringify(e.response.data),
             color: 'orange',
             autoClose: true
@@ -35,7 +35,7 @@ export const queryClient = new QueryClient({
             onError: handleAxiosError
         },
         queries: {
-            queryFn: async ({ queryKey }) => get(`/api/${queryKey[0]}`),
+            queryFn: async ({ queryKey }) => get(`/api/${queryKey.join('/')}`),
             onError: handleAxiosError
         }
     }

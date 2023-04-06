@@ -48,7 +48,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const { responseErrorFromResponseAndData } = useErrorHandler();
 
     const handleLogin = async (username: string, password: string) => (
-        fetch("/api/login",
+        fetch("/api/auth/login",
             {
                 method: 'post',
                 body: JSON.stringify({ username, password }),
@@ -66,7 +66,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     );
     
     const handleRegister = async (username: string, email: string, password: string) => (
-        fetch("/api/register",
+        fetch("/api/auth/register",
             {
                 method: 'post',
                 body: JSON.stringify({ username, email, password }),
@@ -82,7 +82,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     const handleLogout = () => (
-        fetch("/api/logout",
+        fetch("/api/auth/logout",
             {
                 method: 'post',
                 signal: AbortSignal.timeout(3000)
@@ -99,7 +99,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     const handleExists = (username: string) => (
-        fetch("/api/exists",
+        fetch("/api/auth/exists",
             {
                 method: 'post',
                 body: JSON.stringify({ username }),
@@ -115,7 +115,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     )
     
     const handleExistsMail = (email: string) => (
-        fetch("/api/existsMail",
+        fetch("/api/auth/existsMail",
             {
                 method: 'post',
                 body: JSON.stringify({ email }),
@@ -131,7 +131,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     )
 
     const checkSession = () => {
-        fetch("/api/session", {
+        fetch("/api/auth/session", {
             signal: AbortSignal.timeout(3000)
         }).then(r => {
             if (r.ok)
