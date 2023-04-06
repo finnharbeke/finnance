@@ -83,7 +83,7 @@ class Account(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
 
     desc = db.Column(db.String(32), nullable=False)
-    starting_saldo = db.Column(db.Float, nullable=False, default=0)
+    starting_saldo = db.Column(db.Integer, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey(
         'currency.id'), nullable=False)
@@ -115,9 +115,7 @@ class Account(db.Model, JSONModel):
                 exp = change.is_expense
                 amount = change.amount
 
-            saldos.append(round(
-                saldos[-1] + (amount if not exp else -amount),
-                self.currency.decimals))
+            saldos.append(saldos[-1] + (amount if not exp else -amount))
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
@@ -139,8 +137,7 @@ class Account(db.Model, JSONModel):
                 exp = change.is_expense
                 amount = change.amount
 
-            saldo = round(saldo + (amount if not exp else -amount),
-                self.currency.decimals)
+            saldo = saldo + (amount if not exp else -amount)
             
             if (start is None or start <= change.date_issued) and (
                 end is None or change.date_issued < end) and (
@@ -167,7 +164,7 @@ class Transaction(db.Model, JSONModel):
     input_format = "%d.%m.%Y %H:%M"
 
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float, nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
     is_expense = db.Column(db.Boolean, nullable=False)
     currency_id = db.Column(db.Integer, db.ForeignKey(
         'currency.id'), nullable=False)
@@ -188,7 +185,7 @@ class Transaction(db.Model, JSONModel):
 
 class Record(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float, nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey(
         'category.id'), nullable=False)
     trans_id = db.Column(db.Integer, db.ForeignKey('trans.id'), nullable=False)
@@ -205,7 +202,7 @@ class Record(db.Model, JSONModel):
 
 class Flow(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float, nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
     is_debt = db.Column(db.Boolean, nullable=False)
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
     trans_id = db.Column(db.Integer, db.ForeignKey('trans.id'), nullable=False)
@@ -222,8 +219,8 @@ class Flow(db.Model, JSONModel):
 
 class AccountTransfer(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
-    src_amount = db.Column(db.Float, nullable=False)
-    dst_amount = db.Column(db.Float, nullable=False)
+    src_amount = db.Column(db.Integer, nullable=False)
+    dst_amount = db.Column(db.Integer, nullable=False)
     src_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     dst_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
     date_issued = db.Column(db.DateTime)
@@ -249,8 +246,8 @@ class Currency(db.Model, JSONModel):
     decimals = db.Column(db.Integer, CheckConstraint(
         "decimals >= 0"), nullable=False)
 
-    def format(self, number: float) -> str:
-        return "{n:,.{d}f}".format(n=number, d=self.decimals)
+    def format(self, number: int) -> str:
+        return "{n:,.{d}f}".format(n=number / (10 ** self.decimals), d=self.decimals)
 
 
 class Agent(db.Model, JSONModel):

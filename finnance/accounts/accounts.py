@@ -170,7 +170,7 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         "currency_id": {"type": "number"},
     }
 })
-def add_acc(desc: str, starting_saldo: float, date_created: str, currency_id: int, color: str):
+def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int, color: str):
     date_created = datetime.fromisoformat(date_created)
     if date_created > datetime.now():
         raise APIError(HTTPStatus.BAD_REQUEST, "account starting date in the future")
