@@ -1,30 +1,31 @@
 # finnance
 
-SQL / Flask App for saving all my financial transactions etc
-
-## Links
-
-Deployment: [tutorial](https://www.javacodemonk.com/part-2-deploy-flask-api-in-production-using-wsgi-gunicorn-with-nginx-reverse-proxy-4cbeffdb)
-
+Flask React App for saving all my financial transactions etc
 
 ## dev environment
 
 ### setup
 
+**requirements:**
+
+- installed conda
+- installed npm
+
 ```
 conda env create -n finnance --file environment.yml
 ```
+
 from `/frontend` dir:
 ```
 npm i
 ```
 
-### run
+### run
 
 
 from base directory:
 ```
-flask run --debug -p 5050
+flask run --debug
 ```
 
 from `/frontend` dir:
