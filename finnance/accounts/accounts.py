@@ -147,7 +147,7 @@ def edit_account_orders(orders: list[int], ids: list[int]):
     if n_changed == 0:
         raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
 
-    for acc_id, order in zip(orders, ids):
+    for acc_id, order in zip(ids, orders):
         account: Account = Account.query.filter_by(user_id=current_user.id, id=acc_id).first()
         if account.order == order:
             continue
