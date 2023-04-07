@@ -1,7 +1,7 @@
 import { Button, Center, Divider, Grid, Loader, Title } from "@mantine/core";
 import { useState } from "react";
 import { CurrencyCard } from "../components/Currency";
-import AccountFormList from "../components/account/AccountFormList";
+import AccountList from "../components/account/AccountList";
 import { openAccountModal } from "../components/modals/AccountModal";
 import { useAccounts, useCurrencies } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
@@ -18,7 +18,7 @@ export default function AccountsPage() {
 
     if (successAccs && successCurrs)
         return <>
-            <AccountFormList accounts={accounts}/>
+            <AccountList accounts={accounts}/>
             {
                 accounts.length === 0 &&
                 

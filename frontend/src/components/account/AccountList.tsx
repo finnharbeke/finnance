@@ -6,7 +6,7 @@ import { TbDeviceFloppy, TbRotate2 } from "react-icons/tb";
 import { AccountDeep } from "../../Types/Account";
 import { useEditAccountOrders } from "../../hooks/api/useMutation";
 import { PrimaryIcon, RedIcon } from "../Inputs/Icons";
-import { AccountForm } from "./AccountForm";
+import { AccountEdit } from "./AccountForm";
 
 interface AccountFormListContextType {
     moveUp: (ix: number) => void
@@ -141,7 +141,7 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
             <Grid>{
                 accounts.sort((a, b) => a.id - b.id).map((d, ix) =>
                     <Grid.Col key={ix} span={12} order={orderForm.values.orders[ix]}>
-                        <AccountForm data={d} ix={ix} order={orderForm.values.orders[ix]} />
+                        <AccountEdit data={d} ix={ix} order={orderForm.values.orders[ix]} />
                     </Grid.Col>
                 )
             }</Grid>

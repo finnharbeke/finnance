@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { CurrencyFormValues } from "../../components/Currency";
-import { TransformedAccountFormValues } from "../../components/modals/AccountModal";
+import { TransformedAccountFormValues } from "../../components/account/AccountForm";
 import { transformedFormValues } from "../../components/modals/TransactionModal";
-import { OrderFormValues } from "../../components/account/AccountFormList";
+import { OrderFormValues } from "../../components/account/AccountList";
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()

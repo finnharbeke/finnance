@@ -7,5 +7,4 @@ export default function findId<T extends HasID>(array: T[], id: number) {
         if (obj.id === id)
             return obj
     }
-    return null;
 }
