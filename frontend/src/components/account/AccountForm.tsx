@@ -28,12 +28,11 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-export function AccountEdit({ data, ix, order }: { data: AccountDeep, ix: number, order: number }) {
+export function AccountEdit({ data, ix }: { data: AccountDeep, ix: number }) {
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
-    const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
-
+    
     const initials = () => ({
         desc: data.desc,
         starting_saldo: integerToAmount(data.starting_saldo, data.currency),
@@ -41,16 +40,17 @@ export function AccountEdit({ data, ix, order }: { data: AccountDeep, ix: number
         color: data.color,
         currency_id: data.currency_id.toString()
     })
-
+    
     const form = useForm<AccountFormValues, Transform>({
         initialValues: initials(),
         validate: accountFormValidate,
         transformValues: (values: AccountFormValues) => accountFormTransform(values, currencies),
     })
-
+    
     const { moveUp, moveDown } = useAccountFormList();
-
+    
     const editAccount = useEditAccount();
+    const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
 
     const reset = () => {
         form.setValues(initials());
@@ -77,12 +77,13 @@ export function AccountEdit({ data, ix, order }: { data: AccountDeep, ix: number
     }
 
     const { classes } = useStyles();
+    const isPhone = useIsPhone();
 
     if (!currencies.isSuccess)
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Grid gutter='xs' align='center'>
+            <Grid gutter={isPhone ? 'xs' : undefined } align='center'>
                 <Grid.Col span='content'>
                     <SecondaryIcon
                         icon={open ? TbChevronDown : TbChevronRight}

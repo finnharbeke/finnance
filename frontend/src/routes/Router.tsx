@@ -9,6 +9,7 @@ import DashboardPage from "../pages/Dashboard";
 import Layout from "../pages/Layout";
 import LogoutPage from "../pages/Logout";
 import { PrivateRoute, StrictPublicRoute } from "./Route";
+import { CategoriesPage } from "../category/Categories";
 
 export const FinnanceRouter = createBrowserRouter([
     {
@@ -38,6 +39,9 @@ export const FinnanceRouter = createBrowserRouter([
             }, {
                 path: "accounts",
                 element: <AccountsPage />
+            }, {
+                path: "categories",
+                element: <CategoriesPage />
             }]
         }, {
             path: "*",

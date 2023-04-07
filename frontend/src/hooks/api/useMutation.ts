@@ -4,6 +4,7 @@ import { CurrencyFormValues } from "../../components/Currency";
 import { TransformedAccountFormValues } from "../../components/account/AccountForm";
 import { transformedFormValues } from "../../components/modals/TransactionModal";
 import { OrderFormValues } from "../../components/account/AccountList";
+import { TransformedCategoryFormValues } from "../../category/Categories";
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()
@@ -47,5 +48,23 @@ export const useEditAccountOrders = () => {
         mutationFn: (values: OrderFormValues) =>
             axios.put(`/api/accounts/orders`, values),
         onSuccess: () => queryClient.invalidateQueries(["accounts"])
+    });
+}
+
+export const useEditCategory = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ id, values }: { id: number, values: TransformedCategoryFormValues }) =>
+        axios.put(`/api/categories/${id}/edit`, values),
+        onSuccess: () => queryClient.invalidateQueries(["categories"])
+    });
+}
+
+export const useEditCategoryOrders = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (values: OrderFormValues) =>
+            axios.put(`/api/categories/orders`, values),
+        onSuccess: () => queryClient.invalidateQueries(["categories"])
     });
 }

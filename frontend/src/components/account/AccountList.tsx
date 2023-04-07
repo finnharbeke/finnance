@@ -8,12 +8,12 @@ import { useEditAccountOrders } from "../../hooks/api/useMutation";
 import { PrimaryIcon, RedIcon } from "../Inputs/Icons";
 import { AccountEdit } from "./AccountForm";
 
-interface AccountFormListContextType {
+export interface OrderFormContextType {
     moveUp: (ix: number) => void
     moveDown: (ix: number) => void
 }
 
-const AccountFormListContext = createContext<AccountFormListContextType>({
+const AccountFormListContext = createContext<OrderFormContextType>({
     moveDown: () => {},
     moveUp: () => {},
 });
@@ -27,6 +27,40 @@ export interface OrderFormValues {
     ids: number[]
 }
 
+export const leastOrder = (order: number, list: number[]) => {
+    return list.reduce((b, o) => order <= o && b, true)
+}
+
+export const largestOrder = (order: number, list: number[]) => {
+    return list.reduce((b, o) => order >= o && b, true)
+}
+
+export const nextOrder = (order: number, list: number[]) => {
+    let next = undefined;
+    let minNext = Infinity;
+    for (let other in list) {
+        const other_order = list[other];
+        if (other_order > order && other_order < minNext) {
+            next = parseInt(other);
+            minNext = other_order;
+        }
+    }
+    return next;
+}
+
+export const lastOrder = (order: number, list: number[]) => {
+    let last = undefined;
+    let maxLast = -Infinity;
+    for (let other in list) {
+        const other_order = list[other];
+        if (other_order < order && other_order > maxLast) {
+            last = parseInt(other);
+            maxLast = other_order;
+        }
+    }
+    return last;
+}
+
 export default function AccountFormList({ accounts }: { accounts: AccountDeep[] }) {
 
     const initials = () => ({
@@ -37,40 +71,6 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
         initialValues: initials()
     });
 
-    const leastOrder = (order: number) => {
-        return orderForm.values.orders.reduce((b, o) => order <= o && b, true)
-    }
-
-    const largestOrder = (order: number) => {
-        return orderForm.values.orders.reduce((b, o) => order >= o && b, true)
-    }
-
-    const nextOrder = (order: number) => {
-        let next = undefined;
-        let minNext = Infinity;
-        for (let other in orderForm.values.orders) {
-            const other_order = orderForm.values.orders[other];
-            if (other_order > order && other_order < minNext) {
-                next = parseInt(other);
-                minNext = other_order;
-            }
-        }
-        return next;
-    }
-
-    const lastOrder = (order: number) => {
-        let last = undefined;
-        let maxLast = -Infinity;
-        for (let other in orderForm.values.orders) {
-            const other_order = orderForm.values.orders[other];
-            if (other_order < order && other_order > maxLast) {
-                last = parseInt(other);
-                maxLast = other_order;
-            }
-        }
-        return last;
-    }
-
     const swap = (ix1: number, ix2: number) => {
         const order1 = orderForm.values.orders[ix1];
         const order2 = orderForm.values.orders[ix2];
@@ -80,18 +80,18 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
 
     const moveUp = (ix: number) => {
         const order = orderForm.values.orders[ix];
-        if (leastOrder(order))
+        if (leastOrder(order, orderForm.values.orders))
             return;
-        const other = lastOrder(order);
+        const other = lastOrder(order, orderForm.values.orders);
         if (other !== undefined)
             swap(ix, other);
     }
 
     const moveDown = (ix: number) => {
         const order = orderForm.values.orders[ix];
-        if (largestOrder(order))
+        if (largestOrder(order, orderForm.values.orders))
             return;
-        const other = nextOrder(order);
+        const other = nextOrder(order, orderForm.values.orders);
         if (other !== undefined)
             swap(ix, other);
     }
@@ -106,7 +106,7 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
     // eslint-disable-next-line
     useEffect(reset, [...accounts.map(a => a.order), accounts.length])
 
-    const value: AccountFormListContextType = {
+    const value: OrderFormContextType = {
         moveUp, moveDown
     }
 
@@ -141,7 +141,7 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeep[] 
             <Grid>{
                 accounts.sort((a, b) => a.id - b.id).map((d, ix) =>
                     <Grid.Col key={ix} span={12} order={orderForm.values.orders[ix]}>
-                        <AccountEdit data={d} ix={ix} order={orderForm.values.orders[ix]} />
+                        <AccountEdit data={d} ix={ix} />
                     </Grid.Col>
                 )
             }</Grid>
