@@ -288,19 +288,19 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
 
                 <Input.Wrapper label='lock for records?'>
                     <Center>
-                        <Switch size={'xl'}
+                        <Switch size={'xl'} color='red'
                             onLabel={
                                 <Group noWrap spacing='xs'>
-                                    <TbCircleCheck size={20} />
-                                    <Text>free to use</Text>
+                                    <TbLock size={20} />
+                                    <Text>locked</Text>
                                 </Group>
                             } offLabel={
                                 <Group noWrap spacing='xs'>
-                                    <Text>locked</Text>
-                                    <TbLock size={20} />
+                                    <Text>free to use</Text>
+                                    <TbCircleCheck size={20} color='green'/>
                                 </Group>
                             }
-                            checked={form.values.usable}
+                            checked={!form.values.usable}
                             onChange={() => form.setFieldValue('usable', !form.values.usable)}
                         />
                     </Center>
