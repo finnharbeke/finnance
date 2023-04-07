@@ -6,6 +6,7 @@ import FinnanceLogo from "../components/FinnanceLogo";
 import LinkButton from "../components/LinkButton";
 import { useAccounts } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
+import { integerToFixed } from "../helpers/convert";
 
 export default function DashboardPage() {
     const useStyles = createStyles({
@@ -29,7 +30,7 @@ export default function DashboardPage() {
                     {acc.desc}
                 </Text>
                 <Text align='right'>
-                    {acc.saldo}
+                    {integerToFixed(acc.saldo, acc.currency)}
                 </Text>
             </Button>
         </Grid.Col>

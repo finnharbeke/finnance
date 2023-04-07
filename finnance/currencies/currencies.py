@@ -22,7 +22,7 @@ def all_currencies():
     "type": "object",
     "properties": {
         "code": {"type": "string"},
-        "decimals": {"type": "number"},
+        "decimals": {"type": "integer"},
     },
     "required": ["code", "decimals"]
 })

@@ -13,6 +13,8 @@ import AmountInput from "../Inputs/AmountInput"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
 import { AccountFormValues, TransformedAccountFormValues } from "../modals/AccountModal"
 import { useAccountFormList } from "./AccountFormList"
+import { amountToInteger, integerToAmount } from "../../helpers/convert"
+import findId from "../../helpers/findId"
 
 type Transform = (values: AccountFormValues) => TransformedAccountFormValues
 
@@ -31,20 +33,29 @@ export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number
 
     const initials = () => ({
         desc: data.desc,
-        starting_saldo: data.starting_saldo,
+        starting_saldo: integerToAmount(data.starting_saldo, data.currency),
         date_created: DateTime.fromISO(data.date_created).toJSDate(),
         color: data.color,
-        currency_id: data.currency_id.toFixed(0)
+        currency_id: data.currency_id.toString()
     })
 
     const form = useForm<AccountFormValues, Transform>({
         initialValues: initials(),
 
-        transformValues: (values: AccountFormValues) => ({
-            ...values,
-            currency_id: parseInt(values.currency_id),
-            date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
-        }),
+        transformValues: (values: AccountFormValues) => {
+            if (!currencies.isSuccess)
+                throw new Error('currencies not fetched');
+            const c_id = parseInt(values.currency_id);
+            const currency = findId(currencies.data, c_id);
+            if (!currency)
+                throw new Error('invalid currency_id');
+            return ({
+                ...values,
+                currency_id: parseInt(values.currency_id),
+                starting_saldo: amountToInteger(values.starting_saldo, currency),
+                date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
+            })
+        },
     })
 
     const { moveUp, moveDown } = useAccountFormList();
@@ -141,7 +152,7 @@ export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number
                         <Select label="currency"
                             data={currencies.isLoading ? [] : currencies.data.map(
                                 cur => ({
-                                    value: cur.id.toFixed(0),
+                                    value: cur.id.toString(),
                                     label: cur.code,
                                 })
                             )}
@@ -151,7 +162,7 @@ export function AccountForm({ data, ix, order }: { data: AccountDeep, ix: number
                     <Grid.Col md={3} sm={6} xs={12}>
                         <AmountInput label={`saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`}
                             currency={
-                                currencies.data.filter(cur => cur.id.toFixed(0) === form.values.currency_id)[0]
+                                currencies.data.filter(cur => cur.id.toString() === form.values.currency_id)[0]
                             }
                             {...form.getInputProps('starting_saldo')}
                         />

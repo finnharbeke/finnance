@@ -149,7 +149,7 @@ function RecordInput({ form, record, currency, i }: RecordInputProps) {
                     cat => cat.usable && cat.is_expense === form.values.isExpense
                 ).map(
                     cat => ({
-                        value: cat.id.toFixed(0),
+                        value: cat.id.toString(),
                         label: cat.desc,
                         group: cat.parent_id === null ? cat.desc : cat.parent.desc
                     })

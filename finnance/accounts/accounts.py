@@ -57,8 +57,8 @@ def changes(account_id):
         "desc": {"type": "string"},
         "color": {"type": "string"},
         "date_created": {"type": "string"},
-        "starting_saldo": {"type": "number"},
-        "currency_id": {"type": "number"},
+        "starting_saldo": {"type": "integer"},
+        "currency_id": {"type": "integer"},
     }
 })
 def edit_account(account_id: int, **data):
@@ -117,11 +117,11 @@ def edit_account(account_id: int, **data):
     "properties": {
         "orders": {
             "type": "array",
-            "items": {"type": "number"}
+            "items": {"type": "integer"}
         },
         "ids": {
             "type": "array",
-            "items": {"type": "number"}
+            "items": {"type": "integer"}
         },
         "required": ["orders", "ids"]
     }
@@ -166,8 +166,8 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         "desc": {"type": "string"},
         "color": {"type": "string"},
         "date_created": {"type": "string"},
-        "starting_saldo": {"type": "number"},
-        "currency_id": {"type": "number"},
+        "starting_saldo": {"type": "integer"},
+        "currency_id": {"type": "integer"},
     }
 })
 def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int, color: str):

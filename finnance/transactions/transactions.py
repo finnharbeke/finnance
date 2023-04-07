@@ -15,8 +15,8 @@ transactions = Blueprint('transactions', __name__, url_prefix='/api/transactions
 @validate({
     "type": "object",
     "properties": {
-        "account_id": {"type": "number"},
-        "amount": {"type": "number"},
+        "account_id": {"type": "integer"},
+        "amount": {"type": "integer"},
         "date_issued": {"type": "string"},
         "is_expense": {"type": "boolean"},
         "agent": {"type": "string"},
@@ -26,7 +26,7 @@ transactions = Blueprint('transactions', __name__, url_prefix='/api/transactions
             "items": {
                 "type": "object",
                 "properties": {
-                    "amount": {"type": "number"},
+                    "amount": {"type": "integer"},
                     "agent": {"type": "string"},
                 }
             }
@@ -36,8 +36,8 @@ transactions = Blueprint('transactions', __name__, url_prefix='/api/transactions
             "items": {
                 "type": "object",
                 "properties": {
-                    "amount": {"type": "number"},
-                    "category_id": {"type": "number"},
+                    "amount": {"type": "integer"},
+                    "category_id": {"type": "integer"},
                 }
             }
         },

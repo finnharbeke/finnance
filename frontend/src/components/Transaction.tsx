@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import { useRef } from "react";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import { AccountChangeTransaction } from "../Types/AccountChange";
+import { integerToFixed } from "../helpers/convert";
 
 export const HeadStyles = createStyles((theme: MantineTheme) => ({
     head: {
@@ -95,13 +96,12 @@ export const HeadStyles = createStyles((theme: MantineTheme) => ({
     }
 }));
 
-export function TransactionHead(props: AccountChangeTransaction) {
+export function TransactionHead({ saldo, data }: AccountChangeTransaction) {
     const { classes, cx } = HeadStyles();
 
-    const { saldo } = props;
-    const { is_expense, comment, amount, agent, currency } = props.data;
+    const { is_expense, comment, amount, agent, currency } = data;
 
-    const date = DateTime.fromISO(props.data.date_issued);
+    const date = DateTime.fromISO(data.date_issued);
 
     const agentRef = useRef<HTMLDivElement>(null);
     const agentOverflow = useIsOverflow(agentRef);
@@ -119,19 +119,19 @@ export function TransactionHead(props: AccountChangeTransaction) {
             </Center>
             <Text className={cx(classes.child, classes.date)}>{date.toFormat("dd.MM.yy")}</Text>
             <Text className={cx(classes.child, classes.time)}>{date.toFormat("HH:mm")}</Text>
-            <Tooltip label={amount.toFixed(currency.decimals)} disabled={!amountOverflow} openDelay={250}>
+            <Tooltip label={integerToFixed(amount, currency)} disabled={!amountOverflow} openDelay={250}>
                 <Text className={cx(classes.child, classes.amount,
                     is_expense ? classes.expenseAmount : classes.incomeAmount)}
                     ref={amountRef}>
-                    {amount.toFixed(currency.decimals)}
+                    {integerToFixed(amount, currency)}
                 </Text>
             </Tooltip>
             <Tooltip label={agent.desc} disabled={!agentOverflow} openDelay={250}>
                 <Text className={cx(classes.child, classes.agent)} ref={agentRef}>{agent.desc}</Text>
             </Tooltip>
-            <Tooltip label={saldo.toFixed(currency.decimals)} disabled={!saldoOverflow} openDelay={250}>
+            <Tooltip label={integerToFixed(saldo, currency)} disabled={!saldoOverflow} openDelay={250}>
                 <Text className={cx(classes.child, classes.amount)} ref={saldoRef}>
-                    {saldo.toFixed(currency.decimals)}
+                {integerToFixed(saldo, currency)}
                 </Text>
             </Tooltip>
             <Tooltip label={comment} disabled={!commentOverflow} openDelay={250}>

@@ -4,7 +4,7 @@ import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { DateTime, Duration } from "luxon";
 import { AccountDeep } from "../../Types/Account";
-import { CurrencyFlat } from "../../Types/Currency";
+import { amountToInteger } from "../../helpers/convert";
 import { useAddTransaction } from "../../hooks/api/useMutation";
 import { useAgents } from "../../hooks/api/useQuery";
 import DateTimeInput from "./DateTimeInput";
@@ -12,8 +12,8 @@ import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
 
 type TransactionModalProps = {
-    currency?: CurrencyFlat,
-    account?: AccountDeep,
+    // currency?: CurrencyFlat,
+    account: AccountDeep,
 }
 
 export const openTransactionModal = async (props: OpenContextModal<TransactionModalProps>) => {
@@ -54,7 +54,7 @@ export const isFlow = (val: Item): val is Flow => val.type === 'flow';
 export const isRecord = (val: Item): val is Record => val.type === 'record';
 
 export interface FormValues {
-    account_id: number | undefined
+    account_id: number | undefined
     date: Date
     time: string
     amount: number
@@ -68,7 +68,7 @@ export interface FormValues {
 }
 
 export interface transformedFormValues {
-    account_id: number | undefined
+    account_id: number | undefined
     date_issued: string
     amount: number
     is_expense: boolean
@@ -87,7 +87,7 @@ export interface transformedFormValues {
 type Transform = (values: FormValues) => transformedFormValues
 
 export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
-    const { currency, account } = innerProps;
+    const { account } = innerProps;
 
     const agents = useAgents();
 
@@ -162,35 +162,35 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
             }
         },
         transformValues: (values: FormValues) => ({
-            account_id: values.account_id,
-            amount: values.amount,
-            is_expense: values.isExpense,
-            agent: values.agent,
-            comment: values.comment,
-            date_issued: DateTime.fromJSDate(values.date).startOf('day').plus(Duration.fromObject({
-                hour: DateTime.fromFormat(values.time, "HH:mm").hour,
-                minute: DateTime.fromFormat(values.time, "HH:mm").minute
-            })).toISO({ includeOffset: false }),
-            flows: values.isDirect ?
-                [{ amount: values.amount, agent: values.agent }]
-                :
-                values.items.filter(isFlow)
-                    .map(item => ({
-                        amount: item.amount,
-                        agent: item.agent
-                    })),
-            records: values.isDirect ?
-                [] : values.items.filter(isRecord)
-                    .map(item => ({
-                        amount: item.amount,
-                        category_id: parseInt(item.category_id)
-                    }))
-        })
+                account_id: values.account_id,
+                is_expense: values.isExpense,
+                agent: values.agent,
+                comment: values.comment,
+                date_issued: DateTime.fromJSDate(values.date).startOf('day').plus(Duration.fromObject({
+                    hour: DateTime.fromFormat(values.time, "HH:mm").hour,
+                    minute: DateTime.fromFormat(values.time, "HH:mm").minute
+                })).toISO({ includeOffset: false }),
+                flows: values.isDirect ?
+                    [{ amount: values.amount, agent: values.agent }]
+                    :
+                    values.items.filter(isFlow)
+                        .map(item => ({
+                            amount: amountToInteger(item.amount, account.currency),
+                            agent: item.agent
+                        })),
+                records: values.isDirect ?
+                    [] : values.items.filter(isRecord)
+                        .map(item => ({
+                            amount: amountToInteger(item.amount, account.currency),
+                            category_id: parseInt(item.category_id)
+                        })),
+                amount: amountToInteger(values.amount, account.currency),
+            })
     });
     // TODO: let react router know of the change
 
     const addTrans = useAddTransaction()
-    
+
     const submitForm = (vals: transformedFormValues) => {
         addTrans.mutateAsync(vals);
         context.closeModal(id);
@@ -198,19 +198,19 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
 
     return <form onSubmit={form.onSubmit(submitForm)}>
         <DateTimeInput form={form}
-            minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined}/>
-        <AmountInput form={form} currency={currency}/>
+            minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined} />
+        <AmountInput form={form} currency={account.currency} />
         <Autocomplete
-            withAsterisk label='agent' 
+            withAsterisk label='agent'
             data={agents.isLoading || !agents.data ? [] : agents.data.map(
                 agent => agent.desc
             )}
             {...form.getInputProps('agent')}
         />
         <Divider my='sm' />
-        <FlowsNRecordsInput form={form} currency={currency}/>
+        <FlowsNRecordsInput form={form} currency={account.currency} />
         <Divider my='sm' />
-        <TextInput label='comment' {...form.getInputProps('comment')}  />
+        <TextInput label='comment' {...form.getInputProps('comment')} />
         <Button fullWidth mt="md" type='submit' >
             add transaction
         </Button>
