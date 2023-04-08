@@ -296,7 +296,7 @@ class Category(db.Model, JSONModel):
 
     __table_args__ = (
         UniqueConstraint('user_id', 'desc', 'is_expense'),
-        UniqueConstraint('user_id', 'order')
+        UniqueConstraint('user_id', 'order', 'is_expense')
     )
 
     json_relations = ["user", "records"]

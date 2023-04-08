@@ -1,18 +1,23 @@
-import { Center, Collapse, ColorInput, ColorSwatch, Flex, Grid, Group, Input, Paper, Select, Switch, Text, TextInput, Title } from "@mantine/core";
+import { Button, Center, Collapse, ColorInput, ColorSwatch, Flex, Grid, Group, Input, Paper, Select, Switch, Text, TextInput, Title } from "@mantine/core";
 import { UseFormReturnType, useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbCircleCheck, TbDeviceFloppy, TbLock, TbRotate2 } from "react-icons/tb";
 import { CategoryFlat } from "../Types/Category";
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../components/Inputs/Icons";
 import { OrderFormContextType, OrderFormValues, largestOrder, lastOrder, leastOrder, nextOrder } from "../components/account/AccountList";
-import { useEditCategory, useEditCategoryOrders } from "../hooks/api/useMutation";
+import { useAddCategory, useEditCategory, useEditCategoryOrders } from "../hooks/api/useMutation";
 import { useCategories } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
+import { FormValidateInput } from "@mantine/form/lib/types";
+import { OpenContextModal } from "@mantine/modals/lib/context";
 
 export const CategoriesPage = () => {
 
     const { data: categories, isSuccess } = useCategories();
+
+    const isPhone = useIsPhone();
 
     return <>
         <Title>categories</Title>
@@ -20,7 +25,31 @@ export const CategoriesPage = () => {
             isSuccess &&
             <>
                 <CategoryList categories={categories.filter(a => a.is_expense)} title='expenses' />
+                <Button fullWidth my='sm'
+                    onClick={() => {
+                    openCategoryModal({
+                        fullScreen: isPhone,
+                        innerProps: {
+                            is_expense: true,
+                            categories: categories.filter(a => a.is_expense)
+                        }
+                    })
+                }}>
+                        create expense category
+                        </Button>
                 <CategoryList categories={categories.filter(a => !a.is_expense)} title='income' />
+                <Button fullWidth mt='sm'
+                    onClick={() => {
+                    openCategoryModal({
+                        fullScreen: isPhone,
+                        innerProps: {
+                            is_expense: false,
+                            categories: categories.filter(a => !a.is_expense)
+                        }
+                    })
+                }}>
+                        create income category
+                        </Button>
             </>
         }
     </>
@@ -38,7 +67,7 @@ function useCategoryList() {
 
 export const CategoryList = ({ categories, title }: { categories: CategoryFlat[], title: string }) => {
 
-    const initials = () => ({
+    const initials: () => OrderFormValues = () => ({
         orders: categories.sort((a, b) => a.id - b.id).map(a => a.order),
         ids: categories.sort((a, b) => a.id - b.id).map(a => a.id),
     })
@@ -112,13 +141,17 @@ export const CategoryList = ({ categories, title }: { categories: CategoryFlat[]
                 }
             </Flex>
         </form>
+        { categories.length > 0 ?
         <Grid>{
             categories.sort((a, b) => a.id - b.id).map((cat, ix) =>
-                <Grid.Col span={12} key={ix} order={orderForm.values.orders[ix]}>
+            <Grid.Col span={12} key={ix} order={orderForm.values.orders[ix]}>
                     <CategoryEdit ix={ix} category={cat} categories={categories} />
                 </Grid.Col>
             )
         }</Grid>
+        :
+        <Center><Title order={3}>no categories yet</Title></Center>
+        }
     </CategoryListContext.Provider>
 }
 
@@ -144,6 +177,16 @@ interface CategoryEditProps {
     ix: number
 }
 
+const validateCategoryForm: FormValidateInput<CategoryFormValues> = {
+    desc: (val) => (val && val.length > 0) ? null : "enter category name",
+    color: (val) => (val && val.length === 7) ? null : "enter hex color",
+}
+
+const categoryFormTransform = (values: CategoryFormValues) => ({
+    ...values,
+    parent_id: values.parent_id ? parseInt(values.parent_id) : null
+})
+
 export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) => {
 
     const [open, { toggle }] = useDisclosure(false);
@@ -157,10 +200,8 @@ export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) =>
 
     const form = useForm<CategoryFormValues, Transform>({
         initialValues: initials(),
-        transformValues: (values: CategoryFormValues) => ({
-            ...values,
-            parent_id: values.parent_id ? parseInt(values.parent_id) : null
-        })
+        validate: validateCategoryForm,
+        transformValues: categoryFormTransform
     });
 
     const editCategory = useEditCategory();
@@ -264,14 +305,14 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
                     />
                 </Grid.Col>
             }
-            <Grid.Col sm={5} xs={12}>
+            <Grid.Col sm={4} xs={12}>
                 <ColorInput
                     disallowInput={isPhone}
                     label="color" withAsterisk={modal}
                     {...form.getInputProps('color')}
                 />
             </Grid.Col>
-            <Grid.Col sm={5} xs={12}>
+            <Grid.Col sm={4} xs={12}>
                 <Select label="parent category"
                     searchable={!isPhone} clearable
                     placeholder="select parent"
@@ -284,7 +325,7 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
                     {...form.getInputProps('parent_id')}
                 />
             </Grid.Col>
-            <Grid.Col sm={2} xs={12}>
+            <Grid.Col sm={4} xs={12}>
 
                 <Input.Wrapper label='lock for records?'>
                     <Center>
@@ -308,4 +349,67 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
             </Grid.Col>
         </Grid>
     )
+}
+
+export interface AddCategoryFormValues extends TransformedCategoryFormValues {
+    is_expense: boolean
+}
+
+type AddTransform = (v: CategoryFormValues) => AddCategoryFormValues;
+
+interface CategoryModalProps {
+    is_expense: boolean
+    categories: CategoryFlat[]
+}
+
+export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<CategoryModalProps>) => {
+    const { categories, is_expense } = innerProps;
+    const form = useForm<CategoryFormValues, AddTransform>({
+        initialValues: {
+            usable: true,
+            desc: '',
+            parent_id: undefined,
+            color: '',
+        },
+        validate: validateCategoryForm,
+        transformValues: (values) => ({
+            ...categoryFormTransform(values),
+            is_expense: is_expense
+        }),
+    })
+
+    const [loading, setLoading] = useState(false);
+    const addCategory = useAddCategory();
+
+    const handleSubmit = (values: AddCategoryFormValues) => {
+        setLoading(true);
+        console.log(values);
+        addCategory.mutate(values,
+            { onSuccess: () => context.closeModal(id),
+              onSettled: () => {
+                addCategory.reset();
+                setLoading(false);
+            }}
+        );
+    }
+
+    return <form onSubmit={form.onSubmit(handleSubmit)}>
+        <CategoryForm form={form} categories={categories} modal={true}/>
+        <Button mt='lg' fullWidth type="submit"
+            loading={loading}>
+            create
+        </Button>
+    </form>
+}
+
+export const openCategoryModal = async (props: OpenContextModal<CategoryModalProps>) => {
+    openContextModal({
+        ...{
+            modal: 'category',
+            title: `new ${props.innerProps.is_expense ? 'expense' : 'income'} category`,
+            size: 'lg'
+        },
+        ...props,
+        innerProps: props.innerProps
+    })
 }

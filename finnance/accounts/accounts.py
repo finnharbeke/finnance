@@ -174,6 +174,10 @@ def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int,
     date_created = datetime.fromisoformat(date_created)
     if date_created > datetime.now():
         raise APIError(HTTPStatus.BAD_REQUEST, "account starting date in the future")
+    if Currency.query.filter_by(user_id=current_user.id, id=currency_id).first() is None:
+        raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
+    if not re.match('^#[a-fA-F0-9]{6}$', color):
+        raise APIError(HTTPStatus.BAD_REQUEST, "color: invalid color hex-string")
     order = max([acc.order for acc in current_user.accounts] + [0]) + 1
     account = Account(desc=desc, starting_saldo=starting_saldo, order=order, color=color,
         date_created=date_created, currency_id=currency_id, user_id=current_user.id)

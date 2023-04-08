@@ -26,6 +26,44 @@ def all_categories():
     categories = Category.query.filter_by(user_id=current_user.id).all()
     return JSONModel.obj_to_api([cat.json(deep=True) for cat in categories])
 
+@categories.route("/add", methods=["POST"])
+@login_required
+@validate({
+    "type": "object",
+    "properties": {
+        "desc": {"type": "string"},
+        "is_expense": {"type": "boolean"},
+        "color": {"type": "string"},
+        "usable": {"type": "boolean"},
+        "parent_id": {"type": ["integer", "null"]},
+    }
+})
+def add_category(desc: str, is_expense: bool, color: str, usable: bool, parent_id: int):
+    other: Category = Category.query.filter_by(user_id=current_user.id, desc=desc, is_expense=is_expense).first()
+    if other is not None:
+        raise APIError(HTTPStatus.BAD_REQUEST, "category name already in use")
+    
+    parent: Category = Category.query.filter_by(user_id=current_user.id, id=parent_id, is_expense=is_expense).first()
+    if parent_id is not None and parent is None:
+        raise APIError(HTTPStatus.BAD_REQUEST, "invalid parent_id")
+    
+    if not re.match('^#[a-fA-F0-9]{6}$', color):
+        raise APIError(HTTPStatus.BAD_REQUEST, "color: invalid color hex-string")
+    
+    order = max([
+        cat.order for cat in current_user.categories if cat.is_expense == is_expense
+        ] + [0]) + 1
+    
+    category = Category(desc=desc, user_id=current_user.id, usable=usable,
+                        color=color, parent_id=parent_id, is_expense=is_expense,
+                        order=order)
+        
+    db.session.add(category)
+    db.session.commit()
+    return jsonify({
+        "success": True
+    })
+
 @categories.route("/<int:category_id>/edit", methods=["PUT"])
 @login_required
 @validate({
@@ -61,7 +99,7 @@ def edit_category(category_id: int, **data):
         changed = changed or category.parent_id != data['parent_id']
         if data['parent_id'] == category.id: 
             raise APIError(HTTPStatus.BAD_REQUEST, "parent_id must not be its own id")
-        if Category.query.filter_by(user_id=current_user.id, id=data['parent_id']) is None:
+        if data['parent_id'] is not None and Category.query.filter_by(user_id=current_user.id, id=data['parent_id']) is None:
             raise APIError(HTTPStatus.BAD_REQUEST, "invalid parent_id")
         category.parent_id = data['parent_id']
 
