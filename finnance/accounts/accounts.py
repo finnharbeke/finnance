@@ -96,7 +96,7 @@ def edit_account(account_id: int, **data):
 
     if 'currency_id' in data:
         changed = changed or account.currency_id != data['currency_id']
-        if Currency.query.get(data['currency_id']) is None:
+        if Currency.query.filter_by(user_id=current_user.id, id=data['currency_id']).first() is None:
             raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
         account.currency_id = data['currency_id']
         for trans in account.transactions:

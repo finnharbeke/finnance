@@ -1,6 +1,6 @@
 import { Button, Center, Divider, Grid, Loader, Title } from "@mantine/core";
 import { useState } from "react";
-import { CurrencyCard } from "../components/Currency";
+import { CurrencyCard, CurrencyForm } from "../components/Currency";
 import AccountList from "../components/account/AccountList";
 import { openAccountModal } from "../components/modals/AccountModal";
 import { useAccounts, useCurrencies } from "../hooks/api/useQuery";
@@ -45,7 +45,7 @@ export default function AccountsPage() {
                     ))
                 }
             </Grid>
-            {/* <CurrencyForm/> */}
+            <CurrencyForm/>
         </>
     if (loadingAccs || loadingCurrs)
         return <Center><Loader size='lg' /></Center>

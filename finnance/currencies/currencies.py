@@ -2,7 +2,7 @@
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from finnance import db
 from finnance.errors import APIError, validate
@@ -13,7 +13,7 @@ currencies = Blueprint('currencies', __name__, url_prefix='/api/currencies')
 @currencies.route("")
 @login_required
 def all_currencies():
-    currencies = Currency.query.all()
+    currencies = Currency.query.filter_by(user_id=current_user.id)
     return JSONModel.obj_to_api([cur.json(deep=False) for cur in currencies])
 
 @currencies.route("/add", methods=["POST"])
@@ -27,11 +27,11 @@ def all_currencies():
     "required": ["code", "decimals"]
 })
 def add_currency(code, decimals):
-    if Currency.query.filter_by(code=code).first() is not None:
+    if Currency.query.filter_by(code=code, user_id=current_user.id).first() is not None:
         raise APIError(HTTPStatus.BAD_REQUEST, "currency code already in use")
     if int(decimals) != decimals or decimals < 0:
         raise APIError(HTTPStatus.BAD_REQUEST, "decimals must be integer >= 0")
-    curr = Currency(code=code, decimals=decimals)
+    curr = Currency(code=code, decimals=decimals, user_id=current_user.id)
     db.session.add(curr)
     db.session.commit()
     return jsonify({
