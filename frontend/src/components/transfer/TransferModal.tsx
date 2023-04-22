@@ -89,10 +89,11 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
 
     const addTransfer = useAddTransfer();
 
+    // eslint-disable-next-line
     useEffect(() => {
         if (locked)
             form.setFieldValue('dst_amount', form.values.src_amount)
-    }, [locked, form, form.values.src_amount])
+    }, [locked, form.values.src_amount])
 
 
     if (!query.isSuccess)
