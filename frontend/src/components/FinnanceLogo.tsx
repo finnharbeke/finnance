@@ -1,8 +1,9 @@
 import { Box, BoxProps, createStyles } from "@mantine/core";
 import { MantineColor, useMantineTheme } from "@mantine/styles";
+import { DOMAttributes } from "react";
 import { Link } from "react-router-dom";
 
-interface FinnanceLogoProps extends BoxProps {
+interface FinnanceLogoProps extends BoxProps, DOMAttributes<HTMLElement> {
     inverted?: boolean,
     text?: boolean,
     size: number,

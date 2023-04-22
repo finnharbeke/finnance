@@ -105,7 +105,7 @@ export default function FinnanceHeader() {
                     <Grid.Col span='content'>
                         <Group noWrap={true}>
                             <LightDarkToggle />
-                            <FinnanceLogo text link size={28} />
+                            <FinnanceLogo text link size={28} onClick={close}/>
                         </Group>
                     </Grid.Col>
                     {auth &&
