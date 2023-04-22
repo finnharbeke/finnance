@@ -1,9 +1,10 @@
 import { Burger, Container, createStyles, Grid, Group, Header, Paper, Transition } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { NavLink } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import { useAuth } from './auth/api';
 import FinnanceLogo from './FinnanceLogo';
 import { LightDarkToggle } from './LightDarkToggle';
+import Placeholder from './Placeholder';
 
 const HEADER_HEIGHT = 60;
 
@@ -72,7 +73,12 @@ const useStyles = createStyles((theme) => ({
 export default function FinnanceHeader() {
     const [opened, { toggle, close }] = useDisclosure(false);
     const { classes, cx } = useStyles();
-    const { auth } = useAuth();
+    const query = useAuth();
+
+    if (!query.isSuccess)
+        return <Placeholder height={50} queries={[query]}/>
+
+    const auth = query.data.auth;
 
     const links = [
         { link: "", label: "home" },

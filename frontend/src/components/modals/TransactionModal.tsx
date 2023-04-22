@@ -7,7 +7,7 @@ import { AccountDeep } from "../../Types/Account";
 import { amountToInteger } from "../../helpers/convert";
 import { useAddTransaction } from "../../hooks/api/useMutation";
 import { useAgents } from "../../hooks/api/useQuery";
-import DateTimeInput from "./DateTimeInput";
+import DateTimeInput from "../DateTimeInput";
 import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
 

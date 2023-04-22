@@ -12,12 +12,13 @@ import { amountToInteger, integerToAmount } from "../../helpers/convert"
 import findId from "../../helpers/findId"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
-import AmountInput from "../Inputs/AmountInput"
-import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Inputs/Icons"
+import AmountInput from "../AmountInput"
+import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
 import { useAccountFormList } from "./AccountList"
 import useIsPhone from "../../hooks/useIsPhone"
 import { FormValidateInput } from "@mantine/form/lib/types"
 import { UseQueryResult } from "@tanstack/react-query"
+import { AxiosError } from "axios"
 
 type Transform = (values: AccountFormValues) => TransformedAccountFormValues
 
@@ -158,7 +159,7 @@ export const accountFormValidate: FormValidateInput<AccountFormValues> = {
     currency_id: (val) => (val && val.length > 0) ? null : "choose currency",
 }
 
-export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyFlat[], Response>) => {
+export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyFlat[], AxiosError>) => {
     if (!currencies.isSuccess)
         throw new Error('currencies not fetched');
     const c_id = parseInt(values.currency_id);

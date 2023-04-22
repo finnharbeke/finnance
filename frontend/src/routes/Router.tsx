@@ -1,21 +1,21 @@
 import { createBrowserRouter } from "react-router-dom";
 import LoaderError from "../components/LoaderError";
-import { LoginForm } from "../components/LoginForm";
-import { SignUpForm } from "../components/SignUpForm";
+import { LoginForm } from "../components/auth/LoginForm";
 import NotFound from "../pages/404";
 import AccountPage from "../pages/Account";
 import AccountsPage from "../pages/Accounts";
 import DashboardPage from "../pages/Dashboard";
 import Layout from "../pages/Layout";
 import LogoutPage from "../pages/Logout";
-import { PrivateRoute, StrictPublicRoute } from "./Route";
-import { CategoriesPage } from "../category/Categories";
+import { AuthRoute } from "./Route";
+import { CategoriesPage } from "../components/category/Categories";
+import { SignUpForm } from "../components/auth/SignUpForm";
 
 export const FinnanceRouter = createBrowserRouter([
     {
         element: <Layout />,
         children: [{
-            element: <StrictPublicRoute />,
+            element: <AuthRoute private_={false} />,
             errorElement: <LoaderError />,
             children: [{
                 path: "login",
@@ -25,7 +25,7 @@ export const FinnanceRouter = createBrowserRouter([
                 element: <SignUpForm />
             }]
         }, {
-            element: <PrivateRoute />,
+            element: <AuthRoute private_={true} />,
             errorElement: <LoaderError />,
             children: [{
                 index: true,

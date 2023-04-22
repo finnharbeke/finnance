@@ -1,8 +1,8 @@
 import { Button } from "@mantine/core";
-import useAuth from "../hooks/useAuth";
+import { useLogout } from "../components/auth/api";
 
 export default function LogoutPage() {
-    const { logout } = useAuth();
+    const logout = useLogout();
 
-    return <Button fullWidth size='lg' onClick={ logout }>Log Out</Button>
+    return <Button fullWidth size='lg' onClick={ () => logout.mutate() }>Log Out</Button>
 }

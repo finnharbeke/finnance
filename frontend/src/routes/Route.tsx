@@ -1,32 +1,36 @@
 import { Group, Loader } from "@mantine/core";
 import { Navigate, Outlet, useLocation } from "react-router";
-import useAuth from "../hooks/useAuth";
+import { useAuth } from "../components/auth/api";
+import { useNavigate } from "react-router-dom";
+import Placeholder from "../components/Placeholder";
 
 interface AuthRouteProps {
-    auth: boolean, redirect: string
+    private_: boolean
 }
 
-export const AuthRoute = (props: AuthRouteProps) => {
-    const { auth, redirect } = props;
-    const { checkingSession } = useAuth();
+export const AuthRoute = ({ private_ }: AuthRouteProps) => {
+    const query = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
 
-    if (checkingSession)
+    if (query.isLoading)
         return <Group mt="xl" position="center">
             <Loader size="lg" />
         </Group>
-    if (auth)
+    
+    if (query.isError)
+        return <Placeholder queries={[query]}/>
+    
+    const { auth } = query.data;
+
+    if (auth === private_)
         return <Outlet />
 
-    return <Navigate to={redirect} replace state={{ from: location }} />
+    navigate(private_ ? "/login" : "/", {
+        replace: true,
+        state: {
+            from: location
+        }
+    });
+    return <></>
 };
-
-export const PrivateRoute = () => {
-    const { auth } = useAuth();
-    return <AuthRoute auth={auth} redirect={"/login"} />
-}
-
-export const StrictPublicRoute = () => {
-    const { auth } = useAuth();
-    return <AuthRoute auth={!auth} redirect={"/"} />
-}

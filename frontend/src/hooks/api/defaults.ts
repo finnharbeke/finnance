@@ -3,14 +3,14 @@ import { QueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { get } from "./useQuery";
 
-const handleAxiosError = (error: unknown) => {
+export const handleAxiosError = (error: unknown) => {
     const e = (error as AxiosError);
     if (e.response) {
         showNotification({
             title: `${e.response.status}: ${e.response.statusText}`,
             message: JSON.stringify(e.response.data),
             color: 'orange',
-            autoClose: true
+            autoClose: false
         })
     } else if (e.request) {
         showNotification({
@@ -32,11 +32,13 @@ const handleAxiosError = (error: unknown) => {
 export const queryClient = new QueryClient({
     defaultOptions: {
         mutations: {
-            onError: handleAxiosError
+            onError: handleAxiosError,
+            retry: false
         },
         queries: {
             queryFn: async ({ queryKey }) => get(`/api/${queryKey.join('/')}`),
-            onError: handleAxiosError
+            onError: handleAxiosError,
+            retry: false
         }
     }
 })

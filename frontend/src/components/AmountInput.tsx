@@ -1,5 +1,5 @@
 import { NumberInput, NumberInputProps } from "@mantine/core";
-import { CurrencyFlat } from "../../Types/Currency";
+import { CurrencyFlat } from "../Types/Currency";
 
 interface AmountInputProps extends NumberInputProps {
     currency?: CurrencyFlat

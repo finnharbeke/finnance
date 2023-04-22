@@ -4,7 +4,7 @@ import { CurrencyFormValues } from "../../components/Currency";
 import { TransformedAccountFormValues } from "../../components/account/AccountForm";
 import { transformedFormValues } from "../../components/modals/TransactionModal";
 import { OrderFormValues } from "../../components/account/AccountList";
-import { AddCategoryFormValues, TransformedCategoryFormValues } from "../../category/Categories";
+import { AddCategoryFormValues, TransformedCategoryFormValues } from "../../components/category/Categories";
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()

@@ -1,12 +1,13 @@
-import { Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, TextInput, Text, Title, Anchor } from "@mantine/core";
+import { Anchor, Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { createStyles } from "@mantine/styles";
 import { ReactNode, useState } from "react";
 import { TbChevronDown } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router";
-import useAuth from "../hooks/useAuth";
-import useErrorHandler from "../hooks/useErrorHandler";
-import FinnanceLogo from "./FinnanceLogo";
+import FinnanceLogo from "../FinnanceLogo";
+import { useLogin, usernameExists } from "./api";
+import { handleAxiosError } from "../../hooks/api/defaults";
+import { Link } from "react-router-dom";
 
 interface UsernameInputType {
     username: string
@@ -38,7 +39,7 @@ export function FormTop({ children }: { children: ReactNode }) {
 }
 
 export interface LoginFormProps extends Omit<CardProps, 'children'> {
-    
+
 }
 
 export const useLoginFormStyles = createStyles(theme => ({
@@ -81,46 +82,43 @@ export function LoginForm({ ...others }: LoginFormProps) {
     })
 
     const [loading, setLoading] = useState(false);
-    const [continued, setContinued] = useState(false);
     const [username, setUsername] = useState('');
-    const [title, setTitle] = useState('sign in');
+    const [continued, setContinued] = useState(false);
     const navigate = useNavigate();
-    const { login, exists } = useAuth();
     const location = useLocation();
-    const { handleErrors } = useErrorHandler();
 
-    function handleUsername(values: UsernameInputType) {
+    const login = useLogin();
+
+    const handleUsername = (values: UsernameInputType) => {
         setLoading(true);
-        exists(values.username).then(data => {
-            if (!data.ok)
-                return
-            if (data?.exists) {
-                setUsername(values.username);
-                setTitle('welcome');
+        usernameExists(values.username).then(({ data }) => {
+            setLoading(false);
+            if (data.exists) {
                 setContinued(true);
-            } else
+                setUsername(values.username);
+            } else {
                 unForm.setFieldError('username', "username doesn't exist")
-        }).catch(handleErrors)
-            .finally(() => setLoading(false));
+            }
+        }).catch(handleAxiosError);
     }
 
-    function reset() {
+    const reset = () => {
         pwForm.setFieldValue('password', '');
-        setTitle('sign in');
         setContinued(false);
+        setUsername('');
     }
 
-    function handlePassword(values: PasswordInputType) {
+    const handlePassword = (values: PasswordInputType) => {
         setLoading(true);
-        login(username, values.password).then(data => {
-            if (!data.ok)
-                return;
-            if (data?.auth)
-                navigate(location.state?.from?.pathname || '/');
-            else
-                pwForm.setFieldError('password', "wrong password");
-        }).catch(handleErrors)
-            .finally(() => setLoading(false));
+        login.mutate({ ...values, username }, {
+            onSuccess: ({ data }) => (
+                data.auth ?
+                    navigate(location.state?.from?.pathname || '/')
+                    :
+                    pwForm.setFieldError('password', "wrong password")
+            ),
+            onSettled: () => setLoading(false)
+        })
     }
 
     return <Card
@@ -131,18 +129,19 @@ export function LoginForm({ ...others }: LoginFormProps) {
     >
         <Flex justify="center" align="center" direction="column">
             <FinnanceLogo size={40} />
-            <Title order={1} fw={250}>{title}</Title>
+            <Title order={1} fw={250}>{continued ? 'welcome' : 'sign in'}</Title>
         </Flex>
         <form onSubmit={unForm.onSubmit(handleUsername)}
             className={continued ? classes.hidden : undefined}>
             <FormTop>to continue</FormTop>
             <FocusTrap active={!continued}>
-                <TextInput label="username" radius="lg" variant="filled" {...unForm.getInputProps('username')} />
+                <TextInput label="username" radius="lg" variant="filled"
+                    {...unForm.getInputProps('username')} />
             </FocusTrap>
-            <NextButton loading={loading} my='sm'/>
+            <NextButton loading={loading} my='sm' />
             <Text fz='sm' align='center'>
                 no account?
-                <Anchor ml='xs' href='/register'>
+                <Anchor component={Link} ml='xs' to='/register'>
                     sign up
                 </Anchor>
             </Text>
@@ -156,9 +155,10 @@ export function LoginForm({ ...others }: LoginFormProps) {
                 >{username}</Button>
             </FormTop>
             <FocusTrap active={continued}>
-                <PasswordInput label="enter your password" radius="lg" variant="filled" {...pwForm.getInputProps('password')} />
+                <PasswordInput label="enter your password" radius="lg"
+                    variant="filled" {...pwForm.getInputProps('password')} />
             </FocusTrap>
-            <NextButton loading={loading} mt='sm'/>
+            <NextButton loading={login.isLoading} mt='sm' />
         </form>
     </Card>
 }

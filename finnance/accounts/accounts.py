@@ -16,6 +16,7 @@ accounts = Blueprint('accounts', __name__, url_prefix='/api/accounts')
 def all_accounts():
     accs = Account.query.filter_by(
         user_id=current_user.id).order_by(Account.order.asc()).all()
+    # raise APIError(HTTPStatus.BAD_REQUEST, "color: invalid color hex-string")
     return JSONModel.obj_to_api([acc.json(deep=True) for acc in accs])
 
 @accounts.route("/<int:account_id>")

@@ -5,7 +5,7 @@ import { OpenContextModal } from "@mantine/modals/lib/context";
 import { useState } from "react";
 import { useAddAccount } from "../../hooks/api/useMutation";
 import { useCurrencies } from "../../hooks/api/useQuery";
-import { AccountForm, AccountFormValues, TransformedAccountFormValues, accountFormTransform, accountFormValidate } from "../account/AccountForm";
+import { AccountForm, AccountFormValues, TransformedAccountFormValues, accountFormTransform, accountFormValidate } from "./AccountForm";
 
 export const openAccountModal = async (props: OpenContextModal) => {
     openContextModal({

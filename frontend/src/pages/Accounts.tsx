@@ -2,7 +2,7 @@ import { Button, Center, Divider, Grid, Loader, Title } from "@mantine/core";
 import { useState } from "react";
 import { CurrencyCard, CurrencyForm } from "../components/Currency";
 import AccountList from "../components/account/AccountList";
-import { openAccountModal } from "../components/modals/AccountModal";
+import { openAccountModal } from "../components/account/AccountModal";
 import { useAccounts, useCurrencies } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
 

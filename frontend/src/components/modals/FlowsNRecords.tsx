@@ -4,8 +4,8 @@ import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "reac
 import { CurrencyFlat } from "../../Types/Currency";
 import { useAgents, useCategories } from "../../hooks/api/useQuery";
 import useIsPhone from "../../hooks/useIsPhone";
-import AmountInput from "../Inputs/AmountInput";
-import { RedIcon } from "../Inputs/Icons";
+import AmountInput from "../AmountInput";
+import { RedIcon } from "../Icons";
 import { Flow, FormValues, Record, isFlow, isRecord, transformedFormValues } from "./TransactionModal";
 
 interface FlowsNRecordsButtonProps extends ButtonProps {

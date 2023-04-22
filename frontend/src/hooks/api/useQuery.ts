@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 import { AccountDeep } from '../../Types/Account';
 import { AccountChange } from '../../Types/AccountChange';
@@ -14,25 +14,25 @@ export const get = async (url: string) => {
 }
 
 export const useCurrentUser = () =>
-    useQuery<UserFlat, Response>({ queryKey: ["auth", "me"] });
+    useQuery<UserFlat, AxiosError>({ queryKey: ["auth", "me"] });
 
 export const useAccounts = () =>
-    useQuery<AccountDeep[], Response>({ queryKey: ["accounts"] });
+    useQuery<AccountDeep[], AxiosError>({ queryKey: ["accounts"] });
 
 export const useAccount = (account_id: number) =>
-    useQuery<AccountDeep, Response>({
+    useQuery<AccountDeep, AxiosError>({
         queryKey: ["accounts", account_id],
         queryFn: () => get(`/api/accounts/${account_id}`)
     });
 
 export const useAgents = () =>
-    useQuery<AgentFlat[], Response>({ queryKey: ["agents"] });
+    useQuery<AgentFlat[], AxiosError>({ queryKey: ["agents"] });
 
 export const useCategories = () =>
-    useQuery<CategoryFlat[], Response>({ queryKey: ["categories"] });
+    useQuery<CategoryFlat[], AxiosError>({ queryKey: ["categories"] });
 
 export const useCurrencies = () =>
-    useQuery<CurrencyFlat[], Response>({ queryKey: ["currencies"] });
+    useQuery<CurrencyFlat[], AxiosError>({ queryKey: ["currencies"] });
 
 interface useChangesProps {
     start?: DateTime
@@ -56,7 +56,7 @@ const changesSearchParams = ({ start, end, n }: useChangesProps) => {
 }
 
 export const useChanges = (id: number, props: useChangesProps) =>
-    useQuery<AccountChange[], Response>({
+    useQuery<AccountChange[], AxiosError>({
         queryKey: ["changes", id, props],
         queryFn: () => get(`/api/accounts/${id}/changes?${changesSearchParams(props)}`)
     });

@@ -26,6 +26,7 @@ def exists_user(username: str):
         "exists": exists
     })
 
+
 @auth.route("/existsMail", methods=["POST"])
 @validate({
     "type": "object",
@@ -35,6 +36,7 @@ def exists_user(username: str):
     "required": ["email"]
 })
 def exists_mail(email: str):
+    # raise APIError(HTTPStatus.BAD_REQUEST, 'something weird')
     user = User.query.filter_by(email=email).first()
     exists = user is not None
     return jsonify({
@@ -63,6 +65,7 @@ def login(username: str, password: str):
     return jsonify({
         "auth": success,
     })
+
 
 @auth.route("/register", methods=["POST"])
 @validate({
@@ -96,7 +99,8 @@ def register(username: str, email: str, password: str):
     if not re.match(email_reg, email):
         raise APIError(HTTPStatus.BAD_REQUEST, "invalid E-Mail")
     if len(password) < 6:
-        raise APIError(HTTPStatus.BAD_REQUEST, "Password must contain at least 6 characters")
+        raise APIError(HTTPStatus.BAD_REQUEST,
+                       "Password must contain at least 6 characters")
 
     # add user
     pwhash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -117,17 +121,13 @@ def logout():
     })
 
 
-@auth.route("/session")
+@auth.route("")
 def session():
-    if current_user.get_id() is None:
-        return jsonify({
-            "auth": False
-        })
-    else:
-        return jsonify({
-            "auth": True
-        })
-    
+    return jsonify({
+        "auth": current_user.get_id() is not None
+    })
+
+
 @auth.route("/me")
 @login_required
 def me():
