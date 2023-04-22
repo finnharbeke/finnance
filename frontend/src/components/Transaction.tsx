@@ -46,8 +46,8 @@ export const HeadStyles = createStyles((theme: MantineTheme) => ({
     child: {
     },
     transferIcon: {
-        background: theme.colors.violet[
-            theme.colorScheme === 'light' ? 3 : 6
+        background: theme.colors.grape[
+            theme.colorScheme === 'light' ? 3 : 7
         ],
     },
     incomeIcon: {

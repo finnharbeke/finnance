@@ -66,7 +66,7 @@ function FlowsNRecordsButtons({ form, ...other }: FlowsNRecordsButtonProps) {
             </Grid.Col>
             <Grid.Col span='content'>
                 <Switch
-                    size='xl' color='pink'
+                    color='pink'
                     onLabel={<TbArrowWaveRightUp size={32} />}
                     offLabel={<TbArrowWaveRightUp size={32} />}
                     checked={form.values.isDirect}

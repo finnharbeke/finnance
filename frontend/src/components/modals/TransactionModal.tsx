@@ -3,6 +3,7 @@ import { useForm } from "@mantine/form";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { DateTime, Duration } from "luxon";
+import { useState } from "react";
 import { AccountDeep } from "../../Types/Account";
 import { amountToInteger } from "../../helpers/convert";
 import { useAddTransaction } from "../../hooks/api/useMutation";
@@ -86,8 +87,7 @@ export interface transformedFormValues {
 
 type Transform = (values: FormValues) => transformedFormValues
 
-export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<TransactionModalProps>) => {
-    const { account } = innerProps;
+export const TransactionModal = ({ context, id, innerProps: { account } }: ContextModalProps<TransactionModalProps>) => {
 
     const agents = useAgents();
 
@@ -187,13 +187,17 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
                 amount: amountToInteger(values.amount, account.currency),
             })
     });
-    // TODO: let react router know of the change
 
     const addTrans = useAddTransaction()
 
+    const [ loading, setLoading ] = useState(false);
+
     const submitForm = (vals: transformedFormValues) => {
-        addTrans.mutateAsync(vals);
-        context.closeModal(id);
+        setLoading(true);
+        addTrans.mutateAsync(vals, {
+            onSuccess: () => context.closeModal(id),
+            onSettled: () => setLoading(false)
+        });
     }
 
     return <form onSubmit={form.onSubmit(submitForm)}>
@@ -211,7 +215,7 @@ export const TransactionModal = ({ context, id, innerProps }: ContextModalProps<
         <FlowsNRecordsInput form={form} currency={account.currency} />
         <Divider my='sm' />
         <TextInput label='comment' {...form.getInputProps('comment')} />
-        <Button fullWidth mt="md" type='submit' >
+        <Button fullWidth mt="md" type='submit' loading={loading} >
             add transaction
         </Button>
     </form >

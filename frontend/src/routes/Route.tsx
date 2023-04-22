@@ -1,8 +1,8 @@
 import { Group, Loader } from "@mantine/core";
-import { Navigate, Outlet, useLocation } from "react-router";
-import { useAuth } from "../components/auth/api";
+import { Outlet, useLocation } from "react-router";
 import { useNavigate } from "react-router-dom";
 import Placeholder from "../components/Placeholder";
+import { useAuth } from "../components/auth/api";
 
 interface AuthRouteProps {
     private_: boolean

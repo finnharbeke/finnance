@@ -5,12 +5,22 @@ import { TransformedAccountFormValues } from "../../components/account/AccountFo
 import { transformedFormValues } from "../../components/modals/TransactionModal";
 import { OrderFormValues } from "../../components/account/AccountList";
 import { AddCategoryFormValues, TransformedCategoryFormValues } from "../../components/category/Categories";
+import { TransferFormValues } from "../../components/transfer/TransferModal";
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (values: transformedFormValues) =>
             axios.post('/api/transactions/add', values),
+        onSuccess: () => queryClient.invalidateQueries(["changes"])
+    });
+}
+
+export const useAddTransfer = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (values: TransferFormValues) =>
+            axios.post('/api/transfers/add', values),
         onSuccess: () => queryClient.invalidateQueries(["changes"])
     });
 }

@@ -3,12 +3,12 @@ import { TbArrowsLeftRight } from "react-icons/tb";
 import { DateTime } from "luxon";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { useIsOverflow } from "../hooks/useIsOverflow";
-import { AccountChangeTransfer } from "../Types/AccountChange";
-import { HeadStyles } from "./Transaction";
-import { integerToFixed } from "../helpers/convert";
-import { useCurrencies } from "../hooks/api/useQuery";
-import findId from "../helpers/findId";
+import { useIsOverflow } from "../../hooks/useIsOverflow";
+import { AccountChangeTransfer } from "../../Types/AccountChange";
+import { HeadStyles } from "../Transaction";
+import { integerToFixed } from "../../helpers/convert";
+import { useCurrencies } from "../../hooks/api/useQuery";
+import findId from "../../helpers/findId";
 
 export function TransferHead(props: AccountChangeTransfer) {
 

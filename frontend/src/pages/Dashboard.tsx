@@ -1,11 +1,30 @@
-import { Center, Stack } from "@mantine/core";
+import { Button, Center, Stack } from "@mantine/core";
 import FinnanceLogo from "../components/FinnanceLogo";
 import LinkButton from "../components/LinkButton";
 import AccountPills from "../components/account/AccountPills";
+import useIsPhone from "../hooks/useIsPhone";
+import { TbArrowsLeftRight } from 'react-icons/tb'
+import { useState } from "react";
+import { openTransferModal } from "../components/transfer/TransferModal";
 
 export default function DashboardPage() {
+    const isPhone = useIsPhone();
+    const [ loading, setLoading ] = useState(false);
+
     return <>
         <AccountPills/>
+        {
+            isPhone &&
+            <Button color='grape' mb='md' fullWidth loading={loading} leftIcon={
+                <TbArrowsLeftRight size={32} />
+            } onClick={() => {
+                setLoading(true);
+                openTransferModal({
+                    fullScreen: true,
+                    innerProps: {}
+                }).then(() => setLoading(false))
+            }} />
+        }
         {/* <Stack>
             <Button color='indigo' fullWidth>Quick Access</Button>
             <Button fullWidth>Analysis</Button>

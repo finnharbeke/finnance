@@ -3,26 +3,29 @@ import { DateInput, DatePickerInput, TimeInput } from "@mantine/dates"
 import { UseFormReturnType } from "@mantine/form"
 import { DateTime } from "luxon"
 import useIsPhone from "../hooks/useIsPhone"
-import { FormValues, transformedFormValues } from "./modals/TransactionModal"
 
-interface DateTimeInputProps {
-    form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
+interface DateTimeFormValues {
+    date: Date
+    time: string
+}
+interface DateTimeInputProps<T extends DateTimeFormValues> {
+    form: UseFormReturnType<T, any>
     minDate?: Date
 }
 
-export default function DateTimeInput({ minDate, form }: DateTimeInputProps) {
+export default function DateTimeInput<T extends DateTimeFormValues>({ minDate, form }: DateTimeInputProps<T>) {
     const isPhone = useIsPhone();
     return <Group grow align='flex-start'>
         {isPhone ?
             <DatePickerInput
-                data-autofocus label="date" withAsterisk
+                label="date" withAsterisk popoverProps={{ withinPortal: true }}
                 minDate={minDate}
                 maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}
             />
             :
             <DateInput
-                data-autofocus label="date" withAsterisk
+                label="date" withAsterisk popoverProps={{ withinPortal: true }}
                 minDate={minDate}
                 maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}

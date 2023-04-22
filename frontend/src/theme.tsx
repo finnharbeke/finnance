@@ -89,6 +89,11 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
           size: isPhone ? 'md' : 'sm'
         }
       },
+      Switch: {
+        defaultProps: {
+          size: 'xl'
+        }
+      }
     }
   }
 }

@@ -329,7 +329,7 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
 
                 <Input.Wrapper label='lock for records?'>
                     <Center>
-                        <Switch size={'xl'} color='red'
+                        <Switch color='red'
                             onLabel={
                                 <Group noWrap spacing='xs'>
                                     <TbLock size={20} />

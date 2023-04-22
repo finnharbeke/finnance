@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { useChanges } from "../../hooks/api/useQuery";
 import { AccountChange, isAccountChangeTransaction } from "../../Types/AccountChange";
 import { TransactionHead } from "../Transaction";
-import { TransferHead } from "../Transfer";
+import { TransferHead } from "../transfer/Transfer";
 
 interface AccountChangesProps {
     id: number,

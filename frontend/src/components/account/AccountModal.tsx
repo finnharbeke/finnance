@@ -33,9 +33,10 @@ export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
 
     const handleSubmit = (values: TransformedAccountFormValues) => {
         setLoading(true);
-        addAccount.mutate(values,
-            { onSuccess: () => context.closeModal(id) }
-        );
+        addAccount.mutate(values, {
+            onSuccess: () => context.closeModal(id),
+            onSettled: () => setLoading(false)
+        });
     }
 
     if (!currencies.isSuccess)
