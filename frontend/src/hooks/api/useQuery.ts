@@ -37,10 +37,12 @@ export const useCurrencies = () =>
 interface useChangesProps {
     start?: DateTime
     end?: DateTime
-    n?: number
+    search?: string
+    pagesize: number
+    page: number
 }
 
-const changesSearchParams = ({ start, end, n }: useChangesProps) => {
+const changesSearchParams = ({ start, end, search, pagesize, page }: useChangesProps) => {
     let searchParams = new URLSearchParams();
     if (start !== undefined) {
         const naiveStart = start.toISO({ includeOffset: false });
@@ -50,13 +52,21 @@ const changesSearchParams = ({ start, end, n }: useChangesProps) => {
         const naiveEnd = end.toISO({ includeOffset: false });
         searchParams.append('end', naiveEnd);
     }
-    if (n !== undefined)
-        searchParams.append('n', n.toString());
+    if (search !== undefined && search.length > 0) {
+        searchParams.append('search', search);
+    }
+    searchParams.append('pagesize', pagesize.toString());
+    searchParams.append('page', page.toString());
     return searchParams.toString();
 }
 
+interface useChangeReturn {
+    changes: AccountChange[]
+    pages: number
+}
+
 export const useChanges = (id: number, props: useChangesProps) =>
-    useQuery<AccountChange[], AxiosError>({
+    useQuery<useChangeReturn, AxiosError>({
         queryKey: ["changes", id, props],
         queryFn: () => get(`/api/accounts/${id}/changes?${changesSearchParams(props)}`)
     });

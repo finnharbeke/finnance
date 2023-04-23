@@ -1,4 +1,5 @@
 import json
+from math import ceil
 from flask import current_app
 import sqlalchemy
 from sqlalchemy.sql.schema import CheckConstraint, UniqueConstraint
@@ -119,7 +120,7 @@ class Account(db.Model, JSONModel):
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
-    def jsonify_changes(self, start=None, end=None, n=None):
+    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str=None):
         saldo = self.starting_saldo
         changes = sorted(
             self.transactions + self.out_transfers + self.in_transfers,
@@ -127,7 +128,6 @@ class Account(db.Model, JSONModel):
         )
         out = []
         total = len(changes)
-        n = len(changes) if n is None else n
 
         for i, change in enumerate(changes):
             if type(change) is AccountTransfer:
@@ -139,17 +139,31 @@ class Account(db.Model, JSONModel):
 
             saldo = saldo + (amount if not exp else -amount)
             
-            if (start is None or start <= change.date_issued) and (
-                end is None or change.date_issued < end) and (
-                total - i <= n):
-                out.append({
-                    "type": "account_change",
-                    "acc_id": self.id,
-                    "saldo": saldo,
-                    "data": change.json(deep=True)
-                })
+            if (start is not None and start > change.date_issued):
+                continue
+            if (end is not None and change.date_issued >= end):
+                continue
+            if (search is not None):
+                inComment = search.lower() in change.comment
+                inAgent = any([
+                    type(change) is Transaction and search.lower() in change.agent.desc,
+                    type(change) is AccountTransfer and change.src_id == self.id and search.lower() in change.dst.desc,
+                    type(change) is AccountTransfer and change.dst_id == self.id and search.lower() in change.src.desc
+                ])
+                if not inComment and not inAgent:
+                    continue
+
+            out.append({
+                "type": "account_change",
+                "acc_id": self.id,
+                "saldo": saldo,
+                "data": change.json(deep=True)
+            })
         
-        return JSONModel.obj_to_api(out[::-1])
+        return JSONModel.obj_to_api({
+            "pages": ceil(len(out) / pagesize),
+            "changes": out[::-1][pagesize*page:pagesize*(page+1)]
+        })
 
     @property
     def saldo(self):

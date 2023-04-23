@@ -49,6 +49,6 @@ export default function AccountPage() {
                 }
             }).then(() => setLoading(false))
         }} />
-        <ChangePills id={account.id} n={10} />
+        <ChangePills id={account.id} />
     </>;
 }

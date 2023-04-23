@@ -36,13 +36,15 @@ def changes(account_id):
     if acc is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     
-    kwargs = {"start": None, "end": None, "n": None}
+    kwargs = {"start": None, "end": None, "pagesize": 10, "page": 0, "search": None}
     
     for key, val in request.args.to_dict().items():
         if key in kwargs and val != '':
             try:
-                if key == 'n':
+                if key in ['pagesize', 'page']:
                     kwargs[key] = int(val)
+                elif key in ['search']:
+                    kwargs[key] = val
                 else:
                     kwargs[key] = datetime.fromisoformat(val)
             except ValueError:

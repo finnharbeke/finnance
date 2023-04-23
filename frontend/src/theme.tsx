@@ -47,6 +47,13 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
           size: isPhone ? 'md' : 'sm'
         },
       },
+      DateTimePicker: {
+        defaultProps: {
+          placeholder: "dd.mm.yyyy hh:mm",
+          valueFormat: "DD.MM.YYYY HH:mm",
+          size: isPhone ? 'md' : 'sm'
+        },
+      },
       Select: {
         defaultProps: {
           searchable: true,

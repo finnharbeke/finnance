@@ -1,30 +1,81 @@
-import { Center, Flex, Grid, Popover, Text, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
-import { DateTime } from "luxon";
-import { TbArrowsLeftRight, TbMinus, TbPlus } from "react-icons/tb";
+import { ActionIcon, Button, Center, Collapse, Flex, Grid, Group, Popover, Text, TextInput, Title, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
+import { DateTime, Duration } from "luxon";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPlus } from "react-icons/tb";
+import { Link } from "react-router-dom";
 import { AccountChange, isAccountChangeTransaction } from "../../Types/AccountChange";
 import { integerToFixed } from "../../helpers/convert";
 import { useAccount, useChanges } from "../../hooks/api/useQuery";
-import Placeholder from "../Placeholder";
 import { useIsOverflow } from "../../hooks/useIsOverflow";
-import { ReactNode, useRef } from "react";
 import useIsPhone from "../../hooks/useIsPhone";
-import { Link } from "react-router-dom";
+import Placeholder from "../Placeholder";
+import { useDisclosure } from "@mantine/hooks";
+import { useForm } from "@mantine/form";
+import DateTimeInput from "../DateTimeInput";
+import { _TransformValues } from "@mantine/form/lib/types";
+import { DateTimePicker } from "@mantine/dates";
 
-export function ChangePills({ id, n }: { id: number, n: number }) {
-    const query = useChanges(id, { n });
+interface FormValues {
+    search: string | undefined
+    startDate: Date | undefined
+    endDate: Date | undefined
+}
+
+export function ChangePills({ id }: { id: number }) {
+    const pagesize = 10;
+    const [page, setPage] = useState(0);
+    const [search, setSearch] = useState<string>();
+    const [start, setStart] = useState<DateTime>();
+    const [end, setEnd] = useState<DateTime>();
+    const [open, { toggle }] = useDisclosure(false);
+    const query = useChanges(id, { pagesize, page, search, start, end });
+    useEffect(() => {
+        if (query.isSuccess && query.data.pages <= page)
+            setPage(query.data.pages - 1)
+    }, [query.data?.pages, page]);
+
+    const form = useForm<FormValues>()
+
     if (!query.isSuccess)
-        return <Placeholder height={n * 30} queries={[]} />
+        return <Placeholder height={pagesize * 30} queries={[]} />
 
-    const changes = query.data;
-    return <>{
-        changes.map((change, ix) =>
-            <ChangePill change={change} key={ix} />
-            // isAccountChangeTransaction(change) ?
-            //     <TransactionHead {...change} key={ix} />
-            //     :
-            //     <TransferHead {...change} key={ix} />
-        )
-    }</>
+    const { pages, changes } = query.data;
+
+    return <>
+        {
+            changes.length > 0 ?
+            changes.map((change, ix) =>
+                <ChangePill change={change} key={ix} />
+            )
+            :
+            <Title order={4} align='center'>no changes found</Title>
+        }
+        <Group position='right'>
+            <Button variant='default' onClick={toggle} size='sm'>
+                filters
+            </Button>
+            <ActionIcon variant='default' size='lg'
+                disabled={page === 0} onClick={() => setPage(page - 1)}>
+                <TbChevronLeft size={24} />
+            </ActionIcon>
+            <ActionIcon variant='default' size='lg'
+                disabled={page === pages - 1} onClick={() => setPage(page + 1)}>
+                <TbChevronRight size={24} />
+            </ActionIcon>
+        </Group>
+        <Collapse in={open}>
+            <form onSubmit={form.onSubmit(fv => {
+                setSearch(fv.search);
+                setStart(fv.startDate ? DateTime.fromJSDate(fv.startDate) : undefined);
+                setEnd(fv.endDate ? DateTime.fromJSDate(fv.endDate) : undefined);
+            })}>
+            <TextInput label='search' {...form.getInputProps('search')}/>
+            <DateTimePicker label='min date' {...form.getInputProps('startDate')} clearable/> 
+            <DateTimePicker label='max date' {...form.getInputProps('endDate')} clearable/> 
+            <Button type='submit' fullWidth mt='sm'>apply</Button>
+        </form>
+    </Collapse >
+    </>
 }
 
 const useStyles = createStyles(theme => ({
