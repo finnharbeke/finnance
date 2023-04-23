@@ -17,7 +17,7 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
     colors: {
     },
     primaryColor: 'violet',
-
+    primaryShade: { light: 4, dark: 8 },
     headings: {
       fontWeight: 250,
     },
