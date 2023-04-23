@@ -25,10 +25,14 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # operations using the other.
 THREADS_PER_PAGE = 2
 
-# Enable protection agains *Cross-site Request Forgery (CSRF)*
-CSRF_ENABLED     = True
-# Use a secure, unique and absolutely secret key for
-    # signing the data.
-CSRF_SESSION_KEY = os.environ['CSRF_SESSION_KEY']
-# Secret key for signing cookies
-SECRET_KEY = os.environ['SECRET_COOKIE_KEY']
+if not get_debug_flag():
+    # Enable protection agains *Cross-site Request Forgery (CSRF)*
+    CSRF_ENABLED     = True
+    # Use a secure, unique and absolutely secret key for
+        # signing the data.
+
+    CSRF_SESSION_KEY = os.environ['CSRF_SESSION_KEY']
+    # Secret key for signing cookies
+    SECRET_KEY = os.environ['SECRET_COOKIE_KEY']
+else:
+    SECRET_KEY = 'debug_secret_crazy_secure'
