@@ -40,7 +40,7 @@ const useStyles = createStyles(theme => ({
             paddingRight: theme.spacing.xs,
             borderRadius: theme.fn.radius(),
             backgroundColor: theme.colorScheme === 'light' ?
-                theme.colors['gray'][0] : theme.colors['gray'][9],
+                theme.white : theme.colors['gray'][9],
         }
     },
     ellipsis: {
@@ -115,7 +115,11 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
     ][
         theme.colorScheme === 'light' ? 3 : 6
     ];
-    const color = isExpense ? 'red' : 'blue';
+    const color = theme.colors[
+        isExpense ? 'red' : 'blue'
+    ][
+        theme.colorScheme === 'light' ? 4 : 6
+    ];;
 
     const amount = isTransfer ?
         isSource ? change.data.src_amount : change.data.dst_amount
