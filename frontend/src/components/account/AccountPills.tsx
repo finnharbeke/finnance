@@ -29,7 +29,7 @@ export default function AccountPills() {
     const query = useAccounts();
 
     if (!query.isSuccess)
-        return <Placeholder queries={[query]} height={150} />
+        return <Placeholder queries={[query]} height={150} mb='sm'/>
 
     const { data: accounts } = query;
     const cols = accounts.map(acc => (
