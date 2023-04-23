@@ -35,7 +35,3 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/finnance:frontend-staging
-
-
-  deployment:
-    runs-on: self-hosted
