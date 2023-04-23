@@ -23,7 +23,7 @@ class JSONModel:
 
     def api(self):
         return self.obj_to_api(self.json(deep=True))
-    
+
     @staticmethod
     def obj_to_api(obj):
         return current_app.response_class(
@@ -36,7 +36,7 @@ class JSONModel:
         if isinstance(obj, db.Model):
             return obj.json(deep=False)
         if isinstance(obj, sqlalchemy.orm.collections.InstrumentedList
-            ) or isinstance(obj, list):
+                      ) or isinstance(obj, list):
             return [item.json(deep=False) for item in obj]
         return obj
 
@@ -45,7 +45,7 @@ class JSONModel:
             key: self.jsonValue(value)
             for key, value in self.__dict__.items()
             if not (key.startswith('_') or key in self.json_ignore
-                or isinstance(value, db.Model) or isinstance(value, sqlalchemy.orm.collections.InstrumentedList))
+                    or isinstance(value, db.Model) or isinstance(value, sqlalchemy.orm.collections.InstrumentedList))
         }
         # properties
         d.update({
@@ -120,14 +120,13 @@ class Account(db.Model, JSONModel):
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
-    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str=None):
+    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str = None):
         saldo = self.starting_saldo
         changes = sorted(
             self.transactions + self.out_transfers + self.in_transfers,
             key=lambda ch: ch.date_issued
         )
-        out = []
-        total = len(changes)
+        filtered = []
 
         for i, change in enumerate(changes):
             if type(change) is AccountTransfer:
@@ -138,31 +137,40 @@ class Account(db.Model, JSONModel):
                 amount = change.amount
 
             saldo = saldo + (amount if not exp else -amount)
-            
+
             if (start is not None and start > change.date_issued):
                 continue
             if (end is not None and change.date_issued >= end):
                 continue
+
+            if type(change) is Transaction:
+                desc = change.agent.desc
+            elif change.src_id == self.id:
+                desc = change.dst.desc
+            else:
+                desc = change.src.desc
+
             if (search is not None):
-                inComment = search.lower() in change.comment
-                inAgent = any([
-                    type(change) is Transaction and search.lower() in change.agent.desc,
-                    type(change) is AccountTransfer and change.src_id == self.id and search.lower() in change.dst.desc,
-                    type(change) is AccountTransfer and change.dst_id == self.id and search.lower() in change.src.desc
-                ])
+                inComment = search.lower() in change.comment.lower()
+                inAgent = search.lower() in desc.lower()
                 if not inComment and not inAgent:
                     continue
 
-            out.append({
-                "type": "account_change",
-                "acc_id": self.id,
-                "saldo": saldo,
-                "data": change.json(deep=True)
-            })
-        
+            filtered.append((saldo, desc, change))
+
+        out = [{
+            "type": "account_change",
+            "acc_id": self.id,
+            "saldo": saldo,
+            "target": desc,
+            "data": change.json(deep=False)
+        }
+            for (saldo, desc, change) in filtered[::-1][pagesize*page:pagesize*(page+1)]
+        ]
+
         return JSONModel.obj_to_api({
-            "pages": ceil(len(out) / pagesize),
-            "changes": out[::-1][pagesize*page:pagesize*(page+1)]
+            "pages": ceil(len(filtered) / pagesize),
+            "changes": out
         })
 
     @property
@@ -306,7 +314,7 @@ class Category(db.Model, JSONModel):
     @property
     def parent(self):
         return Category.query.filter_by(id=self.parent_id
-                ).order_by(Category.order).first()
+                                        ).order_by(Category.order).first()
 
     __table_args__ = (
         UniqueConstraint('user_id', 'desc', 'is_expense'),

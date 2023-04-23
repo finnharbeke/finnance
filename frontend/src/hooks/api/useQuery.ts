@@ -20,13 +20,13 @@ export const useAccounts = () =>
     useQuery<AccountDeep[], AxiosError>({ queryKey: ["accounts"] });
 
 export const useAccount = (account_id: number) =>
-    useQuery<AccountDeep, AxiosError>({
-        queryKey: ["accounts", account_id],
-        queryFn: () => get(`/api/accounts/${account_id}`)
-    });
+    useQuery<AccountDeep, AxiosError>({ queryKey: ["accounts", account_id] });
 
 export const useAgents = () =>
     useQuery<AgentFlat[], AxiosError>({ queryKey: ["agents"] });
+
+export const useAgent = (agent_id: number) =>
+    useQuery<AgentFlat, AxiosError>({ queryKey: ["agents", agent_id] });
 
 export const useCategories = () =>
     useQuery<CategoryFlat[], AxiosError>({ queryKey: ["categories"] });

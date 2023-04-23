@@ -89,7 +89,7 @@ export default function ErrorHandlerProvider({ children }: { children: ReactNode
     };
 
     const handleErrors = (err: unknown) => {
-        if (isRouteErrorResponse(err) || err instanceof AsyncLoadError) {
+        if (isRouteErrorResponse(err) || err instanceof AsyncLoadError) {
             responseError({
                 status: err.status,
                 name: err.statusText,

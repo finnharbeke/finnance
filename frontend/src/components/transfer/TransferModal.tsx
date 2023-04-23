@@ -65,7 +65,7 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
         transformValues: fv => {
             const src_currency = findId(accounts, parseInt(fv.src_id ?? ''))?.currency;
             const dst_currency = findId(accounts, parseInt(fv.dst_id ?? ''))?.currency;
-            if (!src_currency || !dst_currency)
+            if (!src_currency || !dst_currency)
                 return
             console.log(fv);
             return ({
@@ -89,10 +89,10 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
 
     const addTransfer = useAddTransfer();
 
-    // eslint-disable-next-line
     useEffect(() => {
         if (locked)
             form.setFieldValue('dst_amount', form.values.src_amount)
+        // eslint-disable-next-line
     }, [locked, form.values.src_amount])
 
 
@@ -151,11 +151,11 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
             </Grid.Col>
             <Grid.Col span={12} order={7}>
                 <DateTimeInput form={form}
-                    // minDate={DateTime.min([source, dest].filter(value => !!value).map(value => DateTime.fromJSDate))}
+                // minDate={DateTime.min([source, dest].filter(value => !!value).map(value => DateTime.fromJSDate))}
                 />
             </Grid.Col>
             <Grid.Col span={12} order={8}>
-                <TextInput label="comment" {...form.getInputProps('comment')}/>
+                <TextInput label="comment" {...form.getInputProps('comment')} />
             </Grid.Col>
         </Grid>
         <Button mt='lg' fullWidth type="submit" color='grape'

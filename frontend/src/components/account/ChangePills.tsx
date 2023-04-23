@@ -1,5 +1,8 @@
-import { ActionIcon, Button, Center, Collapse, Flex, Grid, Group, Popover, Text, TextInput, Title, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
-import { DateTime, Duration } from "luxon";
+import { ActionIcon, Button, Center, Collapse, Flex, Grid, Group, Loader, Popover, Text, TextInput, Title, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
+import { useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
+import { DateTime } from "luxon";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
@@ -9,11 +12,6 @@ import { useAccount, useChanges } from "../../hooks/api/useQuery";
 import { useIsOverflow } from "../../hooks/useIsOverflow";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
-import { useDisclosure } from "@mantine/hooks";
-import { useForm } from "@mantine/form";
-import DateTimeInput from "../DateTimeInput";
-import { _TransformValues } from "@mantine/form/lib/types";
-import { DateTimePicker } from "@mantine/dates";
 
 interface FormValues {
     search: string | undefined
@@ -21,7 +19,20 @@ interface FormValues {
     endDate: Date | undefined
 }
 
-export function ChangePills({ id }: { id: number }) {
+export function ChangePills({ changes }: { changes: AccountChange[] | undefined }) {
+    if (changes === undefined)
+        return <Center><Loader/></Center>
+    return changes.length > 0 ?
+        <>{
+            changes.map((change, ix) =>
+                <ChangePill change={change} key={ix} />
+            )
+        }</>
+        :
+        <Title order={4} align='center'>no changes found</Title>
+}
+
+export function FilterableChanges({ id }: { id: number }) {
     const pagesize = 10;
     const [page, setPage] = useState(0);
     const [search, setSearch] = useState<string>();
@@ -31,25 +42,19 @@ export function ChangePills({ id }: { id: number }) {
     const query = useChanges(id, { pagesize, page, search, start, end });
     useEffect(() => {
         if (query.isSuccess && query.data.pages <= page)
-            setPage(query.data.pages - 1)
-    }, [query.data?.pages, page]);
+            setPage(Math.max(query.data.pages - 1, 0))
+    }, [query.isSuccess, query.data?.pages, page]);
 
     const form = useForm<FormValues>()
 
-    if (!query.isSuccess)
+    if (query.isError)
         return <Placeholder height={pagesize * 30} queries={[]} />
 
-    const { pages, changes } = query.data;
+    const pages = query.data?.pages;
+    const changes = query.data?.changes;
 
     return <>
-        {
-            changes.length > 0 ?
-            changes.map((change, ix) =>
-                <ChangePill change={change} key={ix} />
-            )
-            :
-            <Title order={4} align='center'>no changes found</Title>
-        }
+        <ChangePills changes={changes} />
         <Group position='right'>
             <Button variant='default' onClick={toggle} size='sm'>
                 filters
@@ -59,7 +64,7 @@ export function ChangePills({ id }: { id: number }) {
                 <TbChevronLeft size={24} />
             </ActionIcon>
             <ActionIcon variant='default' size='lg'
-                disabled={page === pages - 1} onClick={() => setPage(page + 1)}>
+                disabled={!!pages && page === pages - 1} onClick={() => setPage(page + 1)}>
                 <TbChevronRight size={24} />
             </ActionIcon>
         </Group>
@@ -69,12 +74,12 @@ export function ChangePills({ id }: { id: number }) {
                 setStart(fv.startDate ? DateTime.fromJSDate(fv.startDate) : undefined);
                 setEnd(fv.endDate ? DateTime.fromJSDate(fv.endDate) : undefined);
             })}>
-            <TextInput label='search' {...form.getInputProps('search')}/>
-            <DateTimePicker label='min date' {...form.getInputProps('startDate')} clearable/> 
-            <DateTimePicker label='max date' {...form.getInputProps('endDate')} clearable/> 
-            <Button type='submit' fullWidth mt='sm'>apply</Button>
-        </form>
-    </Collapse >
+                <TextInput label='search' {...form.getInputProps('search')} />
+                <DateTimePicker label='min date' {...form.getInputProps('startDate')} clearable />
+                <DateTimePicker label='max date' {...form.getInputProps('endDate')} clearable />
+                <Button type='submit' fullWidth mt='sm'>apply</Button>
+            </form>
+        </Collapse >
     </>
 }
 
@@ -139,6 +144,7 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
     const isPhone = useIsPhone();
 
     const query = useAccount(change.acc_id);
+    const isTransfer = !isAccountChangeTransaction(change);
 
     const amountRef = useRef<HTMLDivElement>(null);
     const amountOverflow = useIsOverflow(amountRef);
@@ -153,13 +159,9 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
         return <Placeholder height={30} queries={[query]} />
 
     const account = query.data;
-    const isTransfer = !isAccountChangeTransaction(change);
     const isSource = isTransfer && change.data.src_id === change.acc_id;
     const isExpense = (!isTransfer && change.data.is_expense) || isSource;
     const date = DateTime.fromISO(change.data.date_issued);
-
-    const agent = isTransfer ?
-        (isSource ? change.data.dst : change.data.src) : change.data.agent;
 
     const iconColor = theme.colors[
         isTransfer ? 'grape' : isExpense ? 'red' : 'blue'
@@ -214,23 +216,21 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
             </PopoverOrTooltip>
         </Center></Grid.Col>
         <Grid.Col span={15} sm={6}><Flex align='center'>
-            <PopoverOrTooltip label={agent.desc} multiline width={250}
+            <PopoverOrTooltip label={change.target} multiline width={250}
                 overflow={agentOverflow} popover={
-                    <Text>
-                        {agent.desc}
-                    </Text>
+                    <Text>{change.target}</Text>
                 }>
                 {
                     isTransfer ?
                         <Text className={classes.ellipsis} ref={agentRef}>
-                            <Text component={Link} to={`/accounts/${agent.id}`} color={theme.primaryColor} >
-                                {agent.desc}
+                            <Text component={Link} color={theme.primaryColor}
+                                to={`/accounts/${isSource ? change.data.dst_id : change.data.src_id}`}>
+                                {change.target}
                             </Text>
                         </Text>
                         :
-                        <Text ref={agentRef}
-                            className={classes.ellipsis}>
-                            {agent.desc}
+                        <Text ref={agentRef} className={classes.ellipsis}>
+                            {change.target}
                         </Text>
                 }
             </PopoverOrTooltip>

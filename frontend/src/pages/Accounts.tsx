@@ -47,7 +47,7 @@ export default function AccountsPage() {
             </Grid>
             <CurrencyForm/>
         </>
-    if (loadingAccs || loadingCurrs)
+    if (loadingAccs || loadingCurrs)
         return <Center><Loader size='lg' /></Center>
     return <>Error</>
 }

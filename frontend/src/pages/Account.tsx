@@ -4,7 +4,7 @@ import { useState } from "react";
 import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
 import Placeholder from "../components/Placeholder";
-import { ChangePills } from "../components/account/ChangePills";
+import { FilterableChanges } from "../components/account/ChangePills";
 import { openTransactionModal } from "../components/modals/TransactionModal";
 import { integerToFixed } from "../helpers/convert";
 import { useAccount } from "../hooks/api/useQuery";
@@ -49,6 +49,6 @@ export default function AccountPage() {
                 }
             }).then(() => setLoading(false))
         }} />
-        <ChangePills id={account.id} />
+        <FilterableChanges id={account.id} />
     </>;
 }

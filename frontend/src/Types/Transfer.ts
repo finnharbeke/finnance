@@ -12,7 +12,7 @@ export interface TransferFlat {
     type: 'accounttransfer'
 }
 
-export interface TransferDeep extends TransferFlat {
+export interface TransferDeep extends TransferFlat {
     src: AccountFlat,
     dst: AccountFlat
 }

@@ -6,7 +6,7 @@ export interface CategoryFlat {
     desc: string,
     is_expense: boolean,
     usable: boolean,
-    parent_id: number | null,
+    parent_id: number | null,
     color: string,
     order: number,
     user_id: number,
