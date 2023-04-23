@@ -1,7 +1,5 @@
 import os
 from flask.helpers import get_debug_flag
-from dotenv import load_dotenv
-load_dotenv()
 
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))  
@@ -10,9 +8,13 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 if get_debug_flag():
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db')
 else:
+    MARIADB_ROOT_PASSWORD=os.environ["MARIADB_ROOT_PASSWORD"]
+    MARIADB_DATABASE=os.environ["MARIADB_DATABASE"]
     SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True, 'pool_recycle': 300}
     SQLALCHEMY_DATABASE_URI = (f'mariadb+mariadbconnector://'
-        f'root:{os.environ["MARIADB_ROOT_PASSWORD"]}@db:3306/finnance')
+        f'root:{MARIADB_ROOT_PASSWORD}@'
+        f'{"db" if os.environ["PROD"] == "1" else "staging-db"}:3306/{MARIADB_DATABASE}')
+
 DATABASE_CONNECT_OPTIONS = {}
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -29,4 +31,4 @@ CSRF_ENABLED     = True
     # signing the data.
 CSRF_SESSION_KEY = os.environ['CSRF_SESSION_KEY']
 # Secret key for signing cookies
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ['SECRET_COOKIE_KEY']
