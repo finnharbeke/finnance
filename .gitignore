@@ -2,8 +2,5 @@
 *.DS_Store
 *__pycache__
 *.pyc
-app.db
 backups
-secret.py
-.env
-db_data/
+backend/finnance/app.db
