@@ -13,7 +13,7 @@ else:
     SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True, 'pool_recycle': 300}
     SQLALCHEMY_DATABASE_URI = (f'mariadb+mariadbconnector://'
         f'root:{MARIADB_ROOT_PASSWORD}@'
-        f'{"db" if os.environ["PROD"] == "1" else "staging-db"}:3306/{MARIADB_DATABASE}')
+        f'{"db" if os.environ["PROD"] == "1" else "db-staging"}:3306/{MARIADB_DATABASE}')
 
 DATABASE_CONNECT_OPTIONS = {}
 

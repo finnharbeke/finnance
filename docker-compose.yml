@@ -15,7 +15,7 @@ services:
       timeout: 5s
       retries: 10
   
-  staging-db:
+  db-staging:
     image: mariadb:10.7
     restart: always
     environment:
@@ -30,7 +30,7 @@ services:
       retries: 10
 
   backend:
-    image: finnance-backend
+    image: finnharbeke/finnance:backend
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
@@ -42,8 +42,8 @@ services:
       db:
         condition: service_healthy
   
-  staging-backend:
-    image: staging-backend
+  backend-staging:
+    image: finnharbeke/finnance:backend-staging
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
@@ -52,29 +52,29 @@ services:
     build:
       context: .
     depends_on:
-      staging-db:
+      db-staging:
         condition: service_healthy
 
   finnance-build:
-    image: finnance-build
+    image: finnharbeke/finnance:frontend
     build:
       context: ./frontend
     volumes:
-      - ./finnance-build:/build/build
+      - ./build-production:/build/build
 
-  staging-build:
-    image: staging-build
+  build-staging:
+    image: finnharbeke/finnance:frontend-staging
     build:
       context: ./frontend
     volumes:
-      - ./staging-build:/build/build
+      - ./build-staging:/build/build
 
   frontend:
-    image: finnharbeke/finnance-frontend:latest
+    image: finnharbeke/finnance:nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - ./finnance-build:/usr/www/finnance
-      - ./staging-build:/usr/www/staging-finnance
+      - ./build-production:/usr/www/finnance
+      - ./build-staging:/usr/www/finnance-staging
     ports:
       - 80:80
       - 443:443
