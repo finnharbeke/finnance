@@ -1,12 +1,14 @@
-name: build & push staging
+name: staging backend
 
 on:
   push:
     branches:
       - staging
+    paths:
+      - 'backend/**'
 
 jobs:
-  build-push:
+  staging-backend:
     runs-on: self-hosted
     environment: production
     steps:
@@ -22,16 +24,9 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: backend
+        name: docker-build-push
         uses: docker/build-push-action@v3
         with:
-          context: .
+          context: ./backend
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/finnance:backend-staging
-      -
-        name: frontend
-        uses: docker/build-push-action@v3
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/finnance:frontend-staging
