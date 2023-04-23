@@ -1,4 +1,4 @@
-name: build & push staging
+name: nginx
 
 on:
   push:
