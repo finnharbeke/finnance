@@ -187,12 +187,11 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
         <Grid.Col span={9} sm={3}><Center>
             <PopoverOrTooltip label={integerToFixed(change.saldo, account.currency)}
                 overflow={saldoOverflow} popover={
-                    <Text color={color}
-                        className={classes.amount}>
+                    <Text className={classes.amount}>
                         {integerToFixed(change.saldo, account.currency)}
                     </Text>
                 }>
-                <Text color={color} ref={saldoRef}
+                <Text ref={saldoRef}
                     className={cx(classes.ellipsis, classes.amount)}>
                     {integerToFixed(change.saldo, account.currency)}
                 </Text>
