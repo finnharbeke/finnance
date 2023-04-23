@@ -1,10 +1,10 @@
-import { Button, Grid, Text, Title } from "@mantine/core";
+import { Button, Flex, Grid, Text, Title } from "@mantine/core";
 import { DateTime } from "luxon";
 import { useState } from "react";
 import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
 import Placeholder from "../components/Placeholder";
-import { AccountChanges } from "../components/account/AccountChanges";
+import { ChangePills } from "../components/account/ChangePills";
 import { openTransactionModal } from "../components/modals/TransactionModal";
 import { integerToFixed } from "../helpers/convert";
 import { useAccount } from "../hooks/api/useQuery";
@@ -49,6 +49,6 @@ export default function AccountPage() {
                 }
             }).then(() => setLoading(false))
         }} />
-        <AccountChanges id={account.id} n={10} />
+        <ChangePills id={account.id} n={10} />
     </>;
 }

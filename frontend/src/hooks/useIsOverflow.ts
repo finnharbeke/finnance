@@ -1,11 +1,11 @@
-import { RefObject, useLayoutEffect, useState } from "react";
+import { RefObject, useEffect, useLayoutEffect, useState } from "react";
 
 // thanks robin; https://www.robinwieruch.de/react-custom-hook-check-if-overflow/
 
 export const useIsOverflow = (ref: RefObject<HTMLDivElement>, callback?: (isOverflow: boolean) => void) => {
     const [isOverflow, setIsOverflow] = useState(false);
   
-    useLayoutEffect(() => {
+    useEffect(() => {
       const { current } = ref;
   
       const trigger = () => {
