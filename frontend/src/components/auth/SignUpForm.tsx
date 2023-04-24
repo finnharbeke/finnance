@@ -58,7 +58,7 @@ export function SignUpForm({ ...others }: LoginFormProps) {
                     ),
                     onSettled: () => setLoading(false)
                 })
-            })
+            }).catch(handleAxiosError)
         }).catch(handleAxiosError).finally(() => setLoading(false))
     }
 

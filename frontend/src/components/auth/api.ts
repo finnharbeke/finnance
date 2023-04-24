@@ -19,7 +19,7 @@ export const usernameExists = (username: string) =>
     axios.post<Exists>('/api/auth/exists', { username })
     
 export const emailExists = (email: string) =>
-    axios.post<Exists>('/api/auth/exists', { email })
+    axios.post<Exists>('/api/auth/existsMail', { email })
 
 // MUTATIONS
 
