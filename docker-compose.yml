@@ -82,11 +82,11 @@ services:
       - 80:80
       - 443:443
     depends_on:
-      - backend
-      - backend-staging
-      - build-production:
+      backend:
+      backend-staging:
+      build-production:
         condition: service_completed_successfully
-      - build-staging:
+      build-staging:
         condition: service_completed_successfully
 
 volumes:
