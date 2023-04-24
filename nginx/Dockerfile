@@ -8,8 +8,8 @@ RUN rm -rf ./*
 
 # Copy static assets from builder stage
 # COPY --from=build /build/build/ .
-COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx/staging.conf /etc/nginx/conf.d/staging.conf
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+COPY ./staging.conf /etc/nginx/conf.d/staging.conf
 # Containers run nginx with global directives and daemon off
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
