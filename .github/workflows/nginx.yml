@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'nginx/**'
+      - '.github/workflows/nginx.yml'
 
 jobs:
   build-push:

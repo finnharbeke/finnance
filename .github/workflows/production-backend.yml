@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'backend/**'
+      - '.github/workflows/production-backend.yml'
 
 jobs:
   production-frontend:

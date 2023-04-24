@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - 'frontend/**'
+      - '.github/workflows/staging-frontend.yml'
 
 jobs:
   staging-frontend:
