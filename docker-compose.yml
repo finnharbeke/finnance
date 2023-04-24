@@ -3,11 +3,10 @@ version: '3.4'
 services:
   db:
     image: mariadb:10.7
-    restart: always
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
-      - PROD=1
+    restart: always
     volumes:
       - ./db_data:/var/lib/mysql
     healthcheck:
@@ -17,11 +16,10 @@ services:
   
   db-staging:
     image: mariadb:10.7
-    restart: always
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
-      - PROD=0
+    restart: always
     volumes:
       - ./db_staging_data:/var/lib/mysql
     healthcheck:
@@ -36,8 +34,8 @@ services:
       - MARIADB_DATABASE
       - CSRF_SESSION_KEY
       - SECRET_COOKIE_KEY
-    build:
-      context: .
+      - PROD=1
+    restart: always
     depends_on:
       db:
         condition: service_healthy
@@ -49,36 +47,46 @@ services:
       - MARIADB_DATABASE
       - CSRF_SESSION_KEY
       - SECRET_COOKIE_KEY
-    build:
-      context: .
+      - PROD=0
+    restart: always
     depends_on:
       db-staging:
         condition: service_healthy
 
-  finnance-build:
+  build-production:
     image: finnharbeke/finnance:frontend
     build:
       context: ./frontend
     volumes:
-      - ./build-production:/build/build
+      - production:/build/build
 
   build-staging:
     image: finnharbeke/finnance:frontend-staging
     build:
       context: ./frontend
     volumes:
-      - ./build-staging:/build/build
+      - staging:/build/build
 
   frontend:
     image: finnharbeke/finnance:nginx
+    restart: always
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - ./build-production:/usr/www/finnance
-      - ./build-staging:/usr/www/finnance-staging
+      - production:/usr/www/finnance
+      - staging:/usr/www/finnance-staging
     ports:
       - 80:80
       - 443:443
     depends_on:
       - backend
+      - backend-staging
+      - build-production:
+        condition: service_completed_successfully
+      - build-staging:
+        condition: service_completed_successfully
+
+volumes:
+  - production
+  - staging
   
     
