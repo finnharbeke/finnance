@@ -61,17 +61,17 @@ services:
       db-staging:
         condition: service_healthy
 
-  build-production:
+  frontend:
     image: finnharbeke/finnance:frontend
     volumes:
-      - production:/build/build
+      - production:/build/volume
 
-  build-staging:
+  frontend-staging:
     image: finnharbeke/finnance:frontend-staging
     volumes:
-      - staging:/build/build
+      - staging:/build/volume
 
-  frontend:
+  nginx:
     image: finnharbeke/finnance:nginx
     restart: always
     volumes:
