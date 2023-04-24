@@ -3,11 +3,10 @@ version: '3.4'
 services:
   db:
     image: mariadb:10.7
-    restart: always
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
-      - PROD=1
+    restart: always
     volumes:
       - ./db_data:/var/lib/mysql
     healthcheck:
@@ -15,13 +14,12 @@ services:
       timeout: 5s
       retries: 10
   
-  staging-db:
+  db-staging:
     image: mariadb:10.7
-    restart: always
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
-      - PROD=0
+    restart: always
     volumes:
       - ./db_staging_data:/var/lib/mysql
     healthcheck:
@@ -30,55 +28,65 @@ services:
       retries: 10
 
   backend:
-    image: finnance-backend
+    image: finnharbeke/finnance:backend
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
       - CSRF_SESSION_KEY
       - SECRET_COOKIE_KEY
-    build:
-      context: .
+      - PROD=1
+    restart: always
     depends_on:
       db:
         condition: service_healthy
   
-  staging-backend:
-    image: staging-backend
+  backend-staging:
+    image: finnharbeke/finnance:backend-staging
     environment:
       - MARIADB_ROOT_PASSWORD
       - MARIADB_DATABASE
       - CSRF_SESSION_KEY
       - SECRET_COOKIE_KEY
-    build:
-      context: .
+      - PROD=0
+    restart: always
     depends_on:
-      staging-db:
+      db-staging:
         condition: service_healthy
 
-  finnance-build:
-    image: finnance-build
+  build-production:
+    image: finnharbeke/finnance:frontend
     build:
       context: ./frontend
     volumes:
-      - ./finnance-build:/build/build
+      - production:/build/build
 
-  staging-build:
-    image: staging-build
+  build-staging:
+    image: finnharbeke/finnance:frontend-staging
     build:
       context: ./frontend
     volumes:
-      - ./staging-build:/build/build
+      - staging:/build/build
 
   frontend:
-    image: finnharbeke/finnance-frontend:latest
+    image: finnharbeke/finnance:nginx
+    restart: always
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - ./finnance-build:/usr/www/finnance
-      - ./staging-build:/usr/www/staging-finnance
+      - production:/usr/www/finnance
+      - staging:/usr/www/finnance-staging
     ports:
       - 80:80
       - 443:443
     depends_on:
       - backend
+      - backend-staging
+      - build-production:
+        condition: service_completed_successfully
+      - build-staging:
+        condition: service_completed_successfully
+
+volumes:
+  - production
+  - staging
   
     
