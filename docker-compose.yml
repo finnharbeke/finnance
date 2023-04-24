@@ -55,15 +55,11 @@ services:
 
   build-production:
     image: finnharbeke/finnance:frontend
-    build:
-      context: ./frontend
     volumes:
       - production:/build/build
 
   build-staging:
     image: finnharbeke/finnance:frontend-staging
-    build:
-      context: ./frontend
     volumes:
       - staging:/build/build
 

@@ -28,6 +28,6 @@ jobs:
         name: nginx
         uses: docker/build-push-action@v3
         with:
-          context: .
-          push: true/nginx
+          context: ./nginx
+          push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/finnance:nginx
