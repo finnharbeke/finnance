@@ -9,7 +9,7 @@ on:
       - '.github/workflows/nginx.yml'
 
 jobs:
-  build-push:
+  nginx:
     runs-on: self-hosted
     environment: production
     steps:
