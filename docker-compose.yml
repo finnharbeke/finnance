@@ -1,61 +1,47 @@
 version: '3.4'
 
 services:
-  db:
+  finnance-db:
     image: mariadb:10.7
     env_file:
       - .env
-    environment:
-      - MARIADB_ROOT_PASSWORD
-      - MARIADB_DATABASE
     restart: always
     volumes:
       - ./db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p$MARIADB_ROOT_PASSWORD"]
-      timeout: 5s
-      retries: 10
+      timeout: 1s
+      retries: 30
   
-  db-staging:
+  finnance-sdb:
     image: mariadb:10.7
     env_file:
       - .env
-    environment:
-      - MARIADB_ROOT_PASSWORD
-      - MARIADB_DATABASE
     restart: always
     volumes:
       - ./db_staging_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p$MARIADB_ROOT_PASSWORD"]
-      timeout: 5s
-      retries: 10
+      timeout: 1s
+      retries: 30
 
-  backend:
+  finnance-backend:
     image: finnharbeke/finnance:backend
     env_file:
       - .env
     environment:
-      - MARIADB_ROOT_PASSWORD
-      - MARIADB_DATABASE
-      - CSRF_SESSION_KEY
-      - SECRET_COOKIE_KEY
-      - PROD=1
+      - DB_HOST=finnance-db
     restart: always
     depends_on:
       db:
         condition: service_healthy
   
-  backend-staging:
+  finnance-sbackend:
     image: finnharbeke/finnance:backend-staging
     env_file:
       - .env
     environment:
-      - MARIADB_ROOT_PASSWORD
-      - MARIADB_DATABASE
-      - CSRF_SESSION_KEY
-      - SECRET_COOKIE_KEY
-      - PROD=0
+      - DB_HOST=finnance-sdb
     restart: always
     depends_on:
       db-staging:
@@ -63,36 +49,21 @@ services:
 
   frontend:
     image: finnharbeke/finnance:frontend
-    volumes:
-      - production:/build/volume
+    restart: always
+    environment:
+      - API_HOST=finnance-backend
+    depends_on:
+      - finnance-backend
 
   frontend-staging:
     image: finnharbeke/finnance:frontend-staging
-    volumes:
-      - staging:/build/volume
-
-  nginx:
-    image: finnharbeke/finnance:nginx
     restart: always
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - production:/usr/www/finnance
-      - staging:/usr/www/finnance-staging
-    ports:
-      - 80:80
-      - 443:443
+    environment:
+      - API_HOST=finnance-sbackend
     depends_on:
-      backend:
-        condition: service_started
-      backend-staging:
-        condition: service_started
-      frontend:
-        condition: service_completed_successfully
-      frontend-staging:
-        condition: service_completed_successfully
+      - finnance-sbackend
 
-volumes:
-  production:
-  staging:
+networks:
+  pi:
   
     
