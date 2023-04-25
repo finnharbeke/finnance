@@ -86,9 +86,9 @@ services:
         condition: service_started
       backend-staging:
         condition: service_started
-      build-production:
+      frontend:
         condition: service_completed_successfully
-      build-staging:
+      frontend-staging:
         condition: service_completed_successfully
 
 volumes:
