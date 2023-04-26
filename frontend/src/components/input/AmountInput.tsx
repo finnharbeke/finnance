@@ -1,5 +1,5 @@
 import { NumberInput, NumberInputProps } from "@mantine/core";
-import { CurrencyFlat } from "../Types/Currency";
+import { CurrencyFlat } from "../../Types/Currency";
 
 interface AmountInputProps extends NumberInputProps {
     currency?: CurrencyFlat
@@ -15,7 +15,7 @@ export default function AmountInput({currency, ...others} : AmountInputProps) {
                 ? `${currency?.code} ${value}`
                 : `${currency?.code} `
         }
-        step={0.01}
+        step={0.1} // such that mobile has a . on keyboards
         parser={(value: string) => value.replace(/\D+\s/g, '')}
         {...others}
     />

@@ -12,10 +12,10 @@ import findId from "../../helpers/findId"
 import { useAddTransfer } from "../../hooks/api/useMutation"
 import { useAccounts } from "../../hooks/api/useQuery"
 import useIsPhone from "../../hooks/useIsPhone"
-import AmountInput from "../AmountInput"
-import DateTimeInput from "../DateTimeInput"
 import Placeholder from "../Placeholder"
-import AccountSelect from "../account/AccountSelect"
+import AccountInput from "../input/AccountInput"
+import AmountInput from "../input/AmountInput"
+import DateTimeInput from "../input/DateTimeInput"
 
 interface TransferFormProps {
     source?: AccountDeep
@@ -113,7 +113,7 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
     return <form onSubmit={form.onSubmit(handleSubmit)}>
         <Grid align='flex-end'>
             <Grid.Col span={12} sm={5} order={1}>
-                <AccountSelect label="from" disabled={source !== undefined}
+                <AccountInput label="from" disabled={source !== undefined}
                     {...form.getInputProps('src_id')} />
             </Grid.Col>
             {!isPhone &&
@@ -124,7 +124,7 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
                 </Grid.Col>
             }
             <Grid.Col span={12} sm={5} order={4} orderXs={3}>
-                <AccountSelect label="to" disabled={dest !== undefined}
+                <AccountInput label="to" disabled={dest !== undefined}
                     {...form.getInputProps('dst_id')} />
             </Grid.Col>
             <Grid.Col span={12} sm={5} order={3} orderXs={4}>

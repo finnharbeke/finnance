@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Divider, TextInput } from "@mantine/core";
+import { Button, Divider, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
@@ -7,8 +7,8 @@ import { useState } from "react";
 import { AccountDeep } from "../../Types/Account";
 import { amountToInteger } from "../../helpers/convert";
 import { useAddTransaction } from "../../hooks/api/useMutation";
-import { useAgents } from "../../hooks/api/useQuery";
-import DateTimeInput from "../DateTimeInput";
+import DateTimeInput from "../input/DateTimeInput";
+import AgentInput from "../input/AgentInput";
 import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
 
@@ -88,9 +88,6 @@ export interface transformedFormValues {
 type Transform = (values: FormValues) => transformedFormValues
 
 export const TransactionModal = ({ context, id, innerProps: { account } }: ContextModalProps<TransactionModalProps>) => {
-
-    const agents = useAgents();
-
     const form = useForm<FormValues, Transform>({
         initialValues: {
             account_id: account?.id,
@@ -204,11 +201,7 @@ export const TransactionModal = ({ context, id, innerProps: { account } }: Conte
         <DateTimeInput form={form}
             minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined} />
         <AmountInput form={form} currency={account.currency} />
-        <Autocomplete
-            withAsterisk label='agent'
-            data={agents.isLoading || !agents.data ? [] : agents.data.map(
-                agent => agent.desc
-            )}
+        <AgentInput label='agent' withAsterisk withinPortal
             {...form.getInputProps('agent')}
         />
         <Divider my='sm' />

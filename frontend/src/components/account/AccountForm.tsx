@@ -1,7 +1,10 @@
-import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
+import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
 import { DateInput, DatePickerInput } from "@mantine/dates"
 import { UseFormReturnType, useForm } from "@mantine/form"
+import { FormValidateInput } from "@mantine/form/lib/types"
 import { useDisclosure } from "@mantine/hooks"
+import { UseQueryResult } from "@tanstack/react-query"
+import { AxiosError } from "axios"
 import { DateTime } from "luxon"
 import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
@@ -12,13 +15,11 @@ import { amountToInteger, integerToAmount } from "../../helpers/convert"
 import findId from "../../helpers/findId"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
-import AmountInput from "../AmountInput"
-import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
-import { useAccountFormList } from "./AccountList"
 import useIsPhone from "../../hooks/useIsPhone"
-import { FormValidateInput } from "@mantine/form/lib/types"
-import { UseQueryResult } from "@tanstack/react-query"
-import { AxiosError } from "axios"
+import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
+import AmountInput from "../input/AmountInput"
+import CurrencyInput from "../input/CurrencyInput"
+import { useAccountFormList } from "./AccountList"
 
 type Transform = (values: AccountFormValues) => TransformedAccountFormValues
 
@@ -188,16 +189,12 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
             {modal &&
                 <Grid.Col span={12} order={0}>
                     <TextInput label="account name" withAsterisk
-
                         {...form.getInputProps('desc')}
                     />
                 </Grid.Col>
             }
             <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} orderXs={1} order={modal ? 2 : 1}>
-                <ColorInput
-                    disallowInput={isPhone}
-                    label="color" withAsterisk={modal}
-
+                <ColorInput withAsterisk={modal} label="color"
                     {...form.getInputProps('color')}
                 />
             </Grid.Col>
@@ -223,15 +220,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                 }
             </Grid.Col>
             <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} order={3}>
-                <Select label="currency" withAsterisk={modal}
-                    searchable={!isPhone}
-                    placeholder="select currency"
-                    data={currencies.map(
-                        cur => ({
-                            value: cur.id.toString(),
-                            label: cur.code,
-                        })
-                    )}
+                <CurrencyInput label="currency" withAsterisk={modal}
                     {...form.getInputProps('currency_id')}
                 />
             </Grid.Col>

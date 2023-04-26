@@ -83,7 +83,8 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
       },
       ColorInput: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: isPhone ? 'md' : 'sm',
+          disallowInput: isPhone
         }
       },
       TimeInput: {

@@ -1,18 +1,18 @@
-import { Autocomplete, Button, ButtonProps, Grid, Input, Select, Switch, useMantineTheme } from "@mantine/core";
+import { Button, ButtonProps, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { CurrencyFlat } from "../../Types/Currency";
-import { useAgents, useCategories } from "../../hooks/api/useQuery";
-import useIsPhone from "../../hooks/useIsPhone";
-import AmountInput from "../AmountInput";
 import { RedIcon } from "../Icons";
+import AgentInput from "../input/AgentInput";
+import AmountInput from "../input/AmountInput";
+import CategoryInput from "../input/CategoryInput";
 import { Flow, FormValues, Record, isFlow, isRecord, transformedFormValues } from "./TransactionModal";
 
 interface FlowsNRecordsButtonProps extends ButtonProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
 }
 
-function FlowsNRecordsButtons({ form, ...other }: FlowsNRecordsButtonProps) {
+const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
     const theme = useMantineTheme();
     return <Input.Wrapper
         label='add records & flows | direct flow'
@@ -84,9 +84,8 @@ interface FlowInputProps {
     currency?: CurrencyFlat
 }
 
-function FlowInput({ form, i, flow, currency }: FlowInputProps) {
-    const agents = useAgents();
-    return <Grid align='flex-end'>
+const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
+    <Grid align='flex-end'>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} flow`} withAsterisk
@@ -95,17 +94,12 @@ function FlowInput({ form, i, flow, currency }: FlowInputProps) {
             />
         </Grid.Col>
         <Grid.Col span='auto'>
-            <Autocomplete
-                label='agent' withAsterisk withinPortal
-                placeholder={`Agent #${flow.ix}`}
-                data={agents.isLoading || !agents.data ? [] : agents.data.map(
-                    agent => agent.desc
-                )}
+            <AgentInput label='agent' withAsterisk withinPortal placeholder={`Agent #${flow.ix}`}
                 {...form.getInputProps(`items.${i}.agent`)}
             />
         </Grid.Col>
         <Grid.Col span='content'>
-            <RedIcon icon={TbEraser} size={'lg'}
+            <RedIcon icon={TbEraser}
                 onClick={() => {
                     form.values.items.forEach(
                         (item, ix) => {
@@ -118,7 +112,6 @@ function FlowInput({ form, i, flow, currency }: FlowInputProps) {
                 }} />
         </Grid.Col>
     </Grid>
-}
 
 interface RecordInputProps {
     record: Record
@@ -127,12 +120,8 @@ interface RecordInputProps {
     currency?: CurrencyFlat
 }
 
-function RecordInput({ form, record, currency, i }: RecordInputProps) {
-    const theme = useMantineTheme();
-    const categories = useCategories();
-    const isPhone = useIsPhone();
-
-    return <Grid align='flex-end'>
+const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
+    <Grid align='flex-end'>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} record`} withAsterisk
@@ -141,25 +130,14 @@ function RecordInput({ form, record, currency, i }: RecordInputProps) {
             />
         </Grid.Col>
         <Grid.Col span='auto'>
-            <Select
-                label='category' withAsterisk
-                searchable={!isPhone} withinPortal
+            <CategoryInput is_expense={form.values.isExpense}
+                label='category' withAsterisk withinPortal
                 placeholder={`Category #${record.ix}`}
-                data={categories.isLoading || !categories.data ? [] : categories.data.filter(
-                    cat => cat.usable && cat.is_expense === form.values.isExpense
-                ).map(
-                    cat => ({
-                        value: cat.id.toString(),
-                        label: cat.desc,
-                        group: cat.parent_id === null ? cat.desc : cat.parent.desc
-                    })
-                )}
                 {...form.getInputProps(`items.${i}.category_id`)}
             />
         </Grid.Col>
         <Grid.Col span='content'>
             <RedIcon
-                color="red" size='lg' variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
                 icon={TbEraser}
                 onClick={() => {
                     form.values.items.forEach(
@@ -174,15 +152,14 @@ function RecordInput({ form, record, currency, i }: RecordInputProps) {
 
         </Grid.Col>
     </Grid>
-}
 
 interface FlowsNRecordsProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     currency?: CurrencyFlat
 }
 
-export default function FlowsNRecordsInput({ form, currency }: FlowsNRecordsProps) {
-    return <>
+const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) =>
+    <>
         <FlowsNRecordsButtons form={form} />
         {
             !form.values.isDirect && form.values.items.map((data, i) =>
@@ -195,4 +172,5 @@ export default function FlowsNRecordsInput({ form, currency }: FlowsNRecordsProp
 
     </>
 
-}
+
+export default FlowsNRecordsInput;
