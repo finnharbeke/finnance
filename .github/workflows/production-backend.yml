@@ -9,7 +9,7 @@ on:
       - '.github/workflows/production-backend.yml'
 
 jobs:
-  production-frontend:
+  production-backend:
     runs-on: self-hosted
     environment: production
     steps:
