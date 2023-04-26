@@ -1,6 +1,5 @@
-import { Alert, Code, createStyles } from "@mantine/core";
+import { Alert, Code } from "@mantine/core";
 import { TbAlertCircle } from "react-icons/tb";
-import { RiZzzFill } from "react-icons/ri";
 
 interface AlertProps {
     msg?: string,
