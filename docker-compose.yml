@@ -6,6 +6,8 @@ services:
     env_file:
       - .env
     restart: always
+    networks:
+      - default
     volumes:
       - ./db_data:/var/lib/mysql
     healthcheck:
@@ -18,6 +20,8 @@ services:
     env_file:
       - .env
     restart: always
+    networks:
+      - default
     volumes:
       - ./db_staging_data:/var/lib/mysql
     healthcheck:
@@ -32,6 +36,8 @@ services:
     environment:
       - DB_HOST=finnance-db
     restart: always
+    networks:
+      - default
     depends_on:
       finnance-db:
         condition: service_healthy
@@ -43,6 +49,8 @@ services:
     environment:
       - DB_HOST=finnance-sdb
     restart: always
+    networks:
+      - default
     depends_on:
       finnance-sdb:
         condition: service_healthy
@@ -52,6 +60,7 @@ services:
     restart: always
     networks:
       - nginx-pi_gateway
+      - default
     environment:
       - API_HOST=finnance-backend
     depends_on:
@@ -62,12 +71,15 @@ services:
     restart: always
     networks:
       - nginx-pi_gateway
+      - default
     environment:
       - API_HOST=finnance-sbackend
     depends_on:
       - finnance-sbackend
 
 networks:
+  default:
+    driver: bridge
   nginx-pi_gateway:
     external: true
   
