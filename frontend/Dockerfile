@@ -13,8 +13,8 @@ RUN rm -rf node_modules
 FROM nginx:stable-alpine
 
 COPY --from=build /app/build/ /usr/share/nginx/html
-COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf.template
-COPY --from=build /app/entrypoint.sh /entrypoint.sh
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf.template
+COPY ./entrypoint.sh .
 
-ENTRYPOINT [ "sh", "/entrypoint.sh" ]
+ENTRYPOINT [ "sh", "./entrypoint.sh" ]
 CMD ["nginx", "-g", "daemon off;"]
