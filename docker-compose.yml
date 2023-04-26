@@ -33,7 +33,7 @@ services:
       - DB_HOST=finnance-db
     restart: always
     depends_on:
-      db:
+      finnance-db:
         condition: service_healthy
   
   finnance-sbackend:
@@ -44,10 +44,10 @@ services:
       - DB_HOST=finnance-sdb
     restart: always
     depends_on:
-      db-staging:
+      finnance-sdb:
         condition: service_healthy
 
-  frontend:
+  finnance-frontend:
     image: finnharbeke/finnance:frontend
     restart: always
     environment:
@@ -55,7 +55,7 @@ services:
     depends_on:
       - finnance-backend
 
-  frontend-staging:
+  finnance-sfrontend:
     image: finnharbeke/finnance:frontend-staging
     restart: always
     environment:
