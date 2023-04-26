@@ -51,7 +51,7 @@ services:
     image: finnharbeke/finnance:frontend
     restart: always
     networks:
-      - rpi-gateway
+      - nginx-pi_gateway
     environment:
       - API_HOST=finnance-backend
     depends_on:
@@ -61,13 +61,14 @@ services:
     image: finnharbeke/finnance:frontend-staging
     restart: always
     networks:
-      - rpi-gateway
+      - nginx-pi_gateway
     environment:
       - API_HOST=finnance-sbackend
     depends_on:
       - finnance-sbackend
 
 networks:
-  rpi-gateway: {}
+  nginx-pi_gateway:
+    external: true
   
     
