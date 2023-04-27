@@ -3,7 +3,6 @@ import axios, { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 import { AccountDeepQueryResult, Change } from '../../types/Account';
 import { AgentQueryResult } from '../../types/Agent';
-import { CategoryQueryResult } from '../../types/Category';
 import { CurrencyQueryResult } from '../../types/Currency';
 import { UserQueryResult } from "../../types/User";
 
@@ -26,9 +25,6 @@ export const useAgents = () =>
 
 export const useAgent = (agent_id: number) =>
     useQuery<AgentQueryResult, AxiosError>({ queryKey: ["agents", agent_id] });
-
-export const useCategories = () =>
-    useQuery<CategoryQueryResult[], AxiosError>({ queryKey: ["categories"] });
 
 export const useCurrencies = () =>
     useQuery<CurrencyQueryResult[], AxiosError>({ queryKey: ["currencies"] });

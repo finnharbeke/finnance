@@ -1,13 +1,14 @@
 import { Select, SelectProps } from "@mantine/core";
 import useIsPhone from "../../hooks/useIsPhone";
-import { useCategories } from "../../hooks/api/useQuery";
 import Placeholder from "../Placeholder";
+import { useCategories } from "../../types/Category";
 
 interface CategoryInputProps extends Omit<SelectProps, 'data'> {
     is_expense: boolean
+    must_be_usable: boolean
 }
 
-const CategoryInput = ({ is_expense, ...others }: CategoryInputProps) => {
+const CategoryInput = ({ is_expense, must_be_usable, ...others }: CategoryInputProps) => {
     const isPhone = useIsPhone();
     const query = useCategories();
 
@@ -19,7 +20,7 @@ const CategoryInput = ({ is_expense, ...others }: CategoryInputProps) => {
     return <Select
         searchable={!isPhone} withinPortal
         data={categories.filter(
-            cat => cat.usable && cat.is_expense === is_expense
+            cat => (!must_be_usable || cat.usable) && cat.is_expense === is_expense
         ).map(
             cat => ({
                 value: cat.id.toString(),

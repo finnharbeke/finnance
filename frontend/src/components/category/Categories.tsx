@@ -1,18 +1,17 @@
-import { Button, Center, Collapse, ColorInput, ColorSwatch, Flex, Grid, Group, Input, Paper, Select, Switch, Text, TextInput, Title } from "@mantine/core";
+import { Button, Center, Collapse, ColorInput, ColorSwatch, Flex, Grid, Group, Input, Paper, Switch, Text, TextInput, Title } from "@mantine/core";
 import { UseFormReturnType, useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
+import { OpenContextModal } from "@mantine/modals/lib/context";
 import { createContext, useContext, useEffect, useState } from "react";
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbCircleCheck, TbDeviceFloppy, TbLock, TbRotate2 } from "react-icons/tb";
-import { CategoryQueryResult } from "../../types/Category";
-import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons";
-import { OrderFormContextType, OrderFormValues, largestOrder, lastOrder, leastOrder, nextOrder } from "../account/AccountList";
-import { useAddCategory, useEditCategory, useEditCategoryOrders } from "../../hooks/api/useMutation";
-import { useCategories } from "../../hooks/api/useQuery";
+import { useEditCategoryOrders } from "../../hooks/api/useMutation";
 import useIsPhone from "../../hooks/useIsPhone";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { FormValidateInput } from "@mantine/form/lib/types";
-import { OpenContextModal } from "@mantine/modals/lib/context";
+import { CategoryFormValues, CategoryQueryResult, CategoryRequest, CategoryTransform, emptyCategory, useAddCategory, useCategories, useCategoryForm, useEditCategory } from "../../types/Category";
+import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons";
 import Placeholder from "../Placeholder";
+import { OrderFormContextType, OrderFormValues, largestOrder, lastOrder, leastOrder, nextOrder } from "../account/AccountList";
+import CategoryInput from "../input/CategoryInput";
 
 export const CategoriesPage = () => {
 
@@ -38,7 +37,6 @@ export const CategoriesPage = () => {
                     fullScreen: isPhone,
                     innerProps: {
                         is_expense: true,
-                        categories: expenses
                     }
                 })
             }}>
@@ -51,7 +49,6 @@ export const CategoriesPage = () => {
                     fullScreen: isPhone,
                     innerProps: {
                         is_expense: false,
-                        categories: incomes
                     }
                 })
             }}>
@@ -149,7 +146,7 @@ export const CategoryList = ({ categories, title }: { categories: CategoryQueryR
             <Grid>{
                 categories.sort((a, b) => a.id - b.id).map((cat, ix) =>
                     <Grid.Col span={12} key={ix} order={orderForm.values.orders[ix]}>
-                        <CategoryEdit ix={ix} category={cat} categories={categories} />
+                        <CategoryEdit ix={ix} category={cat} />
                     </Grid.Col>
                 )
             }</Grid>
@@ -159,61 +156,37 @@ export const CategoryList = ({ categories, title }: { categories: CategoryQueryR
     </CategoryListContext.Provider>
 }
 
-export interface CategoryFormValues {
-    desc: string
-    color: string
-    parent_id: string | undefined
-    usable: boolean
-}
-
-export interface TransformedCategoryFormValues {
-    desc: string
-    color: string
-    parent_id: number | null
-    usable: boolean
-}
-
-type Transform = (v: CategoryFormValues) => TransformedCategoryFormValues;
-
 interface CategoryEditProps {
     category: CategoryQueryResult,
-    categories: CategoryQueryResult[],
     ix: number
 }
 
-const validateCategoryForm: FormValidateInput<CategoryFormValues> = {
-    desc: (val) => (val && val.length > 0) ? null : "enter category name",
-    color: (val) => (val && val.length === 7) ? null : "enter hex color",
-}
+export const CategoryEdit = ({ category, ix }: CategoryEditProps) => {
 
-const categoryFormTransform = (values: CategoryFormValues) => ({
-    ...values,
-    parent_id: values.parent_id ? parseInt(values.parent_id) : null
-})
-
-export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) => {
-
+    const query = useCategories();
     const [open, { toggle }] = useDisclosure(false);
 
-    const initials = () => ({
+    const form = useCategoryForm(category.id, category.is_expense, {
         desc: category.desc,
         color: category.color,
         parent_id: category.parent_id ? category.parent_id.toString() : undefined,
         usable: category.usable
-    })
-
-    const form = useForm<CategoryFormValues, Transform>({
-        initialValues: initials(),
-        validate: validateCategoryForm,
-        transformValues: categoryFormTransform
     });
+    const editCategory = useEditCategory(category.id);
 
-    const editCategory = useEditCategory();
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
 
     const reset = () => {
-        form.setValues(initials());
-        form.resetDirty(initials());
+        const vals = {
+            desc: category.desc,
+            color: category.color,
+            parent_id: category.parent_id ? category.parent_id.toString() : undefined,
+            usable: category.usable
+        };
+        form.setValues(vals);
+        form.resetDirty(vals);
+        console.log('hi')
+        console.log(vals);
         // close();
     }
 
@@ -222,10 +195,10 @@ export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) =>
     // eslint-disable-next-line
     useEffect(reset, [category.desc, category.color, category.usable, category.parent_id])
 
-    const handleSubmit = (values: TransformedCategoryFormValues) => {
+    const handleSubmit = (values: CategoryRequest) => {
         startEdit();
         editCategory.mutate(
-            { id: category.id, values },
+            values,
             {
                 onSuccess: () => {
                     editCategory.reset();
@@ -236,6 +209,9 @@ export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) =>
 
     const isPhone = useIsPhone();
     const { moveUp, moveDown } = useCategoryList();
+
+    if (!query.isSuccess)
+        return <Placeholder queries={[query]} />
 
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -284,21 +260,23 @@ export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) =>
                 </Grid.Col>
             </Grid>
             <Collapse in={open}>
-                <CategoryForm form={form} modal={false}
-                    categories={categories.filter(c => c.id !== category.id)} />
+                <CategoryForm form={form} modal={false} is_expense={category.is_expense} />
             </Collapse>
         </form>
     </Paper>
 }
 
 interface CategoryFormProps {
-    form: UseFormReturnType<CategoryFormValues, Transform>
-    categories: CategoryQueryResult[]
+    form: UseFormReturnType<CategoryFormValues, CategoryTransform>
     modal: boolean
+    is_expense: boolean
 }
 
-const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
+const CategoryForm = ({ is_expense, form, modal }: CategoryFormProps) => {
     const isPhone = useIsPhone();
+    const query = useCategories();
+    if (!query.isSuccess)
+        return <Placeholder queries={[query]} />
 
     return (
         <Grid align='flex-end'>
@@ -317,15 +295,8 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
                 />
             </Grid.Col>
             <Grid.Col sm={4} xs={12}>
-                <Select label="parent category"
-                    searchable={!isPhone} clearable
-                    placeholder="select parent"
-                    data={categories.map(
-                        cur => ({
-                            value: cur.id.toString(),
-                            label: cur.desc,
-                        })
-                    )}
+                <CategoryInput label="parent category" is_expense={is_expense}
+                    placeholder="select parent" must_be_usable={false}
                     {...form.getInputProps('parent_id')}
                 />
             </Grid.Col>
@@ -355,39 +326,21 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
     )
 }
 
-export interface AddCategoryFormValues extends TransformedCategoryFormValues {
-    is_expense: boolean
-}
-
-type AddTransform = (v: CategoryFormValues) => AddCategoryFormValues;
-
 interface CategoryModalProps {
     is_expense: boolean
-    categories: CategoryQueryResult[]
 }
 
 export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<CategoryModalProps>) => {
-    const { categories, is_expense } = innerProps;
-    const form = useForm<CategoryFormValues, AddTransform>({
-        initialValues: {
-            usable: true,
-            desc: '',
-            parent_id: undefined,
-            color: '',
-        },
-        validate: validateCategoryForm,
-        transformValues: (values) => ({
-            ...categoryFormTransform(values),
-            is_expense: is_expense
-        }),
+    const { is_expense } = innerProps;
+    const form = useForm<CategoryFormValues, CategoryTransform>({
+        initialValues: emptyCategory(),
     })
 
     const [loading, setLoading] = useState(false);
     const addCategory = useAddCategory();
 
-    const handleSubmit = (values: AddCategoryFormValues) => {
+    const handleSubmit = (values: CategoryRequest) => {
         setLoading(true);
-        console.log(values);
         addCategory.mutate(values,
             {
                 onSuccess: () => context.closeModal(id),
@@ -400,7 +353,7 @@ export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<Cat
     }
 
     return <form onSubmit={form.onSubmit(handleSubmit)}>
-        <CategoryForm form={form} categories={categories} modal={true} />
+        <CategoryForm form={form} modal={true} is_expense={is_expense} />
         <Button mt='lg' fullWidth type="submit"
             loading={loading}>
             create

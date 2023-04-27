@@ -131,7 +131,7 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
         </Grid.Col>
         <Grid.Col span='auto'>
             <CategoryInput is_expense={form.values.isExpense}
-                label='category' withAsterisk withinPortal
+                label='category' withAsterisk withinPortal must_be_usable
                 placeholder={`category #${record.ix}`}
                 {...form.getInputProps(`items.${i}.category_id`)}
             />
