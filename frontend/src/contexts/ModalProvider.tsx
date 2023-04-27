@@ -2,7 +2,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { ReactNode } from "react";
 import { TransactionModal } from "../components/modals/TransactionModal";
 import { AccountModal } from "../components/account/AccountModal";
-import { CategoryModal } from "../components/category/Categories";
+import { CategoryModal } from "../components/category/CategoryModal";
 import TransferForm from "../components/transfer/TransferModal";
 
 export default function FinnanceModalProvider({ children }: { children: ReactNode }) {

@@ -8,8 +8,8 @@ import DashboardPage from "../pages/Dashboard";
 import Layout from "../pages/Layout";
 import LogoutPage from "../pages/Logout";
 import { AuthRoute } from "./Route";
-import { CategoriesPage } from "../components/category/Categories";
 import { SignUpForm } from "../components/auth/SignUpForm";
+import CategoriesPage from "../components/category/CategoriesPage";
 
 export const FinnanceRouter = createBrowserRouter([
     {
