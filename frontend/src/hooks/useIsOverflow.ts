@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useLayoutEffect, useState } from "react";
+import { RefObject, useEffect, useState } from "react";
 
 // thanks robin; https://www.robinwieruch.de/react-custom-hook-check-if-overflow/
 
