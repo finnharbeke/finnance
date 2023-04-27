@@ -10,6 +10,7 @@ import LogoutPage from "../pages/Logout";
 import { AuthRoute } from "./Route";
 import { SignUpForm } from "../components/auth/SignUpForm";
 import CategoriesPage from "../components/category/CategoriesPage";
+import NivoPage from "../nivo/NivoPage";
 
 export const FinnanceRouter = createBrowserRouter([
     {
@@ -42,6 +43,9 @@ export const FinnanceRouter = createBrowserRouter([
             }, {
                 path: "categories",
                 element: <CategoriesPage />
+            }, {
+                path: "analysis",
+                element: <NivoPage />
             }]
         }, {
             path: "*",

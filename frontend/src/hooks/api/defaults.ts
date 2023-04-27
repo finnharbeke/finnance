@@ -1,7 +1,7 @@
 import { showNotification } from "@mantine/notifications";
 import { QueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { get } from "./useQuery";
+import { getAxiosData } from "./useQuery";
 
 export const handleAxiosError = (error: unknown) => {
     const e = (error as AxiosError);
@@ -36,7 +36,7 @@ export const queryClient = new QueryClient({
             retry: false
         },
         queries: {
-            queryFn: async ({ queryKey }) => get(`/api/${queryKey.join('/')}`),
+            queryFn: async ({ queryKey }) => getAxiosData(`/api/${queryKey.join('/')}`),
             onError: handleAxiosError,
             retry: false
         }

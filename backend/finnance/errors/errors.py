@@ -27,6 +27,7 @@ def validate(schema):
             except ValidationError as err:
                 raise APIError(HTTPStatus.BAD_REQUEST,
                                f"Invalid JSON schema: {err.message}")
+            print(data)
             return self.foo(**data, **kwargs)
 
     return lambda foo: Wrapper(foo, schema)

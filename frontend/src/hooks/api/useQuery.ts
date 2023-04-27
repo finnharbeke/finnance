@@ -6,7 +6,7 @@ import { AgentQueryResult } from '../../types/Agent';
 import { CurrencyQueryResult } from '../../types/Currency';
 import { UserQueryResult } from "../../types/User";
 
-export const get = async (url: string) => {
+export const getAxiosData = async (url: string) => {
     const { data } = await axios.get(url);
     return data;
 }
@@ -63,6 +63,6 @@ interface useChangeReturn {
 export const useChanges = (id: number, props: useChangesProps) =>
     useQuery<useChangeReturn, AxiosError>({
         queryKey: ["changes", id, props],
-        queryFn: () => get(`/api/accounts/${id}/changes?${changesSearchParams(props)}`)
+        queryFn: () => getAxiosData(`/api/accounts/${id}/changes?${changesSearchParams(props)}`)
     });
 

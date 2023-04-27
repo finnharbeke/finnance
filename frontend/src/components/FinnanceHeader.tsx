@@ -84,6 +84,7 @@ export default function FinnanceHeader() {
         { link: "", label: "home" },
         { link: "accounts", label: "accounts" },
         { link: "categories", label: "categories" },
+        { link: "analysis", label: "graphs" },
         { link: "logout", label: "logout" }
     ]
 

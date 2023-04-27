@@ -33,6 +33,7 @@ export default function DashboardPage() {
         <Skeleton height={150} />
         <Divider my='sm'/> */}
         <Stack>
+            <LinkButton to='/analysis' label="graphs"></LinkButton>
             <LinkButton to='/accounts' label="manage accounts"></LinkButton>
             <LinkButton to='/categories' label="manage categories"></LinkButton>
         </Stack>
