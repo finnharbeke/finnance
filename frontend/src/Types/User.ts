@@ -1,11 +1,12 @@
-import { AccountFlat } from "./Account"
+import { AccountQueryResult } from "./Account"
 
-export interface UserFlat {
+export interface UserQueryResult {
     id: number,
     username: string,
     email: string
+    type: 'user'
 }
 
-export interface UserDeep extends UserFlat {
-    accounts: AccountFlat[]
+export interface UserDeepQueryResult extends UserQueryResult {
+    accounts: AccountQueryResult[]
 }

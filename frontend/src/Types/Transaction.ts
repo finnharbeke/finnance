@@ -1,10 +1,10 @@
-import { AccountFlat } from "./Account"
-import { AgentFlat } from "./Agent"
-import { CurrencyFlat } from "./Currency"
-import { FlowFlat } from "./Flow"
-import { RecordFlat } from "./Record"
+import { AccountQueryResult } from "./Account"
+import { AgentQueryResult } from "./Agent"
+import { CurrencyQueryResult } from "./Currency"
+import { FlowQueryResult } from "./Flow"
+import { RecordQueryResult } from "./Record"
 
-export interface TransactionFlat {
+export interface TransactionQueryResult {
     id: number,
     currency_id: number,
     agent_id: number,
@@ -17,10 +17,10 @@ export interface TransactionFlat {
     type: 'transaction',
 }
 
-export interface TransactionDeep extends TransactionFlat {
-    agent: AgentFlat,
-    account: AccountFlat,
-    currency: CurrencyFlat,
-    records: RecordFlat[]
-    flows: FlowFlat[]
+export interface TransactionDeepQueryResult extends TransactionQueryResult {
+    agent: AgentQueryResult,
+    account: AccountQueryResult,
+    currency: CurrencyQueryResult,
+    records: RecordQueryResult[]
+    flows: FlowQueryResult[]
 }

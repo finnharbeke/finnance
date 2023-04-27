@@ -6,7 +6,7 @@ import { DateTime } from "luxon";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
-import { AccountChange, isAccountChangeTransaction } from "../../Types/AccountChange";
+import { Change, isChangeTransaction } from "../../types/Account";
 import { useAccount, useChanges } from "../../hooks/api/useQuery";
 import { useIsOverflow } from "../../hooks/useIsOverflow";
 import useIsPhone from "../../hooks/useIsPhone";
@@ -19,7 +19,7 @@ interface FormValues {
     endDate: Date | undefined
 }
 
-export function ChangePills({ changes }: { changes: AccountChange[] | undefined }) {
+export function ChangePills({ changes }: { changes: Change[] | undefined }) {
     if (changes === undefined)
         return <Center><Loader/></Center>
     return changes.length > 0 ?
@@ -138,13 +138,13 @@ const PopoverOrTooltip = ({ label, children, overflow, multiline, width, popover
 
 }
 
-const ChangePill = ({ change }: { change: AccountChange }) => {
+const ChangePill = ({ change }: { change: Change }) => {
     const theme = useMantineTheme();
     const { classes, cx } = useStyles();
     const isPhone = useIsPhone();
 
     const query = useAccount(change.acc_id);
-    const isTransfer = !isAccountChangeTransaction(change);
+    const isTransfer = !isChangeTransaction(change);
     const isSource = isTransfer && change.data.src_id === change.acc_id;
     const isExpense = (!isTransfer && change.data.is_expense) || isSource;
 

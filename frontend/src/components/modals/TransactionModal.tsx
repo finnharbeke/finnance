@@ -4,7 +4,7 @@ import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { DateTime, Duration } from "luxon";
 import { useState } from "react";
-import { AccountDeep } from "../../Types/Account";
+import { AccountDeepQueryResult } from "../../types/Account";
 import { useAddTransaction } from "../../hooks/api/useMutation";
 import DateTimeInput from "../input/DateTimeInput";
 import AgentInput from "../input/AgentInput";
@@ -12,8 +12,8 @@ import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
 
 type TransactionModalProps = {
-    // currency?: CurrencyFlat,
-    account: AccountDeep,
+    // currency?: CurrencyQueryResult,
+    account: AccountDeepQueryResult,
 }
 
 export const openTransactionModal = async (props: OpenContextModal<TransactionModalProps>) => {

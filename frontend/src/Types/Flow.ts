@@ -1,4 +1,4 @@
-export interface FlowFlat {
+export interface FlowQueryResult {
     id: number
     trans_id: number
     amount: number

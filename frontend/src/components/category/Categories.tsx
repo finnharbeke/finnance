@@ -3,7 +3,7 @@ import { UseFormReturnType, useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { createContext, useContext, useEffect, useState } from "react";
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbCircleCheck, TbDeviceFloppy, TbLock, TbRotate2 } from "react-icons/tb";
-import { CategoryFlat } from "../../Types/Category";
+import { CategoryQueryResult } from "../../types/Category";
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons";
 import { OrderFormContextType, OrderFormValues, largestOrder, lastOrder, leastOrder, nextOrder } from "../account/AccountList";
 import { useAddCategory, useEditCategory, useEditCategoryOrders } from "../../hooks/api/useMutation";
@@ -12,64 +12,68 @@ import useIsPhone from "../../hooks/useIsPhone";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { FormValidateInput } from "@mantine/form/lib/types";
 import { OpenContextModal } from "@mantine/modals/lib/context";
+import Placeholder from "../Placeholder";
 
 export const CategoriesPage = () => {
 
-    const { data: categories, isSuccess } = useCategories();
-
+    const query = useCategories();
     const isPhone = useIsPhone();
+
+    if (!query.isSuccess)
+        return <>
+            <Title>categories</Title>
+            <Placeholder queries={[query]} />
+        </>
+
+    const categories = query.data;
+    const expenses = categories.filter(x => x.is_expense)
+    const incomes = categories.filter(x => !x.is_expense)
 
     return <>
         <Title>categories</Title>
-        {
-            isSuccess &&
-            <>
-                <CategoryList categories={categories.filter(a => a.is_expense)} title='expenses' />
-                <Button fullWidth my='sm'
-                    onClick={() => {
-                    openCategoryModal({
-                        fullScreen: isPhone,
-                        innerProps: {
-                            is_expense: true,
-                            categories: categories.filter(a => a.is_expense)
-                        }
-                    })
-                }}>
-                        create expense category
-                        </Button>
-                <CategoryList categories={categories.filter(a => !a.is_expense)} title='income' />
-                <Button fullWidth mt='sm'
-                    onClick={() => {
-                    openCategoryModal({
-                        fullScreen: isPhone,
-                        innerProps: {
-                            is_expense: false,
-                            categories: categories.filter(a => !a.is_expense)
-                        }
-                    })
-                }}>
-                        create income category
-                        </Button>
-            </>
-        }
+        <CategoryList categories={expenses} title='expenses' />
+        <Button fullWidth my='sm'
+            onClick={() => {
+                openCategoryModal({
+                    fullScreen: isPhone,
+                    innerProps: {
+                        is_expense: true,
+                        categories: expenses
+                    }
+                })
+            }}>
+            new expense category
+        </Button>
+        <CategoryList categories={incomes} title='income' />
+        <Button fullWidth mt='sm'
+            onClick={() => {
+                openCategoryModal({
+                    fullScreen: isPhone,
+                    innerProps: {
+                        is_expense: false,
+                        categories: incomes
+                    }
+                })
+            }}>
+            new income category
+        </Button>
     </>
 
 }
 
 const CategoryListContext = createContext<OrderFormContextType>({
-    moveDown: () => { },
-    moveUp: () => { },
+    moveDown: () => {},
+    moveUp: () => {},
 });
 
 function useCategoryList() {
     return useContext(CategoryListContext);
 }
 
-export const CategoryList = ({ categories, title }: { categories: CategoryFlat[], title: string }) => {
+export const CategoryList = ({ categories, title }: { categories: CategoryQueryResult[], title: string }) => {
 
     const initials: () => OrderFormValues = () => ({
         orders: categories.sort((a, b) => a.id - b.id).map(a => a.order),
-        ids: categories.sort((a, b) => a.id - b.id).map(a => a.id),
     })
     let orderForm = useForm<OrderFormValues>({
         initialValues: initials()
@@ -141,16 +145,16 @@ export const CategoryList = ({ categories, title }: { categories: CategoryFlat[]
                 }
             </Flex>
         </form>
-        { categories.length > 0 ?
-        <Grid>{
-            categories.sort((a, b) => a.id - b.id).map((cat, ix) =>
-            <Grid.Col span={12} key={ix} order={orderForm.values.orders[ix]}>
-                    <CategoryEdit ix={ix} category={cat} categories={categories} />
-                </Grid.Col>
-            )
-        }</Grid>
-        :
-        <Center><Title order={3}>no categories yet</Title></Center>
+        {categories.length > 0 ?
+            <Grid>{
+                categories.sort((a, b) => a.id - b.id).map((cat, ix) =>
+                    <Grid.Col span={12} key={ix} order={orderForm.values.orders[ix]}>
+                        <CategoryEdit ix={ix} category={cat} categories={categories} />
+                    </Grid.Col>
+                )
+            }</Grid>
+            :
+            <Center><Title order={3}>no categories yet</Title></Center>
         }
     </CategoryListContext.Provider>
 }
@@ -172,8 +176,8 @@ export interface TransformedCategoryFormValues {
 type Transform = (v: CategoryFormValues) => TransformedCategoryFormValues;
 
 interface CategoryEditProps {
-    category: CategoryFlat,
-    categories: CategoryFlat[],
+    category: CategoryQueryResult,
+    categories: CategoryQueryResult[],
     ix: number
 }
 
@@ -271,17 +275,17 @@ export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) =>
                             </>
                         }
                         <SecondaryIcon icon={TbChevronUp}
-                        onClick={() => moveUp(ix)}
+                            onClick={() => moveUp(ix)}
                         />
                         <SecondaryIcon icon={TbChevronDown}
-                        onClick={() => moveDown(ix)}
+                            onClick={() => moveDown(ix)}
                         />
                     </Group>
                 </Grid.Col>
             </Grid>
             <Collapse in={open}>
                 <CategoryForm form={form} modal={false}
-                    categories={categories.filter(c => c.id !== category.id)}/>
+                    categories={categories.filter(c => c.id !== category.id)} />
             </Collapse>
         </form>
     </Paper>
@@ -289,7 +293,7 @@ export const CategoryEdit = ({ category, categories, ix }: CategoryEditProps) =>
 
 interface CategoryFormProps {
     form: UseFormReturnType<CategoryFormValues, Transform>
-    categories: CategoryFlat[]
+    categories: CategoryQueryResult[]
     modal: boolean
 }
 
@@ -338,7 +342,7 @@ const CategoryForm = ({ form, categories, modal }: CategoryFormProps) => {
                             } offLabel={
                                 <Group noWrap spacing='xs'>
                                     <Text>free to use</Text>
-                                    <TbCircleCheck size={20} color='green'/>
+                                    <TbCircleCheck size={20} color='green' />
                                 </Group>
                             }
                             checked={!form.values.usable}
@@ -359,7 +363,7 @@ type AddTransform = (v: CategoryFormValues) => AddCategoryFormValues;
 
 interface CategoryModalProps {
     is_expense: boolean
-    categories: CategoryFlat[]
+    categories: CategoryQueryResult[]
 }
 
 export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<CategoryModalProps>) => {
@@ -385,16 +389,18 @@ export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<Cat
         setLoading(true);
         console.log(values);
         addCategory.mutate(values,
-            { onSuccess: () => context.closeModal(id),
-              onSettled: () => {
-                addCategory.reset();
-                setLoading(false);
-            }}
+            {
+                onSuccess: () => context.closeModal(id),
+                onSettled: () => {
+                    addCategory.reset();
+                    setLoading(false);
+                }
+            }
         );
     }
 
     return <form onSubmit={form.onSubmit(handleSubmit)}>
-        <CategoryForm form={form} categories={categories} modal={true}/>
+        <CategoryForm form={form} categories={categories} modal={true} />
         <Button mt='lg' fullWidth type="submit"
             loading={loading}>
             create

@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { createContext, useContext, useEffect } from "react";
 import { TbDeviceFloppy, TbRotate2 } from "react-icons/tb";
-import { AccountDeep } from "../../Types/Account";
+import { AccountDeepQueryResult } from "../../types/Account";
 import { useEditAccountOrders } from "../../hooks/api/useMutation";
 import { PrimaryIcon, RedIcon } from "../Icons";
 import { AccountEdit } from "./AccountForm";
@@ -24,7 +24,6 @@ export function useAccountFormList() {
 
 export interface OrderFormValues {
     orders: number[]
-    ids: number[]
 }
 
 export const leastOrder = (order: number, list: number[]) => {
@@ -61,11 +60,10 @@ export const lastOrder = (order: number, list: number[]) => {
     return last;
 }
 
-export default function AccountFormList({ accounts }: { accounts: AccountDeep[] }) {
+export default function AccountFormList({ accounts }: { accounts: AccountDeepQueryResult[] }) {
 
     const initials = () => ({
         orders: accounts.sort((a, b) => a.id - b.id).map(a => a.order),
-        ids: accounts.sort((a, b) => a.id - b.id).map(a => a.id),
     })
     let orderForm = useForm<OrderFormValues>({
         initialValues: initials()

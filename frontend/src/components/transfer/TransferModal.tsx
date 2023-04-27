@@ -6,7 +6,7 @@ import { ContextModalProps, OpenContextModal } from "@mantine/modals/lib/context
 import { DateTime, Duration } from "luxon"
 import { useEffect, useState } from "react"
 import { TbArrowBigRightFilled, TbLock, TbLockOpen } from 'react-icons/tb'
-import { AccountDeep } from "../../Types/Account"
+import { AccountDeepQueryResult } from "../../types/Account"
 import findId from "../../helpers/findId"
 import { useAddTransfer } from "../../hooks/api/useMutation"
 import { useAccounts } from "../../hooks/api/useQuery"
@@ -17,8 +17,8 @@ import AmountInput from "../input/AmountInput"
 import DateTimeInput from "../input/DateTimeInput"
 
 interface TransferFormProps {
-    source?: AccountDeep
-    dest?: AccountDeep
+    source?: AccountDeepQueryResult
+    dest?: AccountDeepQueryResult
 }
 
 interface FormValues {

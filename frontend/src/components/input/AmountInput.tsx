@@ -1,6 +1,6 @@
 import { NumberInput, NumberInputProps } from "@mantine/core";
 import { useEffect } from "react";
-import { CurrencyFlat } from "../../Types/Currency";
+import { CurrencyQueryResult } from "../../types/Currency";
 
 function useAmount(int: number | '', decimals: number | undefined) {
     if (int === '' || decimals === undefined)
@@ -9,7 +9,7 @@ function useAmount(int: number | '', decimals: number | undefined) {
 }
 
 interface AmountInputProps extends NumberInputProps {
-    currency: CurrencyFlat | undefined
+    currency: CurrencyQueryResult | undefined
     onChange: (value: number | '') => void
     value: number | ''
 }

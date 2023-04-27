@@ -1,6 +1,6 @@
-export interface CurrencyFlat {
+export interface CurrencyQueryResult {
     id: number,
     code: string,
     decimals: number,
-    type: string
+    type: 'currency'
 }

@@ -1,7 +1,7 @@
-import { RecordFlat } from "./Record";
-import { UserFlat } from "./User";
+import { RecordQueryResult } from "./Record";
+import { UserQueryResult } from "./User";
 
-export interface CategoryFlat {
+export interface CategoryQueryResult {
     id: number,
     desc: string,
     is_expense: boolean,
@@ -10,10 +10,11 @@ export interface CategoryFlat {
     color: string,
     order: number,
     user_id: number,
-    parent: CategoryFlat, 
+    parent: CategoryQueryResult,
+    type: 'category'
 }
-export interface CategoryDeep extends CategoryFlat {
-    user: UserFlat, 
-    records: RecordFlat[], 
-    children: CategoryFlat[], 
+export interface CategoryDeepQueryResult extends CategoryQueryResult {
+    user: UserQueryResult, 
+    records: RecordQueryResult[], 
+    children: CategoryQueryResult[], 
 }

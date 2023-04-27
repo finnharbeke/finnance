@@ -1,7 +1,9 @@
-import { CurrencyFlat } from "./Currency"
-import { UserFlat } from "./User"
+import { CurrencyQueryResult } from "./Currency"
+import { TransactionQueryResult } from "./Transaction";
+import { TransferQueryResult } from "./Transfer";
+import { UserQueryResult } from "./User"
 
-export interface AccountFlat {
+export interface AccountQueryResult {
     id: number,
     date_created: string,
     user_id: number,
@@ -11,10 +13,30 @@ export interface AccountFlat {
     currency_id: number,
     color: string,
     saldo: number,
-    type: "account"
+    type: 'account'
 }
 
-export interface AccountDeep extends AccountFlat {
-    currency: CurrencyFlat,
-    user: UserFlat,
+export interface AccountDeepQueryResult extends AccountQueryResult {
+    currency: CurrencyQueryResult,
+    user: UserQueryResult,
 }
+
+export interface ChangeBase {
+    type: 'change',
+    acc_id: number,
+    saldo: number,
+    target: string
+}
+export interface ChangeTransfer extends ChangeBase {
+    data: TransferQueryResult,
+}
+
+export interface ChangeTransaction extends ChangeBase {
+    data: TransactionQueryResult,
+}
+
+export type Change = ChangeTransfer | ChangeTransaction;
+
+export const isChangeTransaction = (ac: Change): ac is ChangeTransaction => (
+    ac.data.type === 'transaction'
+)

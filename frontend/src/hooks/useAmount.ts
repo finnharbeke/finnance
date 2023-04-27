@@ -1,6 +1,6 @@
-import { CurrencyFlat } from "../Types/Currency";
+import { CurrencyQueryResult } from "../types/Currency";
 
-export default function useAmount(int: number | undefined, currency: CurrencyFlat | undefined) {
+export default function useAmount(int: number | undefined, currency: CurrencyQueryResult | undefined) {
     if (int === undefined || currency === undefined)
         return '';
     

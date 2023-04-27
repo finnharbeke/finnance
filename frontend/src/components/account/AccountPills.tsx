@@ -2,7 +2,7 @@ import { ActionIcon, Button, Collapse, ColorSwatch, Divider, Grid, Group, Text, 
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
-import { AccountDeep } from "../../Types/Account";
+import { AccountDeepQueryResult } from "../../types/Account";
 import { useAccounts } from "../../hooks/api/useQuery";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
@@ -69,7 +69,7 @@ export default function AccountPills() {
     </>
 }
 
-const AccountPill = ({ account: acc }: { account: AccountDeep }) => {
+const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
     const { classes } = useStyles();
     const theme = useMantineTheme();
     const isPhone = useIsPhone();

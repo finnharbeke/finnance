@@ -1,6 +1,6 @@
-import { AccountFlat } from "./Account"
+import { AccountQueryResult } from "./Account"
 
-export interface TransferFlat {
+export interface TransferQueryResult {
     id: number,
     src_id: number,
     dst_id: number,
@@ -12,7 +12,7 @@ export interface TransferFlat {
     type: 'accounttransfer'
 }
 
-export interface TransferDeep extends TransferFlat {
-    src: AccountFlat,
-    dst: AccountFlat
+export interface TransferDeepQueryResult extends TransferQueryResult {
+    src: AccountQueryResult,
+    dst: AccountQueryResult
 }

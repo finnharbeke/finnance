@@ -9,8 +9,8 @@ import { DateTime } from "luxon"
 import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
 import { Link } from "react-router-dom"
-import { AccountDeep } from "../../Types/Account"
-import { CurrencyFlat } from "../../Types/Currency"
+import { AccountDeepQueryResult } from "../../types/Account"
+import { CurrencyQueryResult } from "../../types/Currency"
 import findId from "../../helpers/findId"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
@@ -29,7 +29,7 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-export function AccountEdit({ data, ix }: { data: AccountDeep, ix: number }) {
+export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: number }) {
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
@@ -159,7 +159,7 @@ export const accountFormValidate: FormValidateInput<AccountFormValues> = {
     currency_id: (val) => (val && val.length > 0) ? null : "choose currency",
 }
 
-export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyFlat[], AxiosError>) => {
+export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyQueryResult[], AxiosError>) => {
     if (!currencies.isSuccess)
         throw new Error('currencies not fetched');
     const c_id = parseInt(values.currency_id);
@@ -176,7 +176,7 @@ export const accountFormTransform = (values: AccountFormValues, currencies: UseQ
 
 interface AccountFormProps {
     form: UseFormReturnType<AccountFormValues, Transform>
-    currencies: CurrencyFlat[]
+    currencies: CurrencyQueryResult[]
     modal: boolean
 }
 

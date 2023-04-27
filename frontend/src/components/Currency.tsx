@@ -1,10 +1,10 @@
 import { Button, Flex, Grid, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { CurrencyFlat } from "../Types/Currency";
+import { CurrencyQueryResult } from "../types/Currency";
 import { useAddCurrency } from "../hooks/api/useMutation";
 
 interface CurrencyCardProps extends PaperProps {
-    currency: CurrencyFlat
+    currency: CurrencyQueryResult
 };
 
 export function CurrencyCard({ currency, ...others }: CurrencyCardProps) {

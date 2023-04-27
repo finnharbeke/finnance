@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
-import { AccountDeep } from '../../Types/Account';
-import { AccountChange } from '../../Types/AccountChange';
-import { AgentFlat } from '../../Types/Agent';
-import { CategoryFlat } from '../../Types/Category';
-import { CurrencyFlat } from '../../Types/Currency';
-import { UserFlat } from "../../Types/User";
+import { AccountDeepQueryResult, Change } from '../../types/Account';
+import { AgentQueryResult } from '../../types/Agent';
+import { CategoryQueryResult } from '../../types/Category';
+import { CurrencyQueryResult } from '../../types/Currency';
+import { UserQueryResult } from "../../types/User";
 
 export const get = async (url: string) => {
     const { data } = await axios.get(url);
@@ -14,25 +13,25 @@ export const get = async (url: string) => {
 }
 
 export const useCurrentUser = () =>
-    useQuery<UserFlat, AxiosError>({ queryKey: ["auth", "me"] });
+    useQuery<UserQueryResult, AxiosError>({ queryKey: ["auth", "me"] });
 
 export const useAccounts = () =>
-    useQuery<AccountDeep[], AxiosError>({ queryKey: ["accounts"] });
+    useQuery<AccountDeepQueryResult[], AxiosError>({ queryKey: ["accounts"] });
 
 export const useAccount = (account_id: number) =>
-    useQuery<AccountDeep, AxiosError>({ queryKey: ["accounts", account_id] });
+    useQuery<AccountDeepQueryResult, AxiosError>({ queryKey: ["accounts", account_id] });
 
 export const useAgents = () =>
-    useQuery<AgentFlat[], AxiosError>({ queryKey: ["agents"] });
+    useQuery<AgentQueryResult[], AxiosError>({ queryKey: ["agents"] });
 
 export const useAgent = (agent_id: number) =>
-    useQuery<AgentFlat, AxiosError>({ queryKey: ["agents", agent_id] });
+    useQuery<AgentQueryResult, AxiosError>({ queryKey: ["agents", agent_id] });
 
 export const useCategories = () =>
-    useQuery<CategoryFlat[], AxiosError>({ queryKey: ["categories"] });
+    useQuery<CategoryQueryResult[], AxiosError>({ queryKey: ["categories"] });
 
 export const useCurrencies = () =>
-    useQuery<CurrencyFlat[], AxiosError>({ queryKey: ["currencies"] });
+    useQuery<CurrencyQueryResult[], AxiosError>({ queryKey: ["currencies"] });
 
 interface useChangesProps {
     start?: DateTime
@@ -61,7 +60,7 @@ const changesSearchParams = ({ start, end, search, pagesize, page }: useChangesP
 }
 
 interface useChangeReturn {
-    changes: AccountChange[]
+    changes: Change[]
     pages: number
 }
 

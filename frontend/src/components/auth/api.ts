@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { Success } from "../../Types/Helpers";
+import { Success } from "../../types/Helpers";
 
 // QUERIES
 

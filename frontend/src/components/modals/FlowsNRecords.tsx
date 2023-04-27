@@ -1,7 +1,7 @@
 import { Button, ButtonProps, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
-import { CurrencyFlat } from "../../Types/Currency";
+import { CurrencyQueryResult } from "../../types/Currency";
 import { RedIcon } from "../Icons";
 import AgentInput from "../input/AgentInput";
 import AmountInput from "../input/AmountInput";
@@ -81,7 +81,7 @@ interface FlowInputProps {
     flow: Flow
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
-    currency?: CurrencyFlat
+    currency?: CurrencyQueryResult
 }
 
 const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
@@ -117,7 +117,7 @@ interface RecordInputProps {
     record: Record
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
     i: number
-    currency?: CurrencyFlat
+    currency?: CurrencyQueryResult
 }
 
 const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
@@ -155,7 +155,7 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
 
 interface FlowsNRecordsProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
-    currency?: CurrencyFlat
+    currency?: CurrencyQueryResult
 }
 
 const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) =>
