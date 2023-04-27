@@ -7,11 +7,11 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import { AccountChange, isAccountChangeTransaction } from "../../Types/AccountChange";
-import { integerToFixed } from "../../helpers/convert";
 import { useAccount, useChanges } from "../../hooks/api/useQuery";
 import { useIsOverflow } from "../../hooks/useIsOverflow";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
+import useAmount from "../../hooks/useAmount";
 
 interface FormValues {
     search: string | undefined
@@ -145,6 +145,8 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
 
     const query = useAccount(change.acc_id);
     const isTransfer = !isAccountChangeTransaction(change);
+    const isSource = isTransfer && change.data.src_id === change.acc_id;
+    const isExpense = (!isTransfer && change.data.is_expense) || isSource;
 
     const amountRef = useRef<HTMLDivElement>(null);
     const amountOverflow = useIsOverflow(amountRef);
@@ -155,12 +157,15 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
     const commentRef = useRef<HTMLDivElement>(null);
     const commentOverflow = useIsOverflow(commentRef);
 
+    const amount = useAmount(isTransfer ? 
+        isSource ? change.data.src_amount : change.data.dst_amount
+        : change.data.amount, query.data?.currency)
+    
+    const saldo = useAmount(query.data?.saldo, query.data?.currency);
+
     if (!query.isSuccess)
         return <Placeholder height={30} queries={[query]} />
 
-    const account = query.data;
-    const isSource = isTransfer && change.data.src_id === change.acc_id;
-    const isExpense = (!isTransfer && change.data.is_expense) || isSource;
     const date = DateTime.fromISO(change.data.date_issued);
 
     const iconColor = theme.colors[
@@ -172,11 +177,7 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
         isExpense ? 'red' : 'blue'
     ][
         theme.colorScheme === 'light' ? 4 : 6
-    ];;
-
-    const amount = isTransfer ?
-        isSource ? change.data.src_amount : change.data.dst_amount
-        : change.data.amount;
+    ];
 
     const gutter = 2;
     return <Grid gutter={gutter} p={gutter / 2} columns={24}
@@ -202,16 +203,16 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
         </Center></Grid.Col>
         <Grid.Col span={9} sm={2}><Center>
             <PopoverOrTooltip overflow={amountOverflow}
-                label={integerToFixed(amount, account.currency)}
+                label={amount}
                 popover={
                     <Text color={color}
                         className={classes.amount}>
-                        {integerToFixed(amount, account.currency)}
+                        {amount}
                     </Text>
                 }>
                 <Text color={color} ref={amountRef}
                     className={cx(classes.ellipsis, classes.amount)}>
-                    {integerToFixed(amount, account.currency)}
+                    {amount}
                 </Text>
             </PopoverOrTooltip>
         </Center></Grid.Col>
@@ -236,15 +237,13 @@ const ChangePill = ({ change }: { change: AccountChange }) => {
             </PopoverOrTooltip>
         </Flex></Grid.Col>
         <Grid.Col span={9} sm={3}><Center>
-            <PopoverOrTooltip label={integerToFixed(change.saldo, account.currency)}
+            <PopoverOrTooltip label={saldo}
                 overflow={saldoOverflow} popover={
-                    <Text className={classes.amount}>
-                        {integerToFixed(change.saldo, account.currency)}
-                    </Text>
+                    <Text className={classes.amount}>{saldo}</Text>
                 }>
                 <Text ref={saldoRef}
                     className={cx(classes.ellipsis, classes.amount)}>
-                    {integerToFixed(change.saldo, account.currency)}
+                    {saldo}
                 </Text>
             </PopoverOrTooltip>
         </Center></Grid.Col>

@@ -24,6 +24,13 @@ export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
     const currencies = useCurrencies();
 
     const form = useForm<AccountFormValues, Transform>({
+        initialValues: {
+            desc: '',
+            starting_saldo: '',
+            date_created: new Date(),
+            color: '',
+            currency_id: ''
+        },
         validate: accountFormValidate,
         transformValues: (values: AccountFormValues) => accountFormTransform(values, currencies),
     })

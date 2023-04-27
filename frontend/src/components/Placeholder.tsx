@@ -1,18 +1,23 @@
 import { Center, Paper, PaperProps, Skeleton, Stack, Text, Title, createStyles } from "@mantine/core";
 import { UseQueryResult } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { allSuccess, anyError } from "../helpers/queries";
 
-interface PlaceholderProps extends PaperProps {
-    height?: number
-    queries: UseQueryResult<unknown, AxiosError>[]
-}
+const allSuccess = (queries: UseQueryResult[]) =>
+    queries.reduce((success, query) => query.isSuccess && success, true)
+
+const anyError = (queries: UseQueryResult[]) =>
+    queries.reduce((error, query) => query.isError || error, false)
 
 const useStyles = createStyles((theme) => ({
     errorPaper: {
         backgroundColor: theme.fn.rgba(theme.colors.red[9], 0.1),
     }
 }));
+
+interface PlaceholderProps extends PaperProps {
+    height?: number
+    queries: UseQueryResult<unknown, AxiosError>[]
+}
 
 export default function Placeholder({ height, queries, ...other }: PlaceholderProps) {
     const { classes } = useStyles();
@@ -30,11 +35,11 @@ export default function Placeholder({ height, queries, ...other }: PlaceholderPr
                         queries.map((query, ix) =>
                             !query.isError ? <></> :
                                 query.error.response ?
-                                    <Title order={4} align='center'>
+                                    <Title order={4} align='center' key={ix}>
                                         {query.error.response.status}: {query.error.response.statusText}
                                     </Title>
                                     :
-                                    <Text align='center'>{query.error.message}</Text>
+                                    <Text align='center' key={ix}>{query.error.message}</Text>
                         )
                     }
                 </Stack>

@@ -3,12 +3,12 @@ import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { AccountDeep } from "../../Types/Account";
-import { integerToFixed } from "../../helpers/convert";
 import { useAccounts } from "../../hooks/api/useQuery";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
 import { openTransferModal } from "../transfer/TransferModal";
 import { Link } from "react-router-dom";
+import useAmount from "../../hooks/useAmount";
 
 const useStyles = createStyles({
     apart: {
@@ -75,6 +75,7 @@ const AccountPill = ({ account: acc }: { account: AccountDeep }) => {
     const isPhone = useIsPhone();
     const [beingDragged, setBeing] = useState(false);
     const [draggedOver, setDraggedOver] = useState(false);
+    const saldo = useAmount(acc.saldo, acc.currency);
 
     const svg = document.getElementById('transferSVG') as Element;
     const background = typeof theme.primaryShade === 'number' ?
@@ -119,9 +120,7 @@ const AccountPill = ({ account: acc }: { account: AccountDeep }) => {
                     {acc.desc}
                 </Text>
             </Group>
-            <Text align='right'>
-                {integerToFixed(acc.saldo, acc.currency)}
-            </Text>
+            <Text align='right'>{saldo}</Text>
         </Button >
         <svg id="transferSVG" style={{ position: 'absolute', left: -1000 }}
             xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-arrows-left-right" width="32" height="32" viewBox="-8 -8 40 40" stroke={theme.white} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">

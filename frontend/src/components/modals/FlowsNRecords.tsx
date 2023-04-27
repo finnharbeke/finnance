@@ -32,7 +32,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                         const item: Record = {
                             type: 'record',
                             ix: form.values.n_records,
-                            amount: 0,
+                            amount: "",
                             category_id: ""
                         };
                         form.insertListItem('items', item);
@@ -53,7 +53,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                         const item: Flow = {
                             type: 'flow',
                             ix: form.values.n_flows,
-                            amount: 0,
+                            amount: "",
                             agent: ''
                         };
                         form.insertListItem('items', item)
@@ -85,7 +85,7 @@ interface FlowInputProps {
 }
 
 const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
-    <Grid align='flex-end'>
+    <Grid>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} flow`} withAsterisk
@@ -94,12 +94,12 @@ const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
             />
         </Grid.Col>
         <Grid.Col span='auto'>
-            <AgentInput label='agent' withAsterisk withinPortal placeholder={`Agent #${flow.ix}`}
+            <AgentInput label='agent' withAsterisk withinPortal placeholder={`agent #${flow.ix}`}
                 {...form.getInputProps(`items.${i}.agent`)}
             />
         </Grid.Col>
         <Grid.Col span='content'>
-            <RedIcon icon={TbEraser}
+            <RedIcon icon={TbEraser} mt='1.5em'
                 onClick={() => {
                     form.values.items.forEach(
                         (item, ix) => {
@@ -121,7 +121,7 @@ interface RecordInputProps {
 }
 
 const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
-    <Grid align='flex-end'>
+    <Grid>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} record`} withAsterisk
@@ -132,13 +132,13 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
         <Grid.Col span='auto'>
             <CategoryInput is_expense={form.values.isExpense}
                 label='category' withAsterisk withinPortal
-                placeholder={`Category #${record.ix}`}
+                placeholder={`category #${record.ix}`}
                 {...form.getInputProps(`items.${i}.category_id`)}
             />
         </Grid.Col>
         <Grid.Col span='content'>
             <RedIcon
-                icon={TbEraser}
+                icon={TbEraser} mt='1.5em'
                 onClick={() => {
                     form.values.items.forEach(
                         (item, ix) => {

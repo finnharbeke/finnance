@@ -11,7 +11,6 @@ import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 }
 import { Link } from "react-router-dom"
 import { AccountDeep } from "../../Types/Account"
 import { CurrencyFlat } from "../../Types/Currency"
-import { amountToInteger, integerToAmount } from "../../helpers/convert"
 import findId from "../../helpers/findId"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
@@ -37,7 +36,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeep, ix: number }) {
     
     const initials = () => ({
         desc: data.desc,
-        starting_saldo: integerToAmount(data.starting_saldo, data.currency),
+        starting_saldo: data.starting_saldo,
         date_created: DateTime.fromISO(data.date_created).toJSDate(),
         color: data.color,
         currency_id: data.currency_id.toString()
@@ -138,7 +137,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeep, ix: number }) {
 
 export interface AccountFormValues {
     desc: string
-    starting_saldo: number
+    starting_saldo: number | ""
     date_created: Date
     color: string
     currency_id: string
@@ -170,7 +169,7 @@ export const accountFormTransform = (values: AccountFormValues, currencies: UseQ
     return ({
         ...values,
         currency_id: c_id,
-        starting_saldo: amountToInteger(values.starting_saldo, currency),
+        starting_saldo: values.starting_saldo ? values.starting_saldo : 0,
         date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
     })
 }
