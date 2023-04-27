@@ -66,7 +66,6 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
             const dst_currency = findId(accounts, parseInt(fv.dst_id ?? ''))?.currency;
             if (!src_currency || !dst_currency)
                 return
-            console.log(fv);
             return ({
                 src_id: parseInt(fv.src_id ?? ''),
                 dst_id: parseInt(fv.dst_id ?? ''),

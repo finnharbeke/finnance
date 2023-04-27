@@ -90,7 +90,6 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
                 // event.preventDefault();
                 setBeing(true);
                 event.dataTransfer.setData("json", JSON.stringify(acc))
-                // console.log(color);
                 event.dataTransfer.setDragImage(svg, 0, 25)
             }}
             onDragEnd={() => setBeing(false)}
@@ -110,7 +109,6 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
                 if (source.id === acc.id)
                     return;
                 event.preventDefault();
-                console.log()
                 openTransferModal({ innerProps: { source, dest: acc } });
             }}
         >

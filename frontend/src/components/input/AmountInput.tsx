@@ -25,8 +25,6 @@ export default function AmountInput(props: AmountInputProps) {
         // eslint-disable-next-line
         , [currency])
 
-    useEffect(() => console.log(integral), [integral])
-
     return <NumberInput
         precision={currency?.decimals} hideControls
         min={0} step={0.1} // such that mobile has a . on keyboards

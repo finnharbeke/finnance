@@ -164,7 +164,7 @@ interface CategoryEditProps {
 export const CategoryEdit = ({ category, ix }: CategoryEditProps) => {
 
     const query = useCategories();
-    const [open, { toggle }] = useDisclosure(false);
+    const [open, { toggle, close }] = useDisclosure(false);
 
     const form = useCategoryForm(category.id, category.is_expense, {
         desc: category.desc,
@@ -185,9 +185,7 @@ export const CategoryEdit = ({ category, ix }: CategoryEditProps) => {
         };
         form.setValues(vals);
         form.resetDirty(vals);
-        console.log('hi')
-        console.log(vals);
-        // close();
+        close();
     }
 
     // disable: missing dependency form, but should only reset
