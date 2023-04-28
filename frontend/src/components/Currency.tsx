@@ -26,7 +26,7 @@ export function CurrencyForm({ ...others }: PaperProps) {
     const form = useForm<CurrencyFormValues>({
         initialValues: {
             code: '',
-            decimals: 0,
+            decimals: 2,
         },
         validate: {
             code: value => value.length !== 3 ? "code must have length 3" : null
