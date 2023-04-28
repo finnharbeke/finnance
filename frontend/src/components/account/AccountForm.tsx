@@ -1,24 +1,24 @@
-import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Select, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
+import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
 import { DateInput, DatePickerInput } from "@mantine/dates"
 import { UseFormReturnType, useForm } from "@mantine/form"
+import { FormValidateInput } from "@mantine/form/lib/types"
 import { useDisclosure } from "@mantine/hooks"
+import { UseQueryResult } from "@tanstack/react-query"
+import { AxiosError } from "axios"
 import { DateTime } from "luxon"
 import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
 import { Link } from "react-router-dom"
-import { AccountDeep } from "../../Types/Account"
-import { CurrencyFlat } from "../../Types/Currency"
-import { amountToInteger, integerToAmount } from "../../helpers/convert"
+import { AccountDeepQueryResult } from "../../types/Account"
+import { CurrencyQueryResult } from "../../types/Currency"
 import findId from "../../helpers/findId"
 import { useEditAccount } from "../../hooks/api/useMutation"
 import { useCurrencies } from "../../hooks/api/useQuery"
-import AmountInput from "../AmountInput"
-import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
-import { useAccountFormList } from "./AccountList"
 import useIsPhone from "../../hooks/useIsPhone"
-import { FormValidateInput } from "@mantine/form/lib/types"
-import { UseQueryResult } from "@tanstack/react-query"
-import { AxiosError } from "axios"
+import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
+import AmountInput from "../input/AmountInput"
+import CurrencyInput from "../input/CurrencyInput"
+import { useAccountFormList } from "./AccountList"
 
 type Transform = (values: AccountFormValues) => TransformedAccountFormValues
 
@@ -29,14 +29,14 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-export function AccountEdit({ data, ix }: { data: AccountDeep, ix: number }) {
+export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: number }) {
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
     
     const initials = () => ({
         desc: data.desc,
-        starting_saldo: integerToAmount(data.starting_saldo, data.currency),
+        starting_saldo: data.starting_saldo,
         date_created: DateTime.fromISO(data.date_created).toJSDate(),
         color: data.color,
         currency_id: data.currency_id.toString()
@@ -137,7 +137,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeep, ix: number }) {
 
 export interface AccountFormValues {
     desc: string
-    starting_saldo: number
+    starting_saldo: number | ""
     date_created: Date
     color: string
     currency_id: string
@@ -159,7 +159,7 @@ export const accountFormValidate: FormValidateInput<AccountFormValues> = {
     currency_id: (val) => (val && val.length > 0) ? null : "choose currency",
 }
 
-export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyFlat[], AxiosError>) => {
+export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyQueryResult[], AxiosError>) => {
     if (!currencies.isSuccess)
         throw new Error('currencies not fetched');
     const c_id = parseInt(values.currency_id);
@@ -169,14 +169,14 @@ export const accountFormTransform = (values: AccountFormValues, currencies: UseQ
     return ({
         ...values,
         currency_id: c_id,
-        starting_saldo: amountToInteger(values.starting_saldo, currency),
+        starting_saldo: values.starting_saldo ? values.starting_saldo : 0,
         date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
     })
 }
 
 interface AccountFormProps {
     form: UseFormReturnType<AccountFormValues, Transform>
-    currencies: CurrencyFlat[]
+    currencies: CurrencyQueryResult[]
     modal: boolean
 }
 
@@ -188,16 +188,12 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
             {modal &&
                 <Grid.Col span={12} order={0}>
                     <TextInput label="account name" withAsterisk
-
                         {...form.getInputProps('desc')}
                     />
                 </Grid.Col>
             }
             <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} orderXs={1} order={modal ? 2 : 1}>
-                <ColorInput
-                    disallowInput={isPhone}
-                    label="color" withAsterisk={modal}
-
+                <ColorInput withAsterisk={modal} label="color"
                     {...form.getInputProps('color')}
                 />
             </Grid.Col>
@@ -223,15 +219,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                 }
             </Grid.Col>
             <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} order={3}>
-                <Select label="currency" withAsterisk={modal}
-                    searchable={!isPhone}
-                    placeholder="select currency"
-                    data={currencies.map(
-                        cur => ({
-                            value: cur.id.toString(),
-                            label: cur.code,
-                        })
-                    )}
+                <CurrencyInput label="currency" withAsterisk={modal}
                     {...form.getInputProps('currency_id')}
                 />
             </Grid.Col>

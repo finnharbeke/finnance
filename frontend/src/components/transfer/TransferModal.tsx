@@ -6,20 +6,19 @@ import { ContextModalProps, OpenContextModal } from "@mantine/modals/lib/context
 import { DateTime, Duration } from "luxon"
 import { useEffect, useState } from "react"
 import { TbArrowBigRightFilled, TbLock, TbLockOpen } from 'react-icons/tb'
-import { AccountDeep } from "../../Types/Account"
-import { amountToInteger } from "../../helpers/convert"
+import { AccountDeepQueryResult } from "../../types/Account"
 import findId from "../../helpers/findId"
 import { useAddTransfer } from "../../hooks/api/useMutation"
 import { useAccounts } from "../../hooks/api/useQuery"
 import useIsPhone from "../../hooks/useIsPhone"
-import AmountInput from "../AmountInput"
-import DateTimeInput from "../DateTimeInput"
 import Placeholder from "../Placeholder"
-import AccountSelect from "../account/AccountSelect"
+import AccountInput from "../input/AccountInput"
+import AmountInput from "../input/AmountInput"
+import DateTimeInput from "../input/DateTimeInput"
 
 interface TransferFormProps {
-    source?: AccountDeep
-    dest?: AccountDeep
+    source?: AccountDeepQueryResult
+    dest?: AccountDeepQueryResult
 }
 
 interface FormValues {
@@ -67,12 +66,11 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
             const dst_currency = findId(accounts, parseInt(fv.dst_id ?? ''))?.currency;
             if (!src_currency || !dst_currency)
                 return
-            console.log(fv);
             return ({
                 src_id: parseInt(fv.src_id ?? ''),
                 dst_id: parseInt(fv.dst_id ?? ''),
-                src_amount: amountToInteger(fv.src_amount ?? 0, src_currency),
-                dst_amount: amountToInteger(fv.dst_amount ?? 0, src_currency),
+                src_amount: fv.src_amount ?? 0,
+                dst_amount: fv.dst_amount ?? 0,
                 date_issued: DateTime.fromJSDate(fv.date).startOf('day').plus(Duration.fromObject({
                     hour: DateTime.fromFormat(fv.time, "HH:mm").hour,
                     minute: DateTime.fromFormat(fv.time, "HH:mm").minute
@@ -113,7 +111,7 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
     return <form onSubmit={form.onSubmit(handleSubmit)}>
         <Grid align='flex-end'>
             <Grid.Col span={12} sm={5} order={1}>
-                <AccountSelect label="from" disabled={source !== undefined}
+                <AccountInput label="from" disabled={source !== undefined}
                     {...form.getInputProps('src_id')} />
             </Grid.Col>
             {!isPhone &&
@@ -124,7 +122,7 @@ export default function TransferModal({ context, id, innerProps: { source, dest 
                 </Grid.Col>
             }
             <Grid.Col span={12} sm={5} order={4} orderXs={3}>
-                <AccountSelect label="to" disabled={dest !== undefined}
+                <AccountInput label="to" disabled={dest !== undefined}
                     {...form.getInputProps('dst_id')} />
             </Grid.Col>
             <Grid.Col span={12} sm={5} order={3} orderXs={4}>

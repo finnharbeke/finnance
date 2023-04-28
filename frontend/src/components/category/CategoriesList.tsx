@@ -1,69 +1,25 @@
-import { Flex, Grid, Group, Title } from "@mantine/core";
+import { Flex, Title, Group, Grid, Center } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { createContext, useContext, useEffect } from "react";
 import { TbDeviceFloppy, TbRotate2 } from "react-icons/tb";
-import { AccountDeepQueryResult } from "../../types/Account";
-import { useEditAccountOrders } from "../../hooks/api/useMutation";
+import { useEditCategoryOrders } from "../../hooks/api/useMutation";
+import { CategoryQueryResult } from "../../types/Category";
 import { PrimaryIcon, RedIcon } from "../Icons";
-import { AccountEdit } from "./AccountForm";
+import { OrderFormContextType, OrderFormValues, leastOrder, lastOrder, largestOrder, nextOrder } from "../account/AccountList";
+import CategoryEdit from "./CategoryEdit";
 
-export interface OrderFormContextType {
-    moveUp: (ix: number) => void
-    moveDown: (ix: number) => void
-}
-
-const AccountFormListContext = createContext<OrderFormContextType>({
+const CategoryListContext = createContext<OrderFormContextType>({
     moveDown: () => {},
     moveUp: () => {},
 });
 
-export function useAccountFormList() {
-    return useContext(AccountFormListContext);
-}
+export const useCategoryList = () => useContext(CategoryListContext);
 
-export interface OrderFormValues {
-    orders: number[]
-}
+export default function CategoryList({ categories, title }: { categories: CategoryQueryResult[], title: string }) {
 
-export const leastOrder = (order: number, list: number[]) => {
-    return list.reduce((b, o) => order <= o && b, true)
-}
-
-export const largestOrder = (order: number, list: number[]) => {
-    return list.reduce((b, o) => order >= o && b, true)
-}
-
-export const nextOrder = (order: number, list: number[]) => {
-    let next = undefined;
-    let minNext = Infinity;
-    for (let other in list) {
-        const other_order = list[other];
-        if (other_order > order && other_order < minNext) {
-            next = parseInt(other);
-            minNext = other_order;
-        }
-    }
-    return next;
-}
-
-export const lastOrder = (order: number, list: number[]) => {
-    let last = undefined;
-    let maxLast = -Infinity;
-    for (let other in list) {
-        const other_order = list[other];
-        if (other_order < order && other_order > maxLast) {
-            last = parseInt(other);
-            maxLast = other_order;
-        }
-    }
-    return last;
-}
-
-export default function AccountFormList({ accounts }: { accounts: AccountDeepQueryResult[] }) {
-
-    const initials = () => ({
-        orders: accounts.sort((a, b) => a.id - b.id).map(a => a.order),
+    const initials: () => OrderFormValues = () => ({
+        orders: categories.sort((a, b) => a.id - b.id).map(a => a.order),
     })
     let orderForm = useForm<OrderFormValues>({
         initialValues: initials()
@@ -102,30 +58,29 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeepQue
     // disable: missing dependency form, but should only reset
     // on change of accounts orders
     // eslint-disable-next-line
-    useEffect(reset, [...accounts.map(a => a.order), accounts.length])
+    useEffect(reset, [...categories.map(a => a.order), categories.length])
 
     const value: OrderFormContextType = {
         moveUp, moveDown
     }
 
-    const editAccountOrders = useEditAccountOrders();
+    const editCategoryOrders = useEditCategoryOrders();
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
     const handleSubmit = (values: OrderFormValues) => {
         startEdit();
-        editAccountOrders.mutate(values,
+        editCategoryOrders.mutate(values,
             {
                 onSuccess: () => {
-                    editAccountOrders.reset();
+                    editCategoryOrders.reset();
                 }, onSettled: endEdit
             }
         );
     }
 
-    return (
-        <AccountFormListContext.Provider value={value}>
-            <form onSubmit={orderForm.onSubmit(handleSubmit)}>
+    return <CategoryListContext.Provider value={value}>
+        <form onSubmit={orderForm.onSubmit(handleSubmit)}>
             <Flex justify='space-between' align='flex-end' pb='sm'>
-                <Title order={1}>accounts</Title>
+                <Title order={2}>{title}</Title>
                 {orderForm.isDirty() &&
                     <Group spacing='xs'>
                         <PrimaryIcon icon={TbDeviceFloppy} tooltip='save new order'
@@ -135,14 +90,17 @@ export default function AccountFormList({ accounts }: { accounts: AccountDeepQue
                     </Group>
                 }
             </Flex>
-            </form>
+        </form>
+        {categories.length > 0 ?
             <Grid>{
-                accounts.sort((a, b) => a.id - b.id).map((d, ix) =>
-                    <Grid.Col key={ix} span={12} order={orderForm.values.orders[ix]}>
-                        <AccountEdit data={d} ix={ix} />
+                categories.sort((a, b) => a.id - b.id).map((cat, ix) =>
+                    <Grid.Col span={12} key={ix} order={orderForm.values.orders[ix]}>
+                        <CategoryEdit ix={ix} category={cat} />
                     </Grid.Col>
                 )
             }</Grid>
-        </AccountFormListContext.Provider>
-    );
+            :
+            <Center><Title order={3}>no categories yet</Title></Center>
+        }
+    </CategoryListContext.Provider>
 }

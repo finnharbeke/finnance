@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { Success } from "../../Types/Helpers";
 
 // QUERIES
 
 interface Auth {
     auth: boolean
+}
+
+interface Success {
+    success: boolean
 }
 
 export const useAuth = () =>

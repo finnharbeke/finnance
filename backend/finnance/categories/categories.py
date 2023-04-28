@@ -36,7 +36,8 @@ def all_categories():
         "color": {"type": "string"},
         "usable": {"type": "boolean"},
         "parent_id": {"type": ["integer", "null"]},
-    }
+    },
+    "required": ["desc", "is_expense", "color", "usable", "parent_id"]
 })
 def add_category(desc: str, is_expense: bool, color: str, usable: bool, parent_id: int):
     other: Category = Category.query.filter_by(user_id=current_user.id, desc=desc, is_expense=is_expense).first()

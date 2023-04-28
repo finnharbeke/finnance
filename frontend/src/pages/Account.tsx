@@ -6,10 +6,10 @@ import { useParams } from "react-router";
 import Placeholder from "../components/Placeholder";
 import { FilterableChanges } from "../components/account/ChangePills";
 import { openTransactionModal } from "../components/modals/TransactionModal";
-import { integerToFixed } from "../helpers/convert";
 import { useAccount } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
 import NotFound from "./404";
+import useAmount from "../hooks/useAmount";
 
 export default function AccountPage() {
     const theme = useMantineTheme();
@@ -17,6 +17,7 @@ export default function AccountPage() {
     const query = useAccount(parseInt(params.id as string));
     const [loading, setLoading] = useState(false);
     const isPhone = useIsPhone();
+    const saldo = useAmount(query.data?.saldo, query.data?.currency);
 
     if (!params.id?.match(/\d+/) || (query.isError && query.error.response?.status === 404))
         return <NotFound />
@@ -33,7 +34,7 @@ export default function AccountPage() {
             <Title order={1}>{account.desc}</Title>
             <ColorSwatch color={account.color} size={theme.headings.sizes.h1.fontSize}/>
             </Group>
-            <Title order={1} lineClamp={1}>{account.currency.code} {integerToFixed(account.saldo, account.currency)}</Title>
+            <Title order={1} lineClamp={1}>{saldo}</Title>
 
         </Flex>
         <Text fz="md">Tracking since {date_created.toRelative()}</Text>

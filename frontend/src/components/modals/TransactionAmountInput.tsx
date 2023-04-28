@@ -1,13 +1,13 @@
 import { Button, createStyles, Grid, Input, MantineTheme } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
-import { CurrencyFlat } from "../../Types/Currency";
-import AmountInput from "../AmountInput";
+import { CurrencyQueryResult } from "../../types/Currency";
+import AmountInput from "../input/AmountInput";
 import { FormValues, isRecord, transformedFormValues } from "./TransactionModal";
 
 interface TransactionAmountInputProps {
     form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
-    currency?: CurrencyFlat
+    currency?: CurrencyQueryResult
 }
 
 export default function TransactionAmountInput({ form, currency }: TransactionAmountInputProps) {

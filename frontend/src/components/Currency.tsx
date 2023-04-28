@@ -1,10 +1,10 @@
 import { Button, Flex, Grid, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { CurrencyFlat } from "../Types/Currency";
+import { CurrencyQueryResult } from "../types/Currency";
 import { useAddCurrency } from "../hooks/api/useMutation";
 
 interface CurrencyCardProps extends PaperProps {
-    currency: CurrencyFlat
+    currency: CurrencyQueryResult
 };
 
 export function CurrencyCard({ currency, ...others }: CurrencyCardProps) {
@@ -13,10 +13,6 @@ export function CurrencyCard({ currency, ...others }: CurrencyCardProps) {
     return <Paper withBorder p='xs' {...others}>
         <Flex justify='space-between' align='center'>
             <Text><Text span fw={700}>{code}:</Text> {decimals} decimals</Text>
-            {/* <RedIcon icon={TbEraser}
-                onClick={() => console.log('delete curr ', currency)}
-                tooltip='delete'
-            /> */}
         </Flex>
     </Paper>
 }
@@ -30,7 +26,7 @@ export function CurrencyForm({ ...others }: PaperProps) {
     const form = useForm<CurrencyFormValues>({
         initialValues: {
             code: '',
-            decimals: 0,
+            decimals: 2,
         },
         validate: {
             code: value => value.length !== 3 ? "code must have length 3" : null

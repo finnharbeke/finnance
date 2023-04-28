@@ -1,4 +1,4 @@
-export interface RecordFlat {
+export interface RecordQueryResult {
     id: number
     trans_id: number
     amount: number
