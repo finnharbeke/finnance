@@ -19,12 +19,10 @@ interface PlaceholderProps extends PaperProps {
     queries: UseQueryResult<unknown, AxiosError>[]
 }
 
-export default function Placeholder({ height, queries, ...other }: PlaceholderProps) {
+export default function Placeholder({ height=200, queries, ...other }: PlaceholderProps) {
     const { classes } = useStyles();
     if (allSuccess(queries))
         return <></>
-    if (!height)
-        height = 200;
 
     if (anyError(queries))
         return <Paper style={{ height: height, overflow: 'hidden' }} className={classes.errorPaper}
