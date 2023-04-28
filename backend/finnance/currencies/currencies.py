@@ -16,6 +16,14 @@ def all_currencies():
     currencies = Currency.query.filter_by(user_id=current_user.id)
     return JSONModel.obj_to_api([cur.json(deep=False) for cur in currencies])
 
+@currencies.route("/<int:currency_id>")
+@login_required
+def currency(currency_id):
+    currency = Currency.query.filter_by(user_id=current_user.id, id=currency_id).first()
+    if currency is None:
+        raise APIError(HTTPStatus.BAD_REQUEST, 'invalid currency_id')
+    return currency.api()
+
 @currencies.route("/add", methods=["POST"])
 @login_required
 @validate({

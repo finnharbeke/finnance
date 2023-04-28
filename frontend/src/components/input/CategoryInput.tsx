@@ -25,7 +25,7 @@ const CategoryInput = ({ is_expense, must_be_usable, ...others }: CategoryInputP
             cat => ({
                 value: cat.id.toString(),
                 label: cat.desc,
-                group: cat.parent_id === null ? cat.desc : cat.parent.desc
+                group: cat.parent === null ? cat.desc : cat.parent.desc
             })
         )}
         {...others}

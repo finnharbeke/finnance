@@ -13,7 +13,7 @@ export interface CategoryQueryResult {
     color: string,
     order: number,
     user_id: number,
-    parent: CategoryQueryResult,
+    parent: CategoryQueryResult | null,
     type: 'category'
 }
 export interface CategoryDeepQueryResult extends CategoryQueryResult {

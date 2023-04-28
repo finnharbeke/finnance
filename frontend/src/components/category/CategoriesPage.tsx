@@ -1,25 +1,17 @@
-import { Title, Button, Grid, createStyles } from "@mantine/core";
+import { ActionIcon, Button, Collapse, Flex, Grid, Title } from "@mantine/core";
+import { TbEye } from "react-icons/tb";
 import useIsPhone from "../../hooks/useIsPhone";
+import { DummySunburst } from "../../nivo/Sunburst";
 import { useCategories } from "../../types/Category";
 import Placeholder from "../Placeholder";
-import { openCategoryModal } from "./CategoryModal";
 import CategoryList from "./CategoriesList";
-import ExpensesSunburst from "../../nivo/Sunburst";
-import { useNavigate } from "react-router-dom";
-
-const useStyles = createStyles({
-    cursor: {
-        ':hover': {
-            cursor: 'pointer'
-        }
-    }
-})
+import { openCategoryModal } from "./CategoryModal";
+import { useDisclosure } from "@mantine/hooks";
 
 export default function CategoriesPage() {
     const query = useCategories();
     const isPhone = useIsPhone();
-    const navigate = useNavigate();
-    const { classes: { cursor }} = useStyles();
+    const [ open, { toggle }] = useDisclosure();
 
     if (!query.isSuccess)
         return <>
@@ -32,15 +24,20 @@ export default function CategoriesPage() {
     const incomes = categories.filter(x => !x.is_expense)
 
     return <>
-        <Title>categories</Title>
-        <Grid onClick={() => navigate('/analysis')} className={cursor}>
-            <Grid.Col span={2}>
-                {/* <Title order={4}>preview:</Title> */}
+        <Flex justify='space-between'>
+            <Title>categories</Title>
+            <ActionIcon variant='default' size='lg' onClick={toggle}><TbEye size={20}/></ActionIcon>
+        </Flex>
+        <Collapse in={open}>
+        <Grid>
+            <Grid.Col span={4} offset={2}>
+                <DummySunburst size={100}/>
             </Grid.Col>
-            <Grid.Col span={2}>
-                <ExpensesSunburst size={75} interactive={false}/>
+            <Grid.Col span={4}>
+                <DummySunburst size={100}/>
             </Grid.Col>
         </Grid>
+        </Collapse>
         <CategoryList categories={expenses} title='expenses' />
         <Button fullWidth my='sm'
             onClick={() => {

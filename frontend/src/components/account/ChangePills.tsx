@@ -39,7 +39,8 @@ export function FilterableChanges({ id }: { id: number }) {
     const [start, setStart] = useState<DateTime>();
     const [end, setEnd] = useState<DateTime>();
     const [open, { toggle }] = useDisclosure(false);
-    const query = useChanges(id, { pagesize, page, search, start, end });
+    const query = useChanges(id, { pagesize, page, search,
+        start: start?.toISO({ includeOffset: false }), end: end?.toISO({ includeOffset: false }) });
     useEffect(() => {
         if (query.isSuccess && query.data.pages <= page)
             setPage(Math.max(query.data.pages - 1, 0))
