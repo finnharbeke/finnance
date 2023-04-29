@@ -11,6 +11,15 @@ from finnance.models import Account, AccountTransfer, Currency
 
 transfers = Blueprint('transfers', __name__, url_prefix='/api/transfers')
 
+@transfers.route("/<int:transfer_id>")
+@login_required
+def transfer(transfer_id: int):
+    transfer = AccountTransfer.filter_by(user_id=current_user.id, id=transfer_id).first()
+    if transfer is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+
+    return transfer.api()
+
 @transfers.route("/add", methods=["POST"])
 @login_required
 @validate({

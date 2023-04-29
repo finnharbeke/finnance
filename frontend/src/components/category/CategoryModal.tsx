@@ -2,7 +2,7 @@ import { Button } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { useState } from "react";
-import { CategoryRequest, emptyCategory, useAddCategory, useCategoryForm } from "../../types/Category";
+import { CategoryRequest, useAddCategory, useCategoryForm, useCategoryFormValues } from "../../types/Category";
 import CategoryForm from "./CategoryForm";
 
 interface CategoryModalProps {
@@ -11,7 +11,7 @@ interface CategoryModalProps {
 
 export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<CategoryModalProps>) => {
     const { is_expense } = innerProps;
-    const form = useCategoryForm(is_expense, emptyCategory());
+    const form = useCategoryForm(is_expense, useCategoryFormValues());
 
     const [loading, setLoading] = useState(false);
     const addCategory = useAddCategory();

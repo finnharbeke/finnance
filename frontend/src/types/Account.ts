@@ -39,10 +39,6 @@ export interface AccountRequest extends Omit<AccountFormValues,
     currency_id: number
 }
 
-export const emptyAccount: () => AccountFormValues = () => ({
-    desc: '', color: '', date_created: new Date(), starting_saldo: '', currency_id: null
-})
-
 export type AccountTransform = (v: AccountFormValues) => AccountRequest
 
 export const useAccountForm = (initial: AccountFormValues) =>
@@ -62,13 +58,18 @@ export const useAccountForm = (initial: AccountFormValues) =>
         })
     })
 
-export const useAccountFormValues = (acc: AccountQueryResult) => ({
+export const useAccountFormValues: (acc?: AccountQueryResult) => AccountFormValues
+    = acc => 
+    acc ? {
     desc: acc.desc,
     starting_saldo: acc.starting_saldo,
     date_created: DateTime.fromISO(acc.date_created).toJSDate(),
     color: acc.color,
     currency_id: acc.currency_id.toString()
-})
+} : {
+    desc: '', color: '', date_created: new Date(),
+    starting_saldo: '', currency_id: null
+}
 
 export const useAccounts = () =>
     useQuery<AccountDeepQueryResult[], AxiosError>({ queryKey: ["accounts"] });

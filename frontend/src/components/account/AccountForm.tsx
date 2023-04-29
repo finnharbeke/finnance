@@ -6,7 +6,6 @@ import { DateTime } from "luxon"
 import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
 import { Link } from "react-router-dom"
-import findId from "../../helpers/findId"
 import useIsPhone from "../../hooks/useIsPhone"
 import { AccountDeepQueryResult, AccountFormValues, AccountRequest, AccountTransform, useAccountForm, useAccountFormValues, useEditAccount } from "../../types/Account"
 import { CurrencyQueryResult, useCurrencies } from "../../types/Currency"
@@ -26,24 +25,24 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
-    
-    const initials = useAccountFormValues(data);
-    
-    const form = useAccountForm(initials);
-    
+
+    const initial = useAccountFormValues(data);
+
+    const form = useAccountForm(initial);
+
     const { moveUp, moveDown } = useAccountFormList();
-    
+
     const editAccount = useEditAccount();
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
 
     const reset = () => {
-        form.setValues(initials);
-        form.resetDirty(initials);
+        form.setValues(initial);
+        form.resetDirty(initial);
         // close();
     }
 
     // eslint-disable-next-line
-    useEffect(reset, [initials])
+    useEffect(reset, [initial])
 
     const handleSubmit = (values: AccountRequest) => {
         startEdit();
@@ -64,7 +63,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Grid gutter={isPhone ? 'xs' : undefined } align='center'>
+            <Grid gutter={isPhone ? 'xs' : undefined} align='center'>
                 <Grid.Col span='content'>
                     <SecondaryIcon
                         icon={open ? TbChevronDown : TbChevronRight}
@@ -124,6 +123,12 @@ interface AccountFormProps {
 export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
     const isPhone = useIsPhone();
 
+    const c_id = form.values.currency_id;
+    const currency = currencies.reduce<CurrencyQueryResult | undefined>(
+        (prev, cur) =>
+            cur.id.toString() === c_id ? cur : prev, undefined
+    );
+
     return (
         <Grid align='flex-end'>
             {modal &&
@@ -169,10 +174,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                     label={form.values.date_created ?
                         `saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`
                         : 'saldo at start'}
-                    currency={form.values.currency_id !== null ?
-                        findId(currencies, parseInt(form.values.currency_id))
-                        : undefined
-                    }
+                    currency={currency}
                     {...form.getInputProps('starting_saldo')}
                 />
             </Grid.Col>

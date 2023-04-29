@@ -32,10 +32,6 @@ export interface CategoryRequest extends Omit<CategoryFormValues, 'parent_id'> {
     is_expense: boolean
 }
 
-export const emptyCategory: () => CategoryFormValues = () => ({
-    desc: '', color: '', parent_id: null, usable: true
-})
-
 export type CategoryTransform = (v: CategoryFormValues) => CategoryRequest
 
 export const useCategoryForm = (is_expense: boolean, initial: CategoryFormValues) =>
@@ -52,12 +48,16 @@ export const useCategoryForm = (is_expense: boolean, initial: CategoryFormValues
         })
     })
 
-export const useCategoryFormValues = (cat: CategoryQueryResult) => ({
-    desc: cat.desc,
-    color: cat.color,
-    parent_id: cat.parent_id ? cat.parent_id.toString() : null,
-    usable: cat.usable
-})
+export const useCategoryFormValues = (cat?: CategoryQueryResult) =>
+    cat ? {
+        desc: cat.desc,
+        color: cat.color,
+        parent_id: cat.parent_id ? cat.parent_id.toString() : null,
+        usable: cat.usable
+    } : {
+        desc: '', color: '',
+        parent_id: null, usable: true
+    }
 
 export const useCategories = () =>
     useQuery<CategoryQueryResult[], AxiosError>({ queryKey: ["categories"] });

@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { CurrencyFormValues } from "../../components/Currency";
-import { transformedFormValues } from "../../components/modals/TransactionModal";
 import { OrderFormValues } from "../../components/account/AccountList";
-import { TransferFormValues } from "../../components/transfer/TransferModal";
+import { transformedFormValues } from "../../components/modals/TransactionModal";
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()
@@ -14,14 +13,6 @@ export const useAddTransaction = () => {
     });
 }
 
-export const useAddTransfer = () => {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: (values: TransferFormValues) =>
-            axios.post('/api/transfers/add', values),
-        onSuccess: () => queryClient.invalidateQueries(["changes"])
-    });
-}
 
 export const useAddCurrency = () => {
     const queryClient = useQueryClient()
