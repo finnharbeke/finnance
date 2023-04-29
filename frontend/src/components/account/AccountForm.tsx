@@ -1,26 +1,18 @@
 import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
 import { DateInput, DatePickerInput } from "@mantine/dates"
-import { UseFormReturnType, useForm } from "@mantine/form"
-import { FormValidateInput } from "@mantine/form/lib/types"
+import { UseFormReturnType } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
-import { UseQueryResult } from "@tanstack/react-query"
-import { AxiosError } from "axios"
 import { DateTime } from "luxon"
 import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
 import { Link } from "react-router-dom"
-import { AccountDeepQueryResult } from "../../types/Account"
-import { CurrencyQueryResult } from "../../types/Currency"
-import findId from "../../helpers/findId"
-import { useEditAccount } from "../../hooks/api/useMutation"
-import { useCurrencies } from "../../hooks/api/useQuery"
 import useIsPhone from "../../hooks/useIsPhone"
+import { AccountDeepQueryResult, AccountFormValues, AccountRequest, AccountTransform, useAccountForm, useAccountFormValues, useEditAccount } from "../../types/Account"
+import { CurrencyQueryResult, useCurrencies } from "../../types/Currency"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
 import AmountInput from "../input/AmountInput"
 import CurrencyInput from "../input/CurrencyInput"
 import { useAccountFormList } from "./AccountList"
-
-type Transform = (values: AccountFormValues) => TransformedAccountFormValues
 
 const useStyles = createStyles((theme) => ({
     AccountLink: {
@@ -33,39 +25,26 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
-    
-    const initials = () => ({
-        desc: data.desc,
-        starting_saldo: data.starting_saldo,
-        date_created: DateTime.fromISO(data.date_created).toJSDate(),
-        color: data.color,
-        currency_id: data.currency_id.toString()
-    })
-    
-    const form = useForm<AccountFormValues, Transform>({
-        initialValues: initials(),
-        validate: accountFormValidate,
-        transformValues: (values: AccountFormValues) => accountFormTransform(values, currencies),
-    })
-    
+
+    const initial = useAccountFormValues(data);
+
+    const form = useAccountForm(initial);
+
     const { moveUp, moveDown } = useAccountFormList();
-    
+
     const editAccount = useEditAccount();
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
 
     const reset = () => {
-        form.setValues(initials());
-        form.resetDirty(initials());
+        form.setValues(initial);
+        form.resetDirty(initial);
         // close();
     }
 
-    // disable: missing dependency form, but should only reset
-    // on change of data
     // eslint-disable-next-line
-    useEffect(reset, [data.desc, data.starting_saldo,
-    data.date_created, data.color, data.currency_id])
+    useEffect(reset, [data])
 
-    const handleSubmit = (values: TransformedAccountFormValues) => {
+    const handleSubmit = (values: AccountRequest) => {
         startEdit();
         editAccount.mutate(
             { id: data.id, values },
@@ -84,7 +63,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
         return <Skeleton height={100}></Skeleton>
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Grid gutter={isPhone ? 'xs' : undefined } align='center'>
+            <Grid gutter={isPhone ? 'xs' : undefined} align='center'>
                 <Grid.Col span='content'>
                     <SecondaryIcon
                         icon={open ? TbChevronDown : TbChevronRight}
@@ -135,53 +114,20 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
     </Paper>
 }
 
-export interface AccountFormValues {
-    desc: string
-    starting_saldo: number | ""
-    date_created: Date
-    color: string
-    currency_id: string
-}
-
-export interface TransformedAccountFormValues {
-    desc: string
-    starting_saldo: number
-    date_created: string
-    color: string
-    currency_id: number
-}
-
-export const accountFormValidate: FormValidateInput<AccountFormValues> = {
-    desc: (val) => (val && val.length > 0) ? null : "enter account name",
-    starting_saldo: (val) => val !== undefined ? null : "enter starting saldo",
-    date_created: (val) => val ? null : "enter starting date",
-    color: (val) => (val && val.length === 7) ? null : "enter hex color",
-    currency_id: (val) => (val && val.length > 0) ? null : "choose currency",
-}
-
-export const accountFormTransform = (values: AccountFormValues, currencies: UseQueryResult<CurrencyQueryResult[], AxiosError>) => {
-    if (!currencies.isSuccess)
-        throw new Error('currencies not fetched');
-    const c_id = parseInt(values.currency_id);
-    const currency = findId(currencies.data, c_id);
-    if (!currency)
-        throw new Error('invalid currency_id');
-    return ({
-        ...values,
-        currency_id: c_id,
-        starting_saldo: values.starting_saldo ? values.starting_saldo : 0,
-        date_created: DateTime.fromJSDate(values.date_created).toISO({ includeOffset: false }),
-    })
-}
-
 interface AccountFormProps {
-    form: UseFormReturnType<AccountFormValues, Transform>
+    form: UseFormReturnType<AccountFormValues, AccountTransform>
     currencies: CurrencyQueryResult[]
     modal: boolean
 }
 
 export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
     const isPhone = useIsPhone();
+
+    const c_id = form.values.currency_id;
+    const currency = currencies.reduce<CurrencyQueryResult | undefined>(
+        (prev, cur) =>
+            cur.id.toString() === c_id ? cur : prev, undefined
+    );
 
     return (
         <Grid align='flex-end'>
@@ -228,7 +174,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                     label={form.values.date_created ?
                         `saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`
                         : 'saldo at start'}
-                    currency={findId(currencies, parseInt(form.values.currency_id))}
+                    currency={currency}
                     {...form.getInputProps('starting_saldo')}
                 />
             </Grid.Col>

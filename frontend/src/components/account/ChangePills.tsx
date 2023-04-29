@@ -4,14 +4,15 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { DateTime } from "luxon";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPlus } from "react-icons/tb";
+import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPencil, TbPlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
-import { Change, isChangeTransaction } from "../../types/Account";
-import { useAccount, useChanges } from "../../hooks/api/useQuery";
+import useAmount from "../../hooks/useAmount";
 import { useIsOverflow } from "../../hooks/useIsOverflow";
 import useIsPhone from "../../hooks/useIsPhone";
+import { Change, isChangeTransaction, useAccount, useChanges } from "../../types/Account";
 import Placeholder from "../Placeholder";
-import useAmount from "../../hooks/useAmount";
+import { openEditTransactionModal } from "../modals/TransactionModal";
+import { openEditTransferModal } from "../transfer/TransferModal";
 
 interface FormValues {
     search: string | undefined
@@ -19,9 +20,9 @@ interface FormValues {
     endDate: Date | undefined
 }
 
-export function ChangePills({ changes }: { changes: Change[] | undefined }) {
+export function ChangePills({ changes }: { changes: Change[] | undefined }) {
     if (changes === undefined)
-        return <Center><Loader/></Center>
+        return <Center><Loader /></Center>
     return changes.length > 0 ?
         <>{
             changes.map((change, ix) =>
@@ -39,8 +40,10 @@ export function FilterableChanges({ id }: { id: number }) {
     const [start, setStart] = useState<DateTime>();
     const [end, setEnd] = useState<DateTime>();
     const [open, { toggle }] = useDisclosure(false);
-    const query = useChanges(id, { pagesize, page, search,
-        start: start?.toISO({ includeOffset: false }), end: end?.toISO({ includeOffset: false }) });
+    const query = useChanges(id, {
+        pagesize, page, search,
+        start: start?.toISO({ includeOffset: false }), end: end?.toISO({ includeOffset: false })
+    });
     useEffect(() => {
         if (query.isSuccess && query.data.pages <= page)
             setPage(Math.max(query.data.pages - 1, 0))
@@ -100,6 +103,16 @@ const useStyles = createStyles(theme => ({
                 theme.white : theme.colors['gray'][9],
         }
     },
+    edit: {
+        '&:hover': {
+            backgroundColor: theme.colorScheme === 'light' ?
+                theme.colors['gray'][0] : theme.colors['dark'][7],
+        },
+        '&:active': {
+            paddingTop: 2
+        },
+
+    },
     ellipsis: {
         overflow: 'hidden',
         whiteSpace: 'nowrap',
@@ -149,6 +162,8 @@ const ChangePill = ({ change }: { change: Change }) => {
     const isSource = isTransfer && change.data.src_id === change.acc_id;
     const isExpense = (!isTransfer && change.data.is_expense) || isSource;
 
+    const [loading, setLoading] = useState(false);
+
     const amountRef = useRef<HTMLDivElement>(null);
     const amountOverflow = useIsOverflow(amountRef);
     const agentRef = useRef<HTMLDivElement>(null);
@@ -158,11 +173,11 @@ const ChangePill = ({ change }: { change: Change }) => {
     const commentRef = useRef<HTMLDivElement>(null);
     const commentOverflow = useIsOverflow(commentRef);
 
-    const amount = useAmount(isTransfer ? 
+    const amount = useAmount(isTransfer ?
         isSource ? change.data.src_amount : change.data.dst_amount
-        : change.data.amount, query.data?.currency)
-    
-    const saldo = useAmount(query.data?.saldo, query.data?.currency);
+        : change.data.amount, query.data?.currency, false)
+
+    const saldo = useAmount(change.saldo, query.data?.currency, false);
 
     if (!query.isSuccess)
         return <Placeholder height={30} queries={[query]} />
@@ -217,7 +232,7 @@ const ChangePill = ({ change }: { change: Change }) => {
                 </Text>
             </PopoverOrTooltip>
         </Center></Grid.Col>
-        <Grid.Col span={15} sm={6}><Flex align='center'>
+        <Grid.Col span={12} sm={6} order={isPhone ? 9 : 5}><Flex align='center'>
             <PopoverOrTooltip label={change.target} multiline width={250}
                 overflow={agentOverflow} popover={
                     <Text>{change.target}</Text>
@@ -237,7 +252,7 @@ const ChangePill = ({ change }: { change: Change }) => {
                 }
             </PopoverOrTooltip>
         </Flex></Grid.Col>
-        <Grid.Col span={9} sm={3}><Center>
+        <Grid.Col span={9} sm={3} order={isPhone ? 10 : 6}><Center>
             <PopoverOrTooltip label={saldo}
                 overflow={saldoOverflow} popover={
                     <Text className={classes.amount}>{saldo}</Text>
@@ -248,9 +263,37 @@ const ChangePill = ({ change }: { change: Change }) => {
                 </Text>
             </PopoverOrTooltip>
         </Center></Grid.Col>
+        <Grid.Col span={3} sm={1} order={8}>
+            <Center className={classes.edit} onClick={() => {
+                setLoading(true);
+                isTransfer ?
+                    openEditTransferModal({
+                        title: `edit transfer #${change.data.id}`,
+                        fullScreen: isPhone,
+                        innerProps: {
+                            transfer: change.data
+                        }
+                    }).then(() => setLoading(false))
+                    :
+                    openEditTransactionModal({
+                        title: `edit transaction #${change.data.id}`,
+                        fullScreen: isPhone,
+                        innerProps: {
+                            transaction_id: change.data.id
+                        }
+                    }).then(() => setLoading(false))
+            }}>
+                {
+                    loading ?
+                        <Loader />
+                        :
+                        <TbPencil size={24} />
+                }
+            </Center>
+        </Grid.Col>
         {
             (change.data.comment !== '' || !isPhone) &&
-            <Grid.Col span={24} sm={7}><Flex align='center'>
+            <Grid.Col span={24} sm={6} order={isPhone ? 11 : 7}><Flex align='center'>
                 <PopoverOrTooltip label={change.data.comment} multiline width={250}
                     overflow={commentOverflow} popover={
                         <Text>

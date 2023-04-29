@@ -1,13 +1,13 @@
 
-from http import HTTPStatus
 import re
+from http import HTTPStatus
 
+from finnance.errors import APIError, validate
+from finnance.models import Category, JSONModel
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
 
 from finnance import db
-from finnance.errors import APIError, validate
-from finnance.models import Category, JSONModel
 
 categories = Blueprint('categories', __name__, url_prefix='/api/categories')
 
@@ -24,7 +24,7 @@ def category(category_id):
 @login_required
 def all_categories():
     categories = Category.query.filter_by(user_id=current_user.id).all()
-    return JSONModel.obj_to_api([cat.json(deep=True) for cat in categories])
+    return JSONModel.obj_to_api([cat.json(deep=False) for cat in categories])
 
 @categories.route("/add", methods=["POST"])
 @login_required
@@ -61,9 +61,7 @@ def add_category(desc: str, is_expense: bool, color: str, usable: bool, parent_i
         
     db.session.add(category)
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return jsonify({}), HTTPStatus.CREATED
 
 @categories.route("/<int:category_id>/edit", methods=["PUT"])
 @login_required
@@ -108,9 +106,7 @@ def edit_category(category_id: int, **data):
         raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
         
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return jsonify({}), HTTPStatus.CREATED
 
 @categories.route("/orders", methods=["PUT"])
 @login_required
@@ -155,6 +151,4 @@ def edit_category_orders(orders: list[int], ids: list[int]):
         category.order = order
 
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return jsonify({}), HTTPStatus.CREATED

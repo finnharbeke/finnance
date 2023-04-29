@@ -1,12 +1,12 @@
 
 from http import HTTPStatus
 
+from finnance.errors import APIError, validate
+from finnance.models import Currency, JSONModel
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
 
 from finnance import db
-from finnance.errors import APIError, validate
-from finnance.models import Currency, JSONModel
 
 currencies = Blueprint('currencies', __name__, url_prefix='/api/currencies')
 
@@ -21,7 +21,7 @@ def all_currencies():
 def currency(currency_id):
     currency = Currency.query.filter_by(user_id=current_user.id, id=currency_id).first()
     if currency is None:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'invalid currency_id')
+        raise APIError(HTTPStatus.NOT_FOUND)
     return currency.api()
 
 @currencies.route("/add", methods=["POST"])
@@ -42,6 +42,4 @@ def add_currency(code, decimals):
     curr = Currency(code=code, decimals=decimals, user_id=current_user.id)
     db.session.add(curr)
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return jsonify({}), HTTPStatus.CREATED
