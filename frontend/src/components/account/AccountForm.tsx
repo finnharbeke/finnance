@@ -42,7 +42,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
     }
 
     // eslint-disable-next-line
-    useEffect(reset, [initial])
+    useEffect(reset, [data])
 
     const handleSubmit = (values: AccountRequest) => {
         startEdit();
