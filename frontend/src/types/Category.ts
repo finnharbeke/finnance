@@ -1,8 +1,7 @@
 import { useForm } from "@mantine/form";
-import { RecordQueryResult } from "./Record";
-import { UserQueryResult } from "./User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { RecordQueryResult } from "./Record";
 
 export interface CategoryQueryResult {
     id: number,
@@ -17,7 +16,6 @@ export interface CategoryQueryResult {
     type: 'category'
 }
 export interface CategoryDeepQueryResult extends CategoryQueryResult {
-    user: UserQueryResult,
     records: RecordQueryResult[],
     children: CategoryQueryResult[],
 }

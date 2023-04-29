@@ -1,11 +1,11 @@
 import { useForm } from "@mantine/form";
-import { CurrencyQueryResult } from "./Currency"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
+import { DateTime } from "luxon";
+import { CurrencyQueryResult } from "./Currency";
 import { TransactionQueryResult } from "./Transaction";
 import { TransferQueryResult } from "./Transfer";
-import { UserQueryResult } from "./User"
-import { DateTime } from "luxon";
-import axios, { AxiosError } from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAxiosData, searchParams, searchParamsProps } from "../query";
 
 export interface AccountQueryResult {
     id: number,
@@ -22,7 +22,6 @@ export interface AccountQueryResult {
 
 export interface AccountDeepQueryResult extends AccountQueryResult {
     currency: CurrencyQueryResult,
-    user: UserQueryResult,
 }
 
 export interface AccountFormValues {
@@ -95,6 +94,8 @@ export const useEditAccount = () => {
     });
 }
 
+// CHANGES
+
 export interface ChangeBase {
     type: 'change',
     acc_id: number,
@@ -114,3 +115,22 @@ export type Change = ChangeTransfer | ChangeTransaction;
 export const isChangeTransaction = (ac: Change): ac is ChangeTransaction => (
     ac.data.type === 'transaction'
 )
+
+interface useChangesProps extends searchParamsProps {
+    start?: string
+    end?: string
+    search?: string
+    pagesize: number
+    page: number
+}
+
+interface useChangeReturn {
+    changes: Change[]
+    pages: number
+}
+
+export const useChanges = (id: number, props: useChangesProps) =>
+    useQuery<useChangeReturn, AxiosError>({
+        queryKey: ["changes", id, props],
+        queryFn: () => getAxiosData(`/api/accounts/${id}/changes?${searchParams(props)}`)
+    });

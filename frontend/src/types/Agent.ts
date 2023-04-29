@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
+import { AxiosError } from "axios"
 import { FlowQueryResult } from "./Flow"
 import { TransactionQueryResult } from "./Transaction"
-import { UserQueryResult } from "./User"
-import { AxiosError } from "axios"
 
 export interface AgentQueryResult {
     desc: string,
@@ -12,7 +11,6 @@ export interface AgentQueryResult {
 }
 
 export interface AgentDeepQueryResult extends AgentQueryResult {
-    user: UserQueryResult
     transactions: TransactionQueryResult[]
     flows: FlowQueryResult[]
 }

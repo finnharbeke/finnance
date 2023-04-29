@@ -1,8 +1,8 @@
 import { Select, SelectProps } from "@mantine/core";
 import useIsPhone from "../../hooks/useIsPhone";
-import { useCurrencies } from "../../hooks/api/useQuery";
 import Placeholder from "../Placeholder";
 import { useEffect } from "react";
+import { useCurrencies } from "../../types/Currency";
 
 interface CurrencyInputProps extends Omit<SelectProps, 'data'> {
     hasDefault?: boolean

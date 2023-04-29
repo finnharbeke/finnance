@@ -100,7 +100,7 @@ class Account(db.Model, JSONModel):
         UniqueConstraint('order', 'user_id')
     )
 
-    json_relations = ["currency", "user"]
+    json_relations = ["currency"]
 
     def changes(self, num=None):
         saldos = [self.starting_saldo]
@@ -201,7 +201,7 @@ class Transaction(db.Model, JSONModel):
     agent = db.relationship("Agent", backref="transactions")
     currency = db.relationship("Currency", backref="transactions")
 
-    json_relations = ["user", "account",
+    json_relations = ["account",
                       "agent", "currency", "records", "flows"]
 
 
@@ -259,7 +259,7 @@ class AccountTransfer(db.Model, JSONModel):
         CheckConstraint('src_id != dst_id'),
     )
 
-    json_relations = ["user", "src", "dst"]
+    json_relations = ["src", "dst"]
 
 
 class Currency(db.Model, JSONModel):
@@ -272,6 +272,8 @@ class Currency(db.Model, JSONModel):
     __table_args__ = (
         UniqueConstraint('code', 'user_id'),
     )
+
+    json_relations = ["accounts"]
 
     def format(self, number: int) -> str:
         return "{n:,.{d}f}".format(n=number / (10 ** self.decimals), d=self.decimals)
@@ -287,7 +289,7 @@ class Agent(db.Model, JSONModel):
         UniqueConstraint('desc', 'user_id'),
     )
 
-    json_relations = ["user", "transactions", "flows"]
+    json_relations = ["transactions", "flows"]
 
     @hybrid_property
     def uses(self):
@@ -320,4 +322,4 @@ class Category(db.Model, JSONModel):
         UniqueConstraint('user_id', 'order', 'is_expense')
     )
 
-    json_relations = ["user", "records"]
+    json_relations = ["records"]

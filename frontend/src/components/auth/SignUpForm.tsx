@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import FinnanceLogo from "../FinnanceLogo";
 import { LoginFormProps, useLoginFormStyles } from "./LoginForm";
 import { emailExists, useRegister, usernameExists } from "./api";
-import { handleAxiosError } from "../../hooks/api/defaults";
+import { handleAxiosError } from "../../query";
 
 interface SignUpInputType {
     username: string

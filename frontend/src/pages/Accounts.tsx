@@ -4,10 +4,9 @@ import { CurrencyCard, CurrencyForm } from "../components/Currency";
 import Placeholder from "../components/Placeholder";
 import AccountList from "../components/account/AccountList";
 import { openAccountModal } from "../components/account/AccountModal";
-import { useCurrencies } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
 import { useAccounts } from "../types/Account";
-
+import { useCurrencies } from "../types/Currency";
 
 
 export default function AccountsPage() {
