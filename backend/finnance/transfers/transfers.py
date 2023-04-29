@@ -70,7 +70,7 @@ def add_transfer(src_id: int, dst_id: int, src_amount: int, dst_amount: int, dat
     },
 })
 def edit_transfer(transfer_id: int, **data):
-    transfer = AccountTransfer.query.filter_by(user_id=current_user, id=transfer_id).first()
+    transfer = AccountTransfer.query.filter_by(user_id=current_user.id, id=transfer_id).first()
     if transfer is None:
         raise APIError(HTTPStatus.NOT_FOUND)
 

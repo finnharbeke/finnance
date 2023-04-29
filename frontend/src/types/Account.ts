@@ -6,6 +6,7 @@ import { CurrencyQueryResult } from "./Currency";
 import { TransactionQueryResult } from "./Transaction";
 import { TransferQueryResult } from "./Transfer";
 import { getAxiosData, searchParams, searchParamsProps } from "../query";
+import { useEffect, useState } from "react";
 
 export interface AccountQueryResult {
     id: number,
@@ -59,17 +60,22 @@ export const useAccountForm = (initial: AccountFormValues) =>
     })
 
 export const useAccountFormValues: (acc?: AccountQueryResult) => AccountFormValues
-    = acc => 
-    acc ? {
-    desc: acc.desc,
-    starting_saldo: acc.starting_saldo,
-    date_created: DateTime.fromISO(acc.date_created).toJSDate(),
-    color: acc.color,
-    currency_id: acc.currency_id.toString()
-} : {
-    desc: '', color: '', date_created: new Date(),
-    starting_saldo: '', currency_id: null
-}
+    = acc => {
+        const build: () => AccountFormValues = () => acc ? {
+            desc: acc.desc,
+            starting_saldo: acc.starting_saldo,
+            date_created: DateTime.fromISO(acc.date_created).toJSDate(),
+            color: acc.color,
+            currency_id: acc.currency_id.toString()
+        } : {
+            desc: '', color: '', date_created: new Date(),
+            starting_saldo: '', currency_id: null
+        }
+        const [fv, setFV] = useState(build());
+        // eslint-disable-next-line
+        useEffect(() => setFV(build()), [acc]);
+        return fv;
+    }
 
 export const useAccounts = () =>
     useQuery<AccountDeepQueryResult[], AxiosError>({ queryKey: ["accounts"] });

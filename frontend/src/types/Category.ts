@@ -2,6 +2,7 @@ import { useForm } from "@mantine/form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { RecordQueryResult } from "./Record";
+import { useEffect, useState } from "react";
 
 export interface CategoryQueryResult {
     id: number,
@@ -48,15 +49,21 @@ export const useCategoryForm = (is_expense: boolean, initial: CategoryFormValues
         })
     })
 
-export const useCategoryFormValues = (cat?: CategoryQueryResult) =>
-    cat ? {
-        desc: cat.desc,
-        color: cat.color,
-        parent_id: cat.parent_id ? cat.parent_id.toString() : null,
-        usable: cat.usable
-    } : {
-        desc: '', color: '',
-        parent_id: null, usable: true
+export const useCategoryFormValues: (cat?: CategoryQueryResult) => CategoryFormValues
+    = cat => {
+        const build: () => CategoryFormValues = () => cat ? {
+            desc: cat.desc,
+            color: cat.color,
+            parent_id: cat.parent_id ? cat.parent_id.toString() : null,
+            usable: cat.usable
+        } : {
+            desc: '', color: '',
+            parent_id: null, usable: true
+        }
+        const [fv, setFV] = useState(build());
+        // eslint-disable-next-line
+        useEffect(() => setFV(build()), [cat]);
+        return fv;
     }
 
 export const useCategories = () =>

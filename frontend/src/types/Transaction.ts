@@ -2,7 +2,7 @@ import { UseFormReturnType, useForm } from "@mantine/form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { DateTime, Duration } from "luxon"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { AccountQueryResult } from "./Account"
 import { AgentQueryResult } from "./Agent"
 import { CurrencyQueryResult } from "./Currency"
@@ -76,7 +76,7 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
     const form = useForm<TransactionFormValues, TransactionTransform>({
         initialValues: initial,
         validate: {
-            currency_id: (val, fv) => val === null && fv.account_id === null ? 'choose currency' : null,
+            currency_id: (val, fv) => val === null ? 'choose currency' : null,
             time: val => val === '' ? 'enter time' : null,
             amount: val => val === '' ? 'enter amount' : null,
             agent: desc => desc.length === 0 ? "at least one character" : null,
@@ -189,12 +189,11 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
 export const useTransactionFormValues:
     (t?: TransactionDeepQueryResult, a?: AccountQueryResult)
         => TransactionFormValues
-    = (trans, acc) =>
-        trans ? {
+    = (trans, acc) => {
+        const build: () => TransactionFormValues = () => trans ? {
             account_id: trans.account_id === null ?
                 null : trans.account_id.toString(),
-            currency_id: trans.account_id === null ?
-                trans.currency_id.toString() : null,
+            currency_id: trans.currency_id.toString(),
             date: DateTime.fromISO(trans.date_issued).startOf('day').toJSDate(),
             time: DateTime.fromISO(trans.date_issued).toFormat('HH:mm'),
             amount: trans.amount,
@@ -206,15 +205,15 @@ export const useTransactionFormValues:
             items: recordsFormValues(trans.records, 0)
                 .concat(
                     trans.account_id === null ?
-                    [] : flowsFormValues(trans.flows, trans.records.length)
+                        [] : flowsFormValues(trans.flows, trans.records.length)
                 ),
             comment: trans.comment,
             last_update: -1,
             remote_agent: trans.account_id === null ?
-                undefined : trans.flows[0].agent_desc,
+                trans.flows[0].agent_desc : undefined,
         } : {
             account_id: acc ? acc.id.toString() : null,
-            currency_id: null,
+            currency_id: acc ? acc.currency_id.toString() : null,
             date: new Date(),
             time: DateTime.now().toFormat('HH:mm'),
             amount: '',
@@ -228,7 +227,11 @@ export const useTransactionFormValues:
             last_update: -1,
             remote_agent: acc ? undefined : ''
         }
-
+        const [fv, setFV] = useState(build());
+        // eslint-disable-next-line
+        useEffect(() => setFV(build()), [trans, acc]);
+        return fv;
+    }
 
 export const useTransaction = (trans_id: number) =>
     useQuery<TransactionDeepQueryResult, AxiosError>({ queryKey: ['transactions', trans_id] });
@@ -250,7 +253,7 @@ export const useEditTransaction = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: ({ id, values }: { id: number, values: TransactionRequest }) =>
-            axios.post(`/api/transactions/${id}/edit`, values),
+            axios.put(`/api/transactions/${id}/edit`, values),
         onSuccess: () => {
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transactions']);

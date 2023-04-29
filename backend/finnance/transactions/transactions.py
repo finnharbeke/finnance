@@ -56,18 +56,17 @@ def transaction(transaction_id: int):
         },
         "remote_agent": {"type": "string"}
     },
-    "required": ["amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
+    "required": ["currency_id", "amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
 })
 def add_trans(**data):
     data['date_issued'] = datetime.fromisoformat(data.pop('date_issued'))
-    
-    if ('account_id' in data and 'currency_id' in data) or ('account_id' not in data and 'currency_id' not in data):
-        raise APIError(HTTPStatus.BAD_REQUEST, 'pass either account_id or currency_id')
 
     if 'account_id' in data:
         account = Account.query.filter_by(id=data['account_id'], user_id=current_user.id).first()
         if account is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid account_id')
+        if account.currency_id != data['currency_id']:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'account and currency don\'t match')
         data['currency_id'] = account.currency_id
 
     else: # 'currency_id' in data:
@@ -160,14 +159,13 @@ def edit_transaction(transaction_id: int, **data):
         if issued != trans.date_issued:
             trans.date_issued = issued
 
-    if 'account_id' in data and 'currency_id' in data:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'pass either account_id or currency_id')
-
     if 'account_id' in data and data['account_id'] != trans.account_id:
         account = Account.query.filter_by(id=data['account_id'], user_id=current_user.id)
         if account is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid account_id')
-        
+        if 'currency_id' in data and account.currency_id != data['currency_id']:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'account and currency don\'t match')
+
         trans.account_id = account.id
         trans.currency_id = account.currency_id
 
@@ -176,10 +174,11 @@ def edit_transaction(transaction_id: int, **data):
         if currency is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid currency_id')
         
-        trans.currency_id = account.currency_id
+        trans.currency_id = currency.id
 
     if 'agent' in data and data['agent'] != trans.agent.desc:
         agent = create_agent_ifnx(data.pop('agent'))
+        db.session.commit()
         trans.agent_id = agent.id
     
     if 'comment' in data and data['comment'] != trans.comment:
@@ -192,6 +191,9 @@ def edit_transaction(transaction_id: int, **data):
 
         is_expense = data['is_expense']
         trans.is_expense = is_expense
+    
+    if 'amount' in data and data['amount'] != trans.amount:
+        trans.amount = data['amount']
     
     flows = None
     if 'remote_agent' in data:
@@ -225,7 +227,7 @@ def edit_transaction(transaction_id: int, **data):
             db.session.add(flow)
     
     if 'records' in data:
-        for rec_data, rec in zip(data['recs'], trans.recs):
+        for rec_data, rec in zip(data['records'], trans.records):
             if rec_data['category_id'] != rec.category.id or rec_data['amount'] != rec.amount:
                 
                 cat = Category.query.filter_by(user_id=current_user.id, id=rec_data['category_id']).first()
@@ -235,10 +237,10 @@ def edit_transaction(transaction_id: int, **data):
                 rec.category_id = cat.id
                 rec.amount = rec_data['amount']
 
-        for rec in trans.recs[len(data['recs']):]:
+        for rec in trans.records[len(data['records']):]:
             db.session.delete(rec)
         
-        for rec_data in data['recs'][len(trans.recs):]:
+        for rec_data in data['records'][len(trans.records):]:
             cat = Category.query.filter_by(user_id=current_user.id, id=rec_data['category_id']).first()
             if cat is None:
                 raise APIError(HTTPStatus.BAD_REQUEST, 'invalid category_id')

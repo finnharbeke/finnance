@@ -4,7 +4,7 @@ import axios, { AxiosError } from "axios"
 import { DateTime } from "luxon"
 import { AccountQueryResult } from "./Account"
 import { datetimeString } from "./Transaction"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export interface TransferQueryResult {
     id: number,
@@ -79,10 +79,10 @@ export const useTransferForm = (initial: TransferFormValues) => {
 }
 
 export const useTransferFormValues:
-    (tf?: TransferDeepQueryResult, src?: AccountQueryResult, dst?: AccountQueryResult)
+    (tf?: TransferQueryResult, src?: AccountQueryResult, dst?: AccountQueryResult)
         => TransferFormValues
-    = (tf, src, dst) =>
-        tf ? {
+    = (tf, src, dst) => {
+        const build: () => TransferFormValues = () => tf ? {
             src_id: tf.src_id.toString(),
             dst_id: tf.dst_id.toString(),
             src_amount: tf.src_amount,
@@ -101,6 +101,11 @@ export const useTransferFormValues:
             comment: '',
             locked: true
         }
+        const [fv, setFV] = useState(build());
+        // eslint-disable-next-line
+        useEffect(() => setFV(build()), [tf, src, dst]);
+        return fv;
+    }
 
 export const useTransfer = (transfer_id: number) =>
     useQuery<TransferDeepQueryResult, AxiosError>({ queryKey: ['transfers', transfer_id] });
@@ -122,7 +127,7 @@ export const useEditTransfer = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: ({ id, values }: { id: number, values: TransferRequest }) =>
-            axios.post(`/api/transfers/${id}/edit`, values),
+            axios.put(`/api/transfers/${id}/edit`, values),
         onSuccess: () => {
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transfers']);

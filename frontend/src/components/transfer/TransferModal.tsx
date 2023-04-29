@@ -5,7 +5,7 @@ import { useState } from "react"
 import { TbArrowBigRightFilled, TbLock, TbLockOpen } from 'react-icons/tb'
 import useIsPhone from "../../hooks/useIsPhone"
 import { AccountDeepQueryResult, useAccounts } from "../../types/Account"
-import { TransferFormType, TransferRequest, useAddTransfer, useTransferForm, useTransferFormValues } from "../../types/Transfer"
+import { TransferFormType, TransferQueryResult, TransferRequest, useAddTransfer, useEditTransfer, useTransferForm, useTransferFormValues } from "../../types/Transfer"
 import Placeholder from "../Placeholder"
 import AccountInput from "../input/AccountInput"
 import AmountInput from "../input/AmountInput"
@@ -13,11 +13,11 @@ import DateTimeInput from "../input/DateTimeInput"
 
 interface TransferFormProps {
     form: TransferFormType
-    src_disabled: boolean
-    dst_disabled: boolean
+    src_disabled?: boolean
+    dst_disabled?: boolean
 }
 
-const TransferForm = ({ form, src_disabled, dst_disabled }: TransferFormProps) => {
+const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: TransferFormProps) => {
 
     const query = useAccounts();
     const isPhone = useIsPhone();
@@ -100,7 +100,6 @@ export const openAddTransferModal = async (props: OpenContextModal<AddTransferMo
             size: 'lg'
         },
         ...props,
-        innerProps: props.innerProps
     })
 
 export const AddTransferModal = ({ context, id, innerProps: { source, dest } }: ContextModalProps<AddTransferModalProps>) => {
@@ -124,6 +123,46 @@ export const AddTransferModal = ({ context, id, innerProps: { source, dest } }: 
         <Button mt='lg' fullWidth type="submit" color='grape'
             loading={loading}>
             create
+        </Button>
+    </form>
+}
+
+
+interface EditTransferModalProps {
+    transfer: TransferQueryResult
+}
+
+export const openEditTransferModal = async (props: OpenContextModal<EditTransferModalProps>) =>
+    openContextModal({
+        ...{
+            modal: 'edit_transfer',
+            title: 'edit transfer',
+            size: 'lg'
+        },
+        ...props,
+    })
+
+export const EditTransferModal = ({ context, id, innerProps: { transfer } }: ContextModalProps<EditTransferModalProps>) => {
+    const initial = useTransferFormValues(transfer);
+    const form = useTransferForm(initial);
+
+    const [loading, setLoading] = useState(false);
+
+    const editTransfer = useEditTransfer();
+
+    function handleSubmit(values: TransferRequest) {
+        setLoading(true);
+        editTransfer.mutate({ id: transfer.id, values }, {
+            onSuccess: () => context.closeModal(id),
+            onSettled: () => setLoading(false)
+        });
+    }
+
+    return <form onSubmit={form.onSubmit(handleSubmit)}>
+        <TransferForm form={form} />
+        <Button mt='lg' fullWidth type="submit" color='grape'
+            loading={loading}>
+            edit
         </Button>
     </form>
 }

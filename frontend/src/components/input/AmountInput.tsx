@@ -21,7 +21,7 @@ export default function AmountInput(props: AmountInputProps) {
     const amount = useAmount(integral, currency?.decimals);
 
     useEffect(() => (currency === undefined || integral === '') ?
-        onChange('') : onChange(integral * (10 ** currency.decimals))
+        onChange('') : onChange(integral)
         // eslint-disable-next-line
         , [currency])
 
