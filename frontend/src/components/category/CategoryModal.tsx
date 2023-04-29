@@ -11,7 +11,7 @@ interface CategoryModalProps {
 
 export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<CategoryModalProps>) => {
     const { is_expense } = innerProps;
-    const form = useCategoryForm(undefined, is_expense, emptyCategory());
+    const form = useCategoryForm(is_expense, emptyCategory());
 
     const [loading, setLoading] = useState(false);
     const addCategory = useAddCategory();

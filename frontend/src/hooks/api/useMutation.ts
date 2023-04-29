@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { CurrencyFormValues } from "../../components/Currency";
-import { TransformedAccountFormValues } from "../../components/account/AccountForm";
 import { transformedFormValues } from "../../components/modals/TransactionModal";
 import { OrderFormValues } from "../../components/account/AccountList";
 import { TransferFormValues } from "../../components/transfer/TransferModal";
@@ -30,24 +29,6 @@ export const useAddCurrency = () => {
         mutationFn: (values: CurrencyFormValues) =>
             axios.post('/api/currencies/add', values),
         onSuccess: () => queryClient.invalidateQueries(["currencies"])
-    });
-}
-
-export const useAddAccount = () => {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: (values: TransformedAccountFormValues) =>
-            axios.post(`/api/accounts/add`, values),
-        onSuccess: () => queryClient.invalidateQueries(["accounts"])
-    });
-}
-
-export const useEditAccount = () => {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: ({ id, values }: { id: number, values: TransformedAccountFormValues }) =>
-            axios.put(`/api/accounts/${id}/edit`, values),
-        onSuccess: () => queryClient.invalidateQueries(["accounts"])
     });
 }
 

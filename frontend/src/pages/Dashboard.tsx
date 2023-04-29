@@ -1,11 +1,11 @@
 import { Button, Center, Stack } from "@mantine/core";
+import { useState } from "react";
+import { TbArrowsLeftRight } from 'react-icons/tb';
 import FinnanceLogo from "../components/FinnanceLogo";
 import LinkButton from "../components/LinkButton";
 import AccountPills from "../components/account/AccountPills";
-import useIsPhone from "../hooks/useIsPhone";
-import { TbArrowsLeftRight } from 'react-icons/tb'
-import { useState } from "react";
 import { openTransferModal } from "../components/transfer/TransferModal";
+import useIsPhone from "../hooks/useIsPhone";
 
 export default function DashboardPage() {
     const isPhone = useIsPhone();

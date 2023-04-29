@@ -6,10 +6,10 @@ import { useParams } from "react-router";
 import Placeholder from "../components/Placeholder";
 import { FilterableChanges } from "../components/account/ChangePills";
 import { openTransactionModal } from "../components/modals/TransactionModal";
-import { useAccount } from "../hooks/api/useQuery";
 import useIsPhone from "../hooks/useIsPhone";
 import NotFound from "./404";
 import useAmount from "../hooks/useAmount";
+import { useAccount } from "../types/Account";
 
 export default function AccountPage() {
     const theme = useMantineTheme();

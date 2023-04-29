@@ -25,7 +25,7 @@ export interface CategoryDeepQueryResult extends CategoryQueryResult {
 export interface CategoryFormValues {
     desc: string
     color: string
-    parent_id: string | undefined
+    parent_id: string | null
     usable: boolean
 }
 
@@ -35,17 +35,17 @@ export interface CategoryRequest extends Omit<CategoryFormValues, 'parent_id'> {
 }
 
 export const emptyCategory: () => CategoryFormValues = () => ({
-    desc: '', color: '', parent_id: undefined, usable: true
+    desc: '', color: '', parent_id: null, usable: true
 })
 
 export type CategoryTransform = (v: CategoryFormValues) => CategoryRequest
 
-export const useCategoryForm = (id: number | undefined, is_expense: boolean, initial: CategoryFormValues) =>
+export const useCategoryForm = (is_expense: boolean, initial: CategoryFormValues) =>
     useForm<CategoryFormValues, CategoryTransform>({
         initialValues: initial,
         validate: {
-            desc: (val) => (val && val.length > 0) ? null : "enter category name",
-            color: (val) => (val && /^#([0-9A-Fa-f]{6})$/i.test(val)) ? null : "enter hex color",
+            desc: val => (val && val.length > 0) ? null : "enter category name",
+            color: val => (val && /^#([0-9A-Fa-f]{6})$/i.test(val)) ? null : "enter hex color",
         },
         transformValues: (fv) => ({
             ...fv,
@@ -53,6 +53,13 @@ export const useCategoryForm = (id: number | undefined, is_expense: boolean, ini
             is_expense
         })
     })
+
+export const useCategoryFormValues = (cat: CategoryQueryResult) => ({
+    desc: cat.desc,
+    color: cat.color,
+    parent_id: cat.parent_id ? cat.parent_id.toString() : null,
+    usable: cat.usable
+})
 
 export const useCategories = () =>
     useQuery<CategoryQueryResult[], AxiosError>({ queryKey: ["categories"] });
