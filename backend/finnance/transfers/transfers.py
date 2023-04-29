@@ -48,7 +48,7 @@ def add_transfer(src_id: int, dst_id: int, src_amount: int, dst_amount: int, dat
     db.session.commit()
     return HTTPStatus.CREATED
 
-@transfers.route("/<id:transfer_id>/edit", methods=["PUT"])
+@transfers.route("/<int:transfer_id>/edit", methods=["PUT"])
 @login_required
 @validate({
     "type": "object",
