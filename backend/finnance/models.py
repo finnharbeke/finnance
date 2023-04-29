@@ -232,6 +232,10 @@ class Flow(db.Model, JSONModel):
     agent = db.relationship('Agent', backref='flows')
     trans = db.relationship('Transaction', backref='flows')
 
+    @property
+    def agent_desc(self):
+        return self.agent.desc
+
     __table_args__ = (
         UniqueConstraint('agent_id', 'trans_id'),
     )

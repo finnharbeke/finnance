@@ -16,7 +16,11 @@ interface FlowsNRecordsButtonProps extends ButtonProps {
 const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
     const theme = useMantineTheme();
     return <Input.Wrapper
-        label='add records & flows | direct flow'
+        label={
+            form.values.account_id === null ?
+            'add records'
+            : 'add records & flows | direct flow'
+        }
         withAsterisk
         {...form.getInputProps('direct')}
     >
@@ -38,30 +42,36 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                     record
                 </Button>
             </Grid.Col>
-            <Grid.Col span='auto'>
-                <Button
-                    fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
-                    leftIcon={<TbArrowWaveRightUp size={32} />}
-                    disabled={form.values.direct} color='pink'
-                    onClick={() => {
-                        form.clearFieldError('direct');
-                        form.insertListItem('items', emptyFlowFormValues(form.values.n_flows));
-                        form.setFieldValue('n_flows', form.values.n_flows + 1);
-                    }}
-                    {...other}
-                >
-                    flow
-                </Button>
-            </Grid.Col>
-            <Grid.Col span='content'>
-                <Switch
-                    color='pink'
-                    onLabel={<TbArrowWaveRightUp size={32} />}
-                    offLabel={<TbArrowWaveRightUp size={32} />}
-                    checked={form.values.direct}
-                    onChange={() => form.setFieldValue('direct', !form.values.direct)}
-                />
-            </Grid.Col>
+            {
+                form.values.account_id !== null &&
+                <Grid.Col span='auto'>
+                    <Button
+                        fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
+                        leftIcon={<TbArrowWaveRightUp size={32} />}
+                        disabled={form.values.direct} color='pink'
+                        onClick={() => {
+                            form.clearFieldError('direct');
+                            form.insertListItem('items', emptyFlowFormValues(form.values.n_flows));
+                            form.setFieldValue('n_flows', form.values.n_flows + 1);
+                        }}
+                        {...other}
+                    >
+                        flow
+                    </Button>
+                </Grid.Col>
+            }
+            {
+                form.values.account_id !== null &&
+                <Grid.Col span='content'>
+                    <Switch
+                        color='pink'
+                        onLabel={<TbArrowWaveRightUp size={32} />}
+                        offLabel={<TbArrowWaveRightUp size={32} />}
+                        checked={form.values.direct}
+                        onChange={() => form.setFieldValue('direct', !form.values.direct)}
+                    />
+                </Grid.Col>
+            }
         </Grid>
     </Input.Wrapper>
 }

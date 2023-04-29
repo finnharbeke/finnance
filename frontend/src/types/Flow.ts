@@ -5,6 +5,7 @@ export interface FlowQueryResult {
     trans_id: number
     amount: number
     agent_id: number
+    agent_desc: string
     type: 'flow'
 }
 
@@ -34,7 +35,7 @@ export const flowsFormValues:
     (fs: FlowQueryResult[], offset: number) => (FlowFormValues | RecordFormValues)[]
     = (fs, offset) => fs.map((fl, i) => ({
         amount: fl.amount,
-        agent: 'something',
+        agent: fl.agent_desc,
         type: 'flow',
         ix: offset + i
     }))

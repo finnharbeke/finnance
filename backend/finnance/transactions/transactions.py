@@ -54,6 +54,7 @@ def transaction(transaction_id: int):
                 "required": ["amount", "category_id"]
             }
         },
+        "remote_agent": {"type": "string"}
     },
     "required": ["amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
 })
@@ -82,9 +83,15 @@ def add_trans(**data):
     # AGENTs
     agent = create_agent_ifnx(data.pop('agent'))
     data['agent_id'] = agent.id
-    # remote_agent = agent_createif(data.pop('remote_agent'))
     
-    flows = data.pop('flows')
+    if 'remote_agent' in data:
+        flows = [{
+            'agent': data.pop('remote_agent'),
+            'is_debt': data['is_expense'],
+            'amount': data['amount']
+        }]
+    else:
+        flows = data.pop('flows')
 
     for flow in flows:
         flow['agent_id'] = create_agent_ifnx(flow.pop('agent')).id
@@ -140,6 +147,7 @@ def add_trans(**data):
                 "required": ["amount", "category_id"]
             }
         },
+        "remote_agent": {"type": "string"}
     }
 })
 def edit_transaction(transaction_id: int, **data):
@@ -185,8 +193,18 @@ def edit_transaction(transaction_id: int, **data):
         is_expense = data['is_expense']
         trans.is_expense = is_expense
     
-    if 'flows' in data:
-        for flow_data, flow in zip(data['flows'], trans.flows):
+    flows = None
+    if 'remote_agent' in data:
+        flows = [{
+            'agent': data.pop('remote_agent'),
+            'is_debt': data['is_expense'],
+            'amount': data['amount']
+        }]
+    elif 'flows' in data:
+        flows = data['flows']
+    
+    if flows is not None:
+        for flow_data, flow in zip(flows, trans.flows):
             if changed_exp or flow_data['agent'] != flow.agent.desc or flow_data['amount'] != flow.amount:
                 
                 agent = create_agent_ifnx(flow_data['agent'])
@@ -194,10 +212,10 @@ def edit_transaction(transaction_id: int, **data):
                 flow.is_debt = not data['is_expense']
                 flow.amount = flow_data['amount']
 
-        for flow in trans.flows[len(data['flows']):]:
+        for flow in trans.flows[len(flows):]:
             db.session.delete(flow)
         
-        for flow_data in data['flows'][len(trans.flows):]:
+        for flow_data in flows[len(trans.flows):]:
             flow = Flow(
                 agent_id = create_agent_ifnx(flow_data.pop('agent')).id,
                 is_debt = not is_expense,

@@ -38,9 +38,14 @@ const TransactionForm = ({ account, form }: TransactionFormProps) => {
     return <>
         {
             account === undefined &&
-            <CurrencyInput label='currency' withAsterisk hasDefault
+            <>
+            <AgentInput label='transaction via' withAsterisk placeholder="my friend tom"
+                {...form.getInputProps('remote_agent')}
+                />
+            <CurrencyInput label='currency' withAsterisk hasDefault mb='md'
                 {...form.getInputProps('currency_id')}
-            />
+                />
+                </>
         }
         <DateTimeInput form={form}
             minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined} />

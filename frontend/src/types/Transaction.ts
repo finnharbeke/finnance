@@ -41,6 +41,7 @@ export interface TransactionFormValues {
     comment: string
 
     direct: boolean
+    remote_agent: string | undefined
     n_flows: number
     n_records: number
     last_update: number
@@ -57,6 +58,7 @@ export interface TransactionRequest {
     flows: FlowRequest[]
     records: RecordRequest[]
     comment: string
+    remote_agent: string | undefined
 }
 
 export type TransactionTransform = (v: TransactionFormValues) => TransactionRequest
@@ -147,6 +149,7 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
                         category_id:
                             item.category_id === null ? -1 : parseInt(item.category_id)
                     })),
+            remote_agent: fv.remote_agent
         })
     });
 
@@ -202,10 +205,13 @@ export const useTransactionFormValues:
             n_records: trans.records.length,
             items: recordsFormValues(trans.records, 0)
                 .concat(
-                    flowsFormValues(trans.flows, trans.records.length)
+                    trans.account_id === null ?
+                    [] : flowsFormValues(trans.flows, trans.records.length)
                 ),
             comment: trans.comment,
-            last_update: -1
+            last_update: -1,
+            remote_agent: trans.account_id === null ?
+                undefined : trans.flows[0].agent_desc,
         } : {
             account_id: acc ? acc.id.toString() : null,
             currency_id: null,
@@ -219,7 +225,8 @@ export const useTransactionFormValues:
             n_records: 0,
             items: [],
             comment: '',
-            last_update: -1
+            last_update: -1,
+            remote_agent: acc ? undefined : ''
         }
 
 

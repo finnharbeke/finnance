@@ -1,8 +1,7 @@
 import { Button, Center, Grid, Switch, TextInput } from "@mantine/core"
-import { useDisclosure } from "@mantine/hooks"
 import { openContextModal } from "@mantine/modals"
 import { ContextModalProps, OpenContextModal } from "@mantine/modals/lib/context"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { TbArrowBigRightFilled, TbLock, TbLockOpen } from 'react-icons/tb'
 import useIsPhone from "../../hooks/useIsPhone"
 import { AccountDeepQueryResult, useAccounts } from "../../types/Account"
@@ -93,7 +92,7 @@ interface AddTransferModalProps {
     dest?: AccountDeepQueryResult
 }
 
-export const openTransferModal = async (props: OpenContextModal<AddTransferModalProps>) =>
+export const openAddTransferModal = async (props: OpenContextModal<AddTransferModalProps>) =>
     openContextModal({
         ...{
             modal: 'add_transfer',
