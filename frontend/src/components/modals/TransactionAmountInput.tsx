@@ -3,10 +3,11 @@ import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
 import AmountInput from "../input/AmountInput";
-import { FormValues, isRecord, transformedFormValues } from "./TransactionModal";
+import { TransactionFormType } from "../../types/Transaction";
+import { isRecord } from "../../types/Record";
 
 interface TransactionAmountInputProps {
-    form: UseFormReturnType<FormValues, (vals: FormValues) => transformedFormValues>
+    form: TransactionFormType
     currency?: CurrencyQueryResult
 }
 
@@ -64,27 +65,27 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
             <Grid.Col span='content'>
                 <Button.Group>
                     <Button
-                        className={cx(classes.incExpButton, form.values.isExpense ? classes.incomeOff : classes.incomeOn)}
+                        className={cx(classes.incExpButton, form.values.is_expense ? classes.incomeOff : classes.incomeOn)}
                         onClick={() => {
-                            if (form.values.isExpense) {
+                            if (form.values.is_expense) {
                                 form.values.items
                                     .forEach((item, i) => isRecord(item) ? form.setFieldValue(
                                         `items.${i}.category_id`, null
                                     ) : null)
                             }
-                            form.setFieldValue('isExpense', false);
+                            form.setFieldValue('is_expense', false);
                         }}
                     ><TbPlus size={28} /></Button>
                     <Button
-                        className={cx(classes.incExpButton, form.values.isExpense ? classes.expenseOn : classes.expenseOff)}
+                        className={cx(classes.incExpButton, form.values.is_expense ? classes.expenseOn : classes.expenseOff)}
                         onClick={() => {
-                            if (!form.values.isExpense) {
+                            if (!form.values.is_expense) {
                                 form.values.items
                                     .forEach((item, i) => isRecord(item) ? form.setFieldValue(
                                         `items.${i}.category_id`, null
                                     ) : null)
                             }
-                            form.setFieldValue('isExpense', true);
+                            form.setFieldValue('is_expense', true);
                         }}
                     ><TbMinus size={28} /></Button>
                 </Button.Group>

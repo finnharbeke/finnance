@@ -1,13 +1,12 @@
-import re
 from datetime import datetime
 from http import HTTPStatus
 
+from finnance.errors import APIError, validate
+from finnance.models import Account, AccountTransfer, Currency
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
 
 from finnance import db
-from finnance.errors import APIError, validate
-from finnance.models import Account, AccountTransfer, Currency
 
 transfers = Blueprint('transfers', __name__, url_prefix='/api/transfers')
 
@@ -55,7 +54,7 @@ def add_transfer(src_id: int, dst_id: int, src_amount: int, dst_amount: int, dat
         date_issued=date_issued, comment=comment, user_id=current_user.id)
     db.session.add(transfer)
     db.session.commit()
-    return HTTPStatus.CREATED
+    return jsonify({}), HTTPStatus.CREATED
 
 @transfers.route("/<int:transfer_id>/edit", methods=["PUT"])
 @login_required
@@ -111,4 +110,4 @@ def edit_transfer(transfer_id: int, **data):
         transfer.comment = data['comment']
 
     db.session.commit()
-    return HTTPStatus.CREATED
+    return jsonify({}), HTTPStatus.CREATED

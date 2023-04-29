@@ -2,17 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { CurrencyFormValues } from "../../components/Currency";
 import { OrderFormValues } from "../../components/account/AccountList";
-import { transformedFormValues } from "../../components/modals/TransactionModal";
-
-export const useAddTransaction = () => {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: (values: transformedFormValues) =>
-            axios.post('/api/transactions/add', values),
-        onSuccess: () => queryClient.invalidateQueries(["changes"])
-    });
-}
-
 
 export const useAddCurrency = () => {
     const queryClient = useQueryClient()

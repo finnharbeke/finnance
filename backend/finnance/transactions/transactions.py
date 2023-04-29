@@ -5,7 +5,7 @@ from finnance.agents import create_agent_ifnx
 from finnance.errors import APIError, validate
 from finnance.models import (Account, Agent, Category, Currency, Flow, Record,
                              Transaction)
-from flask import Blueprint
+from flask import Blueprint, Response, jsonify
 from flask_login import current_user, login_required
 
 from finnance import db
@@ -63,8 +63,8 @@ def add_trans(**data):
     if ('account_id' in data and 'currency_id' in data) or ('account_id' not in data and 'currency_id' not in data):
         raise APIError(HTTPStatus.BAD_REQUEST, 'pass either account_id or currency_id')
 
-    if 'account_id' in data['account_id']:
-        account = Account.query.filter_by(id=data['account_id'], user_id=current_user.id)
+    if 'account_id' in data:
+        account = Account.query.filter_by(id=data['account_id'], user_id=current_user.id).first()
         if account is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid account_id')
         data['currency_id'] = account.currency_id
@@ -76,7 +76,7 @@ def add_trans(**data):
     
     records = data.pop('records')
     for record in records:
-        cat = Category.query.filter_by(user_id=current_user.id, id=record.id)
+        cat = Category.query.filter_by(user_id=current_user.id, id=record['category_id']).first()
         if cat is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid category_id')
     # AGENTs
@@ -93,6 +93,7 @@ def add_trans(**data):
 
     trans = Transaction(**data, user_id=current_user.id)
     db.session.add(trans)
+    db.session.commit()
     for record in records:
         db.session.add(
             Record(**record, trans_id=trans.id)
@@ -103,7 +104,7 @@ def add_trans(**data):
         )
     db.session.commit()
         
-    return HTTPStatus.CREATED
+    return jsonify({}), HTTPStatus.CREATED
 
 @transactions.route("/<int:transaction_id>/edit", methods=["PUT"])
 @login_required
@@ -233,4 +234,4 @@ def edit_transaction(transaction_id: int, **data):
 
     db.session.commit()
         
-    return HTTPStatus.CREATED
+    return jsonify({}), HTTPStatus.CREATED

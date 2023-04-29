@@ -1,8 +1,9 @@
 import { useForm } from "@mantine/form"
-import { AccountQueryResult } from "./Account"
-import { DateTime, Duration } from "luxon"
-import axios, { AxiosError } from "axios"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import axios, { AxiosError } from "axios"
+import { DateTime } from "luxon"
+import { AccountQueryResult } from "./Account"
+import { datetimeString } from "./Transaction"
 
 export interface TransferQueryResult {
     id: number,
@@ -48,46 +49,46 @@ export const useTransferForm = (initial: TransferFormValues) =>
         validate: {
             src_id: val => val === null ? 'choose source account' : null,
             dst_id: val => val === null ? 'choose destination' : null,
-            src_amount: val => val === '' ? 'enter source amount' : null,
-            dst_amount: val => val === '' ? 'enter destination amount' : null,
+            src_amount: val => val === '' ? 'enter source amount'
+                : val === 0 ? 'non-zero amount' : null,
+            dst_amount: val => val === '' ? 'enter destination amount'
+                : val === 0 ? 'non-zero amount' : null,
             time: val => val === '' ? 'enter time' : null,
         },
-        transformValues: (fv) => ({
-            ...fv,
+        transformValues: fv => ({
             src_id: fv.src_id === null ? -1 : parseInt(fv.src_id),
             dst_id: fv.dst_id === null ? -1 : parseInt(fv.dst_id),
             src_amount: fv.src_amount === '' ? 0 : fv.src_amount,
             dst_amount: fv.dst_amount === '' ? 0 : fv.dst_amount,
-            date_issued: DateTime.fromJSDate(fv.date).startOf('day').plus(Duration.fromObject({
-                hour: DateTime.fromFormat(fv.time, "HH:mm").hour,
-                minute: DateTime.fromFormat(fv.time, "HH:mm").minute
-            })).toISO({ includeOffset: false })
+            date_issued: datetimeString(fv.date, fv.time),
+            comment: fv.comment
         })
     })
 
-export const useTransferFormValues: (tf?: TransferQueryResult,
-            src?: AccountQueryResult, dst?: AccountQueryResult) => TransferFormValues
-        = (tf, src, dst) =>
-    tf ? {
-        src_id: tf.src_id.toString(),
-        dst_id: tf.dst_id.toString(),
-        src_amount: tf.src_amount,
-        dst_amount: tf.dst_amount,
-        date: DateTime.fromISO(tf.date_issued).startOf('day').toJSDate(),
-        time: DateTime.fromISO(tf.date_issued).toFormat('HH:mm'),
-        comment: tf.comment
-    } : {
-        src_id: src ? src.id.toString() : null,
-        dst_id: dst ? dst.id.toString() : null,
-        src_amount: '',
-        dst_amount: '',
-        date: new Date(),
-        time: DateTime.now().toFormat("HH:mm"),
-        comment: ''
-    }
+export const useTransferFormValues:
+    (tf?: TransferDeepQueryResult, src?: AccountQueryResult, dst?: AccountQueryResult)
+        => TransferFormValues
+    = (tf, src, dst) =>
+        tf ? {
+            src_id: tf.src_id.toString(),
+            dst_id: tf.dst_id.toString(),
+            src_amount: tf.src_amount,
+            dst_amount: tf.dst_amount,
+            date: DateTime.fromISO(tf.date_issued).startOf('day').toJSDate(),
+            time: DateTime.fromISO(tf.date_issued).toFormat('HH:mm'),
+            comment: tf.comment
+        } : {
+            src_id: src ? src.id.toString() : null,
+            dst_id: dst ? dst.id.toString() : null,
+            src_amount: '',
+            dst_amount: '',
+            date: new Date(),
+            time: DateTime.now().toFormat('HH:mm'),
+            comment: ''
+        }
 
 export const useTransfer = (transfer_id: number) =>
-    useQuery<TransferDeepQueryResult, AxiosError>({ queryKey: ["transfers", transfer_id] });
+    useQuery<TransferDeepQueryResult, AxiosError>({ queryKey: ['transfers', transfer_id] });
 
 export const useAddTransfer = () => {
     const queryClient = useQueryClient()
@@ -97,6 +98,18 @@ export const useAddTransfer = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(["changes"])
             queryClient.invalidateQueries(["transfers"])
+        }
+    });
+}
+
+export const useEditTransfer = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ id, values }: { id: number, values: TransferRequest }) =>
+            axios.post(`/api/transfers/${id}/edit`, values),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['changes']);
+            queryClient.invalidateQueries(['transfers']);
         }
     });
 }
