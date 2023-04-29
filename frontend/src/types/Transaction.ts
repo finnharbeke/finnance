@@ -1,12 +1,13 @@
 import { UseFormReturnType, useForm } from "@mantine/form"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import axios, { AxiosError } from "axios"
 import { DateTime, Duration } from "luxon"
+import { useEffect } from "react"
 import { AccountQueryResult } from "./Account"
 import { AgentQueryResult } from "./Agent"
 import { CurrencyQueryResult } from "./Currency"
 import { FlowFormValues, FlowQueryResult, FlowRequest, flowsFormValues, isFlow } from "./Flow"
 import { RecordFormValues, RecordQueryResult, RecordRequest, isRecord, recordsFormValues } from "./Record"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axios, { AxiosError } from "axios"
 
 export interface TransactionQueryResult {
     id: number,
@@ -37,11 +38,13 @@ export interface TransactionFormValues {
     amount: number | ''
     is_expense: boolean
     agent: string
+    comment: string
+
     direct: boolean
     n_flows: number
     n_records: number
+    last_update: number
     items: (FlowFormValues | RecordFormValues)[]
-    comment: string
 }
 
 export interface TransactionRequest {
@@ -67,8 +70,8 @@ export const datetimeString = (date: Date, timeS: string): string => {
     })).toISO({ includeOffset: false })
 }
 
-export const useTransactionForm = (initial: TransactionFormValues) =>
-    useForm<TransactionFormValues, TransactionTransform>({
+export const useTransactionForm = (initial: TransactionFormValues) => {
+    const form = useForm<TransactionFormValues, TransactionTransform>({
         initialValues: initial,
         validate: {
             currency_id: (val, fv) => val === null && fv.account_id === null ? 'choose currency' : null,
@@ -145,7 +148,40 @@ export const useTransactionForm = (initial: TransactionFormValues) =>
                             item.category_id === null ? -1 : parseInt(item.category_id)
                     })),
         })
-    })
+    });
+
+    // auto-adjust item amounts
+    // lil bit sketchy tbh
+    useEffect(() => form.setFieldValue('last_update', -1),
+        // eslint-disable-next-line
+        [form.values.amount, form.values.n_flows, form.values.n_records])
+
+    const sum = form.values.items.reduce(
+        (sum, item) => sum + (item.amount === '' ? 0 : item.amount), 0
+    );
+    useEffect(() => {
+        // without the 20ms the form's not ready
+        new Promise(r => setTimeout(r, 20)).then(() => {
+            const total = form.values.amount;
+            if (total === '' || form.values.items.length === 0) {
+                form.setFieldValue('last_update', -1);
+                return;
+            }
+            let toCorrect = (total - sum);
+            form.values.items.forEach((item, i) => {
+                if (toCorrect === 0 || i === form.values.last_update)
+                    return;
+                const correct = Math.max(-item.amount, toCorrect);
+                form.setFieldValue(`items.${i}.amount`, (item.amount === '' ? 0 : item.amount) + correct);
+                toCorrect -= correct;
+            })
+            form.setFieldValue('last_update', -1);
+        })
+        // eslint-disable-next-line
+    }, [form.values.amount, sum, form.values.n_flows, form.values.n_records])
+
+    return form;
+}
 
 export const useTransactionFormValues:
     (t?: TransactionDeepQueryResult, a?: AccountQueryResult)
@@ -168,7 +204,8 @@ export const useTransactionFormValues:
                 .concat(
                     flowsFormValues(trans.flows, trans.records.length)
                 ),
-            comment: trans.comment
+            comment: trans.comment,
+            last_update: -1
         } : {
             account_id: acc ? acc.id.toString() : null,
             currency_id: null,
@@ -182,6 +219,7 @@ export const useTransactionFormValues:
             n_records: 0,
             items: [],
             comment: '',
+            last_update: -1
         }
 
 
@@ -194,8 +232,9 @@ export const useAddTransaction = () => {
         mutationFn: (values: TransactionRequest) =>
             axios.post('/api/transactions/add', values),
         onSuccess: () => {
-            queryClient.invalidateQueries(['changes'])
-            queryClient.invalidateQueries(['transactions'])
+            queryClient.invalidateQueries(['changes']);
+            queryClient.invalidateQueries(['transactions']);
+            queryClient.invalidateQueries(['accounts']);
         }
     });
 }
@@ -208,6 +247,7 @@ export const useEditTransaction = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transactions']);
+            queryClient.invalidateQueries(['accounts']);
         }
     });
 }

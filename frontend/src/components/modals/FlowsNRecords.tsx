@@ -31,7 +31,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                     onClick={() => {
                         form.clearFieldError('direct');
                         form.insertListItem('items', emptyRecordFormValues(form.values.n_records));
-                        form.setFieldValue('n_records', form.values.n_records + 1)
+                        form.setFieldValue('n_records', form.values.n_records + 1);
                     }}
                     {...other}
                 >
@@ -45,8 +45,8 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                     disabled={form.values.direct} color='pink'
                     onClick={() => {
                         form.clearFieldError('direct');
-                        form.insertListItem('items', emptyFlowFormValues(form.values.n_flows))
-                        form.setFieldValue('n_flows', form.values.n_flows + 1)
+                        form.insertListItem('items', emptyFlowFormValues(form.values.n_flows));
+                        form.setFieldValue('n_flows', form.values.n_flows + 1);
                     }}
                     {...other}
                 >
@@ -80,6 +80,11 @@ const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
                 label={`#${i} flow`} withAsterisk
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
+                onChange={val => {
+                    form.setFieldValue(`items.${i}.amount`, val);
+                    if (val !== '')
+                        form.setFieldValue('last_update', i);
+                }}
             />
         </Grid.Col>
         <Grid.Col span='auto'>
@@ -97,7 +102,7 @@ const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
                         }
                     )
                     form.removeListItem('items', i);
-                    form.setFieldValue('n_flows', form.values.n_flows - 1)
+                    form.setFieldValue('n_flows', form.values.n_flows - 1);
                 }} />
         </Grid.Col>
     </Grid>
@@ -116,6 +121,11 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
                 label={`#${i} record`} withAsterisk
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
+                onChange={val => {
+                    form.setFieldValue(`items.${i}.amount`, val);
+                    if (val !== '')
+                        form.setFieldValue('last_update', i);
+                }}
             />
         </Grid.Col>
         <Grid.Col span='auto'>

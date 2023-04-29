@@ -1,10 +1,9 @@
 import { Button, createStyles, Grid, Input, MantineTheme } from "@mantine/core";
-import { UseFormReturnType } from "@mantine/form";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
-import AmountInput from "../input/AmountInput";
-import { TransactionFormType } from "../../types/Transaction";
 import { isRecord } from "../../types/Record";
+import { TransactionFormType } from "../../types/Transaction";
+import AmountInput from "../input/AmountInput";
 
 interface TransactionAmountInputProps {
     form: TransactionFormType

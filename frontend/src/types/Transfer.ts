@@ -1,9 +1,10 @@
-import { useForm } from "@mantine/form"
+import { UseFormReturnType, useForm } from "@mantine/form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { DateTime } from "luxon"
 import { AccountQueryResult } from "./Account"
 import { datetimeString } from "./Transaction"
+import { useEffect } from "react"
 
 export interface TransferQueryResult {
     id: number,
@@ -30,6 +31,7 @@ export interface TransferFormValues {
     date: Date
     time: string
     comment: string
+    locked: boolean
 }
 
 export interface TransferRequest {
@@ -43,8 +45,10 @@ export interface TransferRequest {
 
 export type TransferTransform = (fv: TransferFormValues) => TransferRequest
 
-export const useTransferForm = (initial: TransferFormValues) =>
-    useForm<TransferFormValues, TransferTransform>({
+export type TransferFormType = UseFormReturnType<TransferFormValues, TransferTransform>
+
+export const useTransferForm = (initial: TransferFormValues) => {
+    const form = useForm<TransferFormValues, TransferTransform>({
         initialValues: initial,
         validate: {
             src_id: val => val === null ? 'choose source account' : null,
@@ -65,6 +69,15 @@ export const useTransferForm = (initial: TransferFormValues) =>
         })
     })
 
+    useEffect(() => {
+        if (form.values.locked)
+            form.setFieldValue('dst_amount', form.values.src_amount)
+        // eslint-disable-next-line
+    }, [form.values.locked, form.values.src_amount])
+
+    return form;
+}
+
 export const useTransferFormValues:
     (tf?: TransferDeepQueryResult, src?: AccountQueryResult, dst?: AccountQueryResult)
         => TransferFormValues
@@ -76,7 +89,8 @@ export const useTransferFormValues:
             dst_amount: tf.dst_amount,
             date: DateTime.fromISO(tf.date_issued).startOf('day').toJSDate(),
             time: DateTime.fromISO(tf.date_issued).toFormat('HH:mm'),
-            comment: tf.comment
+            comment: tf.comment,
+            locked: tf.src_amount === tf.dst_amount
         } : {
             src_id: src ? src.id.toString() : null,
             dst_id: dst ? dst.id.toString() : null,
@@ -84,7 +98,8 @@ export const useTransferFormValues:
             dst_amount: '',
             date: new Date(),
             time: DateTime.now().toFormat('HH:mm'),
-            comment: ''
+            comment: '',
+            locked: true
         }
 
 export const useTransfer = (transfer_id: number) =>
@@ -96,8 +111,9 @@ export const useAddTransfer = () => {
         mutationFn: (values: TransferRequest) =>
             axios.post('/api/transfers/add', values),
         onSuccess: () => {
-            queryClient.invalidateQueries(["changes"])
-            queryClient.invalidateQueries(["transfers"])
+            queryClient.invalidateQueries(["changes"]);
+            queryClient.invalidateQueries(["transfers"]);
+            queryClient.invalidateQueries(['accounts']);
         }
     });
 }
@@ -110,6 +126,7 @@ export const useEditTransfer = () => {
         onSuccess: () => {
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transfers']);
+            queryClient.invalidateQueries(['accounts']);
         }
     });
 }

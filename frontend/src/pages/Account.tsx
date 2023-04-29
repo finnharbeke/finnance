@@ -5,7 +5,7 @@ import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
 import Placeholder from "../components/Placeholder";
 import { FilterableChanges } from "../components/account/ChangePills";
-import { openTransactionModal } from "../components/modals/TransactionModal";
+import { openAddTransactionModal } from "../components/modals/TransactionModal";
 import useIsPhone from "../hooks/useIsPhone";
 import NotFound from "./404";
 import useAmount from "../hooks/useAmount";
@@ -42,7 +42,7 @@ export default function AccountPage() {
             <TbCirclePlus size={40} />
         } onClick={() => {
             setLoading(true);
-            openTransactionModal({
+            openAddTransactionModal({
                 title: `new transaction - ${account.desc}`,
                 fullScreen: isPhone,
                 innerProps: {
