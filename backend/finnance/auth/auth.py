@@ -108,17 +108,14 @@ def register(username: str, email: str, password: str):
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({
-        "success": User.query.filter_by(username=username).first() is not None,
-    })
+    return HTTPStatus.CREATED
 
 
 @auth.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    return jsonify({
-        "success": logout_user()
-    })
+    logout_user()
+    return HTTPStatus.OK
 
 
 @auth.route("")

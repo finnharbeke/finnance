@@ -21,7 +21,7 @@ def all_currencies():
 def currency(currency_id):
     currency = Currency.query.filter_by(user_id=current_user.id, id=currency_id).first()
     if currency is None:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'invalid currency_id')
+        raise APIError(HTTPStatus.NOT_FOUND)
     return currency.api()
 
 @currencies.route("/add", methods=["POST"])
@@ -42,6 +42,4 @@ def add_currency(code, decimals):
     curr = Currency(code=code, decimals=decimals, user_id=current_user.id)
     db.session.add(curr)
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return HTTPStatus.CREATED

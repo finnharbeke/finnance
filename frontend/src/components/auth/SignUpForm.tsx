@@ -53,9 +53,7 @@ export function SignUpForm({ ...others }: LoginFormProps) {
                     email: form.values.email,
                     password: form.values.password,
                 }, {
-                    onSuccess: ({ data }) => (
-                        data.success && navigate('/login')
-                    ),
+                    onSuccess: () => navigate('/login'),
                     onSettled: () => setLoading(false)
                 })
             }).catch(handleAxiosError)

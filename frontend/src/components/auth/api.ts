@@ -7,10 +7,6 @@ interface Auth {
     auth: boolean
 }
 
-interface Success {
-    success: boolean
-}
-
 export const useAuth = () =>
     useQuery<Auth, AxiosError>({ queryKey: ["auth"] });
 
@@ -47,7 +43,7 @@ interface RegisterProps extends LoginProps {
 export const useRegister = () =>
     useMutation({
         mutationFn: (values: RegisterProps) =>
-            axios.post<Success>('/api/auth/register', values),
+            axios.post('/api/auth/register', values),
     })
 
 export const useLogout = () => {

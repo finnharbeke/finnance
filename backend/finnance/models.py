@@ -313,8 +313,7 @@ class Category(db.Model, JSONModel):
 
     @property
     def parent(self):
-        return Category.query.filter_by(id=self.parent_id
-                                        ).order_by(Category.order).first()
+        return Category.query.filter_by(id=self.parent_id).first()
 
     __table_args__ = (
         UniqueConstraint('user_id', 'desc', 'is_expense'),
