@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import { Change } from '../../types/Account';
-import { AgentQueryResult } from '../../types/Agent';
 import { CurrencyQueryResult } from '../../types/Currency';
 import { UserQueryResult } from "../../types/User";
 
@@ -12,12 +11,6 @@ export const getAxiosData = async (url: string) => {
 
 export const useCurrentUser = () =>
     useQuery<UserQueryResult, AxiosError>({ queryKey: ["auth", "me"] });
-
-export const useAgents = () =>
-    useQuery<AgentQueryResult[], AxiosError>({ queryKey: ["agents"] });
-
-export const useAgent = (agent_id: number) =>
-    useQuery<AgentQueryResult, AxiosError>({ queryKey: ["agents", agent_id] });
 
 export const useCurrencies = () =>
     useQuery<CurrencyQueryResult[], AxiosError>({ queryKey: ["currencies"] });

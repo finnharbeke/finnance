@@ -1,6 +1,6 @@
 import { Autocomplete, AutocompleteProps } from "@mantine/core";
-import { useAgents } from "../../hooks/api/useQuery";
 import Placeholder from "../Placeholder";
+import { useAgents } from "../../types/Agent";
 
 const AgentInput = (props: Omit<AutocompleteProps, 'data'>) => {
     const query = useAgents();
