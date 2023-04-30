@@ -100,7 +100,7 @@ def edit_account(account_id: int, **data):
             trans.currency_id = data['currency_id']
         
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @accounts.route("/orders", methods=["PUT"])
 @login_required
@@ -143,7 +143,7 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         account.order = order
 
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @accounts.route("/add", methods=["POST"])
 @login_required
@@ -171,4 +171,4 @@ def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int,
         date_created=date_created, currency_id=currency_id, user_id=current_user.id)
     db.session.add(account)
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED

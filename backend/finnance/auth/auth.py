@@ -108,14 +108,14 @@ def register(username: str, email: str, password: str):
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 
 @auth.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
-    return jsonify({}), HTTPStatus.OK
+    return '', HTTPStatus.OK
 
 
 @auth.route("")

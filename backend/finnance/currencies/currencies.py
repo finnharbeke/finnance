@@ -42,4 +42,8 @@ def add_currency(code, decimals):
     curr = Currency(code=code, decimals=decimals, user_id=current_user.id)
     db.session.add(curr)
     db.session.commit()
+<<<<<<< HEAD
     return jsonify({}), HTTPStatus.CREATED
+=======
+    return '', HTTPStatus.CREATED
+>>>>>>> dev
