@@ -54,7 +54,7 @@ def add_transfer(src_id: int, dst_id: int, src_amount: int, dst_amount: int, dat
         date_issued=date_issued, comment=comment, user_id=current_user.id)
     db.session.add(transfer)
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @transfers.route("/<int:transfer_id>/edit", methods=["PUT"])
 @login_required
@@ -110,4 +110,4 @@ def edit_transfer(transfer_id: int, **data):
         transfer.comment = data['comment']
 
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED

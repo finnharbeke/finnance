@@ -110,7 +110,7 @@ def add_trans(**data):
         )
     db.session.commit()
         
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @transactions.route("/<int:transaction_id>/edit", methods=["PUT"])
 @login_required
@@ -254,4 +254,4 @@ def edit_transaction(transaction_id: int, **data):
 
     db.session.commit()
         
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED

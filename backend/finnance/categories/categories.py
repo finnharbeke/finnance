@@ -61,7 +61,7 @@ def add_category(desc: str, is_expense: bool, color: str, usable: bool, parent_i
         
     db.session.add(category)
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @categories.route("/<int:category_id>/edit", methods=["PUT"])
 @login_required
@@ -106,7 +106,7 @@ def edit_category(category_id: int, **data):
         raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
         
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @categories.route("/orders", methods=["PUT"])
 @login_required
@@ -151,4 +151,4 @@ def edit_category_orders(orders: list[int], ids: list[int]):
         category.order = order
 
     db.session.commit()
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
