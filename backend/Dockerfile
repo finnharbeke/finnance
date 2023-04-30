@@ -18,4 +18,4 @@ COPY wsgi.py /app
 COPY finnance /app/finnance
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["/env/bin/gunicorn", "--preload", "-w", "4", "--bind", "0.0.0.0:5050", "wsgi:app"]
+CMD ["/env/bin/gunicorn", "--preload", "-w", "4", "--bind", "0.0.0.0:5050", "--log-level", "debug", "wsgi:app"]
