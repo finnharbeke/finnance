@@ -12,9 +12,7 @@ const AgentInput = (props: Omit<AutocompleteProps, 'data'>) => {
 
     return <Autocomplete
         placeholder='unimensa'
-        data={agents.map(
-            agent => agent.desc
-        )}
+        data={agents}
         {...props}
     />
 }

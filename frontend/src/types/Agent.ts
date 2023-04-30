@@ -16,7 +16,7 @@ export interface AgentDeepQueryResult extends AgentQueryResult {
 }
 
 export const useAgents = () =>
-    useQuery<AgentQueryResult[], AxiosError>({ queryKey: ["agents"] });
+    useQuery<string[], AxiosError>({ queryKey: ["agents"] });
 
 export const useAgent = (agent_id: number) =>
     useQuery<AgentDeepQueryResult, AxiosError>({ queryKey: ["agents", agent_id] });
