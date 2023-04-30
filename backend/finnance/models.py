@@ -28,7 +28,7 @@ class JSONModel:
     def obj_to_api(obj):
         return current_app.response_class(
             f"{json.dumps(obj, default=JSONModel.default)}\n",
-            mimetype=current_app.config["JSONIFY_MIMETYPE"],
+            mimetype=current_app.json.mimetype,
         )
 
     @staticmethod
