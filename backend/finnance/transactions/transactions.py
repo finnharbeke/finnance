@@ -15,7 +15,7 @@ transactions = Blueprint('transactions', __name__, url_prefix='/api/transactions
 @transactions.route("/<int:transaction_id>")
 @login_required
 def transaction(transaction_id: int):
-    trans = Transaction.query.filter_by(id=transaction_id).first()
+    trans = Transaction.query.filter_by(id=transaction_id, user_id=current_user.id).first()
     if trans is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     return trans.api()
