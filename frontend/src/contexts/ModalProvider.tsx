@@ -1,6 +1,6 @@
 import { ModalsProvider } from "@mantine/modals";
 import { ReactNode } from "react";
-import { AddTransactionModal, EditTransactionModal } from "../components/modals/TransactionModal";
+import { AddTransactionModal, EditTransactionModal } from "../components/transaction/TransactionModal";
 import { AccountModal } from "../components/account/AccountModal";
 import { CategoryModal } from "../components/category/CategoryModal";
 import { AddTransferModal, EditTransferModal } from "../components/transfer/TransferModal";

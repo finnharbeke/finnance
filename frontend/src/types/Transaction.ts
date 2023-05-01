@@ -8,6 +8,7 @@ import { AgentQueryResult } from "./Agent"
 import { CurrencyQueryResult } from "./Currency"
 import { FlowFormValues, FlowQueryResult, FlowRequest, flowsFormValues, isFlow } from "./Flow"
 import { RecordFormValues, RecordQueryResult, RecordRequest, isRecord, recordsFormValues } from "./Record"
+import { getAxiosData, searchParams, searchParamsProps } from "../query"
 
 export interface TransactionQueryResult {
     id: number,
@@ -235,6 +236,25 @@ export const useTransactionFormValues:
 
 export const useTransaction = (trans_id: number) =>
     useQuery<TransactionDeepQueryResult, AxiosError>({ queryKey: ['transactions', trans_id] });
+
+interface useTransactionsProps extends searchParamsProps {
+    start?: string
+    end?: string
+    account_id?: string | null
+    pagesize: number
+    page: number
+}
+
+interface useTransactionsReturn {
+    transactions: TransactionDeepQueryResult[]
+    pages: number
+}
+
+export const useTransactions = (props: useTransactionsProps) =>
+    useQuery<useTransactionsReturn, AxiosError>({
+        queryKey: ["transaction", props],
+        queryFn: () => getAxiosData(`/api/transactions?${searchParams(props)}`)
+    });
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()

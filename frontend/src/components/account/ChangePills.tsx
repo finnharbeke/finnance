@@ -11,7 +11,7 @@ import useIsPhone from "../../hooks/useIsPhone";
 import { Change, isChangeTransaction, useAccount, useChanges } from "../../types/Account";
 import { DataPill } from "../DataPill";
 import Placeholder from "../Placeholder";
-import { openEditTransactionModal } from "../modals/TransactionModal";
+import { openEditTransactionModal } from "../transaction/TransactionModal";
 import { openEditTransferModal } from "../transfer/TransferModal";
 
 interface FormValues {
@@ -52,7 +52,7 @@ export function FilterableChanges({ id }: { id: number }) {
     const form = useForm<FormValues>()
 
     if (query.isError)
-        return <Placeholder height={pagesize * 30} queries={[]} />
+        return <Placeholder height={pagesize * 30} queries={[query]} />
 
     const pages = query.data?.pages;
     const changes = query.data?.changes;

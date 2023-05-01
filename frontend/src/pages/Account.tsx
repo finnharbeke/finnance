@@ -5,7 +5,7 @@ import { TbCirclePlus } from "react-icons/tb";
 import { useParams } from "react-router";
 import Placeholder from "../components/Placeholder";
 import { FilterableChanges } from "../components/account/ChangePills";
-import { openAddTransactionModal } from "../components/modals/TransactionModal";
+import { openAddTransactionModal } from "../components/transaction/TransactionModal";
 import useIsPhone from "../hooks/useIsPhone";
 import NotFound from "./404";
 import useAmount from "../hooks/useAmount";
