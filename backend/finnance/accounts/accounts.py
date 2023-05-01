@@ -163,3 +163,38 @@ def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int,
     db.session.add(account)
     db.session.commit()
     return '', HTTPStatus.CREATED
+
+@accounts.route("/<int:account_id>/dependencies")
+@login_required
+def account_dependencies(account_id: int):
+    acc = Account.query.filter_by(user_id=current_user.id, id=account_id).first()
+    if acc is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    total = len(acc.transactions)
+    total += len(acc.in_transfers)
+    total += len(acc.out_transfers)
+
+    return jsonify(total)
+
+@accounts.route("/<int:account_id>/delete", methods=["DELETE"])
+@login_required
+def delete_account(account_id: int):
+    acc = Account.query.filter_by(user_id=current_user.id, id=account_id).first()
+    if acc is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    for trans in acc.transactions:
+        for flow in trans.flows:
+            db.session.delete(flow)
+        for rec in trans.records:
+            db.session.delete(rec)
+        db.session.delete(trans)
+    for tf in acc.in_transfers:
+        db.session.delete(tf)
+    for tf in acc.out_transfers:
+        db.session.delete(tf)
+    db.session.delete(acc)
+    db.session.commit()
+
+    return jsonify({}), HTTPStatus.OK

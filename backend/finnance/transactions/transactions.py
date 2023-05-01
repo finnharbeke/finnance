@@ -155,7 +155,7 @@ def add_trans(**data):
         )
     db.session.commit()
         
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
 
 @transactions.route("/<int:transaction_id>/edit", methods=["PUT"])
 @login_required
@@ -299,4 +299,20 @@ def edit_transaction(transaction_id: int, **data):
 
     db.session.commit()
         
-    return jsonify({}), HTTPStatus.CREATED
+    return '', HTTPStatus.CREATED
+
+@transactions.route("/<int:transaction_id>/delete", methods=["DELETE"])
+@login_required
+def delete_transaction(transaction_id: int):
+    trans = Transaction.query.filter_by(user_id=current_user.id, id=transaction_id).first()
+    if trans is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    for flow in trans.flows:
+        db.session.delete(flow)
+    for rec in trans.records:
+        db.session.delete(rec)
+    db.session.delete(trans)
+    db.session.commit()
+
+    return '', HTTPStatus.OK

@@ -111,3 +111,15 @@ def edit_transfer(transfer_id: int, **data):
 
     db.session.commit()
     return '', HTTPStatus.CREATED
+
+@transfers.route("/<int:transfer_id>/delete", methods=["DELETE"])
+@login_required
+def delete_transfer(transfer_id: int):
+    tf = AccountTransfer.query.filter_by(user_id=current_user.id, id=transfer_id).first()
+    if tf is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    db.session.delete(tf)
+    db.session.commit()
+
+    return '', HTTPStatus.OK

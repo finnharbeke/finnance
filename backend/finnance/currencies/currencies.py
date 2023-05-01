@@ -43,3 +43,34 @@ def add_currency(code, decimals):
     db.session.add(curr)
     db.session.commit()
     return '', HTTPStatus.CREATED
+
+@currencies.route("/<int:currency_id>/dependencies")
+@login_required
+def currency_dependencies(currency_id: int):
+    curr = Currency.query.filter_by(user_id=current_user.id, id=currency_id).first()
+    if curr is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+
+    return jsonify(dict(accounts=len(curr.accounts), transactions=len(curr.transactions)))
+
+@currencies.route("/<int:currency_id>/delete", methods=["DELETE"])
+@login_required
+def delete_currency(currency_id: int):
+    curr = Currency.query.filter_by(user_id=current_user.id, id=currency_id).first()
+    if curr is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    for trans in curr.transactions:
+        for flow in trans.flows:
+            db.session.delete(flow)
+        for rec in trans.records:
+            db.session.delete(rec)
+        db.session.delete(trans)
+    
+    for acc in curr.accounts:
+        db.session.delete(acc)
+    
+    db.session.delete(curr)
+    db.session.commit()
+
+    return jsonify({}), HTTPStatus.OK
