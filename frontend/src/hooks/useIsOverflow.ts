@@ -2,27 +2,25 @@ import { RefObject, useEffect, useState } from "react";
 
 // thanks robin; https://www.robinwieruch.de/react-custom-hook-check-if-overflow/
 
-export const useIsOverflow = (ref: RefObject<HTMLDivElement>, callback?: (isOverflow: boolean) => void) => {
+export const useIsOverflow = (ref: RefObject<HTMLDivElement>, trigger?: any) => {
     const [isOverflow, setIsOverflow] = useState(false);
   
     useEffect(() => {
       const { current } = ref;
   
-      const trigger = () => {
+      const update = () => {
         const hasOverflow = current === null ?
           false
           :
           current.scrollWidth > current.clientWidth;
   
         setIsOverflow(hasOverflow);
-  
-        if (callback) callback(hasOverflow);
       };
   
       if (current) {
-        trigger();
+        update();
       }
-    }, [callback, ref]);
+    }, [trigger, ref]);
   
     return isOverflow;
   }

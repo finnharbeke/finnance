@@ -88,6 +88,7 @@ const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} flow`} withAsterisk
+                showPrefix={false}
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
                 onChange={val => {
@@ -129,6 +130,7 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
         <Grid.Col span={4}>
             <AmountInput
                 label={`#${i} record`} withAsterisk
+                showPrefix={false}
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
                 onChange={val => {

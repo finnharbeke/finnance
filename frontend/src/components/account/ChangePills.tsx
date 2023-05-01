@@ -1,15 +1,15 @@
-import { ActionIcon, Button, Center, Collapse, Flex, Grid, Group, Loader, Popover, Text, TextInput, Title, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Button, Center, Collapse, Group, Loader, Text, TextInput, Title, useMantineTheme } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { DateTime } from "luxon";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPencil, TbPlus } from "react-icons/tb";
+import { useEffect, useState } from "react";
+import { TbArrowsLeftRight, TbChevronLeft, TbChevronRight, TbMinus, TbPlus } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import useAmount from "../../hooks/useAmount";
-import { useIsOverflow } from "../../hooks/useIsOverflow";
 import useIsPhone from "../../hooks/useIsPhone";
 import { Change, isChangeTransaction, useAccount, useChanges } from "../../types/Account";
+import { DataPill } from "../DataPill";
 import Placeholder from "../Placeholder";
 import { openEditTransactionModal } from "../modals/TransactionModal";
 import { openEditTransferModal } from "../transfer/TransferModal";
@@ -87,91 +87,14 @@ export function FilterableChanges({ id }: { id: number }) {
     </>
 }
 
-const useStyles = createStyles(theme => ({
-    pill: {
-        backgroundColor: theme.colorScheme === 'light' ?
-            theme.colors['gray'][1] : theme.colors['gray'][8],
-        marginLeft: 0,
-        marginRight: 0,
-        borderRadius: theme.fn.radius(),
-        '& > * > *': {
-            height: '2rem',
-            paddingLeft: theme.spacing.xs,
-            paddingRight: theme.spacing.xs,
-            borderRadius: theme.fn.radius(),
-            backgroundColor: theme.colorScheme === 'light' ?
-                theme.white : theme.colors['gray'][9],
-        }
-    },
-    edit: {
-        '&:hover': {
-            backgroundColor: theme.colorScheme === 'light' ?
-                theme.colors['gray'][0] : theme.colors['dark'][7],
-        },
-        '&:active': {
-            paddingTop: 2
-        },
-
-    },
-    ellipsis: {
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        textOverflow: 'ellipsis',
-    },
-    amount: {
-        textAlign: 'right',
-        width: '100%'
-    }
-}))
-
-interface PopoverOrTooltipProps {
-    label: string
-    children: ReactNode
-    overflow: boolean
-    popover: ReactNode
-    multiline?: boolean
-    width?: number
-}
-
-const PopoverOrTooltip = ({ label, children, overflow, multiline, width, popover }: PopoverOrTooltipProps) => {
-    const isPhone = useIsPhone();
-    return isPhone ?
-        <Popover disabled={!overflow} width={width}>
-            <Popover.Target>
-                {children}
-            </Popover.Target>
-            <Popover.Dropdown>
-                {popover}
-            </Popover.Dropdown>
-        </Popover>
-        :
-        <Tooltip label={label} multiline={multiline}
-            width={width} disabled={!overflow}>
-            {children}
-        </Tooltip>
-
-}
-
 const ChangePill = ({ change }: { change: Change }) => {
     const theme = useMantineTheme();
-    const { classes, cx } = useStyles();
     const isPhone = useIsPhone();
 
     const query = useAccount(change.acc_id);
     const isTransfer = !isChangeTransaction(change);
     const isSource = isTransfer && change.data.src_id === change.acc_id;
     const isExpense = (!isTransfer && change.data.is_expense) || isSource;
-
-    const [loading, setLoading] = useState(false);
-
-    const amountRef = useRef<HTMLDivElement>(null);
-    const amountOverflow = useIsOverflow(amountRef);
-    const agentRef = useRef<HTMLDivElement>(null);
-    const agentOverflow = useIsOverflow(agentRef);
-    const saldoRef = useRef<HTMLDivElement>(null);
-    const saldoOverflow = useIsOverflow(saldoRef);
-    const commentRef = useRef<HTMLDivElement>(null);
-    const commentOverflow = useIsOverflow(commentRef);
 
     const amount = useAmount(isTransfer ?
         isSource ? change.data.src_amount : change.data.dst_amount
@@ -195,85 +118,92 @@ const ChangePill = ({ change }: { change: Change }) => {
         theme.colorScheme === 'light' ? 4 : 6
     ];
 
-    const gutter = 2;
-    return <Grid gutter={gutter} p={gutter / 2} columns={24}
-        mb={isPhone ? 'sm' : 'xs'} className={classes.pill}>
-        <Grid.Col span={3} sm={1}><Center style={{
-            backgroundColor: iconColor
-        }}>
-            {
-                isTransfer ?
-                    <TbArrowsLeftRight size={24} />
-                    :
+    return <DataPill cells={[
+        {
+            type: 'icon',
+            col: {
+                span: 3, sm: 1
+            },
+            cell: {
+                style: { backgroundColor: iconColor },
+                icon: isTransfer ? TbArrowsLeftRight :
                     isExpense ?
-                        <TbMinus size={24} />
-                        :
-                        <TbPlus size={24} />
+                        TbMinus : TbPlus
             }
-        </Center></Grid.Col>
-        <Grid.Col span={7} sm={3}><Center>
-            <Text>{date.toFormat('dd.MM.yy')}</Text>
-        </Center></Grid.Col>
-        <Grid.Col span={5} sm={2}><Center>
-            <Text>{date.toFormat('HH:mm')}</Text>
-        </Center></Grid.Col>
-        <Grid.Col span={9} sm={2}><Center>
-            <PopoverOrTooltip overflow={amountOverflow}
-                label={amount}
-                popover={
-                    <Text color={color}
-                        className={classes.amount}>
-                        {amount}
-                    </Text>
-                }>
-                <Text color={color} ref={amountRef}
-                    className={cx(classes.ellipsis, classes.amount)}>
+        },
+        {
+            type: 'text',
+            col: {
+                span: 7, sm: 3
+            },
+            cell: {
+                align: 'center',
+                text: date.toFormat('dd.MM.yy')
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 5, sm: 2
+            },
+            cell: {
+                align: 'center',
+                text: date.toFormat('HH:mm')
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 9, sm: 2
+            },
+            cell: {
+                align: 'right',
+                text: amount,
+                children: <Text color={color}>
                     {amount}
                 </Text>
-            </PopoverOrTooltip>
-        </Center></Grid.Col>
-        <Grid.Col span={12} sm={6} order={isPhone ? 9 : 5}><Flex align='center'>
-            <PopoverOrTooltip label={change.target} multiline width={250}
-                overflow={agentOverflow} popover={
-                    <Text>{change.target}</Text>
-                }>
-                {
-                    isTransfer ?
-                        <Text className={classes.ellipsis} ref={agentRef}>
-                            <Text component={Link} color={theme.primaryColor}
-                                to={`/accounts/${isSource ? change.data.dst_id : change.data.src_id}`}>
-                                {change.target}
-                            </Text>
-                        </Text>
-                        :
-                        <Text ref={agentRef} className={classes.ellipsis}>
-                            {change.target}
-                        </Text>
-                }
-            </PopoverOrTooltip>
-        </Flex></Grid.Col>
-        <Grid.Col span={9} sm={3} order={isPhone ? 10 : 6}><Center>
-            <PopoverOrTooltip label={saldo}
-                overflow={saldoOverflow} popover={
-                    <Text className={classes.amount}>{saldo}</Text>
-                }>
-                <Text ref={saldoRef}
-                    className={cx(classes.ellipsis, classes.amount)}>
-                    {saldo}
-                </Text>
-            </PopoverOrTooltip>
-        </Center></Grid.Col>
-        <Grid.Col span={3} sm={1} order={8}>
-            <Center className={classes.edit} onClick={() => {
-                setLoading(true);
-                isTransfer ?
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 12, sm: 6, order: isPhone ? 9 : 5
+            },
+            cell: {
+                align: 'left',
+                text: change.target,
+                children: isTransfer ?
+                    <Text component={Link} color={theme.primaryColor}
+                        to={`/accounts/${isSource ? change.data.dst_id : change.data.src_id}`}>
+                        {change.target}
+                    </Text>
+                    : undefined
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 9, sm: 3, order: isPhone ? 10 : 6
+            },
+            cell: {
+                align: 'right',
+                text: saldo,
+            }
+        },
+        {
+            type: 'edit',
+            col: {
+                span: 3, sm: 1, order: 8
+            },
+            cell: {
+                onEdit: () => isTransfer ?
                     openEditTransferModal({
                         title: `edit transfer #${change.data.id}`,
                         fullScreen: isPhone,
                         innerProps: {
                             transfer: change.data
                         }
-                    }).then(() => setLoading(false))
+                    })
                     :
                     openEditTransactionModal({
                         title: `edit transaction #${change.data.id}`,
@@ -281,31 +211,20 @@ const ChangePill = ({ change }: { change: Change }) => {
                         innerProps: {
                             transaction_id: change.data.id
                         }
-                    }).then(() => setLoading(false))
-            }}>
-                {
-                    loading ?
-                        <Loader />
-                        :
-                        <TbPencil size={24} />
-                }
-            </Center>
-        </Grid.Col>
+                    }),
+            }
+        },
         {
-            (change.data.comment !== '' || !isPhone) &&
-            <Grid.Col span={24} sm={6} order={isPhone ? 11 : 7}><Flex align='center'>
-                <PopoverOrTooltip label={change.data.comment} multiline width={250}
-                    overflow={commentOverflow} popover={
-                        <Text>
-                            {change.data.comment}
-                        </Text>
-                    }>
-                    <Text ref={commentRef}
-                        className={classes.ellipsis}>
-                        {change.data.comment}
-                    </Text>
-                </PopoverOrTooltip>
-            </Flex></Grid.Col>
+            type: 'text',
+            col: {
+                span: change.data.comment === '' && isPhone ? -1 : 24,
+                sm: 6,
+                order: isPhone ? 11 : 7
+            },
+            cell: {
+                align: 'left',
+                text: change.data.comment,
+            }
         }
-    </Grid >
+    ]} />
 }
