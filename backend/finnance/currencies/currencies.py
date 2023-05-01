@@ -68,6 +68,10 @@ def delete_currency(currency_id: int):
         db.session.delete(trans)
     
     for acc in curr.accounts:
+        for tf in acc.in_transfers:
+            db.session.delete(tf)
+        for tf in acc.out_transfers:
+            db.session.delete(tf)
         db.session.delete(acc)
     
     db.session.delete(curr)
