@@ -279,12 +279,13 @@ export const useEditTransaction = () => {
     });
 }
 
-export const useDeleteTransaction = () => {
+export const useDeleteTransaction = (id: number) => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: (id: number) =>
+        mutationFn: () =>
             axios.delete(`/api/transactions/${id}/delete`),
         onSuccess: () => {
+            queryClient.removeQueries({ queryKey: ['transactions', id]})
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transactions']);
             queryClient.invalidateQueries(['accounts']);

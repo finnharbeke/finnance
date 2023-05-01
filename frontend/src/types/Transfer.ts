@@ -136,12 +136,13 @@ export const useEditTransfer = () => {
     });
 }
 
-export const useDeleteTransfer = () => {
+export const useDeleteTransfer = (id: number) => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: (id: number) =>
+        mutationFn: () =>
             axios.delete(`/api/transfers/${id}/delete`),
         onSuccess: () => {
+            queryClient.removeQueries({ queryKey: ['transfers', id]});
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transfers']);
             queryClient.invalidateQueries(['accounts']);

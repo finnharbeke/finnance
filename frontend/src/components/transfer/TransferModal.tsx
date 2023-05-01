@@ -1,11 +1,12 @@
-import { Button, Center, Grid, Switch, TextInput } from "@mantine/core"
+import { Button, Center, Grid, Popover, Switch, Text, TextInput } from "@mantine/core"
 import { openContextModal } from "@mantine/modals"
 import { ContextModalProps, OpenContextModal } from "@mantine/modals/lib/context"
+import { showNotification } from "@mantine/notifications"
 import { useState } from "react"
 import { TbArrowBigRightFilled, TbLock, TbLockOpen } from 'react-icons/tb'
 import useIsPhone from "../../hooks/useIsPhone"
 import { AccountDeepQueryResult, useAccounts } from "../../types/Account"
-import { TransferFormType, TransferQueryResult, TransferRequest, useAddTransfer, useEditTransfer, useTransferForm, useTransferFormValues } from "../../types/Transfer"
+import { TransferFormType, TransferQueryResult, TransferRequest, useAddTransfer, useDeleteTransfer, useEditTransfer, useTransferForm, useTransferFormValues } from "../../types/Transfer"
 import Placeholder from "../Placeholder"
 import AccountInput from "../input/AccountInput"
 import AmountInput from "../input/AmountInput"
@@ -149,6 +150,7 @@ export const EditTransferModal = ({ context, id, innerProps: { transfer } }: Con
     const [loading, setLoading] = useState(false);
 
     const editTransfer = useEditTransfer();
+    const delTransfer = useDeleteTransfer(transfer.id);
 
     function handleSubmit(values: TransferRequest) {
         setLoading(true);
@@ -164,5 +166,28 @@ export const EditTransferModal = ({ context, id, innerProps: { transfer } }: Con
             loading={loading}>
             edit
         </Button>
+        <Popover width='target'>
+            <Popover.Target>
+                <Button fullWidth mt="xl" color='red'
+                    variant='light'>
+                    delete transfer
+                </Button>
+            </Popover.Target>
+            <Popover.Dropdown>
+                <Text align='center' mb='sm'>are you sure?</Text>
+                <Button fullWidth color='red' onClick={() => {
+                    context.closeModal(id);
+                    delTransfer.mutateAsync(undefined, {
+                        onSuccess: () => showNotification({
+                            color: 'green',
+                            message: `deleted transfer #${transfer.id}`,
+                            autoClose: 2000
+                        })
+                    });
+                }}>
+                    delete
+                </Button>
+            </Popover.Dropdown>
+        </Popover>
     </form>
 }

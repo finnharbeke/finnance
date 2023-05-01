@@ -105,15 +105,14 @@ export const useEditAccount = () => {
 export const useAccountDependencies = (account_id: number) =>
     useQuery<number, AxiosError>({ queryKey: ["accounts", account_id, "dependencies"] });
 
-export const useDeleteAccount = () => {
+export const useDeleteAccount = (id: number) => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: (id: number) =>
+        mutationFn: () =>
             axios.delete(`/api/accounts/${id}/delete`),
         onSuccess: () => {
-            queryClient.invalidateQueries(['changes']);
-            queryClient.invalidateQueries(['accounts']);
-            queryClient.invalidateQueries(['accounts']);
+            queryClient.removeQueries({ queryKey: ['accounts', id]})
+            queryClient.invalidateQueries();
         }
     });
 }

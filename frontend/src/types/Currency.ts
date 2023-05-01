@@ -26,15 +26,14 @@ interface CurrencyDepsQueryResult {
 export const useCurrencyDependencies = (currency_id: number) =>
     useQuery<CurrencyDepsQueryResult, AxiosError>({ queryKey: ["currencies", currency_id, "dependencies"] });
 
-export const useDeleteCurrency = () => {
+export const useDeleteCurrency = (id: number) => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) =>
+        mutationFn: () =>
             axios.delete(`/api/currencies/${id}/delete`),
         onSuccess: () => {
-            queryClient.invalidateQueries(['changes']);
-            queryClient.invalidateQueries(['currencies']);
-            queryClient.invalidateQueries(['currencies']);
+            queryClient.removeQueries({ queryKey: ['currencies', id]})
+            queryClient.invalidateQueries();
         }
     });
 }

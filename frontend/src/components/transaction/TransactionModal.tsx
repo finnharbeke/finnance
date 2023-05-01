@@ -1,12 +1,13 @@
-import { Button, Divider, TextInput } from "@mantine/core";
+import { Button, Divider, Popover, Text, TextInput } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
+import { showNotification } from "@mantine/notifications";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { AccountDeepQueryResult } from "../../types/Account";
 import { useCategories } from "../../types/Category";
 import { CurrencyQueryResult, useCurrencies } from "../../types/Currency";
-import { TransactionFormType, TransactionRequest, useAddTransaction, useEditTransaction, useTransaction, useTransactionForm, useTransactionFormValues } from "../../types/Transaction";
+import { TransactionFormType, TransactionRequest, useAddTransaction, useDeleteTransaction, useEditTransaction, useTransaction, useTransactionForm, useTransactionFormValues } from "../../types/Transaction";
 import Placeholder from "../Placeholder";
 import AgentInput from "../input/AgentInput";
 import CurrencyInput from "../input/CurrencyInput";
@@ -127,6 +128,7 @@ export const EditTransactionModal = ({ context, id, innerProps: { transaction_id
     const form = useTransactionForm(initial);
 
     const editTrans = useEditTransaction();
+    const delTrans = useDeleteTransaction(transaction_id);
 
     const [loading, setLoading] = useState(false);
 
@@ -146,6 +148,29 @@ export const EditTransactionModal = ({ context, id, innerProps: { transaction_id
         <Button fullWidth mt="md" type='submit' loading={loading} >
             edit transaction
         </Button>
+        <Popover width='target'>
+            <Popover.Target>
+                <Button fullWidth mt="xl" color='red'
+                    variant='light'>
+                    delete transaction
+                </Button>
+            </Popover.Target>
+            <Popover.Dropdown>
+                <Text align='center' mb='sm'>are you sure?</Text>
+                <Button fullWidth color='red' onClick={() => {
+                    context.closeModal(id);
+                    delTrans.mutateAsync(undefined, {
+                        onSuccess: () => showNotification({
+                            color: 'green',
+                            message: `deleted transaction #${transaction_id}`,
+                            autoClose: 2000
+                        })
+                    });
+                }}>
+                    delete
+                </Button>
+            </Popover.Dropdown>
+        </Popover>
     </form >
 
 };
