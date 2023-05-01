@@ -1,11 +1,13 @@
 from datetime import datetime
 from http import HTTPStatus
+from math import ceil
 
 from finnance.agents import create_agent_ifnx
 from finnance.errors import APIError, validate
-from finnance.models import (Account, Agent, Category, Currency, Flow, Record,
-                             Transaction)
-from flask import Blueprint, Response, jsonify
+from finnance.models import (Account, Category, Currency, Flow, Record,
+                             Transaction, JSONModel)
+from finnance.params import parseSearchParams, ModelID
+from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
 from finnance import db
@@ -19,6 +21,31 @@ def transaction(transaction_id: int):
     if trans is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     return trans.api()
+
+@transactions.route("")
+@login_required
+def get_transactions():
+    kwargs = parseSearchParams(request.args.to_dict(), dict(
+        start=datetime, end=datetime, account_id=ModelID
+    ))
+
+    result = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date_issued.desc())
+    if 'start' in kwargs:
+        result = result.filter(Transaction.date_issued >= kwargs.get('start'))
+    if 'end' in kwargs:
+        result = result.filter(Transaction.date_issued < kwargs.get('end'))
+    if 'account_id' in kwargs:
+        result = result.filter_by(account_id=kwargs['account_id'].id)
+    
+    pagesize = kwargs.get('pagesize')
+    page = kwargs.get('page')
+    result = result.all()
+    return JSONModel.obj_to_api(dict(
+        pages= ceil(len(result) / pagesize),
+        transactions=[
+        trans.json(deep=True)
+        for trans in result[pagesize*page:pagesize*(page+1)]
+    ]))
 
 @transactions.route("/add", methods=["POST"])
 @login_required

@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 from finnance.errors import APIError, validate
 from finnance.models import Account, Currency, JSONModel
+from finnance.params import parseSearchParams
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
@@ -36,19 +37,9 @@ def changes(account_id):
     if acc is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     
-    kwargs = {"start": None, "end": None, "pagesize": 10, "page": 0, "search": None}
-    
-    for key, val in request.args.to_dict().items():
-        if key in kwargs and val != '':
-            try:
-                if key in ['pagesize', 'page']:
-                    kwargs[key] = int(val)
-                elif key in ['search']:
-                    kwargs[key] = val
-                else:
-                    kwargs[key] = datetime.fromisoformat(val)
-            except ValueError:
-                raise APIError(HTTPStatus.BAD_REQUEST)
+    kwargs = parseSearchParams(request.args.to_dict(), dict(
+        start=datetime, end=datetime, search=str
+    ))
 
     return acc.jsonify_changes(**kwargs)
 
