@@ -278,3 +278,16 @@ export const useEditTransaction = () => {
         }
     });
 }
+
+export const useDeleteTransaction = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (id: number) =>
+            axios.delete(`/api/transactions/${id}/delete`),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['changes']);
+            queryClient.invalidateQueries(['transactions']);
+            queryClient.invalidateQueries(['accounts']);
+        }
+    });
+}

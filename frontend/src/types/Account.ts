@@ -102,7 +102,25 @@ export const useEditAccount = () => {
     });
 }
 
-// CHANGES
+export const useAccountDependencies = (account_id: number) =>
+    useQuery<number, AxiosError>({ queryKey: ["accounts", account_id, "dependencies"] });
+
+export const useDeleteAccount = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (id: number) =>
+            axios.delete(`/api/accounts/${id}/delete`),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['changes']);
+            queryClient.invalidateQueries(['accounts']);
+            queryClient.invalidateQueries(['accounts']);
+        }
+    });
+}
+
+// || =======
+// || CHANGES
+// || =======
 
 export interface ChangeBase {
     type: 'change',
