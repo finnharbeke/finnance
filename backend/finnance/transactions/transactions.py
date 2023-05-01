@@ -26,7 +26,7 @@ def transaction(transaction_id: int):
 @login_required
 def get_transactions():
     kwargs = parseSearchParams(request.args.to_dict(), dict(
-        start=datetime, end=datetime, account_id=ModelID
+        start=datetime, end=datetime, account_id=ModelID, search=str
     ))
 
     result = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date_issued.desc())
@@ -39,7 +39,25 @@ def get_transactions():
     
     pagesize = kwargs.get('pagesize')
     page = kwargs.get('page')
-    result = result.all()
+    if 'search' in kwargs:
+        print(kwargs['search'].lower())
+        print([[
+                t.comment.lower(),
+                t.agent.desc.lower(),
+                t.account.desc.lower() if t.account_id is not None else t.flows[0].agent_desc
+                
+        ] for t in result])
+
+    # search filter
+    result = list(filter(
+        lambda t: 'search' not in kwargs or any(
+            kwargs['search'].lower() in string for string in [
+                t.comment.lower(),
+                t.agent.desc.lower(),
+                t.account.desc.lower() if t.account_id is not None else t.flows[0].agent_desc
+        ]),
+        result.all()
+    ))
     return JSONModel.obj_to_api(dict(
         pages= ceil(len(result) / pagesize),
         transactions=[

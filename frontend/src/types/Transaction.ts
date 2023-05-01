@@ -3,12 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios, { AxiosError } from "axios"
 import { DateTime, Duration } from "luxon"
 import { useEffect, useState } from "react"
+import { FilterRequest } from "../components/Filter"
+import { getAxiosData, searchParams } from "../query"
 import { AccountQueryResult } from "./Account"
 import { AgentQueryResult } from "./Agent"
 import { CurrencyQueryResult } from "./Currency"
 import { FlowFormValues, FlowQueryResult, FlowRequest, flowsFormValues, isFlow } from "./Flow"
 import { RecordFormValues, RecordQueryResult, RecordRequest, isRecord, recordsFormValues } from "./Record"
-import { getAxiosData, searchParams, searchParamsProps } from "../query"
 
 export interface TransactionQueryResult {
     id: number,
@@ -237,12 +238,8 @@ export const useTransactionFormValues:
 export const useTransaction = (trans_id: number) =>
     useQuery<TransactionDeepQueryResult, AxiosError>({ queryKey: ['transactions', trans_id] });
 
-interface useTransactionsProps extends searchParamsProps {
-    start?: string
-    end?: string
+interface useTransactionsProps extends FilterRequest {
     account_id?: string | null
-    pagesize: number
-    page: number
 }
 
 interface useTransactionsReturn {
@@ -252,7 +249,7 @@ interface useTransactionsReturn {
 
 export const useTransactions = (props: useTransactionsProps) =>
     useQuery<useTransactionsReturn, AxiosError>({
-        queryKey: ["transaction", props],
+        queryKey: ['transactions', props],
         queryFn: () => getAxiosData(`/api/transactions?${searchParams(props)}`)
     });
 

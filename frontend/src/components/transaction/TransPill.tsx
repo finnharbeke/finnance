@@ -1,26 +1,39 @@
-import { useMantineTheme, Text } from "@mantine/core";
+import { Center, Loader, Title, useMantineTheme } from "@mantine/core";
+import { DateTime } from "luxon";
+import { TbMinus, TbPlus } from "react-icons/tb";
+import useAmount from "../../hooks/useAmount";
+import useIsPhone from "../../hooks/useIsPhone";
+import { useCurrency } from "../../types/Currency";
 import { TransactionDeepQueryResult, useTransactions } from "../../types/Transaction";
 import { DataPill } from "../DataPill";
-import { TbMinus, TbPlus } from "react-icons/tb";
-import { DateTime } from "luxon";
-import useAmount from "../../hooks/useAmount";
-import { useCurrency } from "../../types/Currency";
+import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
-import useIsPhone from "../../hooks/useIsPhone";
-import { Link } from "react-router-dom";
 import { openEditTransactionModal } from "./TransactionModal";
 
-export const RemotePills = () => {
-    const query = useTransactions({
-        pagesize: 10, page: 0, account_id: null
-    })
+export function FilterableRemotes() {
+    const [filter, setFilter] = useFilterPagination();
+    const query = useTransactions({ ...filter, account_id: null });
 
-    if (!query.isSuccess)
+    if (query.isError)
         return <Placeholder height={300} queries={[query]} />
 
-    return <>{
-        query.data.transactions.map(t => <TransPill trans={t} />)
-    }</>
+    return <>
+        <TransPills transactions={query.data?.transactions} />
+        <FilterPagination filter={filter} setFilter={setFilter} pages={query.data?.pages} />
+    </>
+}
+
+export const TransPills = ({ transactions }: { transactions: TransactionDeepQueryResult[] | undefined }) => {
+    if (transactions === undefined)
+        return <Center><Loader /></Center>
+    return transactions.length > 0 ?
+        <>{
+            transactions.map((t, ix) =>
+                <TransPill trans={t} key={ix} />
+            )
+        }</>
+        :
+        <Title order={4} align='center'>no transactions found</Title>
 }
 
 const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
@@ -84,9 +97,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
             cell: {
                 align: 'right',
                 text: amount,
-                children: <Text color={color}>
-                    {amount}
-                </Text>
+                color: color
             }
         },
         {
@@ -108,15 +119,8 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
                 align: 'left',
                 text: trans.account_id !== null ?
                     trans.account.desc : trans.flows[0].agent_desc,
-                children: trans.account_id === null ?
-                    <Text color='grape'>
-                        {trans.flows[0].agent_desc}
-                    </Text>
-                    :
-                    <Text component={Link} color={theme.primaryColor}
-                        to={`/accounts/${trans.account_id}`}>
-                        {trans.account.desc}
-                    </Text>
+                color: trans.account_id === null ? 'grape' : theme.primaryColor,
+                link: trans.account_id === null ? undefined : `/accounts/${trans.account_id}`
             }
         },
         {

@@ -1,7 +1,8 @@
-import { Center, ColProps, Grid, GridProps, Loader, Popover, Text, Tooltip, createStyles } from "@mantine/core";
+import { Center, ColProps, Grid, GridProps, Loader, MantineColor, Popover, Text, Tooltip, createStyles } from "@mantine/core";
 import { useRef, useState } from "react";
 import { IconType } from "react-icons";
 import { TbPencil } from "react-icons/tb";
+import { Link } from "react-router-dom";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import useIsPhone from "../hooks/useIsPhone";
 
@@ -86,19 +87,20 @@ export const DataPill = ({ cells, ...props }: DataPillProps) => {
 interface TextCellProps {
     align: AlignSetting
     text: string
-    children?: React.ReactNode
+    color?: MantineColor
+    link?: string
 }
 
-const TextCell = ({ children, align, text }: TextCellProps) => {
+const TextCell = ({ align, text, color, link }: TextCellProps) => {
     const isPhone = useIsPhone();
     const ref = useRef<HTMLDivElement>(null);
-    const over = useIsOverflow(ref, children);
+    const over = useIsOverflow(ref, text);
     const { classes: { textCell } } = useStyles();
     const content =
-        <Text ref={ref} className={textCell} align={align}>
+        <Text ref={ref} className={textCell} align={align} color={color}>
             {
-                children === undefined ?
-                    text : children
+                link === undefined ?
+                text : <Text component={Link} to={link} color={color}>{text}</Text>
             }
         </Text>
     const w = 250;

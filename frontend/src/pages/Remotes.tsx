@@ -1,7 +1,7 @@
 import { Button, Title } from "@mantine/core";
 import { useState } from "react";
 import { TbArrowWaveRightUp } from "react-icons/tb";
-import { RemotePills } from "../components/transaction/TransPill";
+import { FilterableRemotes } from "../components/transaction/TransPill";
 import { openAddTransactionModal } from "../components/transaction/TransactionModal";
 import useIsPhone from "../hooks/useIsPhone";
 
@@ -22,6 +22,6 @@ export const RemotesPage = () => {
             }}>
             remote transaction
         </Button>
-        <RemotePills />
+        <FilterableRemotes />
     </>
 }
