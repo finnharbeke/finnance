@@ -2,12 +2,13 @@ import re
 from datetime import datetime
 from http import HTTPStatus
 
+from finnance.errors import APIError, validate
+from finnance.models import Account, Currency, JSONModel
+from finnance.params import parseSearchParams
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
 from finnance import db
-from finnance.errors import APIError, validate
-from finnance.models import Account, Currency, JSONModel
 
 accounts = Blueprint('accounts', __name__, url_prefix='/api/accounts')
 
@@ -36,19 +37,9 @@ def changes(account_id):
     if acc is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     
-    kwargs = {"start": None, "end": None, "pagesize": 10, "page": 0, "search": None}
-    
-    for key, val in request.args.to_dict().items():
-        if key in kwargs and val != '':
-            try:
-                if key in ['pagesize', 'page']:
-                    kwargs[key] = int(val)
-                elif key in ['search']:
-                    kwargs[key] = val
-                else:
-                    kwargs[key] = datetime.fromisoformat(val)
-            except ValueError:
-                raise APIError(HTTPStatus.BAD_REQUEST)
+    kwargs = parseSearchParams(request.args.to_dict(), dict(
+        start=datetime, end=datetime, search=str
+    ))
 
     return acc.jsonify_changes(**kwargs)
 
@@ -69,15 +60,12 @@ def edit_account(account_id: int, **data):
     if account is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     
-    changed = False
     if 'desc' in data:
-        changed = account.desc != data['desc']
         account.desc = data['desc']
     
     if 'color' in data:
         if not re.match('^#[a-fA-F0-9]{6}$', data['color']):
             raise APIError(HTTPStatus.BAD_REQUEST, "color: invalid color hex-string")
-        changed = changed or account.color != data['color']
         account.color = data['color']
 
     if 'date_created' in data:
@@ -86,32 +74,24 @@ def edit_account(account_id: int, **data):
             for ch in account.changes()[0]:
                 if ch.date_issued < new_date:
                     raise APIError(HTTPStatus.BAD_REQUEST, "date_created: there exist account changes before this date")
-            changed = changed or account.date_created != new_date
             account.date_created = new_date
         except ValueError:
             raise APIError(HTTPStatus.BAD_REQUEST, "date_created: invalid isoformat string")
     
     if 'starting_saldo' in data:
-        changed = changed or account.starting_saldo != data['starting_saldo']
         if data['starting_saldo'] < 0:
             raise APIError(HTTPStatus.BAD_REQUEST, "negative starting_saldo")
         account.starting_saldo = data['starting_saldo']
 
     if 'currency_id' in data:
-        changed = changed or account.currency_id != data['currency_id']
         if Currency.query.filter_by(user_id=current_user.id, id=data['currency_id']).first() is None:
             raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
         account.currency_id = data['currency_id']
         for trans in account.transactions:
             trans.currency_id = data['currency_id']
-
-    if not changed:
-        raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
         
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return '', HTTPStatus.CREATED
 
 @accounts.route("/orders", methods=["PUT"])
 @login_required
@@ -147,9 +127,6 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         n_changed += 1
         account.order = -n_changed
 
-    if n_changed == 0:
-        raise APIError(HTTPStatus.BAD_REQUEST, "edit request has no changes")
-
     for acc_id, order in zip(ids, orders):
         account: Account = Account.query.filter_by(user_id=current_user.id, id=acc_id).first()
         if account.order == order:
@@ -157,9 +134,7 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         account.order = order
 
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return '', HTTPStatus.CREATED
 
 @accounts.route("/add", methods=["POST"])
 @login_required
@@ -171,7 +146,8 @@ def edit_account_orders(orders: list[int], ids: list[int]):
         "date_created": {"type": "string"},
         "starting_saldo": {"type": "integer"},
         "currency_id": {"type": "integer"},
-    }
+    },
+    "required": ["desc", "color", "date_created", "starting_saldo", "currency_id"]
 })
 def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int, color: str):
     date_created = datetime.fromisoformat(date_created)
@@ -186,6 +162,39 @@ def add_acc(desc: str, starting_saldo: int, date_created: str, currency_id: int,
         date_created=date_created, currency_id=currency_id, user_id=current_user.id)
     db.session.add(account)
     db.session.commit()
-    return jsonify({
-        "success": True
-    })
+    return '', HTTPStatus.CREATED
+
+@accounts.route("/<int:account_id>/dependencies")
+@login_required
+def account_dependencies(account_id: int):
+    acc = Account.query.filter_by(user_id=current_user.id, id=account_id).first()
+    if acc is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    total = len(acc.transactions)
+    total += len(acc.in_transfers)
+    total += len(acc.out_transfers)
+
+    return jsonify(total)
+
+@accounts.route("/<int:account_id>/delete", methods=["DELETE"])
+@login_required
+def delete_account(account_id: int):
+    acc = Account.query.filter_by(user_id=current_user.id, id=account_id).first()
+    if acc is None:
+        raise APIError(HTTPStatus.NOT_FOUND)
+    
+    for trans in acc.transactions:
+        for flow in trans.flows:
+            db.session.delete(flow)
+        for rec in trans.records:
+            db.session.delete(rec)
+        db.session.delete(trans)
+    for tf in acc.in_transfers:
+        db.session.delete(tf)
+    for tf in acc.out_transfers:
+        db.session.delete(tf)
+    db.session.delete(acc)
+    db.session.commit()
+
+    return jsonify({}), HTTPStatus.OK

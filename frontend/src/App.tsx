@@ -4,7 +4,7 @@ import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { RouterProvider } from "react-router-dom";
-import { queryClient } from './hooks/api/defaults';
+import { queryClient } from './query';
 import { FinnanceRouter } from './routes/Router';
 import { useCustomTheme } from './theme';
 

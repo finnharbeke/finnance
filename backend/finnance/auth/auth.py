@@ -1,12 +1,12 @@
 import re
 from http import HTTPStatus
 
+from finnance.errors import APIError, validate
+from finnance.models import User
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required, login_user, logout_user
 
-from finnance import db, bcrypt
-from finnance.errors import APIError, validate
-from finnance.models import User
+from finnance import bcrypt, db
 
 auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -108,17 +108,14 @@ def register(username: str, email: str, password: str):
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({
-        "success": User.query.filter_by(username=username).first() is not None,
-    })
+    return '', HTTPStatus.CREATED
 
 
 @auth.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    return jsonify({
-        "success": logout_user()
-    })
+    logout_user()
+    return '', HTTPStatus.OK
 
 
 @auth.route("")

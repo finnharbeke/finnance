@@ -5,9 +5,10 @@ import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
 import Placeholder from '../components/Placeholder';
-import { getAxiosData, searchParams, searchParamsProps, useCurrency } from '../hooks/api/useQuery';
+import { getAxiosData, searchParams, searchParamsProps } from '../query';
 import useAmount from '../hooks/useAmount';
 import { CategoryQueryResult, useCategories } from '../types/Category';
+import { useCurrency } from '../types/Currency';
 
 interface SunburstData {
     id: string

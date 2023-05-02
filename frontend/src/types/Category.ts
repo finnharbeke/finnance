@@ -1,8 +1,8 @@
 import { useForm } from "@mantine/form";
-import { RecordQueryResult } from "./Record";
-import { UserQueryResult } from "./User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { RecordQueryResult } from "./Record";
+import { useEffect, useState } from "react";
 
 export interface CategoryQueryResult {
     id: number,
@@ -17,7 +17,6 @@ export interface CategoryQueryResult {
     type: 'category'
 }
 export interface CategoryDeepQueryResult extends CategoryQueryResult {
-    user: UserQueryResult,
     records: RecordQueryResult[],
     children: CategoryQueryResult[],
 }
@@ -25,7 +24,7 @@ export interface CategoryDeepQueryResult extends CategoryQueryResult {
 export interface CategoryFormValues {
     desc: string
     color: string
-    parent_id: string | undefined
+    parent_id: string | null
     usable: boolean
 }
 
@@ -34,18 +33,14 @@ export interface CategoryRequest extends Omit<CategoryFormValues, 'parent_id'> {
     is_expense: boolean
 }
 
-export const emptyCategory: () => CategoryFormValues = () => ({
-    desc: '', color: '', parent_id: undefined, usable: true
-})
-
 export type CategoryTransform = (v: CategoryFormValues) => CategoryRequest
 
-export const useCategoryForm = (id: number | undefined, is_expense: boolean, initial: CategoryFormValues) =>
+export const useCategoryForm = (is_expense: boolean, initial: CategoryFormValues) =>
     useForm<CategoryFormValues, CategoryTransform>({
         initialValues: initial,
         validate: {
-            desc: (val) => (val && val.length > 0) ? null : "enter category name",
-            color: (val) => (val && /^#([0-9A-Fa-f]{6})$/i.test(val)) ? null : "enter hex color",
+            desc: val => (val && val.length > 0) ? null : "enter category name",
+            color: val => (val && /^#([0-9A-Fa-f]{6})$/i.test(val)) ? null : "enter hex color",
         },
         transformValues: (fv) => ({
             ...fv,
@@ -53,6 +48,23 @@ export const useCategoryForm = (id: number | undefined, is_expense: boolean, ini
             is_expense
         })
     })
+
+export const useCategoryFormValues: (cat?: CategoryQueryResult) => CategoryFormValues
+    = cat => {
+        const build: () => CategoryFormValues = () => cat ? {
+            desc: cat.desc,
+            color: cat.color,
+            parent_id: cat.parent_id ? cat.parent_id.toString() : null,
+            usable: cat.usable
+        } : {
+            desc: '', color: '',
+            parent_id: null, usable: true
+        }
+        const [fv, setFV] = useState(build());
+        // eslint-disable-next-line
+        useEffect(() => setFV(build()), [cat]);
+        return fv;
+    }
 
 export const useCategories = () =>
     useQuery<CategoryQueryResult[], AxiosError>({ queryKey: ["categories"] });

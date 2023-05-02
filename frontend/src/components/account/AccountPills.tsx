@@ -2,11 +2,10 @@ import { ActionIcon, Button, Collapse, ColorSwatch, Divider, Grid, Group, Text, 
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
-import { AccountDeepQueryResult } from "../../types/Account";
-import { useAccounts } from "../../hooks/api/useQuery";
+import { AccountDeepQueryResult, useAccounts } from "../../types/Account";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
-import { openTransferModal } from "../transfer/TransferModal";
+import { openAddTransferModal } from "../transfer/TransferModal";
 import { Link } from "react-router-dom";
 import useAmount from "../../hooks/useAmount";
 
@@ -109,7 +108,7 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
                 if (source.id === acc.id)
                     return;
                 event.preventDefault();
-                openTransferModal({ innerProps: { source, dest: acc } });
+                openAddTransferModal({ innerProps: { source, dest: acc } });
             }}
         >
             <Group spacing='xs' noWrap>

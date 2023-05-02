@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useEffect } from "react";
 import { TbChevronDown, TbChevronRight, TbDeviceFloppy, TbRotate2, TbChevronUp } from "react-icons/tb";
 import useIsPhone from "../../hooks/useIsPhone";
-import { CategoryQueryResult, useCategories, useCategoryForm, useEditCategory, CategoryRequest } from "../../types/Category";
+import { CategoryQueryResult, useCategories, useCategoryForm, useEditCategory, CategoryRequest, useCategoryFormValues } from "../../types/Category";
 import { SecondaryIcon, PrimaryIcon, RedIcon } from "../Icons";
 import Placeholder from "../Placeholder";
 import { useCategoryList } from "./CategoriesList";
@@ -19,25 +19,15 @@ export default function CategoryEdit({ category, ix }: CategoryEditProps) {
     const query = useCategories();
     const [open, { toggle, close }] = useDisclosure(false);
 
-    const form = useCategoryForm(category.id, category.is_expense, {
-        desc: category.desc,
-        color: category.color,
-        parent_id: category.parent_id ? category.parent_id.toString() : undefined,
-        usable: category.usable
-    });
+    const initials = useCategoryFormValues(category);
+    const form = useCategoryForm(category.is_expense, initials);
     const editCategory = useEditCategory(category.id);
 
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
 
     const reset = () => {
-        const vals = {
-            desc: category.desc,
-            color: category.color,
-            parent_id: category.parent_id ? category.parent_id.toString() : undefined,
-            usable: category.usable
-        };
-        form.setValues(vals);
-        form.resetDirty(vals);
+        form.setValues(initials);
+        form.resetDirty(initials);
         close();
     }
 

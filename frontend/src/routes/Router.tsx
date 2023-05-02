@@ -9,6 +9,7 @@ import AccountsPage from "../pages/Accounts";
 import DashboardPage from "../pages/Dashboard";
 import Layout from "../pages/Layout";
 import LogoutPage from "../pages/Logout";
+import { RemotesPage } from "../pages/Remotes";
 import { AuthRoute } from "./Route";
 
 export const FinnanceRouter = createBrowserRouter([
@@ -43,6 +44,9 @@ export const FinnanceRouter = createBrowserRouter([
             }, {
                 path: "analysis",
                 element: <NivoPage />
+            }, {
+                path: "remotes",
+                element: <RemotesPage />
             }]
         }, {
             path: "*",

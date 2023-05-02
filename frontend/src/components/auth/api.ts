@@ -47,7 +47,7 @@ interface RegisterProps extends LoginProps {
 export const useRegister = () =>
     useMutation({
         mutationFn: (values: RegisterProps) =>
-            axios.post<Success>('/api/auth/register', values),
+            axios.post('/api/auth/register', values),
     })
 
 export const useLogout = () => {

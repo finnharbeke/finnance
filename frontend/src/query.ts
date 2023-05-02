@@ -1,7 +1,7 @@
 import { showNotification } from "@mantine/notifications";
-import { QueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-import { getAxiosData } from "./useQuery";
+import { QueryClient, useQuery } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
+import { UserQueryResult } from "./types/User";
 
 export const handleAxiosError = (error: unknown) => {
     const e = (error as AxiosError);
@@ -42,3 +42,25 @@ export const queryClient = new QueryClient({
         }
     }
 })
+
+export const getAxiosData = async (url: string) => {
+    const { data } = await axios.get(url);
+    return data;
+}
+
+export const useCurrentUser = () =>
+    useQuery<UserQueryResult, AxiosError>({ queryKey: ["auth", "me"] });
+
+export interface searchParamsProps {
+    [key: string]: string | number | boolean | undefined | null
+}
+
+export const searchParams = (props: searchParamsProps) => {
+    const searchParams = new URLSearchParams();
+    Object.entries(props).forEach(([key, value]) => {
+        if (value !== undefined)
+            searchParams.append(key, value === null ? 'null' : value.toString())
+    })
+    return searchParams.toString();
+}
+

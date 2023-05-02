@@ -28,7 +28,7 @@ class JSONModel:
     def obj_to_api(obj):
         return current_app.response_class(
             f"{json.dumps(obj, default=JSONModel.default)}\n",
-            mimetype=current_app.config["JSONIFY_MIMETYPE"],
+            mimetype=current_app.json.mimetype,
         )
 
     @staticmethod
@@ -100,7 +100,7 @@ class Account(db.Model, JSONModel):
         UniqueConstraint('order', 'user_id')
     )
 
-    json_relations = ["currency", "user"]
+    json_relations = ["currency"]
 
     def changes(self, num=None):
         saldos = [self.starting_saldo]
@@ -201,7 +201,7 @@ class Transaction(db.Model, JSONModel):
     agent = db.relationship("Agent", backref="transactions")
     currency = db.relationship("Currency", backref="transactions")
 
-    json_relations = ["user", "account",
+    json_relations = ["account",
                       "agent", "currency", "records", "flows"]
 
 
@@ -232,6 +232,10 @@ class Flow(db.Model, JSONModel):
     agent = db.relationship('Agent', backref='flows')
     trans = db.relationship('Transaction', backref='flows')
 
+    @property
+    def agent_desc(self):
+        return self.agent.desc
+
     __table_args__ = (
         UniqueConstraint('agent_id', 'trans_id'),
     )
@@ -259,7 +263,7 @@ class AccountTransfer(db.Model, JSONModel):
         CheckConstraint('src_id != dst_id'),
     )
 
-    json_relations = ["user", "src", "dst"]
+    json_relations = ["src", "dst"]
 
 
 class Currency(db.Model, JSONModel):
@@ -272,6 +276,8 @@ class Currency(db.Model, JSONModel):
     __table_args__ = (
         UniqueConstraint('code', 'user_id'),
     )
+
+    json_relations = ["accounts"]
 
     def format(self, number: int) -> str:
         return "{n:,.{d}f}".format(n=number / (10 ** self.decimals), d=self.decimals)
@@ -287,7 +293,7 @@ class Agent(db.Model, JSONModel):
         UniqueConstraint('desc', 'user_id'),
     )
 
-    json_relations = ["user", "transactions", "flows"]
+    json_relations = ["transactions", "flows"]
 
     @hybrid_property
     def uses(self):
@@ -313,12 +319,11 @@ class Category(db.Model, JSONModel):
 
     @property
     def parent(self):
-        return Category.query.filter_by(id=self.parent_id
-                                        ).order_by(Category.order).first()
+        return Category.query.filter_by(id=self.parent_id, user_id=self.user_id).first()
 
     __table_args__ = (
         UniqueConstraint('user_id', 'desc', 'is_expense'),
         UniqueConstraint('user_id', 'order', 'is_expense')
     )
 
-    json_relations = ["user", "records"]
+    json_relations = ["records"]

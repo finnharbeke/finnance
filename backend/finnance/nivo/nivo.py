@@ -27,7 +27,7 @@ def sunburst():
         c_id = int(params['currency_id'])
     except ValueError:
         raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be integer')
-    currency = Currency.query.filter_by(id=c_id).first()
+    currency = Currency.query.filter_by(id=c_id, user_id=current_user.id).first()
     if currency is None:
         raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
     min_date = None
@@ -64,7 +64,7 @@ def sunburst():
         ]
 
     def cat_obj(cat: Category, inside=False, path=''):
-        cat_children = Category.query.filter_by(parent_id=cat.id).order_by(Category.order).all()
+        cat_children = Category.query.filter_by(parent_id=cat.id, user_id=current_user.id).order_by(Category.order).all()
         path = f'{path}.{cat.desc}'
         if len(cat_children) == 0 or inside:
             children = agents(cat, path)

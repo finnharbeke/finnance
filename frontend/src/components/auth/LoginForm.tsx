@@ -6,7 +6,7 @@ import { TbChevronDown } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router";
 import FinnanceLogo from "../FinnanceLogo";
 import { useLogin, usernameExists } from "./api";
-import { handleAxiosError } from "../../hooks/api/defaults";
+import { handleAxiosError } from "../../query";
 import { Link } from "react-router-dom";
 
 interface UsernameInputType {

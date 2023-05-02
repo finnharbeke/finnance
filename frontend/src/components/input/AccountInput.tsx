@@ -1,7 +1,7 @@
 import { Select, SelectProps } from "@mantine/core";
-import { useAccounts } from "../../hooks/api/useQuery";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
+import { useAccounts } from "../../types/Account";
 
 export default function AccountSelect(props: Partial<SelectProps>) {
     const query = useAccounts();

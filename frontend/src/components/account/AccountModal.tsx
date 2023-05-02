@@ -1,11 +1,10 @@
 import { Button, Skeleton } from "@mantine/core";
-import { useForm } from "@mantine/form";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { OpenContextModal } from "@mantine/modals/lib/context";
 import { useState } from "react";
-import { useAddAccount } from "../../hooks/api/useMutation";
-import { useCurrencies } from "../../hooks/api/useQuery";
-import { AccountForm, AccountFormValues, TransformedAccountFormValues, accountFormTransform, accountFormValidate } from "./AccountForm";
+import { AccountRequest, useAccountForm, useAddAccount } from "../../types/Account";
+import { AccountForm } from "./AccountForm";
+import { useCurrencies } from "../../types/Currency";
 
 export const openAccountModal = async (props: OpenContextModal) => {
     openContextModal({
@@ -18,27 +17,21 @@ export const openAccountModal = async (props: OpenContextModal) => {
     })
 }
 
-type Transform = (values: AccountFormValues) => TransformedAccountFormValues
-
 export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
     const currencies = useCurrencies();
 
-    const form = useForm<AccountFormValues, Transform>({
-        initialValues: {
-            desc: '',
-            starting_saldo: '',
-            date_created: new Date(),
-            color: '',
-            currency_id: ''
-        },
-        validate: accountFormValidate,
-        transformValues: (values: AccountFormValues) => accountFormTransform(values, currencies),
+    const form = useAccountForm({
+        desc: '',
+        starting_saldo: '',
+        date_created: new Date(),
+        color: '',
+        currency_id: ''
     })
 
     const [loading, setLoading] = useState(false);
     const addAccount = useAddAccount();
 
-    const handleSubmit = (values: TransformedAccountFormValues) => {
+    const handleSubmit = (values: AccountRequest) => {
         setLoading(true);
         addAccount.mutate(values, {
             onSuccess: () => context.closeModal(id),
@@ -49,7 +42,7 @@ export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
     if (!currencies.isSuccess)
         return <Skeleton height={300}></Skeleton>
     return <form onSubmit={form.onSubmit(handleSubmit)}>
-        <AccountForm form={form} currencies={currencies.data} modal={true}/>
+        <AccountForm form={form} currencies={currencies.data} modal={true} />
         <Button mt='lg' fullWidth type="submit"
             loading={loading}>
             create
