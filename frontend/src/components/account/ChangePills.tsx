@@ -51,12 +51,6 @@ const ChangePill = ({ change }: { change: Change }) => {
 
     const saldo = useAmount(change.saldo, query.data?.currency, false);
 
-    const amount = useAmount(isTransfer ? 
-        isSource ? change.data.src_amount : change.data.dst_amount
-        : change.data.amount, query.data?.currency)
-    
-    const saldo = useAmount(query.data?.saldo, query.data?.currency);
-
     if (!query.isSuccess)
         return <Placeholder height={30} queries={[query]} />
 

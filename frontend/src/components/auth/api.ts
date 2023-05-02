@@ -7,10 +7,6 @@ interface Auth {
     auth: boolean
 }
 
-interface Success {
-    success: boolean
-}
-
 export const useAuth = () =>
     useQuery<Auth, AxiosError>({ queryKey: ["auth"] });
 
