@@ -1,40 +1,23 @@
-import { Paper, Grid, ColorSwatch, TextInput, Title, Group, Collapse } from "@mantine/core";
+import { Collapse, ColorSwatch, Grid, Group, Paper, TextInput, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect } from "react";
-import { TbChevronDown, TbChevronRight, TbDeviceFloppy, TbRotate2, TbChevronUp } from "react-icons/tb";
+import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb";
 import useIsPhone from "../../hooks/useIsPhone";
-import { CategoryQueryResult, useCategories, useCategoryForm, useEditCategory, CategoryRequest, useCategoryFormValues } from "../../types/Category";
-import { SecondaryIcon, PrimaryIcon, RedIcon } from "../Icons";
-import Placeholder from "../Placeholder";
-import { useCategoryList } from "./CategoriesList";
+import { CategoryHierarchyQueryResult, CategoryRequest, useCategoryForm, useCategoryFormValues, useEditCategory } from "../../types/Category";
+import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons";
+import { OrderCellProps } from "../OrderForm";
+import CategoryList from "./CategoriesList";
 import CategoryForm from "./CategoryForm";
 
-interface CategoryEditProps {
-    category: CategoryQueryResult,
-    ix: number
-}
+export default function CategoryEdit(props: OrderCellProps<CategoryHierarchyQueryResult>) {
+    const { data: { category, children }, ix, orderForm: { moveUp, moveDown} } = props;
 
-export default function CategoryEdit({ category, ix }: CategoryEditProps) {
-
-    const query = useCategories();
-    const [open, { toggle, close }] = useDisclosure(false);
+    const [open, { toggle }] = useDisclosure(false);
 
     const initials = useCategoryFormValues(category);
     const form = useCategoryForm(category.is_expense, initials);
     const editCategory = useEditCategory(category.id);
 
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
-
-    const reset = () => {
-        form.setValues(initials);
-        form.resetDirty(initials);
-        close();
-    }
-
-    // disable: missing dependency form, but should only reset
-    // on change of data
-    // eslint-disable-next-line
-    useEffect(reset, [category.desc, category.color, category.usable, category.parent_id])
 
     const handleSubmit = (values: CategoryRequest) => {
         startEdit();
@@ -43,16 +26,16 @@ export default function CategoryEdit({ category, ix }: CategoryEditProps) {
             {
                 onSuccess: () => {
                     editCategory.reset();
-                }, onSettled: endEdit
+                },
+                onSettled: () => {
+                    endEdit();
+                    form.resetDirty();
+                }
             }
         );
     }
 
     const isPhone = useIsPhone();
-    const { moveUp, moveDown } = useCategoryList();
-
-    if (!query.isSuccess)
-        return <Placeholder queries={[query]} />
 
     return <Paper withBorder p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -86,7 +69,7 @@ export default function CategoryEdit({ category, ix }: CategoryEditProps) {
                                     tooltip='save'
                                 />
                                 <RedIcon icon={TbRotate2}
-                                    onClick={reset}
+                                    onClick={() => form.setValues(initials)}
                                     tooltip='discard'
                                 />
                             </>
@@ -101,8 +84,17 @@ export default function CategoryEdit({ category, ix }: CategoryEditProps) {
                 </Grid.Col>
             </Grid>
             <Collapse in={open}>
-                <CategoryForm form={form} modal={false} is_expense={category.is_expense} />
+                <CategoryForm form={form} modal={false}
+                    is_expense={category.is_expense}
+                    parent_except={category.desc}/>
             </Collapse>
         </form>
+        {
+            open && children.length > 0 &&
+            <>
+            {/* <Button fullWidth /> */}
+            <CategoryList categories={children}/>
+            </>
+        }
     </Paper>
 }

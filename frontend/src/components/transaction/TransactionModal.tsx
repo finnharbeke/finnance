@@ -5,7 +5,6 @@ import { showNotification } from "@mantine/notifications";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { AccountDeepQueryResult } from "../../types/Account";
-import { useCategories } from "../../types/Category";
 import { CurrencyQueryResult, useCurrencies } from "../../types/Currency";
 import { TransactionFormType, TransactionRequest, useAddTransaction, useDeleteTransaction, useEditTransaction, useTransaction, useTransactionForm, useTransactionFormValues } from "../../types/Transaction";
 import Placeholder from "../Placeholder";
@@ -22,9 +21,6 @@ interface TransactionFormProps {
 
 const TransactionForm = ({ account, form }: TransactionFormProps) => {
     const query = useCurrencies();
-    // so that it's already loaded for records
-    // eslint-disable-next-line
-    const preQuery = useCategories();
 
     if (!query.isSuccess)
         return <Placeholder queries={[query]} height={400} />

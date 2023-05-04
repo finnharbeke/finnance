@@ -5,9 +5,9 @@ import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
 import Placeholder from '../components/Placeholder';
-import { getAxiosData, searchParams, searchParamsProps } from '../query';
 import useAmount from '../hooks/useAmount';
-import { CategoryQueryResult, useCategories } from '../types/Category';
+import { getAxiosData, searchParams, searchParamsProps } from '../query';
+import { CategoryHierarchyQueryResult, useCategoryHierarchy } from '../types/Category';
 import { useCurrency } from '../types/Currency';
 
 interface SunburstData {
@@ -61,21 +61,18 @@ export default function FinnanceSunburst(props: FinnanceSunburstProps) {
     return <CustomSunburst data={query.data} size={size} currency_id={currency_id} />
 }
 
-export const DummySunburst = ({ size }: { size: number }) => {
-    const query = useCategories();
-    const generate = (cats: CategoryQueryResult[] | undefined) => ({
+export const DummySunburst = ({ size, is_expense }: { size: number, is_expense: boolean }) => {
+    const query = useCategoryHierarchy(is_expense);
+    const generate = (children: CategoryHierarchyQueryResult[] | undefined) => ({
         id: 'sunburst',
         color: '#00000',
-        children: !cats ? [] : cats.filter(c => c.parent === null).map(c => dummy(cats, c, false))
+        children: children?.map(dummy)
     })
-    const dummy: (cats: CategoryQueryResult[], c: CategoryQueryResult, inside: boolean) => SunburstData = (cats, c, inside) => {
-        const children = cats.filter(c2 => c2.parent_id === c.id || c2.id === c.id);
-        const end = children.length === 1 || inside;
+    const dummy: (data: CategoryHierarchyQueryResult) => SunburstData = ({ category, children }) => {
         return {
-            id: c.desc, color: c.color,
-            children: end ?
-                [{ id: `${c.desc}.agent`, color: c.color, value: Math.random() }]
-                : children.map(c2 => dummy(cats, c2, c2.id === c.id))
+            id: category.desc, color: category.color,
+            value: category.usable ? Math.random() : 0,
+            children: children.map(dummy)
         }
     }
 

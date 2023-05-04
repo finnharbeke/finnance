@@ -2,21 +2,18 @@ import { Center, ColorInput, Grid, Group, Input, Switch, Text, TextInput } from 
 import { UseFormReturnType } from "@mantine/form";
 import { TbCircleCheck, TbLock } from "react-icons/tb";
 import useIsPhone from "../../hooks/useIsPhone";
-import { CategoryFormValues, CategoryTransform, useCategories } from "../../types/Category";
-import Placeholder from "../Placeholder";
+import { CategoryFormValues, CategoryTransform } from "../../types/Category";
 import CategoryInput from "../input/CategoryInput";
 
 interface CategoryFormProps {
     form: UseFormReturnType<CategoryFormValues, CategoryTransform>
     modal: boolean
     is_expense: boolean
+    parent_except?: string
 }
 
-export default function CategoryForm({ is_expense, form, modal }: CategoryFormProps) {
+export default function CategoryForm({ is_expense, form, modal, parent_except }: CategoryFormProps) {
     const isPhone = useIsPhone();
-    const query = useCategories();
-    if (!query.isSuccess)
-        return <Placeholder queries={[query]} />
 
     return (
         <Grid align='flex-end'>
@@ -37,11 +34,11 @@ export default function CategoryForm({ is_expense, form, modal }: CategoryFormPr
             <Grid.Col sm={4} xs={12}>
                 <CategoryInput label="parent category" is_expense={is_expense}
                     placeholder="select parent" must_be_usable={false}
+                    except={parent_except}
                     {...form.getInputProps('parent_id')}
                 />
             </Grid.Col>
             <Grid.Col sm={4} xs={12}>
-
                 <Input.Wrapper label='lock for records?'>
                     <Center>
                         <Switch color='red'

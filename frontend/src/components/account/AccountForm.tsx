@@ -3,16 +3,15 @@ import { DateInput, DatePickerInput } from "@mantine/dates"
 import { UseFormReturnType } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { DateTime } from "luxon"
-import { useEffect } from "react"
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb"
 import { Link } from "react-router-dom"
 import useIsPhone from "../../hooks/useIsPhone"
 import { AccountDeepQueryResult, AccountFormValues, AccountRequest, AccountTransform, useAccountForm, useAccountFormValues, useEditAccount } from "../../types/Account"
 import { CurrencyQueryResult, useCurrencies } from "../../types/Currency"
 import { PrimaryIcon, RedIcon, SecondaryIcon } from "../Icons"
+import { OrderCellProps } from "../OrderForm"
 import AmountInput from "../input/AmountInput"
 import CurrencyInput from "../input/CurrencyInput"
-import { useAccountFormList } from "./AccountList"
 
 const useStyles = createStyles((theme) => ({
     AccountLink: {
@@ -21,7 +20,7 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
-export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: number }) {
+export function AccountEdit({ data, ix, orderForm: { moveUp, moveDown } }: OrderCellProps<AccountDeepQueryResult>) {
     const currencies = useCurrencies();
 
     const [open, { toggle }] = useDisclosure(false);
@@ -30,19 +29,8 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
 
     const form = useAccountForm(initial);
 
-    const { moveUp, moveDown } = useAccountFormList();
-
     const editAccount = useEditAccount();
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
-
-    const reset = () => {
-        form.setValues(initial);
-        form.resetDirty(initial);
-        // close();
-    }
-
-    // eslint-disable-next-line
-    useEffect(reset, [data])
 
     const handleSubmit = (values: AccountRequest) => {
         startEdit();
@@ -51,7 +39,10 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
             {
                 onSuccess: () => {
                     editAccount.reset();
-                }, onSettled: endEdit
+                }, onSettled: () => {
+                    endEdit();
+                    form.resetDirty();
+                }
             }
         );
     }
@@ -93,7 +84,7 @@ export function AccountEdit({ data, ix }: { data: AccountDeepQueryResult, ix: nu
                                     tooltip='save'
                                 />
                                 <RedIcon icon={TbRotate2}
-                                    onClick={reset}
+                                    onClick={() => form.setValues(initial)}
                                     tooltip='discard'
                                 />
                             </>
