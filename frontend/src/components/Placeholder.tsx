@@ -2,9 +2,6 @@ import { Center, Paper, PaperProps, Skeleton, Stack, Text, Title, createStyles }
 import { UseQueryResult } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
-const allSuccess = (queries: UseQueryResult[]) =>
-    queries.reduce((success, query) => query.isSuccess && success, true)
-
 const anyError = (queries: UseQueryResult[]) =>
     queries.reduce((error, query) => query.isError || error, false)
 
@@ -21,8 +18,6 @@ interface PlaceholderProps extends PaperProps {
 
 export default function Placeholder({ height=200, queries, ...other }: PlaceholderProps) {
     const { classes } = useStyles();
-    if (allSuccess(queries))
-        return <></>
 
     if (anyError(queries))
         return <Paper style={{ height: height, overflow: 'hidden' }} className={classes.errorPaper}

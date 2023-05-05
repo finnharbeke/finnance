@@ -3,7 +3,7 @@ import { ComputedDatum, ResponsiveSunburst } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Placeholder from '../components/Placeholder';
 import useAmount from '../hooks/useAmount';
 import { getAxiosData, searchParams, searchParamsProps } from '../query';
@@ -63,22 +63,29 @@ export default function FinnanceSunburst(props: FinnanceSunburstProps) {
 
 export const DummySunburst = ({ size, is_expense }: { size: number, is_expense: boolean }) => {
     const query = useCategoryHierarchy(is_expense);
-    const generate = (children: CategoryHierarchyQueryResult[] | undefined) => ({
+    const dummy = useCallback(
+        ({ category, children }: CategoryHierarchyQueryResult): SunburstData => {
+            return {
+                id: category.desc, color: category.color,
+                value: category.usable ? Math.random() : 0,
+                children: children.map(dummy)
+            }
+        }, []);
+    const generate = useCallback((children: CategoryHierarchyQueryResult[] | undefined) => ({
         id: 'sunburst',
         color: '#00000',
-        children: children?.map(dummy)
-    })
-    const dummy: (data: CategoryHierarchyQueryResult) => SunburstData = ({ category, children }) => {
-        return {
-            id: category.desc, color: category.color,
-            value: category.usable ? Math.random() : 0,
-            children: children.map(dummy)
-        }
-    }
+        children: children?.sort(
+            (a, b) => a.category.order - b.category.order
+        ).map(dummy)
+        // don't ask why i need to sort, should be sorted but
+        // otherwise weird stuff happens
+    }), [dummy]);
 
-    const [data, setData] = useState<SunburstData>(generate(query.data));
+    const [data, setData] = useState<SunburstData>();
+    useEffect(() => setData(generate(query.data)),
+        [setData, generate, query.data]);
 
-    if (!query.isSuccess)
+    if (!query.isSuccess || !data)
         return <Placeholder queries={[query]} height={size} />
 
     return <CustomSunburst onClick={() => setData(generate(query.data))} data={data} size={size} interactive={false} />
@@ -139,7 +146,7 @@ const TooltipNoCurrency = ({ node }: { node: ComputedDatum<SunburstData> }) =>
 const TooltipBase = ({ node, amount }: { node: ComputedDatum<SunburstData>, amount: string }) =>
     <Paper p='xs' withBorder>
         <Group noWrap spacing='xs'>
-            <ColorSwatch color={node.data.color} size={16}/>
+            <ColorSwatch color={node.data.color} size={16} />
             <Text fz={14} fw={900} style={{ whiteSpace: 'nowrap' }}>{node.data.name}: {node.percentage.toFixed(0)}%,</Text>
             <Text fz={14} style={{ whiteSpace: 'nowrap' }}>{amount}</Text>
         </Group>

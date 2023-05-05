@@ -28,7 +28,6 @@ const CategoryInput = ({ is_expense, must_be_usable, except, ...others }: Catego
         return true;
     }
     const categories = query.data.filter(except_filter);
-    console.log(categories);
     return <Select
         searchable={!isPhone} withinPortal
         data={categories.filter(
