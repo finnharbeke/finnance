@@ -1,7 +1,6 @@
 import { Button, Flex, Grid, NumberInput, Paper, PaperProps, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { CurrencyQueryResult } from "../types/Currency";
-import { useAddCurrency } from "../hooks/api/useMutation";
+import { CurrencyFormValues, CurrencyQueryResult, useAddCurrency } from "../types/Currency";
 
 interface CurrencyCardProps extends PaperProps {
     currency: CurrencyQueryResult
@@ -15,11 +14,6 @@ export function CurrencyCard({ currency, ...others }: CurrencyCardProps) {
             <Text><Text span fw={700}>{code}:</Text> {decimals} decimals</Text>
         </Flex>
     </Paper>
-}
-
-export interface CurrencyFormValues {
-    code: string
-    decimals: number
 }
 
 export function CurrencyForm({ ...others }: PaperProps) {

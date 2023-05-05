@@ -69,7 +69,7 @@ export const DataPill = ({ cells, ...props }: DataPillProps) => {
         mb={isPhone ? 'sm' : 'xs'} className={pill}
         {...props}>
         {
-            cells.map(({ col, type, cell }, i) => <Grid.Col {...col}>
+            cells.map(({ col, type, cell }, i) => <Grid.Col {...col} key={i}>
                 {
                     type === 'text' ?
                         <TextCell {...cell} />

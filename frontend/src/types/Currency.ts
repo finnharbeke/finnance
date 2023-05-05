@@ -8,8 +8,9 @@ export interface CurrencyQueryResult {
     type: 'currency'
 }
 
-export interface CurrencyDeepQueryResult extends CurrencyQueryResult {
-
+export interface CurrencyFormValues {
+    code: string
+    decimals: number
 }
 
 export const useCurrencies = () =>
@@ -26,13 +27,22 @@ interface CurrencyDepsQueryResult {
 export const useCurrencyDependencies = (currency_id: number) =>
     useQuery<CurrencyDepsQueryResult, AxiosError>({ queryKey: ["currencies", currency_id, "dependencies"] });
 
+export const useAddCurrency = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (values: CurrencyFormValues) =>
+            axios.post('/api/currencies/add', values),
+        onSuccess: () => queryClient.invalidateQueries(["currencies"])
+    });
+}
+
 export const useDeleteCurrency = (id: number) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: () =>
             axios.delete(`/api/currencies/${id}/delete`),
         onSuccess: () => {
-            queryClient.removeQueries({ queryKey: ['currencies', id]})
+            queryClient.removeQueries({ queryKey: ['currencies', id] })
             queryClient.invalidateQueries();
         }
     });

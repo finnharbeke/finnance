@@ -1,8 +1,8 @@
 import { useForm } from "@mantine/form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { RecordQueryResult } from "./Record";
 import { useEffect, useState } from "react";
+import { RecordQueryResult } from "./Record";
 
 export interface CategoryQueryResult {
     id: number,
@@ -66,8 +66,27 @@ export const useCategoryFormValues: (cat?: CategoryQueryResult) => CategoryFormV
         return fv;
     }
 
-export const useCategories = () =>
-    useQuery<CategoryQueryResult[], AxiosError>({ queryKey: ["categories"] });
+export interface CategoryDescQueryResult {
+    id: number
+    desc: string
+    parent_desc: string
+    usable: boolean
+}
+
+export const useCategoryDescs = (is_expense: boolean) =>
+    useQuery<CategoryDescQueryResult[], AxiosError>({
+        queryKey: ["categories", is_expense ? "expenses" : "incomes"]
+    });
+export interface CategoryHierarchyQueryResult {
+    category: CategoryQueryResult
+    children: CategoryHierarchyQueryResult[]
+}
+
+export const useCategoryHierarchy = (is_expense: boolean) =>
+    useQuery<CategoryHierarchyQueryResult[], AxiosError>({
+        queryKey: ["categories", "hierarchy", is_expense ? "expenses" : "incomes"]
+    });
+
 
 export const useAddCategory = () => {
     const queryClient = useQueryClient()
@@ -83,6 +102,15 @@ export const useEditCategory = (id: number) => {
     return useMutation({
         mutationFn: (values: CategoryRequest) =>
             axios.put(`/api/categories/${id}/edit`, values),
+        onSuccess: () => queryClient.invalidateQueries(["categories"])
+    });
+}
+
+export const useEditCategoryOrders = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (values: { orders: number[], ids: number[] }) =>
+            axios.put(`/api/categories/orders`, values),
         onSuccess: () => queryClient.invalidateQueries(["categories"])
     });
 }

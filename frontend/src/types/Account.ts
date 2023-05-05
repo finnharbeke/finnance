@@ -117,6 +117,15 @@ export const useDeleteAccount = (id: number) => {
     });
 }
 
+export const useEditAccountOrders = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (values: { orders: number[], ids: number[] }) =>
+            axios.put(`/api/accounts/orders`, values),
+        onSuccess: () => queryClient.invalidateQueries(["accounts"])
+    });
+}
+
 // || =======
 // || CHANGES
 // || =======

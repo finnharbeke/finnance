@@ -65,6 +65,14 @@ def sunburst():
 
     def cat_obj(cat: Category, inside=False, path=''):
         cat_children = Category.query.filter_by(parent_id=cat.id, user_id=current_user.id).order_by(Category.order).all()
+
+        if not inside:
+            # skip children if none have actual entries
+            inside = all([
+                len(agents(child, '')) == 0
+                for child in cat_children
+            ])
+
         path = f'{path}.{cat.desc}'
         if len(cat_children) == 0 or inside:
             children = agents(cat, path)

@@ -1,44 +1,31 @@
 import { ActionIcon, Button, Collapse, Flex, Grid, Title } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { TbEye } from "react-icons/tb";
 import useIsPhone from "../../hooks/useIsPhone";
 import { DummySunburst } from "../../nivo/Sunburst";
-import { useCategories } from "../../types/Category";
-import Placeholder from "../Placeholder";
-import CategoryList from "./CategoriesList";
+import { CategoryExpensesList, CategoryIncomesList } from "./CategoriesList";
 import { openCategoryModal } from "./CategoryModal";
-import { useDisclosure } from "@mantine/hooks";
 
 export default function CategoriesPage() {
-    const query = useCategories();
     const isPhone = useIsPhone();
-    const [ open, { toggle }] = useDisclosure();
-
-    if (!query.isSuccess)
-        return <>
-            <Title>categories</Title>
-            <Placeholder queries={[query]} />
-        </>
-
-    const categories = query.data;
-    const expenses = categories.filter(x => x.is_expense)
-    const incomes = categories.filter(x => !x.is_expense)
+    const [open, { toggle }] = useDisclosure();
 
     return <>
         <Flex justify='space-between'>
             <Title>categories</Title>
-            <ActionIcon variant='default' size='lg' onClick={toggle}><TbEye size={20}/></ActionIcon>
+            <ActionIcon variant='default' size='lg' onClick={toggle}><TbEye size={20} /></ActionIcon>
         </Flex>
         <Collapse in={open}>
-        <Grid>
-            <Grid.Col span={4} offset={2}>
-                <DummySunburst size={100}/>
-            </Grid.Col>
-            <Grid.Col span={4}>
-                <DummySunburst size={100}/>
-            </Grid.Col>
-        </Grid>
+            <Grid>
+                <Grid.Col span={4} offset={2}>
+                    <DummySunburst size={100} is_expense />
+                </Grid.Col>
+                <Grid.Col span={4}>
+                    <DummySunburst size={100} is_expense={false} />
+                </Grid.Col>
+            </Grid>
         </Collapse>
-        <CategoryList categories={expenses} title='expenses' />
+        <CategoryExpensesList />
         <Button fullWidth my='sm'
             onClick={() => {
                 openCategoryModal({
@@ -50,7 +37,7 @@ export default function CategoriesPage() {
             }}>
             new expense category
         </Button>
-        <CategoryList categories={incomes} title='income' />
+        <CategoryIncomesList />
         <Button fullWidth mt='sm'
             onClick={() => {
                 openCategoryModal({

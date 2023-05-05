@@ -20,11 +20,61 @@ def category(category_id):
         raise APIError(HTTPStatus.NOT_FOUND)
     return cat.api()
 
-@categories.route("")
+def with_parent(parent_id: int | None, is_expense: bool):
+    return Category.query.filter_by(
+        user_id=current_user.id, parent_id=parent_id, is_expense=is_expense
+    ).order_by(
+        Category.is_expense, Category.order
+    ).all()
+
+def hierarchy(category: Category, json=False):
+    return {
+        'category': category.json(deep=False) if json else category,
+        'children': [
+            hierarchy(cat, json=json)
+            for cat in with_parent(category.id, category.is_expense)
+        ]
+    }
+
+def flatten(category, children):
+    return [
+        dict(id=category.id, desc=category.desc, usable=category.usable,
+             parent_desc=category.desc if category.parent_id is None else category.parent.desc),
+        *[
+            cat for child in children for cat in flatten(**child)
+        ]
+    ]
+
+def descs(is_expense: bool):
+    return [
+        flat
+        for cat in with_parent(None, is_expense)
+        for flat in flatten(**hierarchy(cat))
+    ]
+
+@categories.route("/expenses")
 @login_required
-def all_categories():
-    categories = Category.query.filter_by(user_id=current_user.id).all()
-    return JSONModel.obj_to_api([cat.json(deep=False) for cat in categories])
+def expenses_descs():
+    return JSONModel.obj_to_api(descs(True))
+
+@categories.route("/incomes")
+@login_required
+def incomes_descs():
+    return JSONModel.obj_to_api(descs(False))
+    
+@categories.route("/hierarchy/expenses")
+@login_required
+def expenses_hierarchy():
+    return JSONModel.obj_to_api([
+        hierarchy(cat, json=True) for cat in with_parent(None, True)
+    ])
+
+@categories.route("/hierarchy/incomes")
+@login_required
+def incomes_hierarchy():
+    return JSONModel.obj_to_api([
+        hierarchy(cat, json=True) for cat in with_parent(None, False)
+    ])
 
 @categories.route("/add", methods=["POST"])
 @login_required
