@@ -8,6 +8,7 @@ import { getAxiosData, searchParams } from "../query";
 import { CurrencyQueryResult } from "./Currency";
 import { TransactionQueryResult } from "./Transaction";
 import { TransferQueryResult } from "./Transfer";
+import { OrderRequest } from "../hooks/useOrderForm";
 
 export interface AccountQueryResult {
     id: number,
@@ -120,7 +121,7 @@ export const useDeleteAccount = (id: number) => {
 export const useEditAccountOrders = () => {
     const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: (values: { orders: number[], ids: number[] }) =>
+        mutationFn: (values: OrderRequest) =>
             axios.put(`/api/accounts/orders`, values),
         onSuccess: () => queryClient.invalidateQueries(["accounts"])
     });

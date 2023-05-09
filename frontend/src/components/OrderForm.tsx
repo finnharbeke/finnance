@@ -1,7 +1,7 @@
 import { Grid, Group, Title, TitleOrder } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { TbListDetails, TbRotate2 } from "react-icons/tb";
-import { OrderFormValues, useOrderForm } from "../hooks/useOrderForm";
+import { OrderFormValues, OrderRequest, useOrderForm } from "../hooks/useOrderForm";
 import { PrimaryIcon, RedIcon } from "./Icons";
 
 export interface OrderCellProps<T> {
@@ -13,16 +13,16 @@ export interface OrderCellProps<T> {
 interface OrderFormProps<T> {
     title: string | undefined
     titleOrder?: TitleOrder
-    orders: number[]
-    onSubmit: (fv: OrderFormValues, cb: () => void) => void
+    orders: OrderFormValues
+    onSubmit: (fv: OrderRequest, cb: () => void) => void
     data: T[]
     cell: (p: OrderCellProps<T>) => JSX.Element;
 }
 
 export function OrderForm<T>(props: OrderFormProps<T>) {
     const { title, titleOrder, onSubmit, data, orders, cell } = props;
-    const orderFormReturn = useOrderForm({ orders });
-    const { form } = orderFormReturn;
+    const orderFormReturn = useOrderForm(orders);
+    const { form, getOrder } = orderFormReturn;
     const [editing, { open: startEdit, close: endEdit }] = useDisclosure(false);
     const Cell = cell;
 
@@ -44,7 +44,7 @@ export function OrderForm<T>(props: OrderFormProps<T>) {
                                 });
                             })()} />
                         <RedIcon icon={TbRotate2} tooltip='discard new order'
-                            onClick={() => form.setValues({ orders })} />
+                            onClick={() => form.setValues(orders)} />
                     </Group>
                 }</Grid.Col>
             </Grid>
@@ -52,7 +52,7 @@ export function OrderForm<T>(props: OrderFormProps<T>) {
         <Grid.Col span={data.length > 0 ? 1 : -1} order={title ? 2 : 1}>
             <Grid>{
                 data.map((d, ix) =>
-                    <Grid.Col span={12} key={ix} order={form.values.orders[ix]}>
+                    <Grid.Col span={12} key={ix} order={getOrder(orders.array[ix].id)}>
                         <Cell ix={ix} data={d} orderForm={orderFormReturn}/>
                     </Grid.Col>
                 )

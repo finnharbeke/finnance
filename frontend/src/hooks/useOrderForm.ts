@@ -1,25 +1,41 @@
 import { useForm } from "@mantine/form";
 
-export type OrderFormValues = { orders: number[];}
+export interface OrderFormValues {
+    array: {
+        order: number
+        id: number
+    }[]
+}
+
+export interface OrderRequest {
+    orders: number[]
+    ids: number[]
+}
+
+type Transform = (v: OrderFormValues) => OrderRequest
 
 export const useOrderForm = (data: OrderFormValues) => {
-    const form = useForm<OrderFormValues>({
-        initialValues: data
+    const form = useForm<OrderFormValues, Transform>({
+        initialValues: data,
+        transformValues: (fv) => ({
+            orders: fv.array.map(x => x.order),  
+            ids: fv.array.map(x => x.id),  
+        })
     });
 
     const leastOrder = (order: number) => {
-        return form.values.orders.reduce((b, o) => order < o && b, true)
+        return form.values.array.reduce((b, o) => order < o.order && b, true)
     }
     
     const largestOrder = (order: number) => {
-        return form.values.orders.reduce((b, o) => order > o && b, true)
+        return form.values.array.reduce((b, o) => order > o.order && b, true)
     }
     
     const nextOrder = (order: number) => {
         let next = undefined;
         let minNext = Infinity;
-        for (let other in form.values.orders) {
-            const other_order = form.values.orders[other];
+        for (let other in form.values.array) {
+            const other_order = form.values.array[other].order;
             if (other_order > order && other_order < minNext) {
                 next = parseInt(other);
                 minNext = other_order;
@@ -31,8 +47,8 @@ export const useOrderForm = (data: OrderFormValues) => {
     const lastOrder = (order: number) => {
         let last = undefined;
         let maxLast = -Infinity;
-        for (let other in form.values.orders) {
-            const other_order = form.values.orders[other];
+        for (let other in form.values.array) {
+            const other_order = form.values.array[other].order;
             if (other_order < order && other_order > maxLast) {
                 last = parseInt(other);
                 maxLast = other_order;
@@ -42,14 +58,14 @@ export const useOrderForm = (data: OrderFormValues) => {
     }
 
     const swap = (ix1: number, ix2: number) => {
-        const order1 = form.values.orders[ix1];
-        const order2 = form.values.orders[ix2];
-        form.setFieldValue(`orders.${ix1}`, order2);
-        form.setFieldValue(`orders.${ix2}`, order1);
+        const order1 = form.values.array[ix1].order;
+        const order2 = form.values.array[ix2].order;
+        form.setFieldValue(`array.${ix2}.order`, order1);
+        form.setFieldValue(`array.${ix1}.order`, order2);
     }
 
     const moveUp = (ix: number) => {
-        const order = form.values.orders[ix];
+        const order = form.values.array[ix].order;
         if (leastOrder(order))
             return;
         const other = lastOrder(order);
@@ -58,7 +74,7 @@ export const useOrderForm = (data: OrderFormValues) => {
     }
 
     const moveDown = (ix: number) => {
-        const order = form.values.orders[ix];
+        const order = form.values.array[ix].order;
         if (largestOrder(order))
             return;
         const other = nextOrder(order);
@@ -66,5 +82,10 @@ export const useOrderForm = (data: OrderFormValues) => {
             swap(ix, other);
     }
 
-    return { form, moveUp, moveDown };
+    const getOrder = (id: number) => {
+        const ix = form.values.array.map(x => x.id).indexOf(id);
+        return form.values.array[ix].order;
+    }
+
+    return { form, moveUp, moveDown, getOrder };
 }

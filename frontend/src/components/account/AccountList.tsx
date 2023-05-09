@@ -1,4 +1,4 @@
-import { OrderFormValues } from "../../hooks/useOrderForm";
+import { OrderRequest } from "../../hooks/useOrderForm";
 import { AccountDeepQueryResult, useEditAccountOrders } from "../../types/Account";
 import { OrderForm } from "../OrderForm";
 import { AccountEdit } from "./AccountForm";
@@ -7,8 +7,8 @@ export default function AccountFormList({ accounts: unsorted }: { accounts: Acco
     const accounts = unsorted.sort((a, b) => a.id - b.id);
     const editAccountOrders = useEditAccountOrders();
 
-    const handleSubmit = (values: OrderFormValues, callback: () => void) => {
-        editAccountOrders.mutate({ ...values, ids: accounts.map(a => a.id) }, {
+    const handleSubmit = (values: OrderRequest, callback: () => void) => {
+        editAccountOrders.mutate(values, {
             onSuccess: () => {
 
                 editAccountOrders.reset();
@@ -17,7 +17,7 @@ export default function AccountFormList({ accounts: unsorted }: { accounts: Acco
     }
 
     return <OrderForm title={'accounts'} titleOrder={1}
-        orders={accounts.map(a => a.order)}
+        orders={{array: accounts.map(a => ({order: a.order, id: a.id}))}}
         data={accounts} cell={AccountEdit}
         onSubmit={handleSubmit}
     />
