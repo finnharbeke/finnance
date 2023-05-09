@@ -1,4 +1,4 @@
-import { OrderFormValues } from "../../hooks/useOrderForm";
+import { OrderRequest } from "../../hooks/useOrderForm";
 import { CategoryHierarchyQueryResult, useCategoryHierarchy, useEditCategoryOrders } from "../../types/Category";
 import { OrderForm } from "../OrderForm";
 import Placeholder from "../Placeholder";
@@ -27,8 +27,8 @@ export default function CategoryList({ categories: unsorted, title }: CategoryLi
     const categories = unsorted.sort((a, b) => a.category.id - b.category.id);
 
     const editCategoryOrders = useEditCategoryOrders();
-    const handleSubmit = (values: OrderFormValues, callback: () => void) => {
-        editCategoryOrders.mutate({ ...values, ids: categories.map(a => a.category.id) }, {
+    const handleSubmit = (values: OrderRequest, callback: () => void) => {
+        editCategoryOrders.mutate(values, {
             onSuccess: () => {
                 editCategoryOrders.reset();
             }, onSettled: callback
@@ -36,7 +36,7 @@ export default function CategoryList({ categories: unsorted, title }: CategoryLi
     }
 
     return <OrderForm title={title}
-        orders={categories.map(a => a.category.order)}
+        orders={{ array: categories.map(a => ({ order: a.category.order, id: a.category.id })) }}
         data={categories} cell={CategoryEdit}
         onSubmit={handleSubmit}
     />
