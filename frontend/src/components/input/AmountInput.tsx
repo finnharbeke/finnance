@@ -36,7 +36,7 @@ export default function AmountInput(props: AmountInputProps) {
                     ? (showPrefix ? `${currency?.code} ${value}` : value)
                     : ''
         }
-        parser={(value: string) => value.replace(/\D+\s/g, '')}
+        parser={(value: string) => value.replace(/\D+\s/g, '').replace(',', '.')}
 
         value={amount}
         onChange={(newVal) =>
