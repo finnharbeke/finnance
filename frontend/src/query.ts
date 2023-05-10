@@ -1,5 +1,5 @@
 import { showNotification } from "@mantine/notifications";
-import { QueryClient, useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { UserQueryResult } from "./types/User";
 
@@ -64,3 +64,15 @@ export const searchParams = (props: searchParamsProps) => {
     return searchParams.toString();
 }
 
+export const usePrefetch = () => {
+    const queryClient = useQueryClient();
+    queryClient.prefetchQuery({
+        queryKey: ["categories", "expenses"]
+    })
+    queryClient.prefetchQuery({
+        queryKey: ["categories", "incomes"]
+    })
+    queryClient.prefetchQuery({
+        queryKey: ["agents"]
+    })
+}
