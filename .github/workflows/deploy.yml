@@ -26,6 +26,6 @@ jobs:
             docker compose pull
             docker compose up -d --no-deps
             docker system prune --force --all
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.SSH_HOST }}
           username: pi
           privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
