@@ -1,0 +1,36 @@
+name: deploy on server
+
+on:
+  workflow_run:
+    workflows: [
+      "production backend",
+      "production frontend",
+      "staging backend",
+      "staging frontend",
+    ]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ../private.key
+          sudo chmod 600 ../private.key
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+          SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+      - name: pull & deploy
+        run: |
+          ssh -i $SSH_KEY_PATH pi@doerfli.ddns.net
+          cd ~/finnance
+          wget https://raw.githubusercontent.com/finnharbeke/finnance/main/docker-compose.yml -O docker-compose.yml
+          docker compose pull
+          docker compose up -d --no-deps
