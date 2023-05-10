@@ -1,4 +1,5 @@
 import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
 import { FlowFormValues, emptyFlowFormValues, isFlow } from "../../types/Flow";
@@ -8,8 +9,6 @@ import { RedIcon } from "../Icons";
 import AgentInput from "../input/AgentInput";
 import AmountInput from "../input/AmountInput";
 import CategoryInput from "../input/CategoryInput";
-import { useDisclosure } from "@mantine/hooks";
-import { useEffect, useState } from "react";
 
 interface FlowsNRecordsButtonProps extends ButtonProps {
     form: TransactionFormType

@@ -1,5 +1,5 @@
 import { Box, BoxProps, ColorSwatch, Group, Paper, Text, useMantineTheme } from '@mantine/core';
-import { ComputedDatum, ResponsiveSunburst } from '@nivo/sunburst';
+import { ComputedDatum, ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
@@ -123,6 +123,11 @@ const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currenc
 
         tooltip={node => tooltip(node, currency_id)}
 
+        layers={[
+            'arcs', 'arcLabels',
+            (props) => centeredMetric(props, currency_id)
+        ]}
+
         // animate={false}
         transitionMode='middleAngle'
     /></Box>
@@ -151,3 +156,42 @@ const TooltipBase = ({ node, amount }: { node: ComputedDatum<SunburstData>, amou
             <Text fz={14} style={{ whiteSpace: 'nowrap' }}>{amount}</Text>
         </Group>
     </Paper>
+
+const centeredMetric = (props: SunburstCustomLayerProps<SunburstData>, currency_id: string | undefined) =>
+    currency_id === undefined ?
+        <CenteredMetricNoCurrency props={props} />
+        :
+        <CenteredMetricCurrency props={props} currency_id={currency_id} />
+
+const CenteredMetricCurrency = ({ props, currency_id }: { props: SunburstCustomLayerProps<SunburstData>, currency_id: string }) => {
+    const total = props.nodes.reduce((total, datum) => total + datum.value, 0);
+    const query = useCurrency(currency_id);
+    const amount = useAmount(total, query.data);
+    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={amount} />
+}
+
+const CenteredMetricNoCurrency = ({ props }: { props: SunburstCustomLayerProps<SunburstData> }) => {
+    const total = props.nodes.reduce((total, datum) => total + datum.value, 0);
+    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={total.toString()} />
+}
+
+interface CenteredMetricBaseProps extends SunburstCustomLayerProps<SunburstData> {
+    middle: string
+}
+
+const CenteredMetricBase = ({ centerX, centerY, middle }: CenteredMetricBaseProps) => {
+    const theme = useMantineTheme();
+    return <text
+        x={centerX}
+        y={centerY}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{
+            fontSize: '24px',
+            fontWeight: 600,
+            fill: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.dark[8]
+        }}
+    >
+        {middle}
+    </text>
+}
