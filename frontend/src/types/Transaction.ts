@@ -9,7 +9,7 @@ import { AccountQueryResult } from "./Account"
 import { AgentQueryResult } from "./Agent"
 import { CurrencyQueryResult } from "./Currency"
 import { FlowFormValues, FlowQueryResult, FlowRequest, flowsFormValues, isFlow } from "./Flow"
-import { RecordFormValues, RecordQueryResult, RecordRequest, isRecord, recordsFormValues } from "./Record"
+import { RecordFormValues, RecordQueryResult, RecordRequest, emptyRecordFormValues, isRecord, recordsFormValues } from "./Record"
 
 export interface TransactionQueryResult {
     id: number,
@@ -223,8 +223,8 @@ export const useTransactionFormValues:
             agent: '',
             direct: false,
             n_flows: 0,
-            n_records: 0,
-            items: [],
+            n_records: 1,
+            items: [emptyRecordFormValues(0)],
             comment: '',
             last_update: -1,
             remote_agent: acc ? undefined : ''

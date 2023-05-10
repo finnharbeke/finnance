@@ -10,7 +10,7 @@ on:
 
 jobs:
   staging-frontend:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
     steps:
       - name: Checkout
@@ -30,4 +30,7 @@ jobs:
         with:
           context: ./frontend
           push: true
+          platforms: linux/arm64
           tags: ${{ vars.DOCKERHUB_USERNAME }}/finnance:frontend-staging
+          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/finnance:frontend-staging
+          cache-to: type=inline

@@ -1,4 +1,4 @@
-import { Button, ButtonProps, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
+import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
 import { FlowFormValues, emptyFlowFormValues, isFlow } from "../../types/Flow";
@@ -8,6 +8,8 @@ import { RedIcon } from "../Icons";
 import AgentInput from "../input/AgentInput";
 import AmountInput from "../input/AmountInput";
 import CategoryInput from "../input/CategoryInput";
+import { useDisclosure } from "@mantine/hooks";
+import { useEffect, useState } from "react";
 
 interface FlowsNRecordsButtonProps extends ButtonProps {
     form: TransactionFormType
@@ -18,8 +20,8 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
     return <Input.Wrapper
         label={
             form.values.account_id === null ?
-            'add records'
-            : 'add records & flows | direct flow'
+                'add records'
+                : 'add records & flows | direct flow'
         }
         withAsterisk
         {...form.getInputProps('direct')}
@@ -169,9 +171,18 @@ interface FlowsNRecordsProps {
     currency?: CurrencyQueryResult
 }
 
-const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) =>
-    <>
-        <FlowsNRecordsButtons form={form} />
+const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) => {
+    const [hidden, setHidden] = useState(
+        form.values.items.length <= 1
+    );
+    useEffect(() =>
+        setHidden(form.values.items.length <= 1),
+        [form.values.items.length, setHidden]
+    )
+    return <>
+        <Collapse in={!hidden}>
+            <FlowsNRecordsButtons form={form} />
+        </Collapse>
         {
             !form.values.direct && form.values.items.map((data, i) =>
                 isFlow(data) ?
@@ -180,8 +191,13 @@ const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) =>
                     <RecordInput form={form} currency={currency} record={data} i={i} key={i} />
             )
         }
-
+        {
+            hidden &&
+            <Anchor align='right' onClick={() => setHidden(false)}>
+                more...
+            </Anchor>
+        }
     </>
-
+}
 
 export default FlowsNRecordsInput;

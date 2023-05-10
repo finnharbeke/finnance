@@ -6,10 +6,12 @@ import LinkButton from "../components/LinkButton";
 import AccountPills from "../components/account/AccountPills";
 import { openAddTransferModal } from "../components/transfer/TransferModal";
 import useIsPhone from "../hooks/useIsPhone";
+import { usePrefetch } from "../query";
 
 export default function DashboardPage() {
     const isPhone = useIsPhone();
     const [loading, setLoading] = useState(false);
+    usePrefetch();
     return <>
         <AccountPills />
         {
