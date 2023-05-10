@@ -72,21 +72,11 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
         {
             type: 'text',
             col: {
-                span: 7, sm: 3
+                span: 12, sm: 3
             },
             cell: {
                 align: 'center',
                 text: date.toFormat('dd.MM.yy')
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 5, sm: 2
-            },
-            cell: {
-                align: 'center',
-                text: date.toFormat('HH:mm')
             }
         },
         {
@@ -143,7 +133,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
             type: 'text',
             col: {
                 span: trans.comment === '' && isPhone ? -1 : 24,
-                sm: 5,
+                sm: 7,
                 order: isPhone ? 11 : 7
             },
             cell: {
