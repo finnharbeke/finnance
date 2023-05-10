@@ -1,4 +1,4 @@
-FROM condaforge/miniforge3:latest as conda
+FROM condaforge/miniforge3:23.1.0-1 as conda
 WORKDIR /app
 
 # Keeps Python from generating .pyc files in the container
