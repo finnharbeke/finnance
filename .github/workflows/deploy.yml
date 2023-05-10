@@ -34,3 +34,6 @@ jobs:
           wget https://raw.githubusercontent.com/finnharbeke/finnance/main/docker-compose.yml -O docker-compose.yml
           docker compose pull
           docker compose up -d --no-deps
+        shell: bash
+        env:
+          SSH_KEY_PATH: ${{ github.workspace }}/../private.key
