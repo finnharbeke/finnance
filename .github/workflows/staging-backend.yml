@@ -32,5 +32,4 @@ jobs:
           push: true
           platforms: linux/arm64
           tags: ${{ vars.DOCKERHUB_USERNAME }}/finnance:backend-staging
-          cache-from: type=registry,ref=${{ vars.DOCKERHUB_USERNAME }}/finnance:backend-staging
           cache-to: type=inline
