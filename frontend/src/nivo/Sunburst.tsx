@@ -164,14 +164,16 @@ const centeredMetric = (props: SunburstCustomLayerProps<SunburstData>, currency_
         <CenteredMetricCurrency props={props} currency_id={currency_id} />
 
 const CenteredMetricCurrency = ({ props, currency_id }: { props: SunburstCustomLayerProps<SunburstData>, currency_id: string }) => {
-    const total = props.nodes.reduce((total, datum) => total + datum.value, 0);
+    const total = props.nodes.reduce((total, datum) => total + (
+        datum.path.length === 2 ? datum.value : 0), 0); // only outer
     const query = useCurrency(currency_id);
     const amount = useAmount(total, query.data);
     return total === 0 ? <></> : <CenteredMetricBase {...props} middle={amount} />
 }
 
 const CenteredMetricNoCurrency = ({ props }: { props: SunburstCustomLayerProps<SunburstData> }) => {
-    const total = props.nodes.reduce((total, datum) => total + datum.value, 0);
+    const total = props.nodes.reduce((total, datum) => total + (
+        datum.path.length === 2 ? datum.value : 0), 0); // only outer
     return total === 0 ? <></> : <CenteredMetricBase {...props} middle={total.toString()} />
 }
 
