@@ -1,6 +1,5 @@
 import { Button, Divider, Popover, Text, TextInput } from "@mantine/core";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { OpenContextModal } from "@mantine/modals/lib/context";
+import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
@@ -81,20 +80,9 @@ const TransactionForm = ({ edit = false, account_input = false, minDate, form }:
     </>
 }
 
-type AddTransactionModalProps = {
+export interface AddTransactionModalProps {
     remote?: boolean
     account?: AccountDeepQueryResult,
-}
-
-export const openAddTransactionModal = async (props: OpenContextModal<AddTransactionModalProps>) => {
-    openContextModal({
-        ...{
-            modal: 'add_transaction',
-            title: 'new transaction',
-            size: 'lg'
-        },
-        ...props,
-    })
 }
 
 export const AddTransactionModal = ({ context, id, innerProps: { account, remote = false } }: ContextModalProps<AddTransactionModalProps>) => {
@@ -127,17 +115,6 @@ export const AddTransactionModal = ({ context, id, innerProps: { account, remote
 
 type EditTransactionModalProps = {
     transaction_id: number
-}
-
-export const openEditTransactionModal = async (props: OpenContextModal<EditTransactionModalProps>) => {
-    openContextModal({
-        ...{
-            modal: 'edit_transaction',
-            title: 'edit transaction',
-            size: 'lg'
-        },
-        ...props,
-    })
 }
 
 export const EditTransactionModal = ({ context, id, innerProps: { transaction_id } }: ContextModalProps<EditTransactionModalProps>) => {

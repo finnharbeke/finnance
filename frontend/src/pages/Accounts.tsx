@@ -1,10 +1,9 @@
 import { Button, Divider, Grid, Title } from "@mantine/core";
 import { useState } from "react";
+import { addAccountAction } from "../actions/actions";
 import { CurrencyCard, CurrencyForm } from "../components/Currency";
 import Placeholder from "../components/Placeholder";
 import AccountList from "../components/account/AccountList";
-import { openAccountModal } from "../components/account/AccountModal";
-import useIsPhone from "../hooks/useIsPhone";
 import { useAccounts } from "../types/Account";
 import { useCurrencies } from "../types/Currency";
 
@@ -14,7 +13,6 @@ export default function AccountsPage() {
     const accsQuery = useAccounts();
     const currsQuery = useCurrencies();
 
-    const isPhone = useIsPhone();
     const [loading, setLoading] = useState(false);
 
     if (!accsQuery.isSuccess || !currsQuery.isSuccess)
@@ -31,10 +29,9 @@ export default function AccountsPage() {
         <Button fullWidth mt='sm' loading={loading}
             onClick={() => {
                 setLoading(true);
-                openAccountModal({
-                    fullScreen: isPhone,
-                    innerProps: {}
-                }).then(() => setLoading(false))
+                addAccountAction().then(
+                    () => setLoading(false)
+                )
             }}
         >
             create account</Button>

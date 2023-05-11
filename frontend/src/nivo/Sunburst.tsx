@@ -37,6 +37,7 @@ interface FinnanceSunburstProps {
     min_date?: DateTime,
     max_date?: DateTime,
     currency_id: string
+    interactive?: boolean 
 }
 
 export default function FinnanceSunburst(props: FinnanceSunburstProps) {
@@ -44,6 +45,7 @@ export default function FinnanceSunburst(props: FinnanceSunburstProps) {
     const {
         size,
         is_expense = true,
+        interactive = true,
         currency_id,
         min_date = DateTime.now().startOf('month'),
         max_date
@@ -58,7 +60,7 @@ export default function FinnanceSunburst(props: FinnanceSunburstProps) {
     if (!query.isSuccess)
         return <Placeholder queries={[query]} height={size} />
 
-    return <CustomSunburst data={query.data} size={size} currency_id={currency_id} />
+    return <CustomSunburst data={query.data} size={size} currency_id={currency_id} interactive={interactive} />
 }
 
 export const DummySunburst = ({ size, is_expense }: { size: number, is_expense: boolean }) => {

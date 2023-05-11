@@ -1,14 +1,13 @@
 import { Center, Loader, Title, useMantineTheme } from "@mantine/core";
 import { DateTime } from "luxon";
 import { TbArrowsLeftRight, TbMinus, TbPlus } from "react-icons/tb";
+import { editTransactionAction, editTransferAction } from "../../actions/actions";
 import useAmount from "../../hooks/useAmount";
 import { useSmallerThan } from "../../hooks/useSmallerthan";
 import { Change, isChangeTransaction, useAccount, useChanges } from "../../types/Account";
 import { DataPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
-import { openEditTransactionModal } from "../transaction/TransactionModal";
-import { openEditTransferModal } from "../transfer/TransferModal";
 
 export function ChangePills({ changes }: { changes: Change[] | undefined }) {
     if (changes === undefined)
@@ -130,21 +129,9 @@ const ChangePill = ({ change }: { change: Change }) => {
             },
             cell: {
                 onEdit: () => isTransfer ?
-                    openEditTransferModal({
-                        title: `edit transfer #${change.data.id}`,
-                        fullScreen: isXs,
-                        innerProps: {
-                            transfer: change.data
-                        }
-                    })
+                    editTransferAction(change.data)
                     :
-                    openEditTransactionModal({
-                        title: `edit transaction #${change.data.id}`,
-                        fullScreen: isXs,
-                        innerProps: {
-                            transaction_id: change.data.id
-                        }
-                    }),
+                    editTransactionAction(change.data.id),
             }
         },
         {

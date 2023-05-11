@@ -1,11 +1,10 @@
 import { Button } from "@mantine/core";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { OpenContextModal } from "@mantine/modals/lib/context";
+import { ContextModalProps } from "@mantine/modals";
 import { useState } from "react";
 import { CategoryRequest, useAddCategory, useCategoryForm, useCategoryFormValues } from "../../types/Category";
 import CategoryForm from "./CategoryForm";
 
-interface CategoryModalProps {
+export interface CategoryModalProps {
     is_expense: boolean
 }
 
@@ -36,16 +35,4 @@ export const CategoryModal = ({ context, id, innerProps }: ContextModalProps<Cat
             create
         </Button>
     </form>
-}
-
-export const openCategoryModal = async (props: OpenContextModal<CategoryModalProps>) => {
-    openContextModal({
-        ...{
-            modal: 'category',
-            title: `new ${props.innerProps.is_expense ? 'expense' : 'income'} category`,
-            size: 'lg'
-        },
-        ...props,
-        innerProps: props.innerProps
-    })
 }

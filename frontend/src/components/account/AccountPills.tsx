@@ -5,9 +5,9 @@ import { TbChevronDown, TbChevronUp } from "react-icons/tb";
 import { AccountDeepQueryResult, useAccounts } from "../../types/Account";
 import useIsPhone from "../../hooks/useIsPhone";
 import Placeholder from "../Placeholder";
-import { openAddTransferModal } from "../transfer/TransferModal";
 import { Link } from "react-router-dom";
 import useAmount from "../../hooks/useAmount";
+import { addTransferAction } from "../../actions/actions";
 
 const useStyles = createStyles({
     apart: {
@@ -108,7 +108,7 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
                 if (source.id === acc.id)
                     return;
                 event.preventDefault();
-                openAddTransferModal({ innerProps: { source, dest: acc } });
+                addTransferAction({ source, dest: acc });
             }}
         >
             <Group spacing='xs' noWrap>

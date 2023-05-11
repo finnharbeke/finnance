@@ -2,6 +2,7 @@ import { DefaultMantineColor, Tuple } from '@mantine/core';
 import { MantineThemeOverride } from "@mantine/styles";
 import { DateTime } from 'luxon';
 import useIsPhone from './hooks/useIsPhone';
+import { useSmallerThan } from './hooks/useSmallerthan';
 
 type ExtendedCustomColors = DefaultMantineColor;
 
@@ -13,6 +14,7 @@ declare module '@mantine/core' {
 
 export const useCustomTheme: () => MantineThemeOverride = () => {
   const isPhone = useIsPhone();
+  const isXs = useSmallerThan('xs');
   return {
     colors: {
     },
@@ -100,6 +102,12 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
       Switch: {
         defaultProps: {
           size: 'xl'
+        }
+      },
+      Modal: {
+        defaultProps: {
+          size: 'lg',
+          fullScreen: isXs,
         }
       }
     }

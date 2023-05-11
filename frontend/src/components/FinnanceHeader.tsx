@@ -1,10 +1,12 @@
-import { Burger, Container, createStyles, Grid, Group, Header, Paper, Transition } from '@mantine/core';
+import { ActionIcon, Burger, Container, createStyles, Grid, Group, Header, Paper, Transition, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from './auth/api';
 import FinnanceLogo from './FinnanceLogo';
 import { LightDarkToggle } from './LightDarkToggle';
 import Placeholder from './Placeholder';
+import { spotlight } from '@mantine/spotlight';
+import { AiOutlineThunderbolt } from 'react-icons/ai';
 
 const HEADER_HEIGHT = 60;
 
@@ -71,6 +73,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function FinnanceHeader() {
+    const theme = useMantineTheme();
     const [opened, { toggle, close }] = useDisclosure(false);
     const { classes, cx } = useStyles();
     const query = useAuth();
@@ -102,10 +105,13 @@ export default function FinnanceHeader() {
     return (
         <Header height={HEADER_HEIGHT} className={classes.root}>
             <Container>
-                <Grid justify='space-between' p='xs'>
+                <Grid justify='space-between' pt='xs'>
                     <Grid.Col span='content'>
                         <Group noWrap={true}>
-                            <LightDarkToggle />
+                            <ActionIcon onClick={() => spotlight.open()}
+                                size='lg' variant='light' color={theme.primaryColor}>
+                                <AiOutlineThunderbolt size={24} />
+                            </ActionIcon>
                             <FinnanceLogo text link size={28} onClick={close}/>
                         </Group>
                     </Grid.Col>
@@ -114,6 +120,7 @@ export default function FinnanceHeader() {
 
                             <Group spacing={5} className={classes.links} position='right'>
                                 {items}
+                                <LightDarkToggle />
                             </Group>
 
 
@@ -125,6 +132,9 @@ export default function FinnanceHeader() {
                                 {(styles) => (
                                     <Paper className={classes.dropdown} withBorder style={styles}>
                                         {items}
+                                        <Group align='center' grow p='xs'>
+                                            <LightDarkToggle />
+                                        </Group>
                                     </Paper>
                                 )}
                             </Transition>

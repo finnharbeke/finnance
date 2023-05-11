@@ -1,6 +1,7 @@
 import { Center, Loader, Title, useMantineTheme } from "@mantine/core";
 import { DateTime } from "luxon";
 import { TbMinus, TbPlus } from "react-icons/tb";
+import { editTransactionAction } from "../../actions/actions";
 import useAmount from "../../hooks/useAmount";
 import { useSmallerThan } from "../../hooks/useSmallerthan";
 import { useCurrency } from "../../types/Currency";
@@ -8,7 +9,6 @@ import { TransactionDeepQueryResult, useTransactions, useTransactionsProps } fro
 import { DataPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
-import { openEditTransactionModal } from "./TransactionModal";
 
 export function FilterableTransactions(props: Partial<useTransactionsProps>) {
     const [filter, setFilter] = useFilterPagination();
@@ -120,13 +120,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
             },
             cell: {
                 onEdit: () =>
-                    openEditTransactionModal({
-                        title: `edit transaction #${trans.id}`,
-                        fullScreen: isXs,
-                        innerProps: {
-                            transaction_id: trans.id
-                        }
-                    }),
+                    editTransactionAction(trans.id),
             }
         },
         {

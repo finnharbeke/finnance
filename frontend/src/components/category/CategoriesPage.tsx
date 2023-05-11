@@ -1,13 +1,11 @@
 import { ActionIcon, Button, Collapse, Flex, Grid, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { TbEye } from "react-icons/tb";
-import useIsPhone from "../../hooks/useIsPhone";
+import { addCategoryAction } from "../../actions/actions";
 import { DummySunburst } from "../../nivo/Sunburst";
 import { CategoryExpensesList, CategoryIncomesList } from "./CategoriesList";
-import { openCategoryModal } from "./CategoryModal";
 
 export default function CategoriesPage() {
-    const isPhone = useIsPhone();
     const [open, { toggle }] = useDisclosure();
 
     return <>
@@ -27,26 +25,12 @@ export default function CategoriesPage() {
         </Collapse>
         <CategoryExpensesList />
         <Button fullWidth my='sm'
-            onClick={() => {
-                openCategoryModal({
-                    fullScreen: isPhone,
-                    innerProps: {
-                        is_expense: true,
-                    }
-                })
-            }}>
+            onClick={() => addCategoryAction(true)}>
             new expense category
         </Button>
         <CategoryIncomesList />
         <Button fullWidth mt='sm'
-            onClick={() => {
-                openCategoryModal({
-                    fullScreen: isPhone,
-                    innerProps: {
-                        is_expense: false,
-                    }
-                })
-            }}>
+            onClick={() => addCategoryAction(false)}>
             new income category
         </Button>
     </>

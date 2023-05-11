@@ -1,21 +1,9 @@
 import { Button, Skeleton } from "@mantine/core";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { OpenContextModal } from "@mantine/modals/lib/context";
+import { ContextModalProps } from "@mantine/modals";
 import { useState } from "react";
 import { AccountRequest, useAccountForm, useAddAccount } from "../../types/Account";
-import { AccountForm } from "./AccountForm";
 import { useCurrencies } from "../../types/Currency";
-
-export const openAccountModal = async (props: OpenContextModal) => {
-    openContextModal({
-        ...{
-            modal: 'account',
-            title: 'new account',
-            size: 'lg'
-        },
-        ...props,
-    })
-}
+import { AccountForm } from "./AccountForm";
 
 export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
     const currencies = useCurrencies();

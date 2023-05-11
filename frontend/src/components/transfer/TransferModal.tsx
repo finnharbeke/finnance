@@ -1,6 +1,5 @@
 import { Button, Center, Grid, Popover, Switch, Text, TextInput } from "@mantine/core"
-import { openContextModal } from "@mantine/modals"
-import { ContextModalProps, OpenContextModal } from "@mantine/modals/lib/context"
+import { ContextModalProps } from "@mantine/modals/lib/context"
 import { showNotification } from "@mantine/notifications"
 import { useState } from "react"
 import { TbArrowBigRightFilled, TbLock, TbLockOpen } from 'react-icons/tb'
@@ -88,20 +87,10 @@ const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: Transfer
     </>
 }
 
-interface AddTransferModalProps {
+export interface AddTransferModalProps {
     source?: AccountDeepQueryResult
     dest?: AccountDeepQueryResult
 }
-
-export const openAddTransferModal = async (props: OpenContextModal<AddTransferModalProps>) =>
-    openContextModal({
-        ...{
-            modal: 'add_transfer',
-            title: 'new account transfer',
-            size: 'lg'
-        },
-        ...props,
-    })
 
 export const AddTransferModal = ({ context, id, innerProps: { source, dest } }: ContextModalProps<AddTransferModalProps>) => {
     const initial = useTransferFormValues(undefined, source, dest);
@@ -132,16 +121,6 @@ export const AddTransferModal = ({ context, id, innerProps: { source, dest } }: 
 interface EditTransferModalProps {
     transfer: TransferQueryResult
 }
-
-export const openEditTransferModal = async (props: OpenContextModal<EditTransferModalProps>) =>
-    openContextModal({
-        ...{
-            modal: 'edit_transfer',
-            title: 'edit transfer',
-            size: 'lg'
-        },
-        ...props,
-    })
 
 export const EditTransferModal = ({ context, id, innerProps: { transfer } }: ContextModalProps<EditTransferModalProps>) => {
     const initial = useTransferFormValues(transfer);
