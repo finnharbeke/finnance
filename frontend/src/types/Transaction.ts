@@ -78,6 +78,7 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
     const form = useForm<TransactionFormValues, TransactionTransform>({
         initialValues: initial,
         validate: {
+            account_id: (val, fv) => val === null ? 'choose account' : null,
             currency_id: (val, fv) => val === null ? 'choose currency' : null,
             time: val => val === '' ? 'enter time' : null,
             amount: val => val === '' ? 'enter amount' : null,
@@ -130,7 +131,8 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
             }
         },
         transformValues: (fv: TransactionFormValues) => ({
-            account_id: fv.account_id === null ? undefined : parseInt(fv.account_id),
+            account_id: fv.account_id === null ? -1 : 
+                fv.account_id === 'remote' ? undefined : parseInt(fv.account_id),
             currency_id: fv.currency_id === null ? undefined : parseInt(fv.currency_id),
             is_expense: fv.is_expense,
             agent: fv.agent,
@@ -189,12 +191,12 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
 }
 
 export const useTransactionFormValues:
-    (t?: TransactionDeepQueryResult, a?: AccountQueryResult)
+    (t?: TransactionDeepQueryResult, a?: AccountQueryResult, r?: boolean)
         => TransactionFormValues
-    = (trans, acc) => {
+    = (trans, acc, remote=false) => {
         const build: () => TransactionFormValues = () => trans ? {
             account_id: trans.account_id === null ?
-                null : trans.account_id.toString(),
+                'remote' : trans.account_id.toString(),
             currency_id: trans.currency_id.toString(),
             date: DateTime.fromISO(trans.date_issued).startOf('day').toJSDate(),
             time: DateTime.fromISO(trans.date_issued).toFormat('HH:mm'),
@@ -214,7 +216,7 @@ export const useTransactionFormValues:
             remote_agent: trans.account_id === null ?
                 trans.flows[0].agent_desc : undefined,
         } : {
-            account_id: acc ? acc.id.toString() : null,
+            account_id: remote ? 'remote' : acc ? acc.id.toString() : null,
             currency_id: acc ? acc.currency_id.toString() : null,
             date: new Date(),
             time: DateTime.now().toFormat('HH:mm'),
@@ -238,7 +240,7 @@ export const useTransactionFormValues:
 export const useTransaction = (trans_id: number) =>
     useQuery<TransactionDeepQueryResult, AxiosError>({ queryKey: ['transactions', trans_id] });
 
-interface useTransactionsProps extends FilterRequest {
+export interface useTransactionsProps extends FilterRequest {
     account_id?: string | null
 }
 

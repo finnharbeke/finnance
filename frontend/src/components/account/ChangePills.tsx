@@ -2,7 +2,7 @@ import { Center, Loader, Title, useMantineTheme } from "@mantine/core";
 import { DateTime } from "luxon";
 import { TbArrowsLeftRight, TbMinus, TbPlus } from "react-icons/tb";
 import useAmount from "../../hooks/useAmount";
-import useIsPhone from "../../hooks/useIsPhone";
+import { useSmallerThan } from "../../hooks/useSmallerthan";
 import { Change, isChangeTransaction, useAccount, useChanges } from "../../types/Account";
 import { DataPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
@@ -38,7 +38,7 @@ export function FilterableChanges({ id }: { id: number }) {
 
 const ChangePill = ({ change }: { change: Change }) => {
     const theme = useMantineTheme();
-    const isPhone = useIsPhone();
+    const isXs = useSmallerThan('xs');
 
     const query = useAccount(change.acc_id);
     const isTransfer = !isChangeTransaction(change);
@@ -71,7 +71,7 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'icon',
             col: {
-                span: 3, sm: 1
+                span: 3, xs: 1
             },
             cell: {
                 style: { backgroundColor: iconColor },
@@ -83,7 +83,7 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'text',
             col: {
-                span: 12, sm: 3
+                span: 12, xs: 3
             },
             cell: {
                 align: 'center',
@@ -93,7 +93,7 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'text',
             col: {
-                span: 9, sm: 2
+                span: 9, xs: 2
             },
             cell: {
                 align: 'right',
@@ -104,7 +104,7 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'text',
             col: {
-                span: 12, sm: 6, order: isPhone ? 9 : 5
+                span: 12, xs: 6, order: 9, orderXs: 5
             },
             cell: {
                 align: 'left',
@@ -116,7 +116,7 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'text',
             col: {
-                span: 9, sm: 3, order: isPhone ? 10 : 6
+                span: 9, xs: 3, order: 10, orderXs: 6
             },
             cell: {
                 align: 'right',
@@ -126,13 +126,13 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'edit',
             col: {
-                span: 3, sm: 1, order: 8
+                span: 3, xs: 1, order: 8
             },
             cell: {
                 onEdit: () => isTransfer ?
                     openEditTransferModal({
                         title: `edit transfer #${change.data.id}`,
-                        fullScreen: isPhone,
+                        fullScreen: isXs,
                         innerProps: {
                             transfer: change.data
                         }
@@ -140,7 +140,7 @@ const ChangePill = ({ change }: { change: Change }) => {
                     :
                     openEditTransactionModal({
                         title: `edit transaction #${change.data.id}`,
-                        fullScreen: isPhone,
+                        fullScreen: isXs,
                         innerProps: {
                             transaction_id: change.data.id
                         }
@@ -150,9 +150,9 @@ const ChangePill = ({ change }: { change: Change }) => {
         {
             type: 'text',
             col: {
-                span: change.data.comment === '' && isPhone ? -1 : 24,
-                sm: 8,
-                order: isPhone ? 11 : 7
+                span: change.data.comment === '' && isXs ? -1 : 24,
+                xs: 8,
+                order: 11, orderXs: 7
             },
             cell: {
                 align: 'left',

@@ -18,7 +18,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
     const theme = useMantineTheme();
     return <Input.Wrapper
         label={
-            form.values.account_id === null ?
+            form.values.account_id === 'remote' ?
                 'add records'
                 : 'add records & flows | direct flow'
         }

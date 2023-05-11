@@ -1,4 +1,4 @@
-import { Button, Collapse, Group, Pagination, TextInput } from "@mantine/core";
+import { Button, Collapse, Grid, Pagination, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -56,18 +56,25 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
             })
         // eslint-disable-next-line
     }, [pages, filter.page]);
+     
 
     const [ open, { toggle }] = useDisclosure(false);
 
     return <>
-        <Group position='apart'>
-            <Button variant='default' onClick={toggle} leftIcon={
-                <TbFilter size={24}/>
-            }>filter
-            </Button>
-            <Pagination size='md' value={filter.page + 1} total={pages ?? 0}
-                onChange={page => setFilter({...filter, page: page - 1})} />
-        </Group>
+        <Grid justify='space-between'>
+            <Grid.Col span={12} sm='content' order={2} orderSm={1}>
+                <Button variant='default' onClick={toggle} leftIcon={
+                    <TbFilter size={24}/>
+                }>filter
+                </Button>
+            </Grid.Col>
+            <Grid.Col span={12} sm='content' order={1} orderSm={2}>
+                <Pagination size='md' withControls={false} grow
+                    value={filter.page + 1} total={pages ?? 0}
+                    onChange={page => setFilter({...filter, page: page - 1})}
+                />
+            </Grid.Col>
+        </Grid>
         <Collapse in={open} pt='sm'>
             <form onSubmit={form.onSubmit(setFilter)}>
                 <TextInput label='search' {...form.getInputProps('search')} />

@@ -1,4 +1,4 @@
-import { Button, Center, Stack } from "@mantine/core";
+import { Button, Center, Divider, Stack } from "@mantine/core";
 import { useState } from "react";
 import { TbArrowsLeftRight } from 'react-icons/tb';
 import FinnanceLogo from "../components/FinnanceLogo";
@@ -26,13 +26,13 @@ export default function DashboardPage() {
                 }).then(() => setLoading(false))
             }} />
         }
-        {/* <Stack>
+        <Stack>
             <Button color='indigo' fullWidth>Quick Access</Button>
             <Button fullWidth>Analysis</Button>
         </Stack>
         <Divider my='sm'/>
-        <Skeleton height={150} />
-        <Divider my='sm'/> */}
+        {/* <Skeleton height={150} /> */}
+        <Divider my='sm'/>
         <Stack>
             <LinkButton to='/analysis' label="graphs"></LinkButton>
             <LinkButton to='/accounts' label="manage accounts"></LinkButton>

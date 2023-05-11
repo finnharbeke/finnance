@@ -2,17 +2,17 @@ import { Center, Loader, Title, useMantineTheme } from "@mantine/core";
 import { DateTime } from "luxon";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import useAmount from "../../hooks/useAmount";
-import useIsPhone from "../../hooks/useIsPhone";
+import { useSmallerThan } from "../../hooks/useSmallerthan";
 import { useCurrency } from "../../types/Currency";
-import { TransactionDeepQueryResult, useTransactions } from "../../types/Transaction";
+import { TransactionDeepQueryResult, useTransactions, useTransactionsProps } from "../../types/Transaction";
 import { DataPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
 import { openEditTransactionModal } from "./TransactionModal";
 
-export function FilterableRemotes() {
+export function FilterableTransactions(props: Partial<useTransactionsProps>) {
     const [filter, setFilter] = useFilterPagination();
-    const query = useTransactions({ ...filter, account_id: null });
+    const query = useTransactions({ ...filter, ...props });
 
     if (query.isError)
         return <Placeholder height={300} queries={[query]} />
@@ -39,7 +39,7 @@ export const TransPills = ({ transactions }: { transactions: TransactionDeepQuer
 const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
     const query = useCurrency(trans.currency_id);
     const theme = useMantineTheme();
-    const isPhone = useIsPhone();
+    const isXs = useSmallerThan('xs');
 
     const iconColor = theme.colors[
         trans.is_expense ? 'red' : 'blue'
@@ -82,7 +82,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
         {
             type: 'text',
             col: {
-                span: 9, sm: 2
+                span: 9, sm: 3
             },
             cell: {
                 align: 'right',
@@ -93,7 +93,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
         {
             type: 'text',
             col: {
-                span: 12, sm: 5, order: isPhone ? 9 : 5
+                span: 12, sm: 5, order: 9, orderXs: 5
             },
             cell: {
                 align: 'left',
@@ -103,7 +103,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
         {
             type: 'text',
             col: {
-                span: 9, sm: 5, order: isPhone ? 10 : 6
+                span: 9, sm: 5, order: 10, orderXs: 6
             },
             cell: {
                 align: 'left',
@@ -122,7 +122,7 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
                 onEdit: () =>
                     openEditTransactionModal({
                         title: `edit transaction #${trans.id}`,
-                        fullScreen: isPhone,
+                        fullScreen: isXs,
                         innerProps: {
                             transaction_id: trans.id
                         }
@@ -132,9 +132,9 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
         {
             type: 'text',
             col: {
-                span: trans.comment === '' && isPhone ? -1 : 24,
-                sm: 7,
-                order: isPhone ? 11 : 7
+                span: trans.comment === '' && isXs ? -1 : 24,
+                sm: 6,
+                order: 11, orderXs: 7
             },
             cell: {
                 align: 'left',

@@ -205,7 +205,7 @@ def edit_transaction(transaction_id: int, **data):
             trans.date_issued = issued
 
     if 'account_id' in data and data['account_id'] != trans.account_id:
-        account = Account.query.filter_by(id=data['account_id'], user_id=current_user.id)
+        account = Account.query.filter_by(id=data['account_id'], user_id=current_user.id).first()
         if account is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid account_id')
         if 'currency_id' in data and account.currency_id != data['currency_id']:
@@ -215,7 +215,7 @@ def edit_transaction(transaction_id: int, **data):
         trans.currency_id = account.currency_id
 
     if 'currency_id' in data and data['currency_id'] != trans.currency_id:
-        currency = Currency.query.filter_by(id=data['currency_id'], user_id=current_user.id)
+        currency = Currency.query.filter_by(id=data['currency_id'], user_id=current_user.id).first()
         if currency is None:
             raise APIError(HTTPStatus.BAD_REQUEST, 'invalid currency_id')
         

@@ -125,7 +125,7 @@ const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currenc
 
         layers={[
             'arcs', 'arcLabels',
-            (props) => centeredMetric(props, currency_id)
+            (props) => centeredMetric(props, currency_id, size)
         ]}
 
         // animate={false}
@@ -157,31 +157,32 @@ const TooltipBase = ({ node, amount }: { node: ComputedDatum<SunburstData>, amou
         </Group>
     </Paper>
 
-const centeredMetric = (props: SunburstCustomLayerProps<SunburstData>, currency_id: string | undefined) =>
+const centeredMetric = (props: SunburstCustomLayerProps<SunburstData>, currency_id: string | undefined, size: number) =>
     currency_id === undefined ?
-        <CenteredMetricNoCurrency props={props} />
+        <CenteredMetricNoCurrency props={props} size={size}/>
         :
-        <CenteredMetricCurrency props={props} currency_id={currency_id} />
+        <CenteredMetricCurrency props={props} currency_id={currency_id} size={size}/>
 
-const CenteredMetricCurrency = ({ props, currency_id }: { props: SunburstCustomLayerProps<SunburstData>, currency_id: string }) => {
+const CenteredMetricCurrency = ({ props, currency_id, size }: { props: SunburstCustomLayerProps<SunburstData>, currency_id: string, size: number }) => {
     const total = props.nodes.reduce((total, datum) => total + (
         datum.path.length === 2 ? datum.value : 0), 0); // only outer
     const query = useCurrency(currency_id);
     const amount = useAmount(total, query.data);
-    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={amount} />
+    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={amount} size={size} />
 }
 
-const CenteredMetricNoCurrency = ({ props }: { props: SunburstCustomLayerProps<SunburstData> }) => {
+const CenteredMetricNoCurrency = ({ props, size }: { props: SunburstCustomLayerProps<SunburstData>, size: number }) => {
     const total = props.nodes.reduce((total, datum) => total + (
         datum.path.length === 2 ? datum.value : 0), 0); // only outer
-    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={total.toString()} />
+    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={total.toString()} size={size} />
 }
 
 interface CenteredMetricBaseProps extends SunburstCustomLayerProps<SunburstData> {
     middle: string
+    size: number
 }
 
-const CenteredMetricBase = ({ centerX, centerY, middle }: CenteredMetricBaseProps) => {
+const CenteredMetricBase = ({ centerX, centerY, middle, size }: CenteredMetricBaseProps) => {
     const theme = useMantineTheme();
     return <text
         x={centerX}
@@ -189,7 +190,7 @@ const CenteredMetricBase = ({ centerX, centerY, middle }: CenteredMetricBaseProp
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-            fontSize: '24px',
+            fontSize: size / 15,
             fontWeight: 600,
             fill: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.dark[8]
         }}

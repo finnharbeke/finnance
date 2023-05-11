@@ -4,10 +4,11 @@ import { OpenContextModal } from "@mantine/modals/lib/context";
 import { showNotification } from "@mantine/notifications";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
-import { AccountDeepQueryResult } from "../../types/Account";
+import { AccountDeepQueryResult, useAccounts } from "../../types/Account";
 import { CurrencyQueryResult, useCurrencies } from "../../types/Currency";
 import { TransactionFormType, TransactionRequest, useAddTransaction, useDeleteTransaction, useEditTransaction, useTransaction, useTransactionForm, useTransactionFormValues } from "../../types/Transaction";
 import Placeholder from "../Placeholder";
+import AccountSelect from "../input/AccountInput";
 import AgentInput from "../input/AgentInput";
 import CurrencyInput from "../input/CurrencyInput";
 import DateTimeInput from "../input/DateTimeInput";
@@ -15,25 +16,50 @@ import FlowsNRecordsInput from "./FlowsNRecords";
 import AmountInput from "./TransactionAmountInput";
 
 interface TransactionFormProps {
-    account?: AccountDeepQueryResult
+    edit?: boolean
+    account_input?: boolean
+    minDate?: Date
     form: TransactionFormType
 }
 
-const TransactionForm = ({ account, form }: TransactionFormProps) => {
-    const query = useCurrencies();
+const TransactionForm = ({ edit = false, account_input = false, minDate, form }: TransactionFormProps) => {
+    const currQuery = useCurrencies();
+    const accQuery = useAccounts();
 
-    if (!query.isSuccess)
-        return <Placeholder queries={[query]} height={400} />
+    const [currency, setCurrency] = useState<CurrencyQueryResult | undefined>();
+    const [account, setAccount] = useState<AccountDeepQueryResult | undefined>();
 
-    const currencies = query.data;
+    useEffect(() => setCurrency(
+        (currQuery.data || []).reduce<CurrencyQueryResult | undefined>(
+            (prev, current) => current.id.toString() === form.values.currency_id ?
+                current : prev, undefined
+        ))
+        , [currQuery, form.values.currency_id])
 
-    const currency = currencies.reduce<CurrencyQueryResult | undefined>(
-        (prev, curr) => curr.id.toString() === form.values.currency_id ?
-            curr : prev, undefined
-    );
+    useEffect(() => setAccount(
+        (accQuery.data || []).reduce<AccountDeepQueryResult | undefined>(
+            (prev, current) => current.id.toString() === form.values.account_id ?
+                current : prev, undefined
+        )), [accQuery, form.values.account_id])
+
+    useEffect(() => {
+        if (account !== undefined)
+            form.setFieldValue('currency_id', account.currency_id.toString())
+        // eslint-disable-next-line
+    }, [account])
+
+    if (!currQuery.isSuccess || !accQuery.isSuccess)
+        return <Placeholder queries={[accQuery, currQuery]} height={400} />
+
     return <>
         {
-            form.values.account_id === null &&
+            (edit || account_input) &&
+            <AccountSelect include_remote
+                {...form.getInputProps('account_id')}
+            />
+        }
+        {
+            form.values.account_id === 'remote' &&
             <>
                 <AgentInput label='transaction via' withAsterisk placeholder="my friend tom"
                     {...form.getInputProps('remote_agent')}
@@ -43,8 +69,7 @@ const TransactionForm = ({ account, form }: TransactionFormProps) => {
                 />
             </>
         }
-        <DateTimeInput form={form}
-            minDate={account ? DateTime.fromISO(account?.date_created).toJSDate() : undefined} />
+        <DateTimeInput form={form} minDate={minDate} />
         <AmountInput form={form} currency={currency} />
         <AgentInput label='agent' withAsterisk withinPortal
             {...form.getInputProps('agent')}
@@ -57,6 +82,7 @@ const TransactionForm = ({ account, form }: TransactionFormProps) => {
 }
 
 type AddTransactionModalProps = {
+    remote?: boolean
     account?: AccountDeepQueryResult,
 }
 
@@ -68,13 +94,12 @@ export const openAddTransactionModal = async (props: OpenContextModal<AddTransac
             size: 'lg'
         },
         ...props,
-        innerProps: props.innerProps
     })
 }
 
-export const AddTransactionModal = ({ context, id, innerProps: { account } }: ContextModalProps<AddTransactionModalProps>) => {
+export const AddTransactionModal = ({ context, id, innerProps: { account, remote = false } }: ContextModalProps<AddTransactionModalProps>) => {
 
-    const initial = useTransactionFormValues(undefined, account);
+    const initial = useTransactionFormValues(undefined, account, remote);
     const form = useTransactionForm(initial);
 
     const addTrans = useAddTransaction();
@@ -90,7 +115,9 @@ export const AddTransactionModal = ({ context, id, innerProps: { account } }: Co
     }
 
     return <form onSubmit={form.onSubmit(submitForm)}>
-        <TransactionForm form={form} account={account} />
+        <TransactionForm form={form}
+            minDate={account && DateTime.fromISO(account.date_created).toJSDate()}
+            account_input={account === undefined && !remote} />
         <Button fullWidth mt="md" type='submit' loading={loading} >
             add transaction
         </Button>
@@ -140,7 +167,7 @@ export const EditTransactionModal = ({ context, id, innerProps: { transaction_id
         return <Placeholder height={500} queries={[query]} />
 
     return <form onSubmit={form.onSubmit(submitForm)}>
-        <TransactionForm form={form} />
+        <TransactionForm form={form} edit />
         <Button fullWidth mt="md" type='submit' loading={loading} >
             edit transaction
         </Button>

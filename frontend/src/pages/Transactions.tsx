@@ -1,29 +1,27 @@
 import { Button, Title } from "@mantine/core";
 import { useState } from "react";
-import { TbArrowWaveRightUp } from "react-icons/tb";
+import { TbCirclePlus } from "react-icons/tb";
 import { FilterableTransactions } from "../components/transaction/TransPill";
 import { openAddTransactionModal } from "../components/transaction/TransactionModal";
 import useIsPhone from "../hooks/useIsPhone";
 
-export const RemotesPage = () => {
+export const TransactionsPage = () => {
     const [loading, setLoading] = useState(false);
     const isPhone = useIsPhone();
     return <>
-        <Title>remote transactions</Title>
-        <Button color='pink' size='lg' fullWidth loading={loading} my='md'
-            leftIcon={<TbArrowWaveRightUp size={40} />}
+        <Title>all transactions</Title>
+        <Button size='lg' fullWidth loading={loading} my='md'
+            leftIcon={<TbCirclePlus size={40} />}
             onClick={() => {
                 setLoading(true);
                 openAddTransactionModal({
                     fullScreen: isPhone,
-                    title: 'new remote transaction',
-                    innerProps: {
-                        remote: true
-                    }
+                    title: 'new transaction',
+                    innerProps: {}
                 }).then(() => setLoading(false))
             }}>
-            remote transaction
+            new transaction
         </Button>
-        <FilterableTransactions account_id={null} />
+        <FilterableTransactions />
     </>
 }
