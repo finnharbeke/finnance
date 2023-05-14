@@ -8,7 +8,6 @@ RUN npm ci
 COPY public/ public
 COPY src/ src
 RUN npm run build
-RUN rm -rf node_modules
 
 FROM nginx:stable-alpine
 
