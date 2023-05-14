@@ -1,4 +1,4 @@
-import { Box, BoxProps, createStyles } from "@mantine/core";
+import { Box, BoxProps, Center, createStyles } from "@mantine/core";
 import { MantineColor, useMantineTheme } from "@mantine/styles";
 import { DOMAttributes } from "react";
 import { Link } from "react-router-dom";
@@ -49,10 +49,14 @@ export default function FinnanceLogo({ inverted, text, size, color, link, ...oth
     </svg>
     return link ?
         <Box component={Link} to='' {...others}>
-            <SVG />
+            <Center>
+                <SVG />
+            </Center>
         </Box >
         :
         <Box {...others}>
-            <SVG />
+            <Center>
+                <SVG />
+            </Center>
         </Box >
 }

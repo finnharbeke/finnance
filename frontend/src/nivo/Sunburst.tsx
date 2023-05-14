@@ -151,7 +151,7 @@ const TooltipNoCurrency = ({ node }: { node: ComputedDatum<SunburstData> }) =>
     <TooltipBase node={node} amount={node.value.toString()} />
 
 const TooltipBase = ({ node, amount }: { node: ComputedDatum<SunburstData>, amount: string }) =>
-    <Paper p='xs' withBorder>
+    <Paper>
         <Group noWrap spacing='xs'>
             <ColorSwatch color={node.data.color} size={16} />
             <Text fz={14} fw={900} style={{ whiteSpace: 'nowrap' }}>{node.data.name}: {node.percentage.toFixed(0)}%,</Text>

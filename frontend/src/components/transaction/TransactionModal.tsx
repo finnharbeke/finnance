@@ -5,7 +5,8 @@ import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { AccountDeepQueryResult, useAccounts } from "../../types/Account";
 import { CurrencyQueryResult, useCurrencies } from "../../types/Currency";
-import { TransactionFormType, TransactionRequest, useAddTransaction, useDeleteTransaction, useEditTransaction, useTransaction, useTransactionForm, useTransactionFormValues } from "../../types/Transaction";
+import { TemplateDeepQueryResult } from "../../types/Template";
+import { TransactionFormType, TransactionRequest, UseTransactionFormValuesProps, useAddTransaction, useDeleteTransaction, useEditTransaction, useTransaction, useTransactionForm, useTransactionFormValues } from "../../types/Transaction";
 import Placeholder from "../Placeholder";
 import AccountSelect from "../input/AccountInput";
 import AgentInput from "../input/AgentInput";
@@ -17,11 +18,13 @@ import AmountInput from "./TransactionAmountInput";
 interface TransactionFormProps {
     edit?: boolean
     account_input?: boolean
+    date_input?: boolean
     minDate?: Date
     form: TransactionFormType
 }
 
-const TransactionForm = ({ edit = false, account_input = false, minDate, form }: TransactionFormProps) => {
+export const TransactionForm = (props: TransactionFormProps) => {
+    const { edit = false, account_input = false, minDate, form, date_input = true } = props;
     const currQuery = useCurrencies();
     const accQuery = useAccounts();
 
@@ -59,35 +62,41 @@ const TransactionForm = ({ edit = false, account_input = false, minDate, form }:
         }
         {
             form.values.account_id === 'remote' &&
-            <>
-                <AgentInput label='transaction via' withAsterisk placeholder="my friend tom"
-                    {...form.getInputProps('remote_agent')}
-                />
-                <CurrencyInput label='currency' withAsterisk hasDefault mb='md'
-                    {...form.getInputProps('currency_id')}
-                />
-            </>
+            <AgentInput label='transaction via' withAsterisk placeholder="my friend tom"
+                {...form.getInputProps('remote_agent')}
+            />
         }
-        <DateTimeInput form={form} minDate={minDate} />
+        {
+            (form.values.account_id === 'remote' || form.values.account_id === null) &&
+            <CurrencyInput label='currency' withAsterisk hasDefault
+                {...form.getInputProps('currency_id')}
+            />
+        }
+        {
+            (edit || account_input || form.values.account_id === 'remote'
+                || form.values.account_id === null) &&
+            <Divider mt='sm' />
+        }
+        {
+            date_input &&
+            <DateTimeInput form={form} minDate={minDate} />
+        }
         <AmountInput form={form} currency={currency} />
         <AgentInput label='agent' withAsterisk withinPortal
             {...form.getInputProps('agent')}
         />
-        <Divider my='sm' />
+        <Divider mt='sm' />
         <FlowsNRecordsInput form={form} currency={currency} />
-        <Divider my='sm' />
+        <Divider mt='sm' />
         <TextInput label='comment' {...form.getInputProps('comment')} />
     </>
 }
 
-export interface AddTransactionModalProps {
-    remote?: boolean
-    account?: AccountDeepQueryResult,
-}
-
-export const AddTransactionModal = ({ context, id, innerProps: { account, remote = false } }: ContextModalProps<AddTransactionModalProps>) => {
-
-    const initial = useTransactionFormValues(undefined, account, remote);
+export const AddTransactionModal = (
+    { context, id, innerProps: props }: ContextModalProps<UseTransactionFormValuesProps>
+) => {
+    const { account, remote } = props;
+    const initial = useTransactionFormValues(props);
     const form = useTransactionForm(initial);
 
     const addTrans = useAddTransaction();
@@ -105,13 +114,22 @@ export const AddTransactionModal = ({ context, id, innerProps: { account, remote
     return <form onSubmit={form.onSubmit(submitForm)}>
         <TransactionForm form={form}
             minDate={account && DateTime.fromISO(account.date_created).toJSDate()}
-            account_input={account === undefined && !remote} />
+            account_input={account === undefined && !remote}
+        />
         <Button fullWidth mt="md" type='submit' loading={loading} >
             add transaction
         </Button>
-    </form >
+    </form>
 
 };
+
+export interface FromTemplateModalProps {
+    template: TemplateDeepQueryResult
+}
+
+export const FromTemplateModal = ({ context, id, innerProps: { template } }: ContextModalProps<FromTemplateModalProps>) => {
+
+}
 
 type EditTransactionModalProps = {
     transaction_id: number
@@ -120,7 +138,7 @@ type EditTransactionModalProps = {
 export const EditTransactionModal = ({ context, id, innerProps: { transaction_id } }: ContextModalProps<EditTransactionModalProps>) => {
     const query = useTransaction(transaction_id);
 
-    const initial = useTransactionFormValues(query.data);
+    const initial = useTransactionFormValues({ trans: query.data });
 
     // eslint-disable-next-line
     useEffect(() => form.setValues(initial), [initial]);

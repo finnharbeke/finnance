@@ -1,5 +1,5 @@
-import { Center, ColProps, Grid, GridProps, Loader, MantineColor, Popover, Text, Tooltip, createStyles } from "@mantine/core";
-import { useRef, useState } from "react";
+import { Center, ColProps, Grid, GridProps, MantineColor, Popover, Text, Tooltip, createStyles } from "@mantine/core";
+import { useRef } from "react";
 import { IconType } from "react-icons";
 import { TbPencil } from "react-icons/tb";
 import { Link } from "react-router-dom";
@@ -100,7 +100,7 @@ const TextCell = ({ align, text, color, link }: TextCellProps) => {
         <Text ref={ref} className={textCell} align={align} color={color}>
             {
                 link === undefined ?
-                text : <Text component={Link} to={link} color={color}>{text}</Text>
+                    text : <Text component={Link} to={link} color={color}>{text}</Text>
             }
         </Text>
     const w = 250;
@@ -126,18 +126,9 @@ interface EditCellProps {
 }
 
 const EditCell = ({ onEdit }: EditCellProps) => {
-    const [loading, setLoading] = useState(false);
     const { classes: { edit } } = useStyles();
-    return <Center className={edit} onClick={() => {
-        setLoading(true);
-        onEdit().finally(() => setLoading(false));
-    }}>
-        {
-            loading ?
-                <Loader />
-                :
-                <TbPencil size={24} />
-        }
+    return <Center className={edit} onClick={() => onEdit()}>
+        <TbPencil size={24} />
     </Center>
 }
 

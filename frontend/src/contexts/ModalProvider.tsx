@@ -4,6 +4,7 @@ import { AddTransactionModal, EditTransactionModal } from "../components/transac
 import { AccountModal } from "../components/account/AccountModal";
 import { CategoryModal } from "../components/category/CategoryModal";
 import { AddTransferModal, EditTransferModal } from "../components/transfer/TransferModal";
+import { AddTemplateModal } from "../components/templates/TemplateModal";
 
 
 const modals = {
@@ -12,7 +13,8 @@ const modals = {
     add_transfer: AddTransferModal,
     edit_transfer: EditTransferModal,
     account: AccountModal,
-    category: CategoryModal
+    category: CategoryModal,
+    add_template: AddTemplateModal
 };
 declare module '@mantine/modals' {
     export interface MantineModalsOverride {
@@ -21,14 +23,7 @@ declare module '@mantine/modals' {
 }
 
 export default function FinnanceModalProvider({ children }: { children: ReactNode }) {
-    return <ModalsProvider modals={{
-        add_transaction: AddTransactionModal,
-        edit_transaction: EditTransactionModal,
-        add_transfer: AddTransferModal,
-        edit_transfer: EditTransferModal,
-        account: AccountModal,
-        category: CategoryModal
-    }}>
+    return <ModalsProvider modals={modals}>
         {children}
     </ModalsProvider>
 }

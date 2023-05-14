@@ -44,7 +44,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                 </Button>
             </Grid.Col>
             {
-                form.values.account_id !== null &&
+                form.values.account_id !== 'remote' &&
                 <Grid.Col span='auto'>
                     <Button
                         fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
@@ -62,7 +62,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                 </Grid.Col>
             }
             {
-                form.values.account_id !== null &&
+                form.values.account_id !== 'remote' &&
                 <Grid.Col span='content'>
                     <Switch
                         color='pink'

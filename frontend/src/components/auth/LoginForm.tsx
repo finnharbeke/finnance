@@ -1,13 +1,14 @@
 import { Anchor, Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { createStyles } from "@mantine/styles";
+import { useQueryClient } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import { TbChevronDown } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router";
+import { Link } from "react-router-dom";
+import { handleAxiosError } from "../../query";
 import FinnanceLogo from "../FinnanceLogo";
 import { useLogin, usernameExists } from "./api";
-import { handleAxiosError } from "../../query";
-import { Link } from "react-router-dom";
 
 interface UsernameInputType {
     username: string
@@ -81,6 +82,7 @@ export function LoginForm({ ...others }: LoginFormProps) {
         }
     })
 
+    const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [continued, setContinued] = useState(false);
@@ -111,12 +113,14 @@ export function LoginForm({ ...others }: LoginFormProps) {
     const handlePassword = (values: PasswordInputType) => {
         setLoading(true);
         login.mutate({ ...values, username }, {
-            onSuccess: ({ data }) => (
-                data.auth ?
-                    navigate(location.state?.from?.pathname || '/')
-                    :
+            onSuccess: ({ data }) => {
+                if (!data.auth)
                     pwForm.setFieldError('password', "wrong password")
-            ),
+                else {
+                    queryClient.invalidateQueries();
+                    navigate(location.state?.from?.pathname || '/')
+                }
+            },
             onSettled: () => setLoading(false)
         })
     }

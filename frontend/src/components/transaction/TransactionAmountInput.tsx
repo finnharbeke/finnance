@@ -52,13 +52,13 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
     const { classes, cx } = useStyles();
 
     return <Input.Wrapper
-        label={currency ? `amount, ${currency.code}` : 'amount'}
+        label='amount'
         withAsterisk
     >
         <Grid>
             <Grid.Col span='auto'>
                 <AmountInput
-                    currency={currency} showPrefix={false}
+                    currency={currency}
                     {...form.getInputProps('amount')}
                 />
             </Grid.Col>

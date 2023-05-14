@@ -12,6 +12,7 @@ import LogoutPage from "../pages/Logout";
 import { RemotesPage } from "../pages/Remotes";
 import { AuthRoute } from "./Route";
 import { TransactionsPage } from "../pages/Transactions";
+import { TemplatesPage } from "../pages/Templates";
 
 export const FinnanceRouter = createBrowserRouter([
     {
@@ -51,6 +52,9 @@ export const FinnanceRouter = createBrowserRouter([
             }, {
                 path: "transactions",
                 element: <TransactionsPage />
+            }, {
+                path: "templates",
+                element: <TemplatesPage />
             }]
         }, {
             path: "*",

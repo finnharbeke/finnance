@@ -52,7 +52,7 @@ export function AccountEdit({ data, ix, orderForm: { moveUp, moveDown } }: Order
 
     if (!currencies.isSuccess)
         return <Skeleton height={100}></Skeleton>
-    return <Paper withBorder p='xs'>
+    return <Paper p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
             <Grid gutter={isPhone ? 'xs' : undefined} align='center'>
                 <Grid.Col span='content'>

@@ -1,6 +1,6 @@
 import { openContextModal } from "@mantine/modals";
-import { AddTransactionModalProps } from "../components/transaction/TransactionModal";
 import { AddTransferModalProps } from "../components/transfer/TransferModal";
+import { UseTransactionFormValuesProps } from "../types/Transaction";
 import { TransferQueryResult } from "../types/Transfer";
 
 export const addAccountAction = async () =>
@@ -26,12 +26,15 @@ export const editTransferAction = async (data: TransferQueryResult) =>
         }
     })
 
-export const addTransactionAction = async (props: AddTransactionModalProps) =>
+export const addTransactionAction = async (props: UseTransactionFormValuesProps) =>
     openContextModal({
         modal: 'add_transaction',
-        title: 
-        props.account ? `new transaction - ${props.account.desc}`
-        : `new ${props.remote ? 'remote ' : ''}transaction`,
+        title: props.template ?
+            `new transaction - ${props.template.desc}`
+            :
+            props.account ?
+                `new transaction - ${props.account.desc}`
+                : `new ${props.remote ? 'remote ' : ''}transaction`,
         innerProps: props
     })
 
@@ -46,5 +49,12 @@ export const addCategoryAction = async (is_expense: boolean) =>
     openContextModal({
         modal: 'category',
         title: `new ${is_expense ? 'expense' : 'income'} category`,
-        innerProps: {is_expense}
+        innerProps: { is_expense }
     });
+
+export const addTemplateAction = async () =>
+    openContextModal({
+        modal: 'add_template',
+        title: 'new template',
+        innerProps: {}
+    })

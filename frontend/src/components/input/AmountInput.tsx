@@ -1,5 +1,5 @@
 import { NumberInput, NumberInputProps } from "@mantine/core";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CurrencyQueryResult } from "../../types/Currency";
 
 interface AmountInputProps extends NumberInputProps {
@@ -13,31 +13,22 @@ export default function AmountInput(props: AmountInputProps) {
 
     const { currency, value: integral, onChange, showPrefix = true, ...others } = props;
 
-    const [amount, setAmount] = useState<number | ''>('');
+    const [amount, setAmount] = useState<number | ''>('');
     useEffect(() => {
-        integral === '' || currency?.decimals === undefined ?
+        integral === '' ?
             setAmount('')
-        :
-            setAmount(integral / (10 ** currency?.decimals))
-    }, [integral, currency?.decimals])
-
-    useEffect(() => (currency === undefined || integral === '') ?
-        onChange('') : onChange(integral)
-        // eslint-disable-next-line
-        , [currency])
-
-    const formatter = useCallback((v: string) =>
-        !currency ? v :
-            !Number.isNaN(parseFloat(v))
-                ? (showPrefix ? `${currency.code} ${v}` : v)
-                : ''
-        , [currency, showPrefix])
+            :
+            currency?.decimals === undefined ?
+                setAmount(integral)
+                :
+                setAmount(integral / (10 ** currency?.decimals))
+    }, [integral, currency])
 
     return <NumberInput
         precision={currency?.decimals} hideControls
         min={0} step={0.1} // such that mobile has a . on keyboards
 
-        formatter={formatter}
+        formatter={s => ((showPrefix && currency?.code && s && currency?.code + ' ') || '') + s}
         parser={(value: string) => value.replace(/\D+\s/g, '').replace(',', '.')}
 
         value={amount}

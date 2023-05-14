@@ -1,12 +1,13 @@
-import { ActionIcon, Burger, Container, createStyles, Grid, Group, Header, Paper, Transition, useMantineTheme } from '@mantine/core';
+import { Burger, Container, createStyles, Grid, Group, Header, Paper, Transition } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { spotlight } from '@mantine/spotlight';
+import { AiOutlineThunderbolt } from 'react-icons/ai';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from './auth/api';
 import FinnanceLogo from './FinnanceLogo';
+import { MyIcon } from './Icons';
 import { LightDarkToggle } from './LightDarkToggle';
 import Placeholder from './Placeholder';
-import { spotlight } from '@mantine/spotlight';
-import { AiOutlineThunderbolt } from 'react-icons/ai';
 
 const HEADER_HEIGHT = 60;
 
@@ -21,15 +22,10 @@ const useStyles = createStyles((theme) => ({
         top: HEADER_HEIGHT,
         left: 0,
         right: 0,
-        zIndex: 0,
         borderTopRightRadius: 0,
         borderTopLeftRadius: 0,
         borderTopWidth: 0,
         overflow: 'hidden',
-
-        [theme.fn.largerThan('sm')]: {
-            display: 'none',
-        },
     },
 
     links: {
@@ -73,13 +69,12 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function FinnanceHeader() {
-    const theme = useMantineTheme();
     const [opened, { toggle, close }] = useDisclosure(false);
     const { classes, cx } = useStyles();
     const query = useAuth();
 
     if (!query.isSuccess)
-        return <Placeholder height={50} queries={[query]}/>
+        return <Placeholder height={50} queries={[query]} />
 
     const auth = query.data.auth;
 
@@ -107,13 +102,7 @@ export default function FinnanceHeader() {
             <Container>
                 <Grid justify='space-between' pt='xs'>
                     <Grid.Col span='content'>
-                        <Group noWrap={true}>
-                            <ActionIcon onClick={() => spotlight.open()}
-                                size='lg' variant='light' color={theme.primaryColor}>
-                                <AiOutlineThunderbolt size={24} />
-                            </ActionIcon>
-                            <FinnanceLogo text link size={28} onClick={close}/>
-                        </Group>
+                        <FinnanceLogo text link size={28} onClick={close} />
                     </Grid.Col>
                     {auth &&
                         <Grid.Col span='content'>
@@ -127,10 +116,15 @@ export default function FinnanceHeader() {
                             <Group spacing={5} className={classes.burger} position='right'>
                                 <Burger opened={opened} onClick={toggle} size="sm" />
                             </Group>
-
                             <Transition transition="pop-top-right" duration={200} mounted={opened}>
                                 {(styles) => (
-                                    <Paper className={classes.dropdown} withBorder style={styles}>
+                                    <Paper className={classes.dropdown} style={styles}>
+                                        <Group align='center' grow p='xs'>
+                                            <MyIcon icon={AiOutlineThunderbolt} color='indigo'
+                                                onClick={() => spotlight.open()}
+                                                variant='light'
+                                            />
+                                        </Group>
                                         {items}
                                         <Group align='center' grow p='xs'>
                                             <LightDarkToggle />

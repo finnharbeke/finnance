@@ -10,6 +10,7 @@ import { AgentQueryResult } from "./Agent"
 import { CurrencyQueryResult } from "./Currency"
 import { FlowFormValues, FlowQueryResult, FlowRequest, flowsFormValues, isFlow } from "./Flow"
 import { RecordFormValues, RecordQueryResult, RecordRequest, emptyRecordFormValues, isRecord, recordsFormValues } from "./Record"
+import { TemplateDeepQueryResult } from "./Template"
 
 export interface TransactionQueryResult {
     id: number,
@@ -131,7 +132,7 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
             }
         },
         transformValues: (fv: TransactionFormValues) => ({
-            account_id: fv.account_id === null ? -1 : 
+            account_id: fv.account_id === null ? -1 :
                 fv.account_id === 'remote' ? undefined : parseInt(fv.account_id),
             currency_id: fv.currency_id === null ? undefined : parseInt(fv.currency_id),
             is_expense: fv.is_expense,
@@ -190,32 +191,71 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
     return form;
 }
 
-export const useTransactionFormValues:
-    (t?: TransactionDeepQueryResult, a?: AccountQueryResult, r?: boolean)
-        => TransactionFormValues
-    = (trans, acc, remote=false) => {
-        const build: () => TransactionFormValues = () => trans ? {
-            account_id: trans.account_id === null ?
-                'remote' : trans.account_id.toString(),
-            currency_id: trans.currency_id.toString(),
-            date: DateTime.fromISO(trans.date_issued).startOf('day').toJSDate(),
-            time: DateTime.fromISO(trans.date_issued).toFormat('HH:mm'),
-            amount: trans.amount,
-            is_expense: trans.is_expense,
-            agent: trans.agent.desc,
-            direct: trans.flows.length === 1 && trans.flows[0].agent_id === trans.agent_id,
-            n_flows: trans.flows.length,
-            n_records: trans.records.length,
-            items: recordsFormValues(trans.records, 0)
-                .concat(
-                    trans.account_id === null ?
-                        [] : flowsFormValues(trans.flows, trans.records.length)
-                ),
-            comment: trans.comment,
-            last_update: -1,
-            remote_agent: trans.account_id === null ?
-                trans.flows[0].agent_desc : undefined,
-        } : {
+export interface UseTransactionFormValuesProps {
+    trans?: TransactionDeepQueryResult
+    account?: AccountQueryResult
+    remote?: boolean
+    template?: TemplateDeepQueryResult
+}
+
+export const useTransactionFormValues = (
+    { trans, account: acc, remote = false, template: temp }: UseTransactionFormValuesProps
+): TransactionFormValues => {
+    const build: () => TransactionFormValues = () => {
+        if (trans !== undefined)
+            return {
+                account_id: trans.account_id === null ?
+                    'remote' : trans.account_id.toString(),
+                currency_id: trans.currency_id.toString(),
+                date: DateTime.fromISO(trans.date_issued).startOf('day').toJSDate(),
+                time: DateTime.fromISO(trans.date_issued).toFormat('HH:mm'),
+                amount: trans.amount,
+                is_expense: trans.is_expense,
+                agent: trans.agent.desc,
+                direct: trans.flows.length === 1 && trans.flows[0].agent_id === trans.agent_id,
+                n_flows: trans.flows.length,
+                n_records: trans.records.length,
+                items: recordsFormValues(trans.records, 0)
+                    .concat(
+                        trans.account_id === null ?
+                            [] : flowsFormValues(trans.flows, trans.records.length)
+                    ),
+                comment: trans.comment,
+                last_update: -1,
+                remote_agent: trans.account_id === null ?
+                    trans.flows[0].agent_desc : undefined,
+            }
+        else if (temp !== undefined)
+            return {
+                account_id: temp.remote_agent !== null ?
+                    'remote' : temp.account_id === null ?
+                    null : temp.account_id.toString(),
+                currency_id: temp.currency_id === null ?
+                    null : temp.currency_id.toString(),
+                date: new Date(),
+                time: DateTime.now().toFormat('HH:mm'),
+                amount: temp.amount === null ? '' : temp.amount,
+                is_expense: temp.is_expense,
+                agent: temp.agent === null ? '' : temp.agent.desc,
+                direct: temp.direct,
+                n_flows: temp.flows.length,
+                n_records: temp.records.length,
+                items: temp.records.map<RecordFormValues | FlowFormValues>(r => ({
+                    amount: r.amount === null ? '' : r.amount,
+                    category_id: r.category_id === null ? null : r.category_id.toString(),
+                    ix: r.ix,
+                    type: 'record'
+                })).concat(temp.flows.map<FlowFormValues>(f => ({
+                    amount: f.amount === null ? '' : f.amount,
+                    agent: f.agent_desc === null ? '' : f.agent_desc,
+                    ix: f.ix,
+                    type: 'flow'
+                }))),
+                comment: temp.comment === null ? '' : temp.comment,
+                last_update: -1,
+                remote_agent: temp.remote_agent === null ? undefined : temp.remote_agent.desc,
+            }
+        else return {
             account_id: remote ? 'remote' : acc ? acc.id.toString() : null,
             currency_id: acc ? acc.currency_id.toString() : null,
             date: new Date(),
@@ -231,17 +271,18 @@ export const useTransactionFormValues:
             last_update: -1,
             remote_agent: acc ? undefined : ''
         }
-        const [fv, setFV] = useState(build());
-        // eslint-disable-next-line
-        useEffect(() => setFV(build()), [trans, acc]);
-        return fv;
     }
+    const [fv, setFV] = useState(build());
+    // eslint-disable-next-line
+    useEffect(() => setFV(build()), [trans, acc]);
+    return fv;
+}
 
 export const useTransaction = (trans_id: number) =>
     useQuery<TransactionDeepQueryResult, AxiosError>({ queryKey: ['transactions', trans_id] });
 
 export interface useTransactionsProps extends FilterRequest {
-    account_id?: string | null
+    account_id?: string | null
 }
 
 interface useTransactionsReturn {
@@ -287,7 +328,7 @@ export const useDeleteTransaction = (id: number) => {
         mutationFn: () =>
             axios.delete(`/api/transactions/${id}/delete`),
         onSuccess: () => {
-            queryClient.removeQueries({ queryKey: ['transactions', id]})
+            queryClient.removeQueries({ queryKey: ['transactions', id] })
             queryClient.invalidateQueries(['changes']);
             queryClient.invalidateQueries(['transactions']);
             queryClient.invalidateQueries(['accounts']);

@@ -109,6 +109,16 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
           size: 'lg',
           fullScreen: isXs,
         }
+      },
+      ActionIcon: {
+        defaultProps: {
+          size: 'lg',
+        }
+      },
+      Paper: {
+        defaultProps: {
+          withBorder: true,
+        }
       }
     }
   }

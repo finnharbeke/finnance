@@ -11,7 +11,7 @@ export default function CategoriesPage() {
     return <>
         <Flex justify='space-between'>
             <Title>categories</Title>
-            <ActionIcon variant='default' size='lg' onClick={toggle}><TbEye size={20} /></ActionIcon>
+            <ActionIcon variant='default' onClick={toggle}><TbEye size={20} /></ActionIcon>
         </Flex>
         <Collapse in={open}>
             <Grid>

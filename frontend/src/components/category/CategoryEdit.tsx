@@ -37,7 +37,7 @@ export default function CategoryEdit(props: OrderCellProps<CategoryHierarchyQuer
 
     const isPhone = useIsPhone();
 
-    return <Paper withBorder p='xs'>
+    return <Paper p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
             <Grid gutter={isPhone ? 'xs' : undefined} align='center'>
                 <Grid.Col span='content'>

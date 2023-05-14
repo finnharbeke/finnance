@@ -9,7 +9,7 @@ interface CurrencyCardProps extends PaperProps {
 export function CurrencyCard({ currency, ...others }: CurrencyCardProps) {
     const { code, decimals } = currency;
 
-    return <Paper withBorder p='xs' {...others}>
+    return <Paper p='xs' {...others}>
         <Flex justify='space-between' align='center'>
             <Text><Text span fw={700}>{code}:</Text> {decimals} decimals</Text>
         </Flex>
@@ -33,7 +33,7 @@ export function CurrencyForm({ ...others }: PaperProps) {
         addCurrency.mutateAsync(values);
     }
 
-    return <Paper withBorder p='sm' {...others}>
+    return <Paper p='sm' {...others}>
         <Title order={3}>add currency</Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
             <Grid align="flex-end">

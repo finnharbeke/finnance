@@ -8,7 +8,7 @@ interface IconProps extends PolymorphicComponentProps<"button", ActionIconProps>
     icon: IconType
 }
 
-function MyIcon({ icon, tooltip, iconSize = 20, ...others }: IconProps) {
+export function MyIcon({ icon, tooltip, iconSize = 20, ...others }: IconProps) {
     if (!tooltip)
         return <ActionIcon {...others}>
             {icon({ size: iconSize })}
@@ -25,7 +25,7 @@ function MyIcon({ icon, tooltip, iconSize = 20, ...others }: IconProps) {
 export function RedIcon (props: IconProps) {
     const theme = useMantineTheme();
     return <MyIcon
-        color="red" size='lg'
+        color="red"
         variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
         {...props}
     />
@@ -33,15 +33,15 @@ export function RedIcon (props: IconProps) {
 
 export function PrimaryIcon(props: IconProps) {
     const theme = useMantineTheme();
-    return <MyIcon size='lg' color={theme.primaryColor}
-        variant='filled'//{theme.colorScheme === 'light' ? 'filled' : 'outline'}
+    return <MyIcon color={theme.primaryColor}
+        variant='filled'
         {...props}
     />
 }
 
 export function SecondaryIcon(props: IconProps) {
-    return <MyIcon size='lg'// color={theme.secondaryColor}
-        variant='subtle'//{theme.colorScheme === 'light' ? 'filled' : 'outline'}
+    return <MyIcon
+        variant='subtle'
         {...props}
     />
 }
