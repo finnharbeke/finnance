@@ -113,18 +113,16 @@ export default function FinnanceHeader() {
                             </Group>
 
 
-                            <Group spacing={5} className={classes.burger} position='right'>
+                            <Group spacing={5} className={classes.burger} position='right' noWrap>
+                                <MyIcon icon={AiOutlineThunderbolt} color='indigo'
+                                    onClick={() => spotlight.open()}
+                                    variant='light'
+                                />
                                 <Burger opened={opened} onClick={toggle} size="sm" />
                             </Group>
                             <Transition transition="pop-top-right" duration={200} mounted={opened}>
                                 {(styles) => (
                                     <Paper className={classes.dropdown} style={styles}>
-                                        <Group align='center' grow p='xs'>
-                                            <MyIcon icon={AiOutlineThunderbolt} color='indigo'
-                                                onClick={() => spotlight.open()}
-                                                variant='light'
-                                            />
-                                        </Group>
                                         {items}
                                         <Group align='center' grow p='xs'>
                                             <LightDarkToggle />
