@@ -3,11 +3,9 @@ import { ComputedDatum, ResponsiveSunburst, SunburstCustomLayerProps } from '@ni
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
-import { useCallback, useEffect, useState } from 'react';
 import Placeholder from '../components/Placeholder';
 import useAmount from '../hooks/useAmount';
 import { getAxiosData, searchParams, searchParamsProps } from '../query';
-import { CategoryHierarchyQueryResult, useCategoryHierarchy } from '../types/Category';
 import { useCurrency } from '../types/Currency';
 
 interface SunburstData {
@@ -63,42 +61,12 @@ export default function FinnanceSunburst(props: FinnanceSunburstProps) {
     return <CustomSunburst data={query.data} size={size} currency_id={currency_id} interactive={interactive} />
 }
 
-export const DummySunburst = ({ size, is_expense }: { size: number, is_expense: boolean }) => {
-    const query = useCategoryHierarchy(is_expense);
-    const dummy = useCallback(
-        ({ category, children }: CategoryHierarchyQueryResult): SunburstData => {
-            return {
-                id: category.desc, color: category.color,
-                value: category.usable ? Math.random() : 0,
-                children: children.map(dummy)
-            }
-        }, []);
-    const generate = useCallback((children: CategoryHierarchyQueryResult[] | undefined) => ({
-        id: 'sunburst',
-        color: '#00000',
-        children: children?.sort(
-            (a, b) => a.category.order - b.category.order
-        ).map(dummy)
-        // don't ask why i need to sort, should be sorted but
-        // otherwise weird stuff happens
-    }), [dummy]);
-
-    const [data, setData] = useState<SunburstData>();
-    useEffect(() => setData(generate(query.data)),
-        [setData, generate, query.data]);
-
-    if (!query.isSuccess || !data)
-        return <Placeholder queries={[query]} height={size} />
-
-    return <CustomSunburst onClick={() => setData(generate(query.data))} data={data} size={size} interactive={false} />
-}
-
 interface CustomSunburstProps extends BoxProps {
     onClick?: React.MouseEventHandler<HTMLDivElement>
     data: SunburstData
     size?: number
     interactive?: boolean
-    currency_id?: string
+    currency_id: string
 }
 
 const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currency_id }: CustomSunburstProps) => {
@@ -123,11 +91,11 @@ const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currenc
         colors={child => child.data.color}
         childColor={(_, child) => theme.fn.lighten(child.data.color, child.depth * 0.13)}
 
-        tooltip={node => tooltip(node, currency_id)}
+        tooltip={node => <MyTooltip node={node} currency_id={currency_id} />}
 
         layers={[
             'arcs', 'arcLabels',
-            (props) => centeredMetric(props, currency_id, size)
+            (props) => <MiddleNumber props={props} currency_id={currency_id} size={size}/>
         ]}
 
         // animate={false}
@@ -135,56 +103,25 @@ const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currenc
     /></Box>
 }
 
-const tooltip = (node: ComputedDatum<SunburstData>, currency_id: string | undefined) =>
-    currency_id === undefined ?
-        <TooltipNoCurrency node={node} />
-        :
-        <TooltipCurrency node={node} currency_id={currency_id} />
-
-const TooltipCurrency = ({ node, currency_id }: { node: ComputedDatum<SunburstData>, currency_id: string }) => {
+const MyTooltip = ({ node, currency_id }: { node: ComputedDatum<SunburstData>, currency_id: string }) => {
     const query = useCurrency(currency_id);
     const amount = useAmount(node.value, query.data);
-    return <TooltipBase node={node} amount={amount} />
-}
-
-const TooltipNoCurrency = ({ node }: { node: ComputedDatum<SunburstData> }) =>
-    <TooltipBase node={node} amount={node.value.toString()} />
-
-const TooltipBase = ({ node, amount }: { node: ComputedDatum<SunburstData>, amount: string }) =>
-    <Paper p='xs'>
+    return <Paper p='xs'>
         <Group noWrap spacing='xs'>
             <ColorSwatch color={node.data.color} size={16} />
             <Text fz={14} fw={900} style={{ whiteSpace: 'nowrap' }}>{node.data.name}: {node.percentage.toFixed(0)}%,</Text>
             <Text fz={14} style={{ whiteSpace: 'nowrap' }}>{amount}</Text>
         </Group>
     </Paper>
+}
 
-const centeredMetric = (props: SunburstCustomLayerProps<SunburstData>, currency_id: string | undefined, size: number) =>
-    currency_id === undefined ?
-        <CenteredMetricNoCurrency props={props} size={size}/>
-        :
-        <CenteredMetricCurrency props={props} currency_id={currency_id} size={size}/>
-
-const CenteredMetricCurrency = ({ props, currency_id, size }: { props: SunburstCustomLayerProps<SunburstData>, currency_id: string, size: number }) => {
-    const total = props.nodes.reduce((total, datum) => total + (
+const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id, size }: 
+    { props: SunburstCustomLayerProps<SunburstData>, currency_id: string, size: number}) => {
+    
+        const total = nodes.reduce((total, datum) => total + (
         datum.path.length === 2 ? datum.value : 0), 0); // only outer
     const query = useCurrency(currency_id);
     const amount = useAmount(total, query.data);
-    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={amount} size={size} />
-}
-
-const CenteredMetricNoCurrency = ({ props, size }: { props: SunburstCustomLayerProps<SunburstData>, size: number }) => {
-    const total = props.nodes.reduce((total, datum) => total + (
-        datum.path.length === 2 ? datum.value : 0), 0); // only outer
-    return total === 0 ? <></> : <CenteredMetricBase {...props} middle={total.toString()} size={size} />
-}
-
-interface CenteredMetricBaseProps extends SunburstCustomLayerProps<SunburstData> {
-    middle: string
-    size: number
-}
-
-const CenteredMetricBase = ({ centerX, centerY, middle, size }: CenteredMetricBaseProps) => {
     const theme = useMantineTheme();
     return <text
         x={centerX}
@@ -197,6 +134,6 @@ const CenteredMetricBase = ({ centerX, centerY, middle, size }: CenteredMetricBa
             fill: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.dark[8]
         }}
     >
-        {middle}
+        {amount}
     </text>
 }

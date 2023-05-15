@@ -2,7 +2,7 @@ import { AppShell, Avatar, Burger, Container, Flex, Grid, Group, Header, Loader,
 import { useDisclosure } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { AiOutlineThunderbolt } from 'react-icons/ai';
-import { TbArrowWaveLeftDown, TbArrowWaveRightUp, TbColorFilter, TbEdit, TbGraph, TbHistory, TbHome, TbLogout, TbMoneybag, TbTemplate } from 'react-icons/tb';
+import { TbArrowWaveRightUp, TbColorFilter, TbEdit, TbGraph, TbHistory, TbHome, TbLogout, TbMoneybag, TbTemplate } from 'react-icons/tb';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthSpotlight } from '../actions/Spotlight';
 import FinnanceLogo from '../components/FinnanceLogo';

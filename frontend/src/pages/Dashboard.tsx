@@ -1,10 +1,9 @@
-import { Button, Center, Paper, Skeleton, Stack, Text } from "@mantine/core";
+import { Button, Center, Paper, Skeleton, Text } from "@mantine/core";
 import { spotlight } from "@mantine/spotlight";
 import { DateTime } from "luxon";
 import { AiOutlineThunderbolt } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import FinnanceLogo from "../components/FinnanceLogo";
-import LinkButton from "../components/LinkButton";
 import AccountPills from "../components/account/AccountPills";
 import FinnanceSunburst from "../nivo/Sunburst";
 import { usePrefetch } from "../query";
@@ -42,12 +41,6 @@ export default function DashboardPage() {
                 :
                 <Skeleton height={200} my='sm' />
         }
-        {/* <Stack>
-            <LinkButton to='/analytics' label='analytics' />
-            <LinkButton to='/remotes' label='remote transactions' />
-            <LinkButton to='/transactions' label='all transactions' />
-            <LinkButton to='/templates' label='templates' />
-        </Stack> */}
         <Center mt={75}>
             <FinnanceLogo opacity={0.1} size={200} />
         </Center>
