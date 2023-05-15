@@ -6,7 +6,6 @@ import { AgentQueryResult } from "./Agent";
 import { isFlow } from "./Flow";
 import { isRecord } from "./Record";
 import { TransactionFormValues, useTransactionFormValues } from "./Transaction";
-import { findByAltText } from "@testing-library/react";
 
 interface TemplateQueryResult {
     id: number,
@@ -104,10 +103,7 @@ export const useTemplateForm = () => {
             is_expense: fv.is_expense,
             direct: fv.direct,
             comment: fv.comment,
-            flows: fv.direct ?
-                [{ amount: fv.amount ? fv.amount : 0, agent: fv.agent, ix: 0 }]
-                :
-                fv.items.filter(isFlow).map(item => ({
+            flows: fv.items.filter(isFlow).map(item => ({
                     ...(item.amount !== '') && { amount: item.amount },
                     ...(item.agent !== '') && { agent: item.agent },
                     ix: item.ix

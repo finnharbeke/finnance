@@ -1,5 +1,5 @@
 import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
 import { FlowFormValues, emptyFlowFormValues, isFlow } from "../../types/Flow";
@@ -172,12 +172,8 @@ interface FlowsNRecordsProps {
 
 const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) => {
     const [hidden, setHidden] = useState(
-        form.values.items.length <= 1
+        form.values.items.length === 1
     );
-    useEffect(() =>
-        setHidden(form.values.items.length <= 1),
-        [form.values.items.length, setHidden]
-    )
     return <>
         <Collapse in={!hidden}>
             <FlowsNRecordsButtons form={form} />

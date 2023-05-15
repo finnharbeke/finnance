@@ -86,11 +86,9 @@ def add_template(**data):
         data['agent_id'] = agent.id
     
     if 'remote_agent' in data:
-        flows = [{
-            'agent': data.pop('remote_agent'),
-            'is_debt': data['is_expense'],
-            'amount': data['amount'] if 'amount' in data else None
-        }]
+        agent = create_agent_ifnx(data.pop('remote_agent'))
+        data['remote_agent_id'] = agent.id
+        flows = []
     else:
         flows = data.pop('flows')
 

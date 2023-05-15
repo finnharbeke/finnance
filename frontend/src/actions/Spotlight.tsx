@@ -15,6 +15,12 @@ export const FinnanceSpotlight = ({ children }: { children: ReactNode }) => {
     const [query, setQuery] = useState('');
 
     const [actions, setActions] = useState<SpotlightAction[]>([{
+        id: 'goto-account',
+        title: 'go to account',
+        onTrigger: () => setQuery('goto '),
+        icon: <TbMoneybag size="1.2rem" />,
+        closeOnTrigger: false
+    }, {
         id: 'add-transaction',
         title: 'add transaction',
         onTrigger: () => addTransactionAction({}),
@@ -28,12 +34,6 @@ export const FinnanceSpotlight = ({ children }: { children: ReactNode }) => {
         icon: <TbArrowsRightLeft size="1.2rem"
             color={theme.colors.grape[theme.fn.primaryShade()]}
         />,
-    }, {
-        id: 'goto-account',
-        title: 'go to account',
-        onTrigger: () => setQuery('goto '),
-        icon: <TbMoneybag size="1.2rem" />,
-        closeOnTrigger: false
     }]);
 
     return <SpotlightProvider
