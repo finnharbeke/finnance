@@ -2,11 +2,12 @@ import { AppShell, Avatar, Burger, Container, Flex, Grid, Group, Header, Loader,
 import { useDisclosure } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { AiOutlineThunderbolt } from 'react-icons/ai';
-import { TbArrowWaveRightUp, TbColorFilter, TbEdit, TbGraph, TbHistory, TbHome, TbLogout, TbMoneybag, TbTemplate } from 'react-icons/tb';
+import { TbArrowWaveRightUp, TbCoins, TbColorFilter, TbGraph, TbHistory, TbHome, TbList, TbLogout, TbMoneybag, TbTemplate } from 'react-icons/tb';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthSpotlight } from '../actions/Spotlight';
 import FinnanceLogo from '../components/FinnanceLogo';
 import { MyIcon } from '../components/Icons';
+import { LightDarkToggle } from '../components/LightDarkToggle';
 import useIsPhone from '../hooks/useIsPhone';
 import { useCurrentUser } from '../query';
 import { useAccounts } from '../types/Account';
@@ -53,7 +54,7 @@ const AuthHeader = ({ open, toggle }: { open: boolean, toggle: () => void }) => 
                     opened={open}
                     onClick={toggle}
                     size="sm"
-                    />
+                />
             </Grid.Col>
             <Grid.Col span={8}>
                 <FinnanceLogo text link size={32} />
@@ -114,11 +115,12 @@ const AuthNavbar = ({ open, close }: { open: boolean, close: () => void }) => {
         {
             label: "accounts", icon: <TbMoneybag size='1.5rem' />,
             links: [
-                { to: "/accounts", label: "all accounts", icon: <TbEdit size='1.5rem' /> }
+                { to: "/accounts", label: "all accounts", icon: <TbList size='1.5rem' /> }
                 , ...(
                     accsQuery.isSuccess ?
                         accsQuery.data?.map(acc => ({
-                            to: `/accounts/${acc.id}`, label: acc.desc
+                            to: `/accounts/${acc.id}`, label: acc.desc,
+                            icon: <TbCoins size='1.5rem'/>
                         }))
                         : []
                 )
@@ -127,8 +129,14 @@ const AuthNavbar = ({ open, close }: { open: boolean, close: () => void }) => {
         { to: "/categories", label: "categories", icon: <TbColorFilter size='1.5rem' /> },
         { to: "/analytics", label: "analytics", icon: <TbGraph size='1.5rem' /> },
         { to: "/transactions", label: "transactions", icon: <TbHistory size='1.5rem' /> },
-        { to: "/remotes", label: "remote transactions", icon: <TbArrowWaveRightUp size='1.5rem' /> },
-        { to: "/templates", label: "templates", icon: <TbTemplate size='1.5rem' /> },
+        {
+            to: "/remotes", label: "remote transactions",
+            icon: <TbArrowWaveRightUp size='1.5rem' />, color: 'grape'
+        },
+        {
+            to: "/templates", label: "templates",
+            icon: <TbTemplate size='1.5rem' />, color: 'indigo'
+        },
         { to: "/logout", label: "logout", icon: <TbLogout size='1.5rem' /> }
     ]
 
@@ -140,7 +148,12 @@ const AuthNavbar = ({ open, close }: { open: boolean, close: () => void }) => {
             borderTopWidth: 1,
             borderTopStyle: 'solid',
             borderTopColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3],
-        }} pt='sm' mx='md' mb='xl' mt='sm'>
+        }} pt='sm' mx='md' mt='sm'>
+            <Group grow>
+                <LightDarkToggle />
+            </Group>
+        </Navbar.Section>
+        <Navbar.Section pt='sm' mx='md' mb='xl'>
             <Group noWrap>
                 {query.isSuccess &&
                     <Avatar color={theme.fn.primaryColor()} radius='xl'>{query.data.username.at(0)}</Avatar>

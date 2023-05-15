@@ -1,4 +1,4 @@
-import { Box, BoxProps, ColorSwatch, Group, Paper, Stack, Text, useMantineTheme } from '@mantine/core';
+import { Box, BoxProps, Paper, Stack, Text, useMantineTheme } from '@mantine/core';
 import { ComputedDatum, ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';

@@ -2,7 +2,7 @@ import { useMantineTheme } from "@mantine/core";
 import { SpotlightAction, SpotlightProvider, spotlight } from "@mantine/spotlight";
 import { ReactNode, useEffect, useState } from "react";
 import { AiOutlineThunderbolt } from "react-icons/ai";
-import { TbArrowsRightLeft, TbCirclePlus, TbLink, TbMoneybag, TbTemplate } from "react-icons/tb";
+import { TbArrowsRightLeft, TbCirclePlus, TbCoins, TbMoneybag, TbTemplate } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/auth/api";
 import { useAccounts } from "../types/Account";
@@ -78,7 +78,7 @@ export const useAuthSpotlight = () => {
                         id: `account-${a.id}`,
                         title: `${a.desc}`,
                         onTrigger: () => navigate(`accounts/${a.id}`),
-                        icon: <TbLink size="1.2rem" />,
+                        icon: <TbCoins size="1.2rem" />,
                         keywords: ['goto', `goto ${a.desc}`]
                     }))
                 )
