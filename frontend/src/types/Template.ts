@@ -6,6 +6,7 @@ import { AgentQueryResult } from "./Agent";
 import { isFlow } from "./Flow";
 import { isRecord } from "./Record";
 import { TransactionFormValues, useTransactionFormValues } from "./Transaction";
+import { findByAltText } from "@testing-library/react";
 
 interface TemplateQueryResult {
     id: number,
@@ -118,7 +119,7 @@ export const useTemplateForm = () => {
                         ...(item.category_id !== null) && { category_id: parseInt(item.category_id) },
                         ix: item.ix
                     })),
-            ...(fv.account_id !== null) && { account_id: parseInt(fv.account_id) },
+            ...(fv.account_id !== null && fv.account_id !== 'remote') && { account_id: parseInt(fv.account_id) },
             ...(fv.currency_id !== null) && { currency_id: parseInt(fv.currency_id) },
             ...(fv.amount !== '') && { amount: fv.amount },
             ...(fv.agent !== '') && { agent: fv.agent },
