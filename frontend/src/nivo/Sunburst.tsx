@@ -1,4 +1,4 @@
-import { Box, BoxProps, ColorSwatch, Group, Paper, Text, useMantineTheme } from '@mantine/core';
+import { Box, BoxProps, ColorSwatch, Group, Paper, Stack, Text, useMantineTheme } from '@mantine/core';
 import { ComputedDatum, ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -107,11 +107,11 @@ const MyTooltip = ({ node, currency_id }: { node: ComputedDatum<SunburstData>, c
     const query = useCurrency(currency_id);
     const amount = useAmount(node.value, query.data);
     return <Paper p='xs'>
-        <Group noWrap spacing='xs'>
-            <ColorSwatch color={node.data.color} size={16} />
-            <Text fz={14} fw={900} style={{ whiteSpace: 'nowrap' }}>{node.data.name}: {node.percentage.toFixed(0)}%,</Text>
-            <Text fz={14} style={{ whiteSpace: 'nowrap' }}>{amount}</Text>
-        </Group>
+        <Stack spacing={0}>
+            {/* <ColorSwatch color={node.data.color} size={16} /> */}
+            <Text fz={14} fw={900} lineClamp={1}>{node.data.name}: {node.percentage.toFixed(0)}%</Text>
+            <Text fz={14} lineClamp={1}>{amount}</Text>
+        </Stack>
     </Paper>
 }
 

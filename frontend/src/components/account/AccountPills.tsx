@@ -37,16 +37,19 @@ export default function AccountPills() {
         </Grid.Col>
     ));
 
+    const preview = isPhone ? 2 : 4;
+    const more = cols.length > preview;
+
     return <>
         {
             cols.length > 0 ?
                 <>
                     <Grid mb={opened ? 0 : undefined} grow>
-                        {cols.slice(0, 2)}
+                        {cols.slice(0, preview)}
                     </Grid>
                     <Collapse in={opened}>
                         <Grid mt={0} grow>
-                            {cols.slice(2)}
+                            {cols.slice(preview)}
                         </Grid>
                     </Collapse>
                 </>
@@ -54,11 +57,11 @@ export default function AccountPills() {
                 <Title align='center' order={3}>no accounts created yet</Title>
         }
         <Divider
-            my={cols.length > 2 ? undefined : 'lg'}
-            p={cols.length > 2 ? (isPhone ? 'sm' : 'xs') : undefined}
+            my={more ? undefined : 'lg'}
+            p={more ? (isPhone ? 'sm' : 'xs') : undefined}
             labelPosition="center" onClick={handlers.toggle}
-            className={cols.length > 2 ? classes.cursor : ''}
-            label={cols.length > 2 ?
+            className={more ? classes.cursor : ''}
+            label={more ?
                 <ActionIcon size="md">
                     {opened ? <TbChevronUp size={20} /> : <TbChevronDown size={20} />}
                 </ActionIcon>
