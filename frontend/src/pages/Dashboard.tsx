@@ -23,32 +23,32 @@ export default function DashboardPage() {
         >
             quick access
         </Button>
-        <Paper p='sm' onClick={() => navigate('/analysis')} my='sm'>
-            {
-                query.isSuccess && query.data.length > 0 &&
-
-                <FinnanceSunburst size={200} currency_id={query.data[0].id.toString()}
-                    min_date={DateTime.now().startOf('month')}
-                    max_date={DateTime.now().endOf('month')}
-                    interactive={false}
-                />
-            }
-            {
-                query.isSuccess && query.data.length === 0 &&
-                <Text align='center'>no expenses this month</Text>
-            }
-        </Paper>
         {
-            !query.isSuccess &&
-            <Skeleton height={200} my='sm' />
+            query.isSuccess ?
+                <Paper p='sm' onClick={() => navigate('/analytics')} my='sm'>
+                    {
+                        query.data.length > 0 &&
+                        <FinnanceSunburst size={200} currency_id={query.data[0].id.toString()}
+                            min_date={DateTime.now().startOf('month')}
+                            max_date={DateTime.now().endOf('month')}
+                            interactive={false}
+                        />
+                    }
+                    {
+                        query.data.length === 0 &&
+                        <Text align='center'>no expenses this month</Text>
+                    }
+                </Paper>
+                :
+                <Skeleton height={200} my='sm' />
         }
-        <Stack>
-            <LinkButton to='/analysis' label='analysis' />
+        {/* <Stack>
+            <LinkButton to='/analytics' label='analytics' />
             <LinkButton to='/remotes' label='remote transactions' />
             <LinkButton to='/transactions' label='all transactions' />
             <LinkButton to='/templates' label='templates' />
-        </Stack>
-        <Center mt={25}>
+        </Stack> */}
+        <Center mt={75}>
             <FinnanceLogo opacity={0.1} size={200} />
         </Center>
     </>;

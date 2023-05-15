@@ -1,39 +1,71 @@
 import { useMantineTheme } from "@mantine/core";
-import { useListState } from "@mantine/hooks";
-import { SpotlightAction, SpotlightProvider } from "@mantine/spotlight";
-import { ReactNode, useEffect } from "react";
+import { SpotlightAction, SpotlightProvider, spotlight } from "@mantine/spotlight";
+import { ReactNode, useEffect, useState } from "react";
 import { AiOutlineThunderbolt } from "react-icons/ai";
-import { TbArrowsRightLeft, TbCirclePlus, TbLink, TbTemplate } from "react-icons/tb";
+import { TbArrowsRightLeft, TbCirclePlus, TbLink, TbMoneybag, TbTemplate } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../components/auth/api";
 import { useAccounts } from "../types/Account";
 import { useTemplates } from "../types/Template";
 import { addTransactionAction, addTransferAction } from "./actions";
 
 export const FinnanceSpotlight = ({ children }: { children: ReactNode }) => {
     const theme = useMantineTheme();
-    const navigate = useNavigate(); 
+    const auth = useAuth();
+    const [query, setQuery] = useState('');
+
+    const [actions, setActions] = useState<SpotlightAction[]>([{
+        id: 'add-transaction',
+        title: 'add transaction',
+        onTrigger: () => addTransactionAction({}),
+        icon: <TbCirclePlus size="1.2rem"
+            color={theme.fn.primaryColor()}
+        />,
+    }, {
+        id: 'add-transfer',
+        title: 'add account transfer',
+        onTrigger: () => addTransferAction({}),
+        icon: <TbArrowsRightLeft size="1.2rem"
+            color={theme.colors.grape[theme.fn.primaryShade()]}
+        />,
+    }, {
+        id: 'goto-account',
+        title: 'go to account',
+        onTrigger: () => setQuery('goto '),
+        icon: <TbMoneybag size="1.2rem" />,
+        closeOnTrigger: false
+    }]);
+
+    return <SpotlightProvider
+        disabled={!auth.isSuccess || !auth.data.auth}
+        query={query}
+        onQueryChange={setQuery}
+        actions={actions.filter(a => typeof a.keywords !== 'object' || query.startsWith(a.keywords[0]))}
+        onActionsChange={setActions}
+        searchIcon={<AiOutlineThunderbolt size="1.2rem"
+            color={theme.colors.indigo[theme.fn.primaryShade()]}
+        />}
+        searchPlaceholder="quick access..."
+        shortcut={["mod + k", "mod + p"]}
+        nothingFoundMessage="nothing found..."
+        fullScreen={false}
+        limit={8}
+    >
+        {children}
+    </SpotlightProvider>
+}
+
+export const useAuthSpotlight = () => {
+    const theme = useMantineTheme();
+    const navigate = useNavigate();
     const tempQuery = useTemplates();
     const accQuery = useAccounts();
 
-    const [actions, { setState }] = useListState<SpotlightAction>();
-
     useEffect(() => {
-        const basics: SpotlightAction[] = [{
-            title: 'add transaction',
-            onTrigger: () => addTransactionAction({}),
-            icon: <TbCirclePlus size="1.2rem"
-                color={theme.fn.primaryColor()}
-            />,
-        }, {
-            title: 'add account transfer',
-            onTrigger: () => addTransferAction({}),
-            icon: <TbArrowsRightLeft size="1.2rem"
-                color={theme.colors.grape[theme.fn.primaryShade()]}
-            />,
-        }];
-        if (tempQuery.isSuccess && accQuery.isSuccess)
-            setState(basics.concat(
+        tempQuery.isSuccess && accQuery.isSuccess &&
+            spotlight.registerActions(
                 tempQuery.data.map<SpotlightAction>(t => ({
+                    id: `template-${t.id}`,
                     title: `${t.desc}`,
                     onTrigger: () => addTransactionAction({
                         template: t
@@ -41,29 +73,15 @@ export const FinnanceSpotlight = ({ children }: { children: ReactNode }) => {
                     icon: <TbTemplate size="1.2rem"
                         color={theme.colors.indigo[theme.fn.primaryShade()]}
                     />
-                }))
-            ).concat(
-                accQuery.data.map<SpotlightAction>(a => ({
-                    title: `${a.desc}`,
-                    onTrigger: () => navigate(`accounts/${a.id}`),
-                    icon: <TbLink size="1.2rem" />
-                }))
-
-            ))
-    }, [tempQuery, accQuery, setState, navigate, theme])
-
-
-    return <SpotlightProvider
-        actions={actions}
-        searchIcon={<AiOutlineThunderbolt size="1.2rem"
-            color={theme.colors.indigo[theme.fn.primaryShade()]}
-        />}
-        searchPlaceholder="quick access..."
-        shortcut="mod + k"
-        nothingFoundMessage="nothing found..."
-        fullScreen={false}
-        limit={8}
-    >
-        {children}
-    </SpotlightProvider>
+                })).concat(
+                    accQuery.data.map<SpotlightAction>(a => ({
+                        id: `account-${a.id}`,
+                        title: `${a.desc}`,
+                        onTrigger: () => navigate(`accounts/${a.id}`),
+                        icon: <TbLink size="1.2rem" />,
+                        keywords: ['goto', `goto ${a.desc}`]
+                    }))
+                )
+            )
+    }, [accQuery, tempQuery, theme, navigate])
 }

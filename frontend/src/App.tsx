@@ -7,6 +7,8 @@ import { RouterProvider } from "react-router-dom";
 import { queryClient } from './query';
 import { FinnanceRouter } from './routes/Router';
 import { useCustomTheme } from './theme';
+import FinnanceModalProvider from './contexts/ModalProvider';
+import { FinnanceSpotlight } from './actions/Spotlight';
 
 function App() {
     const preferredColorScheme = useColorScheme();
@@ -25,7 +27,11 @@ function App() {
             <MantineProvider theme={{ ...theme, colorScheme }} withGlobalStyles withNormalizeCSS>
                 <Notifications />
                 <QueryClientProvider client={queryClient}>
-                    <RouterProvider router={FinnanceRouter} />
+                    <FinnanceModalProvider>
+                        <FinnanceSpotlight>
+                            <RouterProvider router={FinnanceRouter} />
+                        </FinnanceSpotlight>
+                    </FinnanceModalProvider>
                 </QueryClientProvider>
             </MantineProvider>
         </ColorSchemeProvider>

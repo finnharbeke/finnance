@@ -7,58 +7,57 @@ import NotFound from "../pages/404";
 import AccountPage from "../pages/Account";
 import AccountsPage from "../pages/Accounts";
 import DashboardPage from "../pages/Dashboard";
-import Layout from "../pages/Layout";
+import { AuthLayout, PublicLayout } from "../pages/Layout";
 import LogoutPage from "../pages/Logout";
 import { RemotesPage } from "../pages/Remotes";
-import { AuthRoute } from "./Route";
-import { TransactionsPage } from "../pages/Transactions";
 import { TemplatesPage } from "../pages/Templates";
+import { TransactionsPage } from "../pages/Transactions";
+import { AuthRoute } from "./Route";
 
 export const FinnanceRouter = createBrowserRouter([
     {
-        element: <Layout />,
+        element: <AuthRoute>
+            <AuthLayout />
+        </AuthRoute>,
         children: [{
-            element: <AuthRoute private_={false} />,
-            children: [{
-                path: "login",
-                element: <LoginForm />
-            }, {
-                path: "register",
-                element: <SignUpForm />
-            }]
+            index: true,
+            element: <DashboardPage />,
         }, {
-            element: <AuthRoute private_={true} />,
-            children: [{
-                index: true,
-                element: <DashboardPage />,
-            }, {
-                path: "logout",
-                element: <LogoutPage />
-            }, {
-                path: "accounts/:id",
-                element: <AccountPage />,
-            }, {
-                path: "accounts",
-                element: <AccountsPage />
-            }, {
-                path: "categories",
-                element: <CategoriesPage />
-            }, {
-                path: "analysis",
-                element: <NivoPage />
-            }, {
-                path: "remotes",
-                element: <RemotesPage />
-            }, {
-                path: "transactions",
-                element: <TransactionsPage />
-            }, {
-                path: "templates",
-                element: <TemplatesPage />
-            }]
+            path: "logout",
+            element: <LogoutPage />
+        }, {
+            path: "accounts/:id",
+            element: <AccountPage />,
+        }, {
+            path: "accounts",
+            element: <AccountsPage />
+        }, {
+            path: "categories",
+            element: <CategoriesPage />
+        }, {
+            path: "analytics",
+            element: <NivoPage />
+        }, {
+            path: "remotes",
+            element: <RemotesPage />
+        }, {
+            path: "transactions",
+            element: <TransactionsPage />
+        }, {
+            path: "templates",
+            element: <TemplatesPage />
         }, {
             path: "*",
-            element: <NotFound/>
+            element: <NotFound />
+        }]
+    }, {
+        element: <PublicLayout />,
+        children: [{
+            path: "login",
+            element: <LoginForm />
+        }, {
+            path: "register",
+            element: <SignUpForm />
         }]
     }
 ]);
