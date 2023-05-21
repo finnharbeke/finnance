@@ -39,14 +39,6 @@ def get_transactions():
     
     pagesize = kwargs.get('pagesize')
     page = kwargs.get('page')
-    if 'search' in kwargs:
-        print(kwargs['search'].lower())
-        print([[
-                t.comment.lower(),
-                t.agent.desc.lower(),
-                t.account.desc.lower() if t.account_id is not None else t.flows[0].agent_desc
-                
-        ] for t in result])
 
     # search filter
     result = list(filter(
@@ -77,6 +69,8 @@ def get_transactions():
         "is_expense": {"type": "boolean"},
         "agent": {"type": "string"},
         "comment": {"type": "string"},
+        "direct": {"type": "boolean"},
+        "remote_agent": {"type": "string"},
         "flows": {
             "type": "array",
             "items": {
@@ -99,9 +93,8 @@ def get_transactions():
                 "required": ["amount", "category_id"]
             }
         },
-        "remote_agent": {"type": "string"}
     },
-    "required": ["currency_id", "amount", "date_issued", "is_expense", "agent", "comment", "flows", "records"]
+    "required": ["currency_id", "amount", "date_issued", "is_expense", "agent", "comment", "direct", "flows", "records"]
 })
 def add_trans(**data):
     data['date_issued'] = datetime.fromisoformat(data.pop('date_issued'))
@@ -128,19 +121,29 @@ def add_trans(**data):
     agent = create_agent_ifnx(data.pop('agent'))
     data['agent_id'] = agent.id
     
-    if 'remote_agent' in data:
+    if 'remote_agent' in data and len(data['remote_agent']):
         flows = [{
-            'agent': data.pop('remote_agent'),
+            'agent': data['remote_agent'],
+            'is_debt': data['is_expense'],
+            'amount': data['amount']
+        }]
+    elif data['direct']:
+        flows = [{
+            'agent': agent.desc,
             'is_debt': data['is_expense'],
             'amount': data['amount']
         }]
     else:
-        flows = data.pop('flows')
+        flows = data['flows']
+        for flow in flows:
+            flow['is_debt'] = not data['is_expense']
+
+    data.pop('direct')
+    data.pop('remote_agent')
+    data.pop('flows')
 
     for flow in flows:
         flow['agent_id'] = create_agent_ifnx(flow.pop('agent')).id
-        flow['is_debt'] = not data['is_expense']
-    
 
     trans = Transaction(**data, user_id=current_user.id)
     db.session.add(trans)
@@ -169,6 +172,8 @@ def add_trans(**data):
         "is_expense": {"type": "boolean"},
         "agent": {"type": "string"},
         "comment": {"type": "string"},
+        "remote_agent": {"type": "string"},
+        "direct": {"type": "boolean"},
         "flows": {
             "type": "array",
             "items": {
@@ -191,7 +196,6 @@ def add_trans(**data):
                 "required": ["amount", "category_id"]
             }
         },
-        "remote_agent": {"type": "string"}
     }
 })
 def edit_transaction(transaction_id: int, **data):
@@ -221,6 +225,7 @@ def edit_transaction(transaction_id: int, **data):
         
         trans.currency_id = currency.id
 
+    agent = None
     if 'agent' in data and data['agent'] != trans.agent.desc:
         agent = create_agent_ifnx(data.pop('agent'))
         db.session.commit()
@@ -229,10 +234,8 @@ def edit_transaction(transaction_id: int, **data):
     if 'comment' in data and data['comment'] != trans.comment:
         trans.comment = data['comment']
     
-    changed_exp = False
     is_expense = trans.is_expense
     if 'is_expense' in data and data['is_expense'] != trans.is_expense:
-        changed_exp = True
 
         is_expense = data['is_expense']
         trans.is_expense = is_expense
@@ -241,23 +244,33 @@ def edit_transaction(transaction_id: int, **data):
         trans.amount = data['amount']
     
     flows = None
-    if 'remote_agent' in data:
+    if 'remote_agent' in data and len(data['remote_agent']):
         flows = [{
-            'agent': data.pop('remote_agent'),
+            'agent': data['remote_agent'],
+            'is_debt': data['is_expense'],
+            'amount': data['amount']
+        }]
+    elif 'direct' in data and data['direct']:
+        flows = [{
+            'agent': agent.desc if agent is not None else trans.agent.desc,
             'is_debt': data['is_expense'],
             'amount': data['amount']
         }]
     elif 'flows' in data:
         flows = data['flows']
+        for flow in flows:
+            flow['is_debt'] = not data['is_expense']
+
+    data.pop('direct', 0)
+    data.pop('remote_agent', 0)
+    data.pop('flows', 0)
     
     if flows is not None:
         for flow_data, flow in zip(flows, trans.flows):
-            if changed_exp or flow_data['agent'] != flow.agent.desc or flow_data['amount'] != flow.amount:
-                
-                agent = create_agent_ifnx(flow_data['agent'])
-                flow.agent_id = agent.id
-                flow.is_debt = not data['is_expense']
-                flow.amount = flow_data['amount']
+            agent = create_agent_ifnx(flow_data['agent'])
+            flow.agent_id = agent.id
+            flow.is_debt = flow_data['is_debt']
+            flow.amount = flow_data['amount']
 
         for flow in trans.flows[len(flows):]:
             db.session.delete(flow)
@@ -265,7 +278,7 @@ def edit_transaction(transaction_id: int, **data):
         for flow_data in flows[len(trans.flows):]:
             flow = Flow(
                 agent_id = create_agent_ifnx(flow_data.pop('agent')).id,
-                is_debt = not is_expense,
+                is_debt = flow_data['is_debt'],
                 amount = flow_data['amount'],
                 trans_id = transaction_id
             )

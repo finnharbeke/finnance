@@ -5,6 +5,7 @@ import { TbPencil } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import useIsPhone from "../hooks/useIsPhone";
+import { useSmallerThan } from "../hooks/useSmallerthan";
 
 const useStyles = createStyles(theme => ({
     pill: {
@@ -63,10 +64,10 @@ interface DataPillProps extends Omit<GridProps, 'children'> {
 }
 
 export const DataPill = ({ cells, ...props }: DataPillProps) => {
-    const isPhone = useIsPhone();
+    const isSm = useSmallerThan('sm');
     const { classes: { pill } } = useStyles();
     return <Grid gutter={2} p={1} columns={24}
-        mb={isPhone ? 'sm' : 'xs'} className={pill}
+        mb={isSm ? 'sm' : 'xs'} className={pill}
         {...props}>
         {
             cells.map(({ col, type, cell }, i) => <Grid.Col {...col} key={i}>

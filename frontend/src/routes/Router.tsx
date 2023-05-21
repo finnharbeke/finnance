@@ -13,6 +13,7 @@ import { RemotesPage } from "../pages/Remotes";
 import { TemplatesPage } from "../pages/Templates";
 import { TransactionsPage } from "../pages/Transactions";
 import { AuthRoute } from "./Route";
+import { FlowsPage } from "../pages/Flows";
 
 export const FinnanceRouter = createBrowserRouter([
     {
@@ -46,6 +47,9 @@ export const FinnanceRouter = createBrowserRouter([
         }, {
             path: "templates",
             element: <TemplatesPage />
+        }, {
+            path: "flows",
+            element: <FlowsPage />
         }, {
             path: "*",
             element: <NotFound />

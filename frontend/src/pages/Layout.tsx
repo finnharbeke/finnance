@@ -2,7 +2,7 @@ import { AppShell, Avatar, Burger, Container, Flex, Grid, Group, Header, Loader,
 import { useDisclosure } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { AiOutlineThunderbolt } from 'react-icons/ai';
-import { TbArrowWaveRightUp, TbCoins, TbColorFilter, TbGraph, TbHistory, TbHome, TbList, TbLogout, TbMoneybag, TbTemplate } from 'react-icons/tb';
+import { TbArrowWaveRightUp, TbChartDonut, TbCoins, TbColorFilter, TbHistory, TbHome, TbList, TbLogout, TbMoneybag, TbReceipt, TbReceiptRefund, TbTemplate } from 'react-icons/tb';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthSpotlight } from '../actions/Spotlight';
 import FinnanceLogo from '../components/FinnanceLogo';
@@ -11,6 +11,7 @@ import { LightDarkToggle } from '../components/LightDarkToggle';
 import useIsPhone from '../hooks/useIsPhone';
 import { useCurrentUser } from '../query';
 import { useAccounts } from '../types/Account';
+import { useEffect } from 'react';
 
 export const PublicLayout = () =>
     <AppShell header={<PublicHeader />} padding='lg'>
@@ -23,12 +24,16 @@ export const PublicLayout = () =>
 export const AuthLayout = () => {
     useAuthSpotlight();
 
+    const location = useLocation();
+
     const [open, { toggle, close }] = useDisclosure(false);
+
+    useEffect(() => close(), [location.pathname]);
 
     return <AppShell
         header={<AuthHeader {...{ open, toggle }} />}
         // padding='lg'
-        navbar={<AuthNavbar open={open} close={close} />}
+        navbar={<AuthNavbar open={open} />}
         navbarOffsetBreakpoint={30000}
         padding={0}
     >
@@ -77,10 +82,9 @@ const AuthHeader = ({ open, toggle }: { open: boolean, toggle: () => void }) => 
 interface MyNavLinkProps extends NavLinkProps {
     to?: string
     links?: Omit<MyNavLinkProps, 'close'>[]
-    close: () => void
 }
 
-const NavbarLink = ({ to, links, close, ...others }: MyNavLinkProps) => {
+const NavbarLink = ({ to, links, ...others }: MyNavLinkProps) => {
     const theme = useMantineTheme();
     const navigate = useNavigate();
     const { pathname: location } = useLocation();
@@ -89,7 +93,6 @@ const NavbarLink = ({ to, links, close, ...others }: MyNavLinkProps) => {
         onClick={() => {
             if (!to)
                 return
-            close()
             navigate(to)
         }}
         style={{ borderRadius: theme.fn.radius() }}
@@ -100,12 +103,12 @@ const NavbarLink = ({ to, links, close, ...others }: MyNavLinkProps) => {
         {...others}
     >
         {
-            links?.map((data, i) => <NavbarLink {...data} close={close} key={i} />)
+            links?.map((data, i) => <NavbarLink {...data} key={i} />)
         }
     </NavLink>
 }
 
-const AuthNavbar = ({ open, close }: { open: boolean, close: () => void }) => {
+const AuthNavbar = ({ open }: { open: boolean }) => {
     const query = useCurrentUser();
     const accsQuery = useAccounts();
     const theme = useMantineTheme();
@@ -127,11 +130,20 @@ const AuthNavbar = ({ open, close }: { open: boolean, close: () => void }) => {
             ]
         },
         { to: "/categories", label: "categories", icon: <TbColorFilter size='1.5rem' /> },
-        { to: "/analytics", label: "analytics", icon: <TbGraph size='1.5rem' /> },
-        { to: "/transactions", label: "transactions", icon: <TbHistory size='1.5rem' /> },
+        { to: "/analytics", label: "analytics", icon: <TbChartDonut size='1.5rem' /> },
         {
-            to: "/remotes", label: "remote transactions",
-            icon: <TbArrowWaveRightUp size='1.5rem' />, color: 'grape'
+            label: "archive", icon: <TbHistory size='1.5rem' />,
+            links: [
+                { to: "/transactions", label: "transactions", icon: <TbReceipt size='1.5rem' /> },
+                {
+                    to: "/remotes", label: "remote transactions",
+                    icon: <TbReceiptRefund size='1.5rem' />, color: 'grape'
+                },
+                {
+                    to: "/flows", label: "flows",
+                    icon: <TbArrowWaveRightUp size='1.5rem' />, color: 'grape'
+                },
+            ]
         },
         {
             to: "/templates", label: "templates",
@@ -142,7 +154,7 @@ const AuthNavbar = ({ open, close }: { open: boolean, close: () => void }) => {
 
     return <Navbar width={{ xs: 300 }} p='xs' hidden={!open} hiddenBreakpoint={30000}>
         <Navbar.Section grow component={ScrollArea} mx="-xs" px="xs">
-            {FinnanceLinks.map((data, i) => <NavbarLink key={i} {...data} close={close} />)}
+            {FinnanceLinks.map((data, i) => <NavbarLink key={i} {...data} />)}
         </Navbar.Section>
         <Navbar.Section style={{
             borderTopWidth: 1,

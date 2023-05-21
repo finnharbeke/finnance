@@ -17,7 +17,7 @@ def parseSearchParams(params: dict[str, str], template: dict[str, type]):
         if key in template and val != '':
             try:
                 if template[key] == datetime:
-                    parsed[key] = datetime.isoformat(val)
+                    parsed[key] = datetime.fromisoformat(val)
                 else:
                     parsed[key] = template[key](val)
             except ValueError:

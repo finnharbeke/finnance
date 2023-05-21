@@ -62,6 +62,7 @@ export interface TransactionRequest {
     records: RecordRequest[]
     comment: string
     remote_agent: string | undefined
+    direct: boolean
 }
 
 export type TransactionTransform = (v: TransactionFormValues) => TransactionRequest
@@ -140,8 +141,8 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
             amount: fv.amount ? fv.amount : 0,
             comment: fv.comment,
             date_issued: datetimeString(fv.date, fv.time),
-            flows: fv.direct ?
-                [{ amount: fv.amount ? fv.amount : 0, agent: fv.agent }]
+            flows: fv.direct || fv.remote_agent ?
+                []
                 :
                 fv.items.filter(isFlow).map(item => ({
                     amount: item.amount ? item.amount : 0,
@@ -154,7 +155,8 @@ export const useTransactionForm = (initial: TransactionFormValues) => {
                         category_id:
                             item.category_id === null ? -1 : parseInt(item.category_id)
                     })),
-            remote_agent: fv.remote_agent
+            remote_agent: fv.remote_agent,
+            direct: fv.direct
         })
     });
 
@@ -202,7 +204,8 @@ export const useTransactionFormValues = (
     { trans, account: acc, remote = false, template: temp }: UseTransactionFormValuesProps
 ): TransactionFormValues => {
     const build: () => TransactionFormValues = () => {
-        if (trans !== undefined)
+        if (trans !== undefined) {
+            const direct = trans.flows.length === 1 && trans.flows[0].agent_id === trans.agent_id;
             return {
                 account_id: trans.account_id === null ?
                     'remote' : trans.account_id.toString(),
@@ -212,12 +215,12 @@ export const useTransactionFormValues = (
                 amount: trans.amount,
                 is_expense: trans.is_expense,
                 agent: trans.agent.desc,
-                direct: trans.flows.length === 1 && trans.flows[0].agent_id === trans.agent_id,
+                direct: direct,
                 n_flows: trans.flows.length,
                 n_records: trans.records.length,
                 items: recordsFormValues(trans.records, 0)
                     .concat(
-                        trans.account_id === null ?
+                        trans.account_id === null || direct ?
                             [] : flowsFormValues(trans.flows, trans.records.length)
                     ),
                 comment: trans.comment,
@@ -225,7 +228,7 @@ export const useTransactionFormValues = (
                 remote_agent: trans.account_id === null ?
                     trans.flows[0].agent_desc : undefined,
             }
-        else if (temp !== undefined)
+        } else if (temp !== undefined)
             return {
                 account_id: temp.remote_agent !== null ?
                     'remote' : temp.account_id === null ?
@@ -302,9 +305,8 @@ export const useAddTransaction = () => {
         mutationFn: (values: TransactionRequest) =>
             axios.post('/api/transactions/add', values),
         onSuccess: () => {
-            queryClient.invalidateQueries(['changes']);
-            queryClient.invalidateQueries(['transactions']);
-            queryClient.invalidateQueries(['accounts']);
+            // instead of so many individual ones, invalidate all
+            queryClient.invalidateQueries();
         }
     });
 }
@@ -315,9 +317,8 @@ export const useEditTransaction = () => {
         mutationFn: ({ id, values }: { id: number, values: TransactionRequest }) =>
             axios.put(`/api/transactions/${id}/edit`, values),
         onSuccess: () => {
-            queryClient.invalidateQueries(['changes']);
-            queryClient.invalidateQueries(['transactions']);
-            queryClient.invalidateQueries(['accounts']);
+            // instead of so many individual ones, invalidate all
+            queryClient.invalidateQueries();
         }
     });
 }
@@ -329,9 +330,8 @@ export const useDeleteTransaction = (id: number) => {
             axios.delete(`/api/transactions/${id}/delete`),
         onSuccess: () => {
             queryClient.removeQueries({ queryKey: ['transactions', id] })
-            queryClient.invalidateQueries(['changes']);
-            queryClient.invalidateQueries(['transactions']);
-            queryClient.invalidateQueries(['accounts']);
+            // instead of so many individual ones, invalidate all
+            queryClient.invalidateQueries();
         }
     });
 }
