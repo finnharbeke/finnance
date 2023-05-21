@@ -1,47 +1,52 @@
 import { Center, Loader, Title, useMantineTheme } from "@mantine/core";
 import { DateTime } from "luxon";
-import { TbArrowWaveLeftUp, TbArrowWaveRightUp } from "react-icons/tb";
+import { TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { editTransactionAction } from "../../actions/actions";
 import useAmount from "../../hooks/useAmount";
 import { useCurrency } from "../../types/Currency";
-import { FlowDeepQueryResult, useFlows } from "../../types/Flow";
+import { RecordDeepQueryResult, useRecords } from "../../types/Record";
 import { DataPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
 
-export function FilterableFlows() {
+export function FilterableRecords() {
     const [filter, setFilter] = useFilterPagination();
-    const query = useFlows({ ...filter });
+    const query = useRecords({ ...filter });
 
     if (query.isError)
         return <Placeholder height={300} queries={[query]} />
 
     return <>
-        <FlowPills flows={query.data?.flows} />
+        <RecordPills records={query.data?.records} />
         <FilterPagination filter={filter} setFilter={setFilter} pages={query.data?.pages} />
     </>
 }
 
-export const FlowPills = ({ flows }: { flows: FlowDeepQueryResult[] | undefined }) => {
-    if (flows === undefined)
+export const RecordPills = ({ records }: { records: RecordDeepQueryResult[] | undefined }) => {
+    if (records === undefined)
         return <Center><Loader /></Center>
-    return flows.length > 0 ?
+    return records.length > 0 ?
         <>{
-            flows.map((f, ix) =>
-                <FlowPill flow={f} key={ix} />
+            records.map((f, ix) =>
+                <RecordPill record={f} key={ix} />
             )
         }</>
         :
-        <Title order={4} align='center'>no flows found</Title>
+        <Title order={4} align='center'>no records found</Title>
 }
 
-const FlowPill = ({ flow }: { flow: FlowDeepQueryResult }) => {
+const RecordPill = ({ record }: { record: RecordDeepQueryResult }) => {
     const theme = useMantineTheme();
-    const query = useCurrency(flow.trans.currency_id);
-    const amount = useAmount(flow.amount, query.data);
+    const query = useCurrency(record.trans.currency_id);
+    const amount = useAmount(record.amount, query.data);
 
+    const iconColor = theme.colors[
+        record.category.is_expense ? 'red' : 'blue'
+    ][
+        theme.colorScheme === 'light' ? 3 : 6
+    ];
     const color = theme.colors[
-        flow.is_debt ? 'red' : 'blue'
+        record.category.is_expense ? 'red' : 'blue'
     ][
         theme.colorScheme === 'light' ? 4 : 6
     ];
@@ -53,25 +58,24 @@ const FlowPill = ({ flow }: { flow: FlowDeepQueryResult }) => {
                 span: 3, sm: 1
             },
             cell: {
-                style: { backgroundColor:
-                    theme.colors.grape[theme.fn.primaryShade()]
-                }, icon: flow.is_debt ? TbArrowWaveLeftUp : TbArrowWaveRightUp
+                style: { backgroundColor: iconColor },
+                icon: record.category.is_expense ? TbTrendingDown : TbTrendingUp
             }
         },
         {
             type: 'text',
             col: {
-                span: 11, sm: 3
+                span: 8, sm: 3
             },
             cell: {
                 align: 'center',
-                text: DateTime.fromISO(flow.trans.date_issued).toFormat('dd.MM.yy')
+                text: DateTime.fromISO(record.trans.date_issued).toFormat('dd.MM.yy')
             }
         },
         {
             type: 'text',
             col: {
-                span: 10, sm: 4
+                span: 8, sm: 4, order: 5, orderSm: 3
             },
             cell: {
                 align: 'right',
@@ -82,31 +86,32 @@ const FlowPill = ({ flow }: { flow: FlowDeepQueryResult }) => {
         {
             type: 'text',
             col: {
-                span: 11, sm: 7, order: 9, orderSm: 5
+                span: 13, sm: 7, order: 3, orderSm: 4
             },
             cell: {
                 align: 'left',
-                text: flow.agent.desc
+                text: record.category.desc,
+                color: record.category.color
             }
         },
         {
             type: 'text',
             col: {
-                span: 10, sm: 8, order: 10, orderSm: 6
+                span: 13, sm: 8, order: 6, orderSm: 5
             },
             cell: {
                 align: 'left',
-                text: flow.trans.comment
+                text: record.trans.comment
             }
         },
         {
             type: 'edit',
             col: {
-                span: 3, sm: 1, order: 8
+                span: 3, sm: 1, order: 4, orderSm: 6
             },
             cell: {
                 onEdit: () =>
-                    editTransactionAction(flow.trans.id),
+                    editTransactionAction(record.trans.id),
             }
         },
     ]} />

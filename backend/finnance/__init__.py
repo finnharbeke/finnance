@@ -41,6 +41,7 @@ from finnance.transfers import transfers
 from finnance.nivo import nivo
 from finnance.templates import templates
 from finnance.flows import flows
+from finnance.records import records
 
 # Register blueprints
 app.register_blueprint(auth)
@@ -53,6 +54,7 @@ app.register_blueprint(transfers)
 app.register_blueprint(nivo)
 app.register_blueprint(templates)
 app.register_blueprint(flows)
+app.register_blueprint(records)
 
 # ERROR HANDLING
 ################

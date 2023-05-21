@@ -14,6 +14,7 @@ import { TemplatesPage } from "../pages/Templates";
 import { TransactionsPage } from "../pages/Transactions";
 import { AuthRoute } from "./Route";
 import { FlowsPage } from "../pages/Flows";
+import { RecordsPage } from "../pages/Records";
 
 export const FinnanceRouter = createBrowserRouter([
     {
@@ -50,6 +51,9 @@ export const FinnanceRouter = createBrowserRouter([
         }, {
             path: "flows",
             element: <FlowsPage />
+        }, {
+            path: "records",
+            element: <RecordsPage />
         }, {
             path: "*",
             element: <NotFound />

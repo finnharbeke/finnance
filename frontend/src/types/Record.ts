@@ -1,4 +1,10 @@
+import { useQuery } from "@tanstack/react-query"
+import { AxiosError } from "axios"
+import { FilterRequest } from "../components/Filter"
+import { getAxiosData, searchParams } from "../query"
 import { FlowFormValues } from "./Flow"
+import { CategoryQueryResult } from "./Category"
+import { TransactionQueryResult } from "./Transaction"
 
 export interface RecordQueryResult {
     id: number
@@ -6,6 +12,11 @@ export interface RecordQueryResult {
     amount: number
     category_id: number
     type: 'record'
+}
+
+export interface RecordDeepQueryResult extends RecordQueryResult {
+    trans: TransactionQueryResult
+    category: CategoryQueryResult
 }
 
 export interface RecordFormValues {
@@ -38,3 +49,14 @@ export const recordsFormValues:
         type: 'record',
         ix: offset + i
     }))
+
+interface useRecordsReturn {
+    records: RecordDeepQueryResult[]
+    pages: number
+}
+
+export const useRecords = (props: FilterRequest) =>
+    useQuery<useRecordsReturn, AxiosError>({
+        queryKey: ['records', props],
+        queryFn: () => getAxiosData(`/api/records?${searchParams(props)}`)
+    });

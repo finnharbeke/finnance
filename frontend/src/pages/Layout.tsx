@@ -28,7 +28,7 @@ export const AuthLayout = () => {
 
     const [open, { toggle, close }] = useDisclosure(false);
 
-    useEffect(() => close(), [location.pathname]);
+    useEffect(() => close(), [location.pathname, close]);
 
     return <AppShell
         header={<AuthHeader {...{ open, toggle }} />}
@@ -142,6 +142,10 @@ const AuthNavbar = ({ open }: { open: boolean }) => {
                 {
                     to: "/flows", label: "flows",
                     icon: <TbArrowWaveRightUp size='1.5rem' />, color: 'grape'
+                },
+                {
+                    to: "/records", label: "records",
+                    icon: <TbColorFilter size='1.5rem' />
                 },
             ]
         },
