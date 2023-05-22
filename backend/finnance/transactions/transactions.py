@@ -139,7 +139,7 @@ def add_trans(**data):
             flow['is_debt'] = not data['is_expense']
 
     data.pop('direct')
-    data.pop('remote_agent')
+    data.pop('remote_agent', 0) # not necessarily included
     data.pop('flows')
 
     for flow in flows:
