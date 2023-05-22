@@ -130,7 +130,7 @@ def add_trans(**data):
     elif data['direct']:
         flows = [{
             'agent': agent.desc,
-            'is_debt': data['is_expense'],
+            'is_debt': not data['is_expense'],
             'amount': data['amount']
         }]
     else:
@@ -253,7 +253,7 @@ def edit_transaction(transaction_id: int, **data):
     elif 'direct' in data and data['direct']:
         flows = [{
             'agent': agent.desc if agent is not None else trans.agent.desc,
-            'is_debt': data['is_expense'],
+            'is_debt': not data['is_expense'],
             'amount': data['amount']
         }]
     elif 'flows' in data:
