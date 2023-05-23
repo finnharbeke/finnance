@@ -1,4 +1,5 @@
-import { Center, ColProps, Grid, GridProps, MantineColor, Popover, Text, Tooltip, createStyles } from "@mantine/core";
+import { Center, ColProps, Grid, GridProps, MantineColor, Popover, Text, TextProps, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
+import { DateTime } from "luxon";
 import { useRef } from "react";
 import { IconType } from "react-icons";
 import { TbPencil } from "react-icons/tb";
@@ -15,9 +16,11 @@ const useStyles = createStyles(theme => ({
         marginRight: 0,
         borderRadius: theme.fn.radius(),
         '& > * > *': {
-            height: '2rem',
+            height: '100%',
             paddingLeft: theme.spacing.xs,
             paddingRight: theme.spacing.xs,
+            paddingTop: theme.spacing.xxs,
+            paddingBottom: theme.spacing.xxs,
             borderRadius: theme.fn.radius(),
             backgroundColor: theme.colorScheme === 'light' ?
                 theme.white : theme.colors['gray'][9],
@@ -29,7 +32,8 @@ const useStyles = createStyles(theme => ({
                 theme.colors['gray'][0] : theme.colors['dark'][7],
         },
         '&:active': {
-            paddingTop: 2
+            paddingTop: 4,
+            paddingBottom: 0
         },
 
     },
@@ -66,7 +70,7 @@ interface DataPillProps extends Omit<GridProps, 'children'> {
 export const DataPill = ({ cells, ...props }: DataPillProps) => {
     const isSm = useSmallerThan('sm');
     const { classes: { pill } } = useStyles();
-    return <Grid gutter={2} p={1} columns={24}
+    return <Grid gutter={2} p={1} columns={24} align='stretch'
         mb={isSm ? 'sm' : 'xs'} className={pill}
         {...props}>
         {
@@ -85,27 +89,29 @@ export const DataPill = ({ cells, ...props }: DataPillProps) => {
     </Grid>
 }
 
-interface TextCellProps {
+interface TextCellProps extends TextProps {
     align: AlignSetting
     text: string
-    color?: MantineColor
     link?: string
+    p?: string
 }
 
-const TextCell = ({ align, text, color, link }: TextCellProps) => {
+const TextCell = ({ text, link, p, ...others }: TextCellProps) => {
     const isPhone = useIsPhone();
     const ref = useRef<HTMLDivElement>(null);
     const over = useIsOverflow(ref, text);
     const { classes: { textCell } } = useStyles();
     const content =
-        <Text ref={ref} className={textCell} align={align} color={color}>
+        <Text ref={ref} className={textCell} {...others}>
             {
                 link === undefined ?
-                    text : <Text component={Link} to={link} color={color}>{text}</Text>
+                    text : <Text component={Link} to={link} color={others.color}>{text}</Text>
             }
         </Text>
     const w = 250;
-    return <Center>{
+    return <Center style={{
+        paddingTop: p, paddingBottom: p
+    }}>{
         isPhone ?
             <Popover disabled={!over} width={w}>
                 <Popover.Target>
@@ -142,3 +148,276 @@ const IconCell = ({ style, icon }: IconCellProps) =>
     <Center style={style}>
         {icon({ size: 24 })}
     </Center>
+
+interface StandardPillProps {
+    icon: IconType
+    iconColor: MantineColor
+    datetime: DateTime
+    amount: string
+    is_expense: boolean
+    label: Omit<TextCellProps, 'align'>
+    comment: string
+    onEdit: () => Promise<void>
+}
+
+export const StandardPill = (props: StandardPillProps) => {
+    const {
+        icon, iconColor, datetime,
+        amount, is_expense, label,
+        comment, onEdit
+    } = props;
+    const theme = useMantineTheme();
+    const lightIconColor = theme.fn.lighten(
+        theme.colors[iconColor][theme.fn.primaryShade()],
+        theme.colorScheme === 'light' ? 0.4 : 0.1
+    );
+    const isSm = useSmallerThan('sm');
+
+    return <DataPill cells={[
+        {
+            type: 'icon',
+            col: {
+                span: 3, sm: 1, order: 1
+            },
+            cell: {
+                style: { backgroundColor: lightIconColor},
+                icon: icon
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 14, sm: 5, order: 2, orderSm: 3
+            },
+            cell: {
+                align: isSm ? 'left' : 'right',
+                text: amount,
+                color: is_expense ? theme.other.colors.expense : theme.other.colors.income
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 7, sm: 3, order: 3, orderSm: 2
+            },
+            cell: {
+                align: 'center',
+                text: datetime.toFormat('dd.MM.yy'),
+            }
+        },
+        {
+            type: 'edit',
+            col: {
+                span: 3, sm: 1, order: 4, orderSm: 5
+            },
+            cell: { onEdit }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 21, sm: 14, order: 5, orderSm: 4
+            },
+            cell: {
+                align: 'left',
+                ...label
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: comment === '' ? -1 : 24, order: 6
+            },
+            cell: {
+                align: 'left',
+                text: comment,
+                fz: 'xs',
+                c: 'dimmed',
+                p: theme.spacing.xxxs
+            }
+        },
+    ]} />
+}
+
+interface SaldoPillProps extends StandardPillProps {
+    saldo: string
+}
+
+export const SaldoPill = (props: SaldoPillProps) => {
+    const {
+        icon, iconColor, datetime,
+        amount, saldo, is_expense,
+        label, comment, onEdit
+    } = props;
+    const theme = useMantineTheme();
+    const lightIconColor = theme.fn.lighten(
+        theme.colors[iconColor][theme.fn.primaryShade()],
+        theme.colorScheme === 'light' ? 0.4 : 0.1
+    );
+    const isSm = useSmallerThan('sm');
+
+    return <DataPill cells={[
+        {
+            type: 'icon',
+            col: {
+                span: 3, sm: 1, order: 1
+            },
+            cell: {
+                style: { backgroundColor: lightIconColor},
+                icon: icon
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 10, sm: 5, order: 2, orderSm: 3
+            },
+            cell: {
+                align: isSm ? 'left' : 'right',
+                text: amount,
+                color: is_expense ? theme.other.colors.expense : theme.other.colors.income
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 11, sm: 5, order: 3, orderSm: 5
+            },
+            cell: {
+                align: isSm ? 'left' : 'right',
+                text: saldo,
+            }
+        },
+        {
+            type: 'edit',
+            col: {
+                span: 3, sm: 1, order: 4, orderSm: 6
+            },
+            cell: { onEdit }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 14, sm: 9, order: 5, orderSm: 4
+            },
+            cell: {
+                align: 'left',
+                ...label
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 7, sm: 3, order: 6, orderSm: 2
+            },
+            cell: {
+                align: 'center',
+                text: datetime.toFormat('dd.MM.yy'),
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: comment === '' ? -1 : 24, order: 7
+            },
+            cell: {
+                align: 'left',
+                text: comment,
+                fz: 'xs',
+                c: 'dimmed',
+                p: theme.spacing.xxxs
+            }
+        },
+    ]} />
+}
+
+interface TwoLabelPillProps extends StandardPillProps {
+    label2: Omit<TextCellProps, 'align'>
+}
+
+export const TwoLabelPill = (props: TwoLabelPillProps) => {
+    const theme = useMantineTheme();
+    const {
+        icon, iconColor, datetime,
+        amount, is_expense, label,
+        label2, comment, onEdit
+    } = props;
+    const lightIconColor = theme.fn.lighten(
+        theme.colors[iconColor][theme.fn.primaryShade()],
+        theme.colorScheme === 'light' ? 0.4 : 0.1
+    );
+    const isSm = useSmallerThan('sm');
+
+    return <DataPill cells={[
+        {
+            type: 'icon',
+            col: {
+                span: 3, sm: 1, order: 1
+            },
+            cell: {
+                style: { backgroundColor: lightIconColor},
+                icon: icon
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 10, sm: 4, order: 2, orderSm: 3
+            },
+            cell: {
+                align: isSm ? 'left' : 'right',
+                text: amount,
+                color: is_expense ? theme.other.colors.expense : theme.other.colors.income
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 11, sm: 7, order: 3, orderSm: 5
+            },
+            cell: {
+                align: 'left',
+                ...label2
+            }
+        },
+        {
+            type: 'edit',
+            col: {
+                span: 3, sm: 1, order: 4, orderSm: 5
+            },
+            cell: { onEdit }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 7, sm: 3, order: 6, orderSm: 2
+            },
+            cell: {
+                align: 'center',
+                text: datetime.toFormat('dd.MM.yy'),
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: 14, sm: 8, order: 5, orderSm: 4
+            },
+            cell: {
+                align: 'left',
+                ...label
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: comment === '' ? -1 : 24, order: 7
+            },
+            cell: {
+                align: 'left',
+                text: comment,
+                fz: 'xs',
+                c: 'dimmed',
+                p: theme.spacing.xxxs
+            }
+        },
+    ]} />
+}

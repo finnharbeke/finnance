@@ -51,6 +51,7 @@ const PublicHeader = () =>
     </Header>
 
 const AuthHeader = ({ open, toggle }: { open: boolean, toggle: () => void }) => {
+    const theme = useMantineTheme();
     const isPhone = useIsPhone();
     return <Header height={60} p='sm'>
         <Grid>
@@ -69,7 +70,7 @@ const AuthHeader = ({ open, toggle }: { open: boolean, toggle: () => void }) => 
                 {
                     isPhone &&
                     <Flex direction='row-reverse'>
-                        <MyIcon icon={AiOutlineThunderbolt} color='indigo'
+                        <MyIcon icon={AiOutlineThunderbolt} color={theme.other.colors.quick}
                             onClick={() => spotlight.open()} radius='xl'
                             variant='light' />
                     </Flex>
@@ -136,22 +137,22 @@ const AuthNavbar = ({ open }: { open: boolean }) => {
             links: [
                 { to: "/transactions", label: "transactions", icon: <TbReceipt size='1.5rem' /> },
                 {
-                    to: "/remotes", label: "remote transactions",
-                    icon: <TbReceiptRefund size='1.5rem' />, color: 'grape'
-                },
-                {
                     to: "/flows", label: "flows",
-                    icon: <TbArrowWaveRightUp size='1.5rem' />, color: 'grape'
+                    icon: <TbArrowWaveRightUp size='1.5rem' />, color: theme.other.colors.flow
                 },
                 {
                     to: "/records", label: "records",
                     icon: <TbColorFilter size='1.5rem' />
                 },
+                {
+                    to: "/remotes", label: "remote transactions",
+                    icon: <TbReceiptRefund size='1.5rem' />, color: theme.other.colors.flow
+                },
             ]
         },
         {
             to: "/templates", label: "templates",
-            icon: <TbTemplate size='1.5rem' />, color: 'indigo'
+            icon: <TbTemplate size='1.5rem' />, color: theme.other.colors.quick
         },
         { to: "/logout", label: "logout", icon: <TbLogout size='1.5rem' /> }
     ]

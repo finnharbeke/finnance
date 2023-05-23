@@ -5,7 +5,7 @@ import { editTransactionAction } from "../../actions/actions";
 import useAmount from "../../hooks/useAmount";
 import { useCurrency } from "../../types/Currency";
 import { FlowDeepQueryResult, useFlows } from "../../types/Flow";
-import { DataPill } from "../DataPill";
+import { StandardPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
 
@@ -40,74 +40,16 @@ const FlowPill = ({ flow }: { flow: FlowDeepQueryResult }) => {
     const query = useCurrency(flow.trans.currency_id);
     const amount = useAmount(flow.amount, query.data);
 
-    const color = theme.colors[
-        flow.is_debt ? 'red' : 'blue'
-    ][
-        theme.colorScheme === 'light' ? 4 : 6
-    ];
-
-    return <DataPill cells={[
-        {
-            type: 'icon',
-            col: {
-                span: 3, sm: 1
-            },
-            cell: {
-                style: { backgroundColor:
-                    theme.colors.grape[theme.fn.primaryShade()]
-                }, icon: flow.is_debt ? TbArrowWaveLeftUp : TbArrowWaveRightUp
-            }
+    return <StandardPill {...{
+        icon: flow.is_debt ? TbArrowWaveLeftUp : TbArrowWaveRightUp,
+        iconColor: theme.other.colors.flow,
+        datetime: DateTime.fromISO(flow.trans.date_issued),
+        amount,
+        is_expense: flow.is_debt,
+        label: {
+            text: flow.agent.desc
         },
-        {
-            type: 'text',
-            col: {
-                span: 11, sm: 3
-            },
-            cell: {
-                align: 'center',
-                text: DateTime.fromISO(flow.trans.date_issued).toFormat('dd.MM.yy')
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 10, sm: 4
-            },
-            cell: {
-                align: 'right',
-                text: amount,
-                color: color
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 11, sm: 7, order: 9, orderSm: 5
-            },
-            cell: {
-                align: 'left',
-                text: flow.agent.desc
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 10, sm: 8, order: 10, orderSm: 6
-            },
-            cell: {
-                align: 'left',
-                text: flow.trans.comment
-            }
-        },
-        {
-            type: 'edit',
-            col: {
-                span: 3, sm: 1, order: 8
-            },
-            cell: {
-                onEdit: () =>
-                    editTransactionAction(flow.trans.id),
-            }
-        },
-    ]} />
+        onEdit: () => editTransactionAction(flow.trans.id),
+        comment: flow.trans.comment
+    }} />
 }

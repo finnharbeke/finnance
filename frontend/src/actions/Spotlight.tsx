@@ -32,7 +32,7 @@ export const FinnanceSpotlight = ({ children }: { children: ReactNode }) => {
         title: 'add account transfer',
         onTrigger: () => addTransferAction({}),
         icon: <TbArrowsRightLeft size="1.2rem"
-            color={theme.colors.grape[theme.fn.primaryShade()]}
+        color={theme.colors[theme.other.colors.transfer][theme.fn.primaryShade()]}
         />,
     }]);
 
@@ -43,7 +43,7 @@ export const FinnanceSpotlight = ({ children }: { children: ReactNode }) => {
         actions={actions.filter(a => typeof a.keywords !== 'object' || query.startsWith(a.keywords[0]))}
         onActionsChange={setActions}
         searchIcon={<AiOutlineThunderbolt size="1.2rem"
-            color={theme.colors.indigo[theme.fn.primaryShade()]}
+            color={theme.colors[theme.other.colors.quick][theme.fn.primaryShade()]}
         />}
         searchPlaceholder="quick access..."
         shortcut={["mod + k", "mod + p"]}
@@ -71,7 +71,7 @@ export const useAuthSpotlight = () => {
                         template: t
                     }),
                     icon: <TbTemplate size="1.2rem"
-                        color={theme.colors.indigo[theme.fn.primaryShade()]}
+                        color={theme.colors[theme.other.colors.quick][theme.fn.primaryShade()]}
                     />
                 })).concat(
                     accQuery.data.map<SpotlightAction>(a => ({

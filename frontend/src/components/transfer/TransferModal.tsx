@@ -1,4 +1,4 @@
-import { Button, Center, Grid, Popover, Switch, Text, TextInput } from "@mantine/core"
+import { Button, Center, Grid, Popover, Switch, Text, TextInput, useMantineTheme } from "@mantine/core"
 import { ContextModalProps } from "@mantine/modals/lib/context"
 import { showNotification } from "@mantine/notifications"
 import { useState } from "react"
@@ -93,6 +93,7 @@ export interface AddTransferModalProps {
 }
 
 export const AddTransferModal = ({ context, id, innerProps: { source, dest } }: ContextModalProps<AddTransferModalProps>) => {
+    const theme = useMantineTheme();
     const initial = useTransferFormValues(undefined, source, dest);
     const form = useTransferForm(initial);
 
@@ -110,7 +111,7 @@ export const AddTransferModal = ({ context, id, innerProps: { source, dest } }: 
 
     return <form onSubmit={form.onSubmit(handleSubmit)}>
         <TransferForm form={form} src_disabled={source !== undefined} dst_disabled={source !== undefined} />
-        <Button mt='lg' fullWidth type="submit" color='grape'
+        <Button mt='lg' fullWidth type="submit" color={theme.other.colors.transfer}
             loading={loading}>
             create
         </Button>
@@ -123,6 +124,7 @@ interface EditTransferModalProps {
 }
 
 export const EditTransferModal = ({ context, id, innerProps: { transfer } }: ContextModalProps<EditTransferModalProps>) => {
+    const theme = useMantineTheme();
     const initial = useTransferFormValues(transfer);
     const form = useTransferForm(initial);
 
@@ -141,7 +143,7 @@ export const EditTransferModal = ({ context, id, innerProps: { transfer } }: Con
 
     return <form onSubmit={form.onSubmit(handleSubmit)}>
         <TransferForm form={form} />
-        <Button mt='lg' fullWidth type="submit" color='grape'
+        <Button mt='lg' fullWidth type="submit" color={theme.other.colors.transfer}
             loading={loading}>
             edit
         </Button>

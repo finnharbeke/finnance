@@ -3,9 +3,8 @@ import { DateTime } from "luxon";
 import { TbArrowsLeftRight, TbMinus, TbPlus } from "react-icons/tb";
 import { editTransactionAction, editTransferAction } from "../../actions/actions";
 import useAmount from "../../hooks/useAmount";
-import { useSmallerThan } from "../../hooks/useSmallerthan";
 import { Change, isChangeTransaction, useAccount, useChanges } from "../../types/Account";
-import { DataPill } from "../DataPill";
+import { SaldoPill } from "../DataPill";
 import { FilterPagination, useFilterPagination } from "../Filter";
 import Placeholder from "../Placeholder";
 
@@ -37,7 +36,6 @@ export function FilterableChanges({ id }: { id: number }) {
 
 const ChangePill = ({ change }: { change: Change }) => {
     const theme = useMantineTheme();
-    const isXs = useSmallerThan('xs');
 
     const query = useAccount(change.acc_id);
     const isTransfer = !isChangeTransaction(change);
@@ -46,105 +44,32 @@ const ChangePill = ({ change }: { change: Change }) => {
 
     const amount = useAmount(isTransfer ?
         isSource ? change.data.src_amount : change.data.dst_amount
-        : change.data.amount, query.data?.currency, false)
+        : change.data.amount, query.data?.currency)
 
-    const saldo = useAmount(change.saldo, query.data?.currency, false);
+    const saldo = useAmount(change.saldo, query.data?.currency);
 
     if (!query.isSuccess)
         return <Placeholder height={30} queries={[query]} />
 
-    const date = DateTime.fromISO(change.data.date_issued);
-
-    const iconColor = theme.colors[
-        isTransfer ? 'grape' : isExpense ? 'red' : 'blue'
-    ][
-        theme.colorScheme === 'light' ? 3 : 6
-    ];
-    const color = theme.colors[
-        isExpense ? 'red' : 'blue'
-    ][
-        theme.colorScheme === 'light' ? 4 : 6
-    ];
-
-    return <DataPill cells={[
-        {
-            type: 'icon',
-            col: {
-                span: 3, xs: 1
-            },
-            cell: {
-                style: { backgroundColor: iconColor },
-                icon: isTransfer ? TbArrowsLeftRight :
-                    isExpense ?
-                        TbMinus : TbPlus
-            }
+    return <SaldoPill {...{
+        icon: isTransfer ? TbArrowsLeftRight :
+            isExpense ?
+                TbMinus : TbPlus,
+        iconColor: theme.other.colors[
+            isTransfer ? 'transfer'
+                : isExpense ? 'expense' : 'income'
+        ],
+        datetime: DateTime.fromISO(change.data.date_issued),
+        amount, is_expense: isExpense, saldo,
+        label: {
+            text: change.target,
+            link: isTransfer ? `/accounts/${isSource ? change.data.dst_id : change.data.src_id}` : undefined,
+            color: isTransfer ? theme.primaryColor : undefined
         },
-        {
-            type: 'text',
-            col: {
-                span: 12, xs: 3
-            },
-            cell: {
-                align: 'center',
-                text: date.toFormat('dd.MM.yy')
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 9, xs: 2
-            },
-            cell: {
-                align: 'right',
-                text: amount,
-                color: color
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 12, xs: 6, order: 9, orderXs: 5
-            },
-            cell: {
-                align: 'left',
-                text: change.target,
-                link: isTransfer ? `/accounts/${isSource ? change.data.dst_id : change.data.src_id}` : undefined,
-                color: isTransfer ? theme.primaryColor : undefined
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 9, xs: 3, order: 10, orderXs: 6
-            },
-            cell: {
-                align: 'right',
-                text: saldo,
-            }
-        },
-        {
-            type: 'edit',
-            col: {
-                span: 3, xs: 1, order: 8
-            },
-            cell: {
-                onEdit: () => isTransfer ?
-                    editTransferAction(change.data)
-                    :
-                    editTransactionAction(change.data.id),
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: change.data.comment === '' && isXs ? -1 : 24,
-                xs: 8,
-                order: 11, orderXs: 7
-            },
-            cell: {
-                align: 'left',
-                text: change.data.comment,
-            }
-        }
-    ]} />
+        comment: change.data.comment,
+        onEdit: () => isTransfer ?
+            editTransferAction(change.data)
+            :
+            editTransactionAction(change.data.id),
+    }} />
 }

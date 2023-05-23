@@ -80,13 +80,11 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
     const saldo = useAmount(acc.saldo, acc.currency);
 
     const svg = document.getElementById('transferSVG') as Element;
-    const background = typeof theme.primaryShade === 'number' ?
-        theme.colors.grape[theme.primaryShade]
-        : theme.colors.grape[theme.primaryShade[theme.colorScheme]];
+    const background = theme.colors[theme.other.colors.transfer][theme.fn.primaryShade()]
 
     return <>
         <Button component={Link} to={`/accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}
-            color={beingDragged || draggedOver ? 'grape' : undefined}
+            color={beingDragged || draggedOver ? theme.other.colors.transfer : undefined}
             draggable
             onDragStart={event => {
                 // event.preventDefault();

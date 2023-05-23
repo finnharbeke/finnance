@@ -1,4 +1,4 @@
-import { DefaultMantineColor, Tuple } from '@mantine/core';
+import { DefaultMantineColor, MantineColor, Tuple } from '@mantine/core';
 import { MantineThemeOverride } from "@mantine/styles";
 import { DateTime } from 'luxon';
 import useIsPhone from './hooks/useIsPhone';
@@ -10,9 +10,18 @@ declare module '@mantine/core' {
   export interface MantineThemeColorsOverride {
     colors: Record<ExtendedCustomColors, Tuple<string, 10>>;
   }
+  export interface MantineThemeOther {
+    colors: {
+      flow: MantineColor
+      transfer: MantineColor
+      quick: MantineColor
+      expense: MantineColor
+      income: MantineColor
+    }
+  }
 }
 
-export const useCustomTheme: () => MantineThemeOverride = () => {
+export const useCustomTheme = (): MantineThemeOverride => {
   const isPhone = useIsPhone();
   const isXs = useSmallerThan('xs');
   return {
@@ -24,7 +33,18 @@ export const useCustomTheme: () => MantineThemeOverride = () => {
       fontWeight: 250,
     },
     spacing: {
+      xxxs: '1pt',
+      xxs: '3pt',
       xs: '6pt'
+    },
+    other: {
+      colors: {
+        flow: 'grape',
+        transfer: 'grape',
+        quick: 'indigo',
+        expense: 'red',
+        income: 'blue',
+      }
     },
     components: {
       DateInput: {

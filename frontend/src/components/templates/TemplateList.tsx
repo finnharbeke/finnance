@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Paper, SimpleGrid, Text } from "@mantine/core";
+import { ActionIcon, Group, Paper, SimpleGrid, Text, useMantineTheme } from "@mantine/core";
 import { AiOutlineThunderbolt } from "react-icons/ai";
 import { TbEraser } from "react-icons/tb";
 import { addTransactionAction } from "../../actions/actions";
@@ -25,12 +25,13 @@ export const TemplateList = () => {
 }
 
 const TemplatePill = ({ template }: { template: TemplateDeepQueryResult }) => {
+    const theme = useMantineTheme();
     const deleteTemplate = useDeleteTemplate(template.id);
 
     return <Paper p='xs'>
         <Group noWrap align='center' spacing='xs'>
             <ActionIcon onClick={() => addTransactionAction({ template })}
-                variant='light' color='indigo'>
+                variant='light' color={theme.other.colors.quick}>
                 <AiOutlineThunderbolt size={24} />
             </ActionIcon>
             <Text style={{flexGrow: 1}} lineClamp={1}>
