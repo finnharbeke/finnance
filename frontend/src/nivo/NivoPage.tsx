@@ -3,8 +3,9 @@ import { ActionIcon, Group, Popover, SimpleGrid, Stack, Title } from "@mantine/c
 import { MonthPicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure, useElementSize } from "@mantine/hooks";
-import { DateTime } from "luxon";
-import { TbCalendar } from "react-icons/tb";
+import { DateTime, Duration } from "luxon";
+import { useCallback } from "react";
+import { TbCalendar, TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import CurrencyInput from "../components/input/CurrencyInput";
 import FinnanceSunburst from "./Sunburst";
 
@@ -25,16 +26,30 @@ export default function NivoPage() {
         }
     })
 
+    const move = useCallback((dir: 'l' | 'r') =>
+        (dir !== 'r' ||
+            !DateTime.fromJSDate(form.values.month).startOf('month')
+                .equals(DateTime.now().startOf('month')))
+        &&
+        form.setFieldValue('month',
+            DateTime.fromJSDate(form.values.month).plus(Duration.fromObject({
+                months: dir === 'l' ? -1 : 1
+            })).toJSDate()
+        ), [form]);
 
     return <Stack ref={ref}>
-        <Group>
+        <Group spacing='sm'>
             <Title>
                 analytics
             </Title>
+            <ActionIcon onClick={() => move('l')}
+                variant='default' ml='auto'>
+                <TbChevronLeft size='1.2rem' />
+            </ActionIcon>
             <Popover opened={opened} onChange={toggle}>
                 <Popover.Target>
                     <ActionIcon onClick={open}
-                        variant='default' ml='auto'>
+                        variant='default'>
                         <TbCalendar size='1.2rem' />
                     </ActionIcon>
                 </Popover.Target>
@@ -46,6 +61,12 @@ export default function NivoPage() {
                         }} />
                 </Popover.Dropdown>
             </Popover>
+            <ActionIcon onClick={() => move('r')}
+                disabled={DateTime.fromJSDate(form.values.month).startOf('month')
+                    .equals(DateTime.now().startOf('month'))}
+                variant='default'>
+                <TbChevronRight size='1.2rem' />
+            </ActionIcon>
             <CurrencyInput hasDefault {...form.getInputProps('currency_id')}
                 maw={100}
             />
