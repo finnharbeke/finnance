@@ -1,5 +1,5 @@
 
-import { ActionIcon, Group, Popover, SimpleGrid, Stack, Title } from "@mantine/core";
+import { ActionIcon, Grid, Group, Popover, Stack, Title } from "@mantine/core";
 import { MonthPicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure, useElementSize } from "@mantine/hooks";
@@ -15,7 +15,8 @@ interface FormValues {
 }
 
 export default function NivoPage() {
-    const { ref, width } = useElementSize();
+    const { ref: ref1, width: width1 } = useElementSize();
+    const { ref: ref2, width: width2 } = useElementSize();
 
     const [opened, { open, close, toggle }] = useDisclosure();
 
@@ -37,54 +38,62 @@ export default function NivoPage() {
             })).toJSDate()
         ), [form]);
 
-    return <Stack ref={ref}>
-        <Group spacing='sm'>
+    return <Stack>
+        <Group>
             <Title>
                 analytics
             </Title>
-            <ActionIcon onClick={() => move('l')}
-                variant='default' ml='auto'>
-                <TbChevronLeft size='1.2rem' />
-            </ActionIcon>
-            <Popover opened={opened} onChange={toggle}>
-                <Popover.Target>
-                    <ActionIcon onClick={open}
-                        variant='default'>
-                        <TbCalendar size='1.2rem' />
-                    </ActionIcon>
-                </Popover.Target>
-                <Popover.Dropdown>
-                    <MonthPicker maxDate={new Date()}
-                        value={form.values.month} onChange={v => {
-                            v && form.setFieldValue('month', v)
-                            close();
-                        }} />
-                </Popover.Dropdown>
-            </Popover>
-            <ActionIcon onClick={() => move('r')}
-                disabled={DateTime.fromJSDate(form.values.month).startOf('month')
-                    .equals(DateTime.now().startOf('month'))}
-                variant='default'>
-                <TbChevronRight size='1.2rem' />
-            </ActionIcon>
-            <CurrencyInput hasDefault {...form.getInputProps('currency_id')}
-                maw={100}
-            />
+            <Group spacing='sm' noWrap position='right' ml='auto'>
+                <ActionIcon onClick={() => move('l')}
+                    variant='default'>
+                    <TbChevronLeft size='1.2rem' />
+                </ActionIcon>
+                <Popover opened={opened} onChange={toggle}>
+                    <Popover.Target>
+                        <ActionIcon onClick={open}
+                            variant='default'>
+                            <TbCalendar size='1.2rem' />
+                        </ActionIcon>
+                    </Popover.Target>
+                    <Popover.Dropdown>
+                        <MonthPicker maxDate={new Date()}
+                            value={form.values.month} onChange={v => {
+                                v && form.setFieldValue('month', v)
+                                close();
+                            }} />
+                    </Popover.Dropdown>
+                </Popover>
+                <ActionIcon onClick={() => move('r')}
+                    disabled={DateTime.fromJSDate(form.values.month).startOf('month')
+                        .equals(DateTime.now().startOf('month'))}
+                    variant='default'>
+                    <TbChevronRight size='1.2rem' />
+                </ActionIcon>
+                <CurrencyInput hasDefault {...form.getInputProps('currency_id')}
+                    maw={100}
+                />
+            </Group>
         </Group>
         <Title align='center'>{
             DateTime.fromJSDate(form.values.month)
                 .toFormat('MMMM yy').toLowerCase()
         }</Title>
-        <SimpleGrid cols={2}>
-            <FinnanceSunburst size={Math.min(width, 500)} currency_id={form.values.currency_id}
-                min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
-                max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
-            />
-            <FinnanceSunburst size={Math.min(width, 500)} currency_id={form.values.currency_id}
-                min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
-                max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
-                is_expense={false}
-            />
-        </SimpleGrid>
+        <Grid align='flex-end'>
+            <Grid.Col ref={ref1} span={7}>
+                <FinnanceSunburst size={Math.min(width1, 500)} currency_id={form.values.currency_id}
+                    min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
+                    max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
+                />
+                <Title order={3} align='center' mt='lg'>expenses</Title>
+            </Grid.Col>
+            <Grid.Col ref={ref2} span={5}>
+                <FinnanceSunburst size={Math.min(width2, 500)} currency_id={form.values.currency_id}
+                    min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
+                    max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
+                    is_expense={false}
+                />
+                <Title order={3} align='center' mt='lg'>income</Title>
+            </Grid.Col>
+        </Grid>
     </Stack>
 }
