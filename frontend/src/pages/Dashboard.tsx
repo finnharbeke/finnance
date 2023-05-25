@@ -35,7 +35,7 @@ export default function DashboardPage() {
                         <FinnanceSunburst size={isSm ? 200 : 300} currency_id={query.data[0].id.toString()}
                             min_date={DateTime.now().startOf('month')}
                             max_date={DateTime.now().endOf('month')}
-                            interactive={true}
+                            is_expense={true}
                         />
                     }
                     {

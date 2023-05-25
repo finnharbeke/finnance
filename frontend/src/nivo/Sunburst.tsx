@@ -1,12 +1,13 @@
-import { Box, BoxProps, Paper, Stack, Text, useMantineTheme } from '@mantine/core';
-import { ComputedDatum, ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
+import { Box, useMantineTheme } from '@mantine/core';
+import { ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 import Placeholder from '../components/Placeholder';
 import useAmount from '../hooks/useAmount';
-import { getAxiosData, searchParams, searchParamsProps } from '../query';
+import { getAxiosData, searchParams } from '../query';
 import { useCurrency } from '../types/Currency';
+import { NivoProps, NivoTooltip, useNivoTheme } from './Nivo';
 
 interface SunburstData {
     id: string
@@ -16,14 +17,7 @@ interface SunburstData {
     value?: number
 }
 
-interface useSunburstDataProps extends searchParamsProps {
-    is_expense: boolean
-    currency_id: string
-    min_date?: string
-    max_date?: string
-}
-
-const useSunburstData = (props: useSunburstDataProps) =>
+const useSunburstData = (props: NivoProps) =>
     useQuery<SunburstData, AxiosError>({
         queryKey: ["categories", "changes", "sunburst", props],
         queryFn: () => getAxiosData(`/api/nivo/sunburst?${searchParams(props)}`)
@@ -31,67 +25,45 @@ const useSunburstData = (props: useSunburstDataProps) =>
 
 interface FinnanceSunburstProps {
     size: number,
-    is_expense?: boolean,
+    is_expense: boolean,
     min_date?: DateTime,
     max_date?: DateTime,
     currency_id: string
-    interactive?: boolean 
 }
 
 export default function FinnanceSunburst(props: FinnanceSunburstProps) {
-
     const {
         size,
-        is_expense = true,
-        interactive = true,
+        is_expense,
         currency_id,
-        min_date = DateTime.now().startOf('month'),
+        min_date,
         max_date
     } = props;
-
+    const theme = useMantineTheme();
+    const nivo = useNivoTheme();
     const query = useSunburstData({
         is_expense, currency_id,
-        min_date: min_date.toISO({ includeOffset: false }),
+        min_date: min_date?.toISO({ includeOffset: false }),
         max_date: max_date?.toISO({ includeOffset: false })
     });
 
     if (!query.isSuccess)
         return <Placeholder queries={[query]} height={size} />
 
-    return <CustomSunburst data={query.data} size={size} currency_id={currency_id} interactive={interactive} />
-}
-
-interface CustomSunburstProps extends BoxProps {
-    onClick?: React.MouseEventHandler<HTMLDivElement>
-    data: SunburstData
-    size?: number
-    interactive?: boolean
-    currency_id: string
-}
-
-const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currency_id }: CustomSunburstProps) => {
-    const theme = useMantineTheme();
-    return <Box style={{ height: size }} onClick={onClick}><ResponsiveSunburst
-        data={data}
-
+    return <Box style={{ height: size }}><ResponsiveSunburst
+        theme={nivo}
+        data={query.data}
         cornerRadius={size / 10}
         borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
         borderWidth={size / 150}
-        isInteractive={interactive}
-
-        theme={{
-            fontSize: 16,
-            tooltip: {
-                container: {
-                    background: theme.colorScheme === 'light' ? theme.colors.gray[2] : theme.colors.dark[6],
-                    color: theme.colorScheme === 'dark' ? theme.colors.gray[3] : theme.colors.gray[7],
-                }
-            }
-        }}
         colors={child => child.data.color}
         childColor={(_, child) => theme.fn.lighten(child.data.color, child.depth * 0.13)}
 
-        tooltip={node => <MyTooltip node={node} currency_id={currency_id} />}
+        // tooltip={node => <MyTooltip node={node} currency_id={currency_id} />}
+        tooltip={node => 
+            <NivoTooltip label={node.data.name || ''}
+            value={node.value} perc={node.percentage}
+            currency_id={currency_id} />}
 
         layers={[
             'arcs', 'arcLabels',
@@ -101,18 +73,6 @@ const CustomSunburst = ({ data, size = 200, interactive = true, onClick, currenc
         // animate={false}
         transitionMode='middleAngle'
     /></Box>
-}
-
-const MyTooltip = ({ node, currency_id }: { node: ComputedDatum<SunburstData>, currency_id: string }) => {
-    const query = useCurrency(currency_id);
-    const amount = useAmount(node.value, query.data);
-    return <Paper p='xs'>
-        <Stack spacing={0}>
-            {/* <ColorSwatch color={node.data.color} size={16} /> */}
-            <Text fz={14} fw={900} lineClamp={1}>{node.data.name}: {node.percentage.toFixed(0)}%</Text>
-            <Text fz={14} lineClamp={1}>{amount}</Text>
-        </Stack>
-    </Paper>
 }
 
 const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id, size }: 
@@ -129,9 +89,9 @@ const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id, size }:
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-            fontSize: size / 15,
+            fontSize: 18,
             fontWeight: 600,
-            fill: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.dark[8]
+            fill: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black
         }}
     >
         {amount}
