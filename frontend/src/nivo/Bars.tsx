@@ -70,7 +70,7 @@ export const FinnanceBars = (props: FinnanceBarsProps) => {
             }
             enableGridY={false}
             tooltip={({ id, value }) =>
-                <NivoTooltip label={id.toString()} value={value} currency_id='2' perc={value / total * 100} />}
+                <NivoTooltip label={id.toString()} value={value} currency_id={currency_id} perc={value / total * 100} />}
             {...others}
         />
     </Box>
