@@ -1,14 +1,15 @@
 
-import { ActionIcon, Center, Grid, Group, Popover, SegmentedControl, Stack, Tabs, Title } from "@mantine/core";
+import { ActionIcon, Grid, Group, Popover, Stack, Tabs, Title } from "@mantine/core";
 import { MonthPicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure, useElementSize } from "@mantine/hooks";
 import { DateTime, Duration } from "luxon";
 import { useCallback } from "react";
-import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight, TbList } from "react-icons/tb";
+import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import CurrencyInput from "../components/input/CurrencyInput";
 import { FinnanceBars } from "./Bars";
 import FinnanceSunburst from "./Sunburst";
+import useIsPhone from "../hooks/useIsPhone";
 
 interface FormValues {
     currency_id: string
@@ -19,6 +20,7 @@ export default function NivoPage() {
     const { ref: ref1, width: width1 } = useElementSize();
     const { ref: ref2, width: width2 } = useElementSize();
 
+    const isPhone = useIsPhone();
     const [opened, { open, close, toggle }] = useDisclosure();
 
     const form = useForm<FormValues>({
@@ -45,15 +47,15 @@ export default function NivoPage() {
                 analytics
             </Title>
             <Group spacing='sm' noWrap position='right' ml='auto'>
-                <ActionIcon onClick={() => move('l')}
+                <ActionIcon onClick={() => move('l')} size={isPhone ? 'xl' : 'lg'}
                     variant='default'>
-                    <TbChevronLeft size='1.2rem' />
+                    <TbChevronLeft size={isPhone ? '1.5rem' : '1.3rem'} />
                 </ActionIcon>
                 <Popover opened={opened} onChange={toggle}>
                     <Popover.Target>
-                        <ActionIcon onClick={open}
+                        <ActionIcon onClick={open} size={isPhone ? 'xl' : 'lg'}
                             variant='default'>
-                            <TbCalendar size='1.2rem' />
+                            <TbCalendar size={isPhone ? '1.5rem' : '1.3rem'} />
                         </ActionIcon>
                     </Popover.Target>
                     <Popover.Dropdown>
@@ -64,11 +66,11 @@ export default function NivoPage() {
                             }} />
                     </Popover.Dropdown>
                 </Popover>
-                <ActionIcon onClick={() => move('r')}
+                <ActionIcon onClick={() => move('r')} size={isPhone ? 'xl' : 'lg'}
                     disabled={DateTime.fromJSDate(form.values.month).startOf('month')
                         .equals(DateTime.now().startOf('month'))}
                     variant='default'>
-                    <TbChevronRight size='1.2rem' />
+                    <TbChevronRight size={isPhone ? '1.5rem' : '1.3rem'} />
                 </ActionIcon>
                 <CurrencyInput hasDefault {...form.getInputProps('currency_id')}
                     maw={100}
