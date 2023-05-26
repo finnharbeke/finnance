@@ -92,7 +92,7 @@ def sunburst():
     return jsonify({'name': 'exp', 'children': data})
 
 def months_dates():
-    now = dt.datetime.now()
+    now = dt.datetime(year=2022, month=1, day=1)
     start_of_month = dt.datetime(year=now.year, month=now.month, day=1)
     dates = [start_of_month, now]
     for _ in range(11):
@@ -208,7 +208,7 @@ def acc_plot(acc, color=None, label=None):
 
     x = [acc.date_created] * 2 + (
         [change.date_issued for change in changes] + 
-        [dt.datetime.now()])
+        [dt.datetime(year=2022, month=1, day=1)])
     x = [d.isoformat() for d in x]
     y = [0, saldos[0]] + saldos[1:] + [saldos[-1]]
 
@@ -317,9 +317,9 @@ def net(currency_id=1):
 
     off = 0
     for i in range(n):
-        xy(id_[i], dt.datetime.now(), off)
+        xy(id_[i], dt.datetime(year=2022, month=1, day=1), off)
         off += saldos[id_[i]]
-    xy('f', dt.datetime.now(), off)
+    xy('f', dt.datetime(year=2022, month=1, day=1), off)
         
     return jsonify({
         'plots': [{

@@ -25,7 +25,7 @@ def params():
 @login_required
 def analysis():
     req = request.args.to_dict()
-    now = dt.datetime.now()
+    now = dt.datetime(year=2022, month=1, day=1)
     end = now.isoformat()
     start = (dt.datetime(now.year, now.month, 1) - delta(months=11)).isoformat()
     req.update({'start': start, 'end': end})

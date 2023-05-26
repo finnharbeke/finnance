@@ -16,9 +16,11 @@ login_manager.login_message_category = 'info'
 
 # Define the database object which is imported
 # by modules and controllers
-db = SQLAlchemy(app)
-from . import models
-db.create_all()
+
+with app.app_context():
+    db = SQLAlchemy(app)
+    from . import models
+    db.create_all()
 
 
 # Import a module / component using its blueprint handler variable
