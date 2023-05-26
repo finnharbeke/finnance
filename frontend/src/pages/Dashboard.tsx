@@ -5,10 +5,11 @@ import { AiOutlineThunderbolt } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import FinnanceLogo from "../components/FinnanceLogo";
 import AccountPills from "../components/account/AccountPills";
-import FinnanceSunburst from "../nivo/Sunburst";
+import { Sunburst, SunburstSkeleton } from "../nivo/Sunburst";
 import { usePrefetch } from "../query";
 import { useCurrencies } from "../types/Currency";
 import { useSmallerThan } from "../hooks/useSmallerthan";
+import { NivoShell } from "../nivo/Nivo";
 
 export default function DashboardPage() {
     const theme = useMantineTheme();
@@ -32,7 +33,10 @@ export default function DashboardPage() {
                 <Paper p='sm' onClick={() => navigate('/analytics')} my='sm'>
                     {
                         query.data.length > 0 &&
-                        <FinnanceSunburst size={isSm ? 200 : 300} currency_id={query.data[0].id.toString()}
+                        <NivoShell
+                            nivo={Sunburst} skeleton={SunburstSkeleton}
+                            height={isSm ? 200 : 300}
+                            currency_id={query.data[0].id.toString()}
                             min_date={DateTime.now().startOf('month')}
                             max_date={DateTime.now().endOf('month')}
                             is_expense={true}

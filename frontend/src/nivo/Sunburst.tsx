@@ -1,4 +1,4 @@
-import { Box, useMantineTheme } from '@mantine/core';
+import { Box, Skeleton, useMantineTheme } from '@mantine/core';
 import { ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -7,7 +7,8 @@ import Placeholder from '../components/Placeholder';
 import useAmount from '../hooks/useAmount';
 import { getAxiosData, searchParams } from '../query';
 import { useCurrency } from '../types/Currency';
-import { NivoProps, NivoTooltip, useNivoTheme } from './Nivo';
+import { NivoComponentProps, NivoRequest, NivoSkeletonProps, NivoTooltip, useNivoTheme } from './Nivo';
+import { useEffect, useState } from 'react';
 
 interface SunburstData {
     id: string
@@ -17,45 +18,31 @@ interface SunburstData {
     value?: number
 }
 
-const useSunburstData = (props: NivoProps) =>
+const useSunburstData = (props: NivoRequest) =>
     useQuery<SunburstData, AxiosError>({
         queryKey: ["categories", "changes", "sunburst", props],
         queryFn: () => getAxiosData(`/api/nivo/sunburst?${searchParams(props)}`)
     });
 
-interface FinnanceSunburstProps {
-    size: number,
-    is_expense: boolean,
-    min_date?: DateTime,
-    max_date?: DateTime,
-    currency_id: string
-}
-
-export default function FinnanceSunburst(props: FinnanceSunburstProps) {
-    const {
-        size,
-        is_expense,
-        currency_id,
-        min_date,
-        max_date
-    } = props;
+export const Sunburst = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
     const nivo = useNivoTheme();
-    const query = useSunburstData({
-        is_expense, currency_id,
-        min_date: min_date?.toISO({ includeOffset: false }),
-        max_date: max_date?.toISO({ includeOffset: false })
-    });
+    const query = useSunburstData(request);
+    const height = size.height || 500;
+    const [ data, setData ] = useState<SunburstData>()
+    useEffect(() => query.data && setData(query.data), [query.data, setData])
 
-    if (!query.isSuccess)
-        return <Placeholder queries={[query]} height={size} />
+    if (query.isError)
+        return <Placeholder queries={[query]} height={height} />
+    else if (data === undefined)
+        return <SunburstSkeleton {...size} />
 
-    return <Box style={{ height: size }}><ResponsiveSunburst
+    return <ResponsiveSunburst
         theme={nivo}
-        data={query.data}
-        cornerRadius={size / 10}
+        data={data}
+        cornerRadius={height / 10}
         borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
-        borderWidth={size / 150}
+        borderWidth={height / 150}
         colors={child => child.data.color}
         childColor={(_, child) => theme.fn.lighten(child.data.color, child.depth * 0.13)}
 
@@ -63,20 +50,20 @@ export default function FinnanceSunburst(props: FinnanceSunburstProps) {
         tooltip={node => 
             <NivoTooltip label={node.data.name || ''}
             value={node.value} perc={node.percentage}
-            currency_id={currency_id} />}
+            currency_id={request.currency_id} />}
 
         layers={[
             'arcs', 'arcLabels',
-            (props) => <MiddleNumber props={props} currency_id={currency_id} size={size}/>
+            (props) => <MiddleNumber props={props} currency_id={request.currency_id} />
         ]}
 
         // animate={false}
         transitionMode='middleAngle'
-    /></Box>
+    />
 }
 
-const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id, size }: 
-    { props: SunburstCustomLayerProps<SunburstData>, currency_id: string, size: number}) => {
+const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id }: 
+    { props: SunburstCustomLayerProps<SunburstData>, currency_id: string }) => {
     
         const total = nodes.reduce((total, datum) => total + (
         datum.path.length === 2 ? datum.value : 0), 0); // only outer
@@ -96,4 +83,8 @@ const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id, size }:
     >
         {amount}
     </text>
+}
+
+export const SunburstSkeleton = ({ height }: NivoSkeletonProps) => {
+    return <Skeleton height={height} circle />
 }

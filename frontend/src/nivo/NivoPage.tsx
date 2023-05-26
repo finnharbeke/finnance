@@ -7,12 +7,13 @@ import { DateTime, Duration } from "luxon";
 import { useCallback } from "react";
 import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import CurrencyInput from "../components/input/CurrencyInput";
-import { FinnanceBars } from "./Bars";
-import FinnanceSunburst from "./Sunburst";
+import { BarsSkeleton, FinnanceBars } from "./Bars";
+import { Sunburst, SunburstSkeleton } from "./Sunburst";
 import useIsPhone from "../hooks/useIsPhone";
+import { NivoShell } from "./Nivo";
 
 interface FormValues {
-    currency_id: string
+    currency_id: string | null
     month: Date
 }
 
@@ -25,15 +26,22 @@ export default function NivoPage() {
 
     const form = useForm<FormValues>({
         initialValues: {
-            currency_id: '',
+            currency_id: null,
             month: new Date(),
         }
     })
 
+    const start = DateTime.fromJSDate(form.values.month).startOf('month');
+    const end = DateTime.fromJSDate(form.values.month).endOf('month');
+    const commonProps = {
+        currency_id: form.values.currency_id,
+        min_date: start,
+        max_date: end
+    }
+
     const move = useCallback((dir: 'l' | 'r') =>
         (dir !== 'r' ||
-            !DateTime.fromJSDate(form.values.month).startOf('month')
-                .equals(DateTime.now().startOf('month')))
+            !start.equals(DateTime.now().startOf('month')))
         &&
         form.setFieldValue('month',
             DateTime.fromJSDate(form.values.month).plus(Duration.fromObject({
@@ -67,7 +75,7 @@ export default function NivoPage() {
                     </Popover.Dropdown>
                 </Popover>
                 <ActionIcon onClick={() => move('r')} size={isPhone ? 'xl' : 'lg'}
-                    disabled={DateTime.fromJSDate(form.values.month).startOf('month')
+                    disabled={start
                         .equals(DateTime.now().startOf('month'))}
                     variant='default'>
                     <TbChevronRight size={isPhone ? '1.5rem' : '1.3rem'} />
@@ -81,7 +89,7 @@ export default function NivoPage() {
             DateTime.fromJSDate(form.values.month)
                 .toFormat('MMMM yy').toLowerCase()
         }</Title>
-        <Tabs defaultValue='sunburst'>
+        <Tabs defaultValue='bars'>
             <Tabs.List position='right'>
                 <Tabs.Tab value='sunburst' icon={<TbChartDonut4 size='1.5rem' />} />
                 <Tabs.Tab value='bars' icon={<TbChartBar size='1.5rem' />} />
@@ -98,16 +106,18 @@ export default function NivoPage() {
                         <Title order={3} align='center'>income</Title>
                     </Grid.Col>
                     <Grid.Col span={12} sm={7} order={2} orderSm={3}>
-                        <FinnanceSunburst size={Math.min(width1, 500)} currency_id={form.values.currency_id}
-                            min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
-                            max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
+                        <NivoShell
+                            nivo={Sunburst} skeleton={SunburstSkeleton}
+                            height={Math.min(width1, 500)}
+                            {...commonProps}
                             is_expense={true}
                         />
                     </Grid.Col>
                     <Grid.Col span={12} sm={5} order={5} orderSm={4}>
-                        <FinnanceSunburst size={Math.min(width2, 500)} currency_id={form.values.currency_id}
-                            min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
-                            max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
+                        <NivoShell
+                            nivo={Sunburst} skeleton={SunburstSkeleton}
+                            height={Math.min(width2, 500)}
+                            {...commonProps}
                             is_expense={false}
                         />
                     </Grid.Col>
@@ -116,15 +126,15 @@ export default function NivoPage() {
             <Tabs.Panel value='bars'>
                 <Stack>
                     <Title order={3} align='center'>expenses</Title>
-                    <FinnanceBars currency_id={form.values.currency_id}
-                        min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
-                        max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
+                    <NivoShell
+                        nivo={FinnanceBars} skeleton={BarsSkeleton}
+                        {...commonProps}
                         is_expense={true}
                     />
                     <Title order={3} align='center'>income</Title>
-                    <FinnanceBars currency_id={form.values.currency_id}
-                        min_date={DateTime.fromJSDate(form.values.month).startOf('month')}
-                        max_date={DateTime.fromJSDate(form.values.month).endOf('month')}
+                    <NivoShell
+                        nivo={FinnanceBars} skeleton={BarsSkeleton}
+                        {...commonProps}
                         is_expense={false}
                     />
                 </Stack>

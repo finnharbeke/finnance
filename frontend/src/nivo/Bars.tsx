@@ -1,11 +1,13 @@
-import { Box, useMantineTheme } from "@mantine/core";
-import { BarSvgProps, ResponsiveBar } from "@nivo/bar";
+import { Box, Skeleton, Stack, useMantineTheme } from "@mantine/core";
+import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { DateTime } from "luxon";
 import Placeholder from "../components/Placeholder";
 import { getAxiosData, searchParams } from "../query";
-import { NivoProps, NivoTooltip, useNivoTheme } from "./Nivo";
+import { NivoComponentProps, NivoRequest, NivoSkeletonProps, NivoTooltip, useNivoTheme } from "./Nivo";
+import { useState, useEffect } from "react";
+import { SunburstSkeleton } from "./Sunburst";
+import { useElementSize } from "@mantine/hooks";
 
 interface Datum {
     category: string
@@ -19,44 +21,36 @@ interface BarsData {
     total: number
 }
 
-const useBarsData = (props: NivoProps) =>
+const useBarsData = (props: NivoRequest) =>
     useQuery<BarsData, AxiosError>({
         queryKey: ["categories", "changes", "bars", props],
         queryFn: () => getAxiosData(`/api/nivo/bars?${searchParams(props)}`)
     });
 
-interface FinnanceBarsProps extends Omit<BarSvgProps<Datum>, "height" | "width" | "data"> {
-    is_expense: boolean,
-    min_date?: DateTime,
-    max_date?: DateTime,
-    currency_id: string
-}
+const BAR_HEIGHT = 55;
 
-export const FinnanceBars = (props: FinnanceBarsProps) => {
-    const {
-        is_expense, currency_id,
-        min_date, max_date, ...others
-    } = props;
+export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
     const nivo = useNivoTheme();
-    const query = useBarsData({
-        is_expense, currency_id,
-        min_date: min_date?.toISO({ includeOffset: false }),
-        max_date: max_date?.toISO({ includeOffset: false })
-    });
+    const query = useBarsData(request);
 
-    if (!query.isSuccess)
-        return <Placeholder height={300} queries={[query]} />
+    const [data, setData] = useState<BarsData>()
+    useEffect(() => query.data && setData(query.data), [query.data, setData])
 
-    const { data, keys, total } = query.data;
-    return <Box style={{ height: data.length * 60 }}>
+    if (query.isError)
+        return <Placeholder queries={[query]} height={3 * BAR_HEIGHT} />
+    else if (data === undefined)
+        return <SunburstSkeleton {...size} />
+
+    const { data: bars, keys, total } = data;
+    return <Box style={{ height: bars.length * (BAR_HEIGHT + 5) }}>
         <ResponsiveBar
             theme={nivo}
-            data={data} keys={keys}
+            data={bars} keys={keys}
             indexBy='category'
             layout='horizontal'
             colors={({ id, data }) => theme.fn.lighten(data[`${id}_color`].toString(), 0.15)}
-            
+
             axisBottom={null}
             axisLeft={null}
             // borderColor={({ data: { id, data } }) => data['color']}
@@ -70,8 +64,16 @@ export const FinnanceBars = (props: FinnanceBarsProps) => {
             }
             enableGridY={false}
             tooltip={({ id, value }) =>
-                <NivoTooltip label={id.toString()} value={value} currency_id={currency_id} perc={value / total * 100} />}
-            {...others}
+                <NivoTooltip label={id.toString()} value={value} currency_id={request.currency_id} perc={value / total * 100} />}
         />
     </Box>
+}
+
+export const BarsSkeleton = (props: NivoSkeletonProps) => {
+    const { ref, width } = useElementSize();
+    return <Stack spacing='xs'>
+        <Skeleton height={BAR_HEIGHT} width={Math.random() * width} />
+        <Skeleton height={BAR_HEIGHT} ref={ref}  />
+        <Skeleton height={BAR_HEIGHT} width={Math.random() * width} />
+    </Stack>
 }

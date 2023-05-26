@@ -1,8 +1,9 @@
-import { Paper, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Box, Paper, Stack, Text, useMantineTheme } from "@mantine/core";
 import { Theme } from "@nivo/core";
 import useAmount from "../hooks/useAmount";
 import { searchParamsProps } from "../query";
 import { useCurrency } from "../types/Currency";
+import { DateTime } from "luxon";
 
 export const useNivoTheme = (): Theme => {
     const theme = useMantineTheme();
@@ -14,7 +15,7 @@ export const useNivoTheme = (): Theme => {
     }
 }
 
-export interface NivoProps extends searchParamsProps {
+export interface NivoRequest extends searchParamsProps {
     is_expense: boolean
     currency_id: string
     min_date?: string
@@ -37,4 +38,53 @@ export const NivoTooltip = ({ label, value, perc, currency_id }: NivoTooltipProp
             <Text fz={14} lineClamp={1}>{amount}</Text>
         </Stack>
     </Paper>
+}
+
+export interface NivoSkeletonProps {
+    width?: number
+    height?: number
+}
+
+export interface NivoComponentProps {
+    request: NivoRequest
+    size: NivoSkeletonProps
+}
+
+interface NivoProps {
+    nivo: (props: NivoComponentProps) => JSX.Element,
+    skeleton: (props: NivoSkeletonProps) => JSX.Element,
+    width?: number
+    height?: number
+    is_expense: boolean
+    currency_id: string | null
+    min_date?: DateTime
+    max_date?: DateTime
+}
+
+
+export const NivoShell = (props: NivoProps) => {
+    const {
+        nivo, skeleton,
+        width, height,
+        currency_id, is_expense,
+        min_date, max_date
+    } = props;
+
+    const MyComponent = nivo;
+    const MySkeleton = skeleton;
+    if (!currency_id)
+        return <>
+        <MySkeleton {...{ width, height }} />
+        {currency_id}
+        </>
+
+    const request: NivoRequest = {
+        currency_id, is_expense,
+        min_date: min_date?.toISO({ includeOffset: false }),
+        max_date: max_date?.toISO({ includeOffset: false })
+    }
+
+    return <Box style={{ width, height }}>
+        <MyComponent request={request} size={{ width, height }} />
+    </Box>
 }
