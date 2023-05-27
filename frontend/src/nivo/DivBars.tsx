@@ -49,7 +49,6 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
         ...divBars.map(v => v.total_expenses),
         ...divBars.map(v => v.total_income)
     )
-    console.log(max)
 
     return <Box style={{ height: divBars.length * (BAR_HEIGHT + 2) }}>
 
