@@ -10,54 +10,54 @@ import { useElementSize } from "@mantine/hooks";
 
 interface Datum {
     category: string
-    color: string
+    total: number
     [key: string]: string | number
 }
 
-interface BarsData {
+interface DivBarsData {
     data: Datum[]
     keys: string[]
     total: number
 }
 
-const useBarsData = (props: NivoRequest) =>
-    useQuery<BarsData, AxiosError>({
-        queryKey: ["categories", "changes", "bars", props],
-        queryFn: () => getAxiosData(`/api/nivo/bars?${searchParams(props)}`)
+const useDivBarsData = (props: NivoRequest) =>
+    useQuery<DivBarsData, AxiosError>({
+        queryKey: ["categories", "changes", "divbars", props],
+        queryFn: () => getAxiosData(`/api/nivo/divbars?${searchParams(props)}`)
     });
 
 const BAR_HEIGHT = 55;
 
-export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
+export const DivBars = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
     const nivo = useNivoTheme();
-    const query = useBarsData(request);
+    const query = useDivBarsData(request);
 
-    const [data, setData] = useState<BarsData>()
+    const [data, setData] = useState<DivBarsData>()
     useEffect(() => query.data && setData(query.data), [query.data, setData])
 
     if (query.isError)
         return <Placeholder queries={[query]} height={3 * BAR_HEIGHT} />
     else if (data === undefined)
-        return <BarsSkeleton {...size} />
+        return <DivBarsSkeleton {...size} />
 
-    const { data: bars, keys, total } = data;
+    const { data: divBars, keys, total } = data;
     // with horizontal layout it goes bottom - up, so i reverse them
-    const barsRev = bars.slice().reverse();
-    return <Box style={{ height: bars.length * (BAR_HEIGHT + 5) }}>
+    return <Box style={{ height: divBars.length * (BAR_HEIGHT + 5) }}>
+
         <ResponsiveBar
             theme={nivo}
-            data={barsRev} keys={keys}
-            indexBy='category'
+            data={divBars} keys={keys}
+            indexBy='month'
             layout='horizontal'
             colors={({ id, data }) => theme.fn.lighten(data[`${id}_color`].toString(), 0.15)}
-
+            reverse
             axisBottom={null}
             axisLeft={null}
             // borderColor={({ data: { id, data } }) => theme.fn.lighten(data['color'].toString(), 0.15)}
             borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
             borderWidth={2}
-            borderRadius={10}
+            borderRadius={4}
             label={'id'}
             labelSkipWidth={64}
             labelTextColor={theme.colorScheme === 'light' ?
@@ -70,11 +70,14 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
     </Box>
 }
 
-export const BarsSkeleton = (props: NivoSkeletonProps) => {
+export const DivBarsSkeleton = (props: NivoSkeletonProps) => {
     const { ref, width } = useElementSize();
     return <Stack spacing='xs'>
-        <Skeleton height={BAR_HEIGHT} width={Math.random() * width} />
-        <Skeleton height={BAR_HEIGHT} ref={ref}  />
-        <Skeleton height={BAR_HEIGHT} width={Math.random() * width} />
+        {
+            Array(11).map((_, i) => (
+                <Skeleton height={BAR_HEIGHT} width={Math.random() * width} key={i} />
+            ))
+        }
+        <Skeleton height={BAR_HEIGHT} ref={ref} />
     </Stack>
 }

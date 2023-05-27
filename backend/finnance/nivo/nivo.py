@@ -1,5 +1,6 @@
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from calendar import monthrange
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
@@ -194,8 +195,84 @@ def bars():
                     else:
                         other[key] = other.get(key, 0) + bar[key]
         data.append(other)
-    print([bar['category'] for bar in data])
     data = list(filter(lambda bar: bar['category'] in (big3 + ['other']), data))
-    print([bar['category'] for bar in data])
 
     return jsonify({'data': data, 'keys': keys, 'total': sum(values)})
+
+@nivo.route("/divbars")
+@login_required
+def diverging_bars():
+    params = request.args.to_dict()
+    if 'is_expense' not in params:
+        raise APIError(HTTPStatus.BAD_REQUEST, 'is_expense must be in search parameters')
+    if params['is_expense'] not in ['true', 'false']:
+        raise APIError(HTTPStatus.BAD_REQUEST, "is_expense must be either 'true' or 'false'")
+    is_expense = params['is_expense'] == 'true'
+    if 'currency_id' not in params:
+        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be in search parameters')
+    try:
+        c_id = int(params['currency_id'])
+    except ValueError:
+        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be integer')
+    currency = Currency.query.filter_by(id=c_id, user_id=current_user.id).first()
+    if currency is None:
+        raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
+    min_date = None
+    if 'min_date' in params:
+        try:
+            min_date = datetime.fromisoformat(params['min_date'])
+        except ValueError:
+            raise APIError(HTTPStatus.BAD_REQUEST, "min_date: invalid iso format")
+    max_date = None
+    if 'max_date' in params:
+        try:
+            max_date = datetime.fromisoformat(params['max_date'])
+        except ValueError:
+            raise APIError(HTTPStatus.BAD_REQUEST, "max_date: invalid iso format")
+        
+    def end_of_month(dt: datetime):
+        return datetime(dt.year, dt.month, monthrange(dt.year, dt.month)[1], 23, 59, 59) + timedelta(seconds=1)
+    
+    data = []
+    keys = set()
+
+    start = min_date
+    end = end_of_month(start)
+    while start < max_date:
+        bar = {
+            'month': start.isoformat()
+        }
+
+        def add_total(cat: Category):
+            keys.add(cat.desc)
+            row = Record.query.filter_by(category_id=cat.id).join(
+                Transaction).filter(Transaction.date_issued >= start).filter(Transaction.date_issued < end
+                ).with_entities(sqlalchemy.func.sum(Record.amount).label('value')).first()
+
+            total = row._asdict()['value']
+            if total is None:
+                total = 0
+            bar[cat.desc] = total if cat.is_expense else -total
+            bar[f"{cat.desc}_color"] = cat.color
+            for child in Category.query.filter_by(user_id=current_user.id, parent_id=cat.id):
+                add_total(child)
+
+        for cat in Category.query.filter_by(user_id=current_user.id, 
+                                            is_expense=True, parent_id=None).order_by(Category.order):
+            add_total(cat)
+        for cat in Category.query.filter_by(user_id=current_user.id, 
+                                            is_expense=False, parent_id=None).order_by(Category.order.desc()):
+            add_total(cat)
+
+        print(bar)
+
+        bar['total'] = sum([
+            val if key != 'month' and not key.endswith('_color') else 0 for key, val in bar.items()
+        ])
+
+        data.append(bar)
+        start = end
+        end = end_of_month(start)
+
+
+    return jsonify({'data': data, 'keys': list(keys)})
