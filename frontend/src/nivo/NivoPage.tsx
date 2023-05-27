@@ -1,17 +1,17 @@
 
-import { ActionIcon, Grid, Group, Popover, Stack, Tabs, Title } from "@mantine/core";
+import { ActionIcon, Grid, Group, Popover, SimpleGrid, Stack, Tabs, Title } from "@mantine/core";
 import { MonthPicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
-import { useDisclosure, useElementSize } from "@mantine/hooks";
+import { useElementSize } from "@mantine/hooks";
 import { DateTime, Duration } from "luxon";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight } from "react-icons/tb";
 import CurrencyInput from "../components/input/CurrencyInput";
-import { BarsSkeleton, FinnanceBars } from "./Bars";
-import { Sunburst, SunburstSkeleton } from "./Sunburst";
 import useIsPhone from "../hooks/useIsPhone";
-import { NivoShell } from "./Nivo";
+import { BarsSkeleton, FinnanceBars } from "./Bars";
 import { DivBars, DivBarsSkeleton } from "./DivBars";
+import { NivoShell } from "./Nivo";
+import { Sunburst, SunburstSkeleton } from "./Sunburst";
 
 interface FormValues {
     currency_id: string | null
@@ -23,7 +23,7 @@ export default function NivoPage() {
     const { ref: ref2, width: width2 } = useElementSize();
 
     const isPhone = useIsPhone();
-    const [opened, { open, close, toggle }] = useDisclosure();
+    const [popover, setPopover] = useState(false);
 
     const form = useForm<FormValues>({
         initialValues: {
@@ -48,53 +48,57 @@ export default function NivoPage() {
             DateTime.fromJSDate(form.values.month).plus(Duration.fromObject({
                 months: dir === 'l' ? -1 : 1
             })).toJSDate()
-        ), [form]);
+        ), [form, start]);
 
     return <Stack>
-        <Title>
-            analytics
-        </Title>
+        <Group position='apart'>
+            <Title>
+                analytics
+            </Title>
+            <CurrencyInput hasDefault {...form.getInputProps('currency_id')}
+                maw={150}
+            />
+        </Group>
         <Tabs defaultValue={'monthly'}>
             <Tabs.List position='right' mb='sm'>
                 <Tabs.Tab value='monthly' icon={<TbCalendar size='1.5rem' />} />
                 <Tabs.Tab value='yearly' icon='365' />
             </Tabs.List>
             <Tabs.Panel value='monthly'>
-                <Group spacing='sm' noWrap position='right' ml='auto'>
-                    <ActionIcon onClick={() => move('l')} size={isPhone ? 'xl' : 'lg'}
-                        variant='default'>
-                        <TbChevronLeft size={isPhone ? '1.5rem' : '1.3rem'} />
-                    </ActionIcon>
-                    <Popover opened={opened} onChange={toggle}>
-                        <Popover.Target>
-                            <ActionIcon onClick={open} size={isPhone ? 'xl' : 'lg'}
-                                variant='default'>
-                                <TbCalendar size={isPhone ? '1.5rem' : '1.3rem'} />
-                            </ActionIcon>
-                        </Popover.Target>
-                        <Popover.Dropdown>
-                            <MonthPicker maxDate={new Date()}
-                                value={form.values.month} onChange={v => {
-                                    v && form.setFieldValue('month', v)
-                                    close();
-                                }} />
-                        </Popover.Dropdown>
-                    </Popover>
-                    <ActionIcon onClick={() => move('r')} size={isPhone ? 'xl' : 'lg'}
-                        disabled={start
-                            .equals(DateTime.now().startOf('month'))}
-                        variant='default'>
-                        <TbChevronRight size={isPhone ? '1.5rem' : '1.3rem'} />
-                    </ActionIcon>
-                    <CurrencyInput hasDefault {...form.getInputProps('currency_id')}
-                        maw={100}
-                    />
+                <Group position='apart'>
+                    <Title>{
+                        DateTime.fromJSDate(form.values.month)
+                            .toFormat('MMMM yy').toLowerCase()
+                    }</Title>
+                    <Group spacing='sm' noWrap ml='auto'>
+                        <ActionIcon onClick={() => move('l')} size={isPhone ? 'xl' : 'lg'}
+                            variant='default'>
+                            <TbChevronLeft size={isPhone ? '1.5rem' : '1.3rem'} />
+                        </ActionIcon>
+                        <Popover opened={popover} onChange={setPopover}>
+                            <Popover.Target>
+                                <ActionIcon onClick={() => setPopover(!popover)} size={isPhone ? 'xl' : 'lg'}
+                                    variant='default'>
+                                    <TbCalendar size={isPhone ? '1.5rem' : '1.3rem'} />
+                                </ActionIcon>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                                <MonthPicker maxDate={new Date()}
+                                    value={form.values.month} onChange={v => {
+                                        v && form.setFieldValue('month', v)
+                                        setPopover(false);
+                                    }} />
+                            </Popover.Dropdown>
+                        </Popover>
+                        <ActionIcon onClick={() => move('r')} size={isPhone ? 'xl' : 'lg'}
+                            disabled={start
+                                .equals(DateTime.now().startOf('month'))}
+                            variant='default'>
+                            <TbChevronRight size={isPhone ? '1.5rem' : '1.3rem'} />
+                        </ActionIcon>
+                    </Group>
                 </Group>
-                <Title align='center'>{
-                    DateTime.fromJSDate(form.values.month)
-                        .toFormat('MMMM yy').toLowerCase()
-                }</Title>
-                <Tabs defaultValue='bars'>
+                <Tabs defaultValue='sunburst'>
                     <Tabs.List position='right'>
                         <Tabs.Tab value='sunburst' icon={<TbChartDonut4 size='1.5rem' />} />
                         <Tabs.Tab value='bars' icon={<TbChartBar size='1.5rem' />} />
@@ -150,6 +154,10 @@ export default function NivoPage() {
                 </Tabs>
             </Tabs.Panel>
             <Tabs.Panel value='yearly'>
+                <SimpleGrid cols={2} mb='xs'>
+                    <Title order={3} align='center'>expenses</Title>
+                    <Title order={3} align='center'>income</Title>
+                </SimpleGrid>
                 <NivoShell
                     nivo={DivBars} skeleton={DivBarsSkeleton}
                     {...commonProps}

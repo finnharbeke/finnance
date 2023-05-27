@@ -252,13 +252,19 @@ def diverging_bars():
             if key not in keys:
                 keys.append(key)
             row = Record.query.filter_by(category_id=cat.id).join(
-                Transaction).filter(Transaction.date_issued >= start).filter(Transaction.date_issued < end
+                Transaction).filter_by(currency_id=currency.id).filter(Transaction.date_issued >= start).filter(Transaction.date_issued < end
                 ).with_entities(sqlalchemy.func.sum(Record.amount).label('value')).first()
 
             total = row._asdict()['value']
             if total is None:
                 total = 0
-            bar[key] = total if cat.is_expense else -total
+            if cat.is_expense:
+                bar[key] = total
+                bar['total_expenses'] = bar.get('total_expenses', 0) + total
+            else:
+                bar[key] = -total
+                bar['total_income'] = bar.get('total_income', 0) + total
+
             bar[f"{key}_color"] = cat.color
             for child in Category.query.filter_by(
                 user_id=current_user.id, parent_id=cat.id).order_by(Category.order.desc()):
@@ -271,15 +277,22 @@ def diverging_bars():
                                             is_expense=False, parent_id=None).order_by(Category.order.desc()):
             add_total(cat)
 
-        print(bar)
-
-        bar['total'] = sum([
+        bar['total_exp'] = sum([
+            val if key != 'month' and not key.endswith('_color') else 0 for key, val in bar.items()
+        ])
+        bar['total_inc'] = sum([
             val if key != 'month' and not key.endswith('_color') else 0 for key, val in bar.items()
         ])
 
         data.append(bar)
         start = end
         end = end_of_month(start)
+        if end > max_date:
+            end = max_date
 
+    cut = 0
+    while cut < len(data) and data[cut]['total_expenses'] == 0 and data[cut]['total_income'] == 0:
+        cut += 1
+    data = data[cut:]
 
     return jsonify({'data': data, 'keys': list(keys)})

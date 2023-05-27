@@ -11,14 +11,14 @@ import { DateTime } from "luxon";
 
 interface Datum {
     category: string
-    total: number
+    total_expenses: number
+    total_income: number
     [key: string]: string | number
 }
 
 interface DivBarsData {
     data: Datum[]
     keys: string[]
-    total: number
 }
 
 const useDivBarsData = (props: NivoRequest) =>
@@ -42,13 +42,22 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
     else if (data === undefined)
         return <DivBarsSkeleton {...size} />
 
-    const { data: divBars, keys, total } = data;
+    const { data: divBars, keys } = data;
     // with horizontal layout it goes bottom - up, so i reverse them
-    return <Box style={{ height: divBars.length * (BAR_HEIGHT + 5) }}>
+
+    const max = Math.max(
+        ...divBars.map(v => v.total_expenses),
+        ...divBars.map(v => v.total_income)
+    )
+    console.log(max)
+
+    return <Box style={{ height: divBars.length * (BAR_HEIGHT + 2) }}>
 
         <ResponsiveBar
             theme={nivo}
             data={divBars} keys={keys}
+            minValue={-max}
+            maxValue={max}
             indexBy='month'
             layout='horizontal'
             colors={({ id, data }) => theme.fn.lighten(data[`${id}_color`].toString(), 0.15)}
@@ -69,7 +78,12 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
             tooltip={({ id, value, indexValue }) =>
                 <NivoTooltip
                     label={DateTime.fromISO(indexValue.toString()).toFormat('MMM yy').toLowerCase() + ' - ' + id.toString()}
-                    value={value > 0 ? value : -value} currency_id={request.currency_id} perc={value / total * 100} />}
+                    value={value > 0 ? value : -value} currency_id={request.currency_id} />}
+            markers={[{
+                    axis: 'x',
+                    value: 0,
+                    lineStyle: { stroke: theme.fn.primaryColor(), strokeWidth: 1 },
+                }]}
         />
     </Box>
 }
