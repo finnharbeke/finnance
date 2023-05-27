@@ -234,7 +234,7 @@ def diverging_bars():
         return datetime(dt.year, dt.month, monthrange(dt.year, dt.month)[1], 23, 59, 59) + timedelta(seconds=1)
     
     data = []
-    keys = set()
+    keys = []
 
     start = min_date
     end = end_of_month(start)
@@ -244,7 +244,13 @@ def diverging_bars():
         }
 
         def add_total(cat: Category):
-            keys.add(cat.desc)
+            # same desc category for income & expenses, e.g. gifts
+            if cat.desc in bar and not cat.is_expense:
+                key = f"{cat.desc}+"
+            else:
+                key = cat.desc
+            if key not in keys:
+                keys.append(key)
             row = Record.query.filter_by(category_id=cat.id).join(
                 Transaction).filter(Transaction.date_issued >= start).filter(Transaction.date_issued < end
                 ).with_entities(sqlalchemy.func.sum(Record.amount).label('value')).first()
@@ -252,13 +258,14 @@ def diverging_bars():
             total = row._asdict()['value']
             if total is None:
                 total = 0
-            bar[cat.desc] = total if cat.is_expense else -total
-            bar[f"{cat.desc}_color"] = cat.color
-            for child in Category.query.filter_by(user_id=current_user.id, parent_id=cat.id):
+            bar[key] = total if cat.is_expense else -total
+            bar[f"{key}_color"] = cat.color
+            for child in Category.query.filter_by(
+                user_id=current_user.id, parent_id=cat.id).order_by(Category.order.desc()):
                 add_total(child)
 
         for cat in Category.query.filter_by(user_id=current_user.id, 
-                                            is_expense=True, parent_id=None).order_by(Category.order):
+                                            is_expense=True, parent_id=None).order_by(Category.order.desc()):
             add_total(cat)
         for cat in Category.query.filter_by(user_id=current_user.id, 
                                             is_expense=False, parent_id=None).order_by(Category.order.desc()):

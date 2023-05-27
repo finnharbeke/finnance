@@ -7,6 +7,7 @@ import { getAxiosData, searchParams } from "../query";
 import { NivoComponentProps, NivoRequest, NivoSkeletonProps, NivoTooltip, useNivoTheme } from "./Nivo";
 import { useState, useEffect } from "react";
 import { useElementSize } from "@mantine/hooks";
+import { DateTime } from "luxon";
 
 interface Datum {
     category: string
@@ -26,7 +27,7 @@ const useDivBarsData = (props: NivoRequest) =>
         queryFn: () => getAxiosData(`/api/nivo/divbars?${searchParams(props)}`)
     });
 
-const BAR_HEIGHT = 55;
+const BAR_HEIGHT = 40;
 
 export const DivBars = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
@@ -58,6 +59,7 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
             borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
             borderWidth={2}
             borderRadius={4}
+            padding={0}
             label={'id'}
             labelSkipWidth={64}
             labelTextColor={theme.colorScheme === 'light' ?
@@ -65,7 +67,9 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
             }
             enableGridY={false}
             tooltip={({ id, value, indexValue }) =>
-                <NivoTooltip label={(indexValue !== id.toString() ? indexValue + ' - ' : '') + id.toString()} value={value} currency_id={request.currency_id} perc={value / total * 100} />}
+                <NivoTooltip
+                    label={DateTime.fromISO(indexValue.toString()).toFormat('MMM yy').toLowerCase() + ' - ' + id.toString()}
+                    value={value > 0 ? value : -value} currency_id={request.currency_id} perc={value / total * 100} />}
         />
     </Box>
 }
