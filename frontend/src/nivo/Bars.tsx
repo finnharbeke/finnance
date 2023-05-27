@@ -43,17 +43,19 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
         return <SunburstSkeleton {...size} />
 
     const { data: bars, keys, total } = data;
+    // with horizontal layout it goes bottom - up, so i reverse them
+    const barsRev = bars.slice().reverse();
     return <Box style={{ height: bars.length * (BAR_HEIGHT + 5) }}>
         <ResponsiveBar
             theme={nivo}
-            data={bars} keys={keys}
+            data={barsRev} keys={keys}
             indexBy='category'
             layout='horizontal'
             colors={({ id, data }) => theme.fn.lighten(data[`${id}_color`].toString(), 0.15)}
 
             axisBottom={null}
             axisLeft={null}
-            // borderColor={({ data: { id, data } }) => data['color']}
+            // borderColor={({ data: { id, data } }) => theme.fn.lighten(data['color'].toString(), 0.15)}
             borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
             borderWidth={2}
             borderRadius={10}
@@ -63,8 +65,8 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
                 theme.black : theme.white
             }
             enableGridY={false}
-            tooltip={({ id, value }) =>
-                <NivoTooltip label={id.toString()} value={value} currency_id={request.currency_id} perc={value / total * 100} />}
+            tooltip={({ id, value, indexValue }) =>
+                <NivoTooltip label={(indexValue !== id.toString() ? indexValue + ' - ' : '') + id.toString()} value={value} currency_id={request.currency_id} perc={value / total * 100} />}
         />
     </Box>
 }

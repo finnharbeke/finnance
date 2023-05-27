@@ -78,30 +78,16 @@ def sunburst():
             'children': children,
         }
 
-    def clean_recursion(obj):
-        if 'children' not in obj:
-            return obj
-        children = [child['name'] for child in obj['children']]
-        if children == [obj['name']]:
-            # unnecessary level
-            return obj['children'][0]
-        else:
-            for i, child in enumerate(obj['children']):
-                obj['children'][i] = clean_recursion(child)
-            return obj
-
     data = []
     for cat in Category.query.filter_by(parent_id=None, user_id=current_user.id, is_expense=is_expense
                                         ).order_by(Category.order):
         obj = cat_obj(cat)
-        # obj = clean_recursion(obj)
         data.append(obj)
     return jsonify({'id': 'sunburst', 'color': '#ff0000', 'children': data})
 
 @nivo.route("/bars")
 @login_required
 def bars():
-    
     params = request.args.to_dict()
     if 'is_expense' not in params:
         raise APIError(HTTPStatus.BAD_REQUEST, 'is_expense must be in search parameters')
@@ -148,6 +134,8 @@ def bars():
     keys = []
     values = []
 
+    bar_totals = dict()
+
     def bar_obj(cat):
         bar = {
             'category': cat.desc,
@@ -155,6 +143,7 @@ def bars():
         }
 
         def children(parent):
+            prevSum = sum(values)
             v = value(parent)
             if v > 0:
                 keys.append(parent.desc)
@@ -164,6 +153,10 @@ def bars():
             cat_children = Category.query.filter_by(parent_id=parent.id, user_id=current_user.id).order_by(Category.order).all()
             for child in cat_children:
                 children(child)
+            if parent.parent is None:
+                myTotal = sum(values) - prevSum
+                bar_totals[parent.desc] = myTotal
+            
         children(cat)
         if len(bar.keys()) == 2:
             return None
@@ -184,5 +177,25 @@ def bars():
                 bar[f"{key}_color"] =  Category.query.filter_by(
                     desc=key, is_expense=is_expense, user_id=current_user.id
                 ).first().color
+
+    big3 = [kv[0] for kv in sorted(bar_totals.items(), key=lambda kv: kv[1], reverse=True)[:3]]
+    if len(data) > 3:
+        other = {
+            'category': 'other',
+            'color': '#555555',
+        }
+        for bar in data:
+            if bar['category'] not in big3:
+                for key in bar:
+                    if key == 'color' or key == 'category':
+                        continue
+                    elif key.endswith('_color'):
+                        other[key] = bar[key]
+                    else:
+                        other[key] = other.get(key, 0) + bar[key]
+        data.append(other)
+    print([bar['category'] for bar in data])
+    data = list(filter(lambda bar: bar['category'] in (big3 + ['other']), data))
+    print([bar['category'] for bar in data])
 
     return jsonify({'data': data, 'keys': keys, 'total': sum(values)})

@@ -16,7 +16,6 @@ const CurrencyInput = ({ hasDefault = true, onChange, value, ...props }: Currenc
     const [setAlready, { open: setDefault }] = useDisclosure(false);
 
     useEffect(() => {
-        console.log(hasDefault, setAlready, value, query.data?.at(0))
         if (hasDefault && !setAlready && !value && onChange && query.data) {
             onChange(query.data?.at(0)?.id.toString() ?? null);
             setDefault();
