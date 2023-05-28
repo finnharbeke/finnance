@@ -16,10 +16,10 @@ export const useNivoTheme = (): Theme => {
 }
 
 export interface NivoRequest extends searchParamsProps {
-    is_expense: boolean
+    is_expense?: boolean
     currency_id: string
-    min_date?: string
-    max_date?: string
+    min_date: string
+    max_date: string
 }
 
 interface NivoTooltipProps {
@@ -50,17 +50,14 @@ export interface NivoComponentProps {
     size: NivoSkeletonProps
 }
 
-interface NivoProps {
+interface NivoProps extends NivoSkeletonProps {
     nivo: (props: NivoComponentProps) => JSX.Element,
     skeleton: (props: NivoSkeletonProps) => JSX.Element,
-    width?: number
-    height?: number
-    is_expense: boolean
+    is_expense?: boolean
     currency_id: string | null
-    min_date?: DateTime
-    max_date?: DateTime
+    min_date: DateTime
+    max_date: DateTime
 }
-
 
 export const NivoShell = (props: NivoProps) => {
     const {

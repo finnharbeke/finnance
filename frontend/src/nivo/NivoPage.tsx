@@ -164,7 +164,6 @@ export default function NivoPage() {
                     min_date={DateTime.fromJSDate(form.values.month).startOf('month').minus(Duration.fromObject({
                         months: 11
                     }))}
-                    is_expense={false} // should not be needed
                 />
             </Tabs.Panel>
         </Tabs>
