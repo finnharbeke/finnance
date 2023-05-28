@@ -1,49 +1,63 @@
 
-from datetime import datetime, timedelta
 from calendar import monthrange
+from datetime import datetime, timedelta
+from functools import wraps
 from http import HTTPStatus
 
+import sqlalchemy
+from finnance.errors import APIError
+from finnance.models import Agent, Category, Currency, Record, Transaction
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
-import sqlalchemy
-
-from finnance.errors import APIError
-from finnance.models import Agent, Transaction, Record, Category, Currency
 
 nivo = Blueprint('nivo', __name__, url_prefix='/api/nivo')
 
-@nivo.route("/sunburst")
-@login_required
-def sunburst():
-    
-    params = request.args.to_dict()
-    if 'is_expense' not in params:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'is_expense must be in search parameters')
-    if params['is_expense'] not in ['true', 'false']:
-        raise APIError(HTTPStatus.BAD_REQUEST, "is_expense must be either 'true' or 'false'")
-    is_expense = params['is_expense'] == 'true'
-    if 'currency_id' not in params:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be in search parameters')
-    try:
-        c_id = int(params['currency_id'])
-    except ValueError:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be integer')
-    currency = Currency.query.filter_by(id=c_id, user_id=current_user.id).first()
-    if currency is None:
-        raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
-    min_date = None
-    if 'min_date' in params:
+def nivo_wrapper(foo):
+    @wraps(foo)
+    def wrapper(**kwargs):
+        params = request.args.to_dict()
+        if 'currency_id' not in params:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be in search parameters')
+        try:
+            c_id = int(params['currency_id'])
+        except ValueError:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be integer')
+        currency = Currency.query.filter_by(id=c_id, user_id=current_user.id).first()
+        if currency is None:
+            raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
+        if 'min_date' not in params:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'min_date must be in search parameters')
         try:
             min_date = datetime.fromisoformat(params['min_date'])
         except ValueError:
             raise APIError(HTTPStatus.BAD_REQUEST, "min_date: invalid iso format")
-    max_date = None
-    if 'max_date' in params:
+        if 'max_date' not in params:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'min_date must be in search parameters')
         try:
             max_date = datetime.fromisoformat(params['max_date'])
         except ValueError:
             raise APIError(HTTPStatus.BAD_REQUEST, "max_date: invalid iso format")
 
+        return foo(currency=currency, min_date=min_date, max_date=max_date, **kwargs)
+    return wrapper # bc view function mappings
+
+def is_expense_wrapper(foo):
+    @wraps(foo)
+    def wrapper(**kwargs):
+        params = request.args.to_dict()
+        if 'is_expense' not in params:
+            raise APIError(HTTPStatus.BAD_REQUEST, 'is_expense must be in search parameters')
+        if params['is_expense'] not in ['true', 'false']:
+            raise APIError(HTTPStatus.BAD_REQUEST, "is_expense must be either 'true' or 'false'")
+        is_expense = params['is_expense'] == 'true'
+        return foo(**kwargs, is_expense=is_expense)
+    return wrapper
+
+@nivo.route("/sunburst")
+@login_required
+@nivo_wrapper
+@is_expense_wrapper
+def sunburst(currency: Currency, is_expense: bool, min_date: datetime, max_date: datetime):
     def agents(cat, path):
         query = Agent.query.join(Transaction).join(Record).join(Category
             ).filter(Transaction.currency_id == currency.id).filter(Category.id == cat.id)
@@ -88,34 +102,9 @@ def sunburst():
 
 @nivo.route("/bars")
 @login_required
-def bars():
-    params = request.args.to_dict()
-    if 'is_expense' not in params:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'is_expense must be in search parameters')
-    if params['is_expense'] not in ['true', 'false']:
-        raise APIError(HTTPStatus.BAD_REQUEST, "is_expense must be either 'true' or 'false'")
-    is_expense = params['is_expense'] == 'true'
-    if 'currency_id' not in params:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be in search parameters')
-    try:
-        c_id = int(params['currency_id'])
-    except ValueError:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be integer')
-    currency = Currency.query.filter_by(id=c_id, user_id=current_user.id).first()
-    if currency is None:
-        raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
-    min_date = None
-    if 'min_date' in params:
-        try:
-            min_date = datetime.fromisoformat(params['min_date'])
-        except ValueError:
-            raise APIError(HTTPStatus.BAD_REQUEST, "min_date: invalid iso format")
-    max_date = None
-    if 'max_date' in params:
-        try:
-            max_date = datetime.fromisoformat(params['max_date'])
-        except ValueError:
-            raise APIError(HTTPStatus.BAD_REQUEST, "max_date: invalid iso format")
+@nivo_wrapper
+@is_expense_wrapper
+def bars(currency: Currency, is_expense: bool, min_date: datetime, max_date: datetime):
         
     def value(cat):
         query = Category.query.filter_by(id=cat.id).join(Record).join(
@@ -199,39 +188,13 @@ def bars():
 
     return jsonify({'data': data, 'keys': keys, 'total': sum(values)})
 
+def end_of_month(dt: datetime):
+    return datetime(dt.year, dt.month, monthrange(dt.year, dt.month)[1], 23, 59, 59) + timedelta(seconds=1)
+
 @nivo.route("/divbars")
 @login_required
-def diverging_bars():
-    params = request.args.to_dict()
-    if 'is_expense' not in params:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'is_expense must be in search parameters')
-    if params['is_expense'] not in ['true', 'false']:
-        raise APIError(HTTPStatus.BAD_REQUEST, "is_expense must be either 'true' or 'false'")
-    is_expense = params['is_expense'] == 'true'
-    if 'currency_id' not in params:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be in search parameters')
-    try:
-        c_id = int(params['currency_id'])
-    except ValueError:
-        raise APIError(HTTPStatus.BAD_REQUEST, 'currency_id must be integer')
-    currency = Currency.query.filter_by(id=c_id, user_id=current_user.id).first()
-    if currency is None:
-        raise APIError(HTTPStatus.BAD_REQUEST, "invalid currency_id")
-    min_date = None
-    if 'min_date' in params:
-        try:
-            min_date = datetime.fromisoformat(params['min_date'])
-        except ValueError:
-            raise APIError(HTTPStatus.BAD_REQUEST, "min_date: invalid iso format")
-    max_date = None
-    if 'max_date' in params:
-        try:
-            max_date = datetime.fromisoformat(params['max_date'])
-        except ValueError:
-            raise APIError(HTTPStatus.BAD_REQUEST, "max_date: invalid iso format")
-        
-    def end_of_month(dt: datetime):
-        return datetime(dt.year, dt.month, monthrange(dt.year, dt.month)[1], 23, 59, 59) + timedelta(seconds=1)
+@nivo_wrapper
+def diverging_bars(currency: Currency, min_date: datetime, max_date: datetime):
     
     data = []
     keys = []
