@@ -33,7 +33,7 @@ export const Sunburst = ({ request, size }: NivoComponentProps) => {
 
     if (query.isError)
         return <Placeholder queries={[query]} height={height} />
-    else if (data === undefined)
+    if (data === undefined)
         return <SunburstSkeleton {...size} />
 
     return <ResponsiveSunburst

@@ -259,3 +259,55 @@ def diverging_bars(currency: Currency, min_date: datetime, max_date: datetime):
     data = data[cut:]
 
     return jsonify({'data': data, 'keys': list(keys)})
+
+
+@nivo.route("/line")
+@login_required
+@nivo_wrapper
+def line(currency: Currency, min_date: datetime, max_date: datetime):
+    start = min_date
+    end = end_of_month(start)
+
+    data = []
+
+    while start < max_date:
+
+        exp = Record.query.with_entities(
+             sqlalchemy.func.sum(Record.amount).label("sum")
+        ).join(Transaction).filter_by(
+            currency_id=currency.id,
+            is_expense=True
+        ).filter(
+            Transaction.date_issued >= start
+        ).filter(
+            Transaction.date_issued < end
+        ).first()
+        inc = Record.query.with_entities(
+             sqlalchemy.func.sum(Record.amount).label("sum")
+        ).join(Transaction).filter_by(
+            currency_id=currency.id,
+            is_expense=False
+        ).filter(
+            Transaction.date_issued >= start
+        ).filter(
+            Transaction.date_issued < end
+        ).first()
+        month = {
+            'expenses': 0 if exp is None or exp.sum is None else exp.sum,
+            'income': 0 if inc is None or inc.sum is None else inc.sum,
+            'month': start.isoformat()
+        }
+
+        data.append(month)
+        
+        start = end
+        end = end_of_month(start)
+        if end > max_date:
+            end = max_date
+
+    cut = 0
+    while cut < len(data) and data[cut]['expenses'] == 0 and data[cut]['income'] == 0:
+        cut += 1
+    data = data[cut:]
+
+    return jsonify(data)

@@ -1,4 +1,4 @@
-import { Box, Skeleton, Stack, useMantineTheme } from "@mantine/core";
+import { Box, Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
 import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -38,12 +38,16 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
 
     if (query.isError)
         return <Placeholder queries={[query]} height={3 * BAR_HEIGHT} />
-    else if (data === undefined)
+    if (data === undefined)
         return <BarsSkeleton {...size} />
+    if (data.data.length === 0)
+        return <Text align='center'>no data found</Text>
 
     const { data: bars, keys, total } = data;
     // with horizontal layout it goes bottom - up, so i reverse them
     const barsRev = bars.slice().reverse();
+
+
     return <Box style={{ height: bars.length * (BAR_HEIGHT + 5) }}>
         <ResponsiveBar
             theme={nivo}

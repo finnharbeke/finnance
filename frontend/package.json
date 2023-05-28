@@ -16,6 +16,7 @@
     "@mantine/spotlight": "^6.0.5",
     "@nivo/bar": "^0.83.0",
     "@nivo/core": "^0.83.0",
+    "@nivo/line": "^0.83.0",
     "@nivo/sankey": "^0.83.0",
     "@nivo/stream": "^0.83.0",
     "@nivo/sunburst": "^0.83.0",

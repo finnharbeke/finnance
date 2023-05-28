@@ -1,4 +1,4 @@
-import { Box, Skeleton, Stack, useMantineTheme } from "@mantine/core";
+import { Box, Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
 import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -49,6 +49,10 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
         ...divBars.map(v => v.total_expenses),
         ...divBars.map(v => v.total_income)
     )
+
+    if (divBars.length === 0 || max === 0)
+        return <Text align='center'>no data found</Text>
+        
 
     return <Box style={{ height: divBars.length * (BAR_HEIGHT + 2) }}>
 
