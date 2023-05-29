@@ -3,11 +3,13 @@ import { MonthPicker } from "@mantine/dates";
 import { useElementSize } from "@mantine/hooks";
 import { DateTime, Duration } from "luxon";
 import { useCallback, useState } from "react";
-import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight } from "react-icons/tb";
+import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight, TbList } from "react-icons/tb";
 import useIsPhone from "../hooks/useIsPhone";
 import { BarsSkeleton, FinnanceBars } from "./Bars";
 import { NivoShell } from "./Nivo";
 import { Sunburst, SunburstSkeleton } from "./Sunburst";
+import { CategoryPills } from "./CategoryPills";
+import { LineSkeleton } from "./Line";
 
 export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
 
@@ -75,7 +77,7 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
             <Tabs.List position='right'>
                 <Tabs.Tab value='sunburst' icon={<TbChartDonut4 size='1.5rem' />} />
                 <Tabs.Tab value='bars' icon={<TbChartBar size='1.5rem' />} />
-                {/* <Tabs.Tab value='list' icon={<TbList size='1.5rem' />} /> */}
+                <Tabs.Tab value='list' icon={<TbList size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='sunburst'>
                 <Grid align='flex-end' gutter={'xs'}>
@@ -120,6 +122,18 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
                         is_expense={false}
                     />
                 </Stack>
+            </Tabs.Panel>
+            <Tabs.Panel value='list'>
+                <NivoShell
+                    nivo={CategoryPills} skeleton={LineSkeleton}
+                    {...commonProps}
+                    is_expense={true}
+                />
+                <NivoShell
+                    nivo={CategoryPills} skeleton={LineSkeleton}
+                    {...commonProps}
+                    is_expense={false}
+                />
             </Tabs.Panel>
         </Tabs>
     </>

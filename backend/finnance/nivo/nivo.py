@@ -311,3 +311,42 @@ def line(currency: Currency, min_date: datetime, max_date: datetime):
     data = data[cut:]
 
     return jsonify(data)
+
+@nivo.route("/categories")
+@login_required
+@nivo_wrapper
+@is_expense_wrapper
+def categories(currency: Currency, is_expense: bool, min_date: datetime, max_date: datetime):
+    positive = lambda d: d['total'] > 0
+
+    def compute(cat: Category):
+        query = Record.query.filter_by(
+            category_id=cat.id
+        ).with_entities(
+             sqlalchemy.func.sum(Record.amount).label("total")
+        ).join(Transaction).filter_by(
+            currency_id=currency.id
+        ).filter(
+            Transaction.date_issued >= min_date
+        ).filter(
+            Transaction.date_issued < max_date
+        ).first()
+        total = 0 if query is None or query.total is None else query.total
+        children = list(filter(positive, [
+                compute(cat) for cat in Category.query.filter_by(parent_id=cat.id, user_id=current_user.id)
+            ]))
+        totaltotal = total + sum([d['total'] for d in children])
+        return {
+            'category': cat.json(deep=False),
+            'total': totaltotal,
+            'children': children
+        }
+    
+    data = list(filter(positive, [
+        compute(cat) for cat in Category.query.filter_by(
+            parent_id=None, user_id=current_user.id, is_expense=is_expense
+        )
+    ]))
+
+    return jsonify(data)
+

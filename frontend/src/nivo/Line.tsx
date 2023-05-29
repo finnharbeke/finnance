@@ -31,9 +31,9 @@ export const Line = ({ request, size }: NivoComponentProps) => {
     const [data, setData] = useState<LineData[]>()
     useEffect(() => query.data && setData(query.data), [query.data, setData])
 
-    if (query.isError)
+    if (query.isError || currency.isError)
         return <Placeholder queries={[query]} height={size.height} />
-    if (data === undefined || !currency.isSuccess)
+    if (data === undefined || currency.isLoading)
         return <LineSkeleton {...size} />
     if (data.length === 0)
         return <Text align='center' mt='md'>no data found</Text>

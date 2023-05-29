@@ -2,11 +2,12 @@ import { ActionIcon, Center, Checkbox, Group, Popover, SimpleGrid, Tabs, Text, T
 import { YearPicker } from "@mantine/dates";
 import { DateTime, Duration } from "luxon";
 import { useCallback, useState } from "react";
-import { TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight } from "react-icons/tb";
+import { TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbList } from "react-icons/tb";
 import useIsPhone from "../hooks/useIsPhone";
 import { DivBars, DivBarsSkeleton } from "./DivBars";
 import { Line, LineSkeleton } from "./Line";
 import { NivoShell } from "./Nivo";
+import { CategoryPills } from "./CategoryPills";
 
 export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
 
@@ -91,6 +92,7 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
             <Tabs.List position='right'>
                 <Tabs.Tab value='divbars' icon={<TbChartBar size='1.5rem' />} />
                 <Tabs.Tab value='line' icon={<TbChartLine size='1.5rem' />} />
+                <Tabs.Tab value='list' icon={<TbList size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='divbars'>
                 <SimpleGrid cols={2} mb='xs'>
@@ -106,6 +108,18 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                 <NivoShell
                     nivo={Line} skeleton={LineSkeleton}
                     height={300}
+                    {...commonProps}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel value='list'>
+                <NivoShell
+                    nivo={CategoryPills} skeleton={LineSkeleton}
+                    is_expense={true}
+                    {...commonProps}
+                />
+                <NivoShell
+                    nivo={CategoryPills} skeleton={LineSkeleton}
+                    is_expense={false}
                     {...commonProps}
                 />
             </Tabs.Panel>

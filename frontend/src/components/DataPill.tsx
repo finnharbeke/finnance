@@ -8,7 +8,7 @@ import { useIsOverflow } from "../hooks/useIsOverflow";
 import useIsPhone from "../hooks/useIsPhone";
 import { useSmallerThan } from "../hooks/useSmallerthan";
 
-const useStyles = createStyles(theme => ({
+export const useDataPillStyles = createStyles(theme => ({
     pill: {
         backgroundColor: theme.colorScheme === 'light' ?
             theme.colors['gray'][1] : theme.colors['gray'][8],
@@ -69,7 +69,7 @@ interface DataPillProps extends Omit<GridProps, 'children'> {
 
 export const DataPill = ({ cells, ...props }: DataPillProps) => {
     const isSm = useSmallerThan('sm');
-    const { classes: { pill } } = useStyles();
+    const { classes: { pill } } = useDataPillStyles();
     return <Grid gutter={2} p={1} columns={24} align='stretch'
         mb={isSm ? 'sm' : 'xs'} className={pill}
         {...props}>
@@ -100,7 +100,7 @@ const TextCell = ({ text, link, p, ...others }: TextCellProps) => {
     const isPhone = useIsPhone();
     const ref = useRef<HTMLDivElement>(null);
     const over = useIsOverflow(ref, text);
-    const { classes: { textCell } } = useStyles();
+    const { classes: { textCell } } = useDataPillStyles();
     const content =
         <Text ref={ref} className={textCell} {...others}>
             {
@@ -133,19 +133,21 @@ interface EditCellProps {
 }
 
 const EditCell = ({ onEdit }: EditCellProps) => {
-    const { classes: { edit } } = useStyles();
+    const { classes: { edit } } = useDataPillStyles();
     return <Center className={edit} onClick={() => onEdit()}>
         <TbPencil size={24} />
     </Center>
 }
 
 interface IconCellProps {
-    style: React.CSSProperties
+    style?: React.CSSProperties
+    onClick?: () => void
+    className?: string
     icon: IconType
 }
 
-const IconCell = ({ style, icon }: IconCellProps) =>
-    <Center style={style}>
+const IconCell = ({ style, icon, onClick, className }: IconCellProps) =>
+    <Center style={style} onClick={onClick} className={className}>
         {icon({ size: 24 })}
     </Center>
 
