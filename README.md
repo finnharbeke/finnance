@@ -2,33 +2,42 @@
 
 Flask React App for saving all my financial transactions etc
 
-## dev environment
+# dev environment
 
-### setup
+## setup
 
 **requirements:**
 
 - installed conda
 - installed npm
 
-```
+```bash
 conda env create -n finnance --file environment.yml
 ```
 
 from `/frontend` dir:
-```
+
+```bash
 npm i
 ```
 
-### run
-
+## run
 
 from base directory:
-```
+
+```bash
 flask run --debug
 ```
 
-from `/frontend` dir:
+alternatively with docker:
+
+```bash
+cd backend/
+docker compose up --build
 ```
-npm start
+
+from `/frontend` dir:
+
+```bash
+npm run dev
 ```
