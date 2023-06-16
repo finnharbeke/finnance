@@ -4,3 +4,4 @@
 *.pyc
 backups
 backend/finnance/app.db
+data

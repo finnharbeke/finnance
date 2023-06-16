@@ -1,0 +1,31 @@
+# Docker Compose for local development
+version: '3'
+
+services:
+  db:
+    image: mariadb:10.7
+    env_file:
+      - .env.local
+    networks:
+      - default
+    volumes:
+      - ./data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-pdocker"]
+      timeout: 2s
+      interval: 2s
+      retries: 30
+
+  backend:
+    build: .
+    environment:
+      - DB_HOST=db
+    env_file:
+      - .env.local
+    networks:
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:5050"
