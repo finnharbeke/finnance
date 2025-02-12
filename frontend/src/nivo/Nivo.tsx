@@ -9,9 +9,11 @@ export const useNivoTheme = (): Theme => {
     const theme = useMantineTheme();
 
     return {
-        textColor: theme.colorScheme === 'light' ?
-            theme.black : theme.colors.dark[0],
-        fontSize: 14,
+        text: {
+            fill: theme.colorScheme === 'light' ?
+                theme.black : theme.colors.dark[0],
+            fontSize: 14
+        }
     }
 }
 
