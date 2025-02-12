@@ -23,7 +23,7 @@ npm i
 ### run
 
 
-from base directory:
+from `/backend` directory:
 ```
 flask run --debug
 ```
