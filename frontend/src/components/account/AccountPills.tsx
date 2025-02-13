@@ -9,20 +9,7 @@ import { Link } from "react-router-dom";
 import useAmount from "../../hooks/useAmount";
 import { addTransferAction } from "../../actions/actions";
 
-const useStyles = createStyles({
-    apart: {
-        justifyContent: 'space-between',
-        width: '100%'
-    },
-    cursor: {
-        ":hover": {
-            cursor: 'pointer'
-        }
-    }
-});
-
 export default function AccountPills() {
-    const { classes } = useStyles();
     const isPhone = useIsPhone();
     const [opened, handlers] = useDisclosure(false);
     const query = useAccounts();
@@ -60,7 +47,11 @@ export default function AccountPills() {
             my={more ? undefined : 'lg'}
             p={more ? (isPhone ? 'sm' : 'xs') : undefined}
             labelPosition="center" onClick={handlers.toggle}
-            className={more ? classes.cursor : ''}
+            style={{
+                ":hover": {
+                    cursor: 'pointer'
+                }
+            }}
             label={more ?
                 <ActionIcon size="md">
                     {opened ? <TbChevronUp size={20} /> : <TbChevronDown size={20} />}
@@ -72,7 +63,6 @@ export default function AccountPills() {
 }
 
 const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
-    const { classes } = useStyles();
     const theme = useMantineTheme();
     const isPhone = useIsPhone();
     const [beingDragged, setBeing] = useState(false);
@@ -83,7 +73,11 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
     const background = theme.other.colors.transfer
 
     return <>
-        <Button component={Link} to={`/accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}
+        <Button component={Link} to={`/accounts/${acc.id}`} fullWidth
+            style={{
+                justifyContent: 'space-between',
+                width: '100%'
+            }}
             color={beingDragged || draggedOver ? theme.other.colors.transfer : undefined}
             draggable
             onDragStart={(event: DragEvent) => {

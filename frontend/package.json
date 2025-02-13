@@ -40,6 +40,10 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@types/css-modules": "^1.0.5",
+    "postcss": "^8.5.2",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "react-scripts": "5.0.1"
   },
   "scripts": {

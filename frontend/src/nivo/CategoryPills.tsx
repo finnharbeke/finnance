@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 import { useEffect, useState } from "react"
 import { TbChevronDown, TbChevronUp, TbSortDescending2 } from "react-icons/tb"
-import { DataPill, useDataPillStyles } from "../components/DataPill"
+import { DataPill } from "../components/DataPill"
 import Placeholder from "../components/Placeholder"
 import useAmount from "../hooks/useAmount"
 import useIsPhone from "../hooks/useIsPhone"
@@ -13,6 +13,8 @@ import { CategoryQueryResult } from "../types/Category"
 import { CurrencyQueryResult, useCurrency } from "../types/Currency"
 import { LineSkeleton } from "./Line"
 import { NivoComponentProps, NivoRequest } from "./Nivo"
+
+import classes from "../styles/DataPill.module.css"
 
 interface CategoryData {
     category: CategoryQueryResult
@@ -82,7 +84,7 @@ interface CategoryPillProps {
 }
 
 const CategoryPill = ({ data: { category, children, total }, currency, sorted }: CategoryPillProps) => {
-    const { classes: { edit } } = useDataPillStyles();
+    const { edit } = classes;
     const amount = useAmount(total, currency);
     const [down, { toggle }] = useDisclosure(false)
     return <>

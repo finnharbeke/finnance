@@ -1,15 +1,9 @@
-import { Center, Paper, PaperProps, Skeleton, Stack, Text, Title } from "@mantine/core";
+import { Center, Paper, PaperProps, rgba, Skeleton, Stack, Text, Title, useMantineTheme } from "@mantine/core";
 import { UseQueryResult } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 const anyError = (queries: UseQueryResult[]) =>
     queries.reduce((error, query) => query.isError || error, false)
-
-const useStyles = createStyles((theme) => ({
-    errorPaper: {
-        backgroundColor: theme.fn.rgba(theme.colors.red[9], 0.1),
-    }
-}));
 
 interface PlaceholderProps extends PaperProps {
     height?: number
@@ -17,10 +11,13 @@ interface PlaceholderProps extends PaperProps {
 }
 
 export default function Placeholder({ height=200, queries, ...other }: PlaceholderProps) {
-    const { classes } = useStyles();
-
+    const theme = useMantineTheme();
     if (anyError(queries))
-        return <Paper style={{ height: height, overflow: 'hidden' }} className={classes.errorPaper}
+        return <Paper
+            style={{
+                height: height, overflow: 'hidden',
+                backgroundColor: rgba(theme.colors.red[9], 0.1),
+            }}
             p='sm' radius='md' {...other}>
             <Center>
                 <Stack>

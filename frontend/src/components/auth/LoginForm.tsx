@@ -1,4 +1,4 @@
-import { Anchor, Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, Text, TextInput, Title } from "@mantine/core";
+import { Anchor, Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, Text, TextInput, Title, useMatches } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useQueryClient } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
@@ -42,27 +42,7 @@ export interface LoginFormProps extends Omit<CardProps, 'children'> {
 
 }
 
-export const useLoginFormStyles = createStyles(theme => ({
-    LoginCard: {
-        maxWidth: '50%',
-        margin: 'auto',
-        [theme.fn.smallerThan('md')]: {
-            maxWidth: '60%'
-        },
-        [theme.fn.smallerThan('sm')]: {
-            maxWidth: '70%'
-        },
-        [theme.fn.smallerThan('xs')]: {
-            maxWidth: '90%'
-        },
-    },
-    hidden: {
-        display: 'none'
-    }
-}))
-
 export function LoginForm({ ...others }: LoginFormProps) {
-    const { classes } = useLoginFormStyles();
 
     const unForm = useForm<UsernameInputType>({
         initialValues: {
@@ -124,8 +104,18 @@ export function LoginForm({ ...others }: LoginFormProps) {
         })
     }
 
+    const maxWidth = useMatches({
+        base: '90%',
+        xs: '70%',
+        sm: '60%',
+        md: '50%'
+    })
+
     return <Card
-        className={classes.LoginCard}
+        style={{
+            margin: 'auto',
+            maxWidth
+        }}
         withBorder
         shadow='sm'
         {...others}
@@ -134,8 +124,7 @@ export function LoginForm({ ...others }: LoginFormProps) {
             <FinnanceLogo size={40} />
             <Title order={1} fw={250}>{continued ? 'welcome' : 'sign in'}</Title>
         </Flex>
-        <form onSubmit={unForm.onSubmit(handleUsername)}
-            className={continued ? classes.hidden : undefined}>
+        <form onSubmit={unForm.onSubmit(handleUsername)} hidden={continued}>
             <FormTop>to continue</FormTop>
             <FocusTrap active={!continued}>
                 <TextInput label="username" radius="lg" variant="filled"
@@ -150,7 +139,7 @@ export function LoginForm({ ...others }: LoginFormProps) {
             </Text>
         </form>
         <form onSubmit={pwForm.onSubmit(handlePassword)}
-            className={continued ? undefined : classes.hidden}>
+            hidden={continued}>
             <FormTop>
                 <Button onClick={reset}
                     size='xs' variant='light' compact radius="lg"

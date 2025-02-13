@@ -7,42 +7,44 @@ import { Link } from "react-router-dom";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import useIsPhone from "../hooks/useIsPhone";
 
-export const useDataPillStyles = createStyles(theme => ({
-    pill: {
-        backgroundColor: theme.colorScheme === 'light' ?
-            theme.colors['gray'][1] : theme.colors['gray'][8],
-        marginLeft: 0,
-        marginRight: 0,
-        borderRadius: theme.fn.radius(),
-        '& > * > *': {
-            height: '100%',
-            paddingLeft: theme.spacing.xs,
-            paddingRight: theme.spacing.xs,
-            paddingTop: theme.spacing.xxs,
-            paddingBottom: theme.spacing.xxs,
-            borderRadius: theme.fn.radius(),
-            backgroundColor: theme.colorScheme === 'light' ?
-                theme.white : theme.colors['gray'][9],
-        }
-    },
-    edit: {
-        '&:hover': {
-            backgroundColor: theme.colorScheme === 'light' ?
-                theme.colors['gray'][0] : theme.colors['dark'][7],
-        },
-        '&:active': {
-            paddingTop: 4,
-            paddingBottom: 0
-        },
+import classes from "../styles/DataPill.module.css";
 
-    },
-    textCell: {
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        textOverflow: 'ellipsis',
-        width: '100%'
-    },
-}))
+// export const useDataPillStyles = createStyles(theme => ({
+//     pill: {
+//         backgroundColor: theme.colorScheme === 'light' ?
+//             theme.colors['gray'][1] : theme.colors['gray'][8],
+//         marginLeft: 0,
+//         marginRight: 0,
+//         borderRadius: theme.fn.radius(),
+//         '& > * > *': {
+//             height: '100%',
+//             paddingLeft: theme.spacing.xs,
+//             paddingRight: theme.spacing.xs,
+//             paddingTop: theme.spacing.xxs,
+//             paddingBottom: theme.spacing.xxs,
+//             borderRadius: theme.fn.radius(),
+//             backgroundColor: theme.colorScheme === 'light' ?
+//                 theme.white : theme.colors['gray'][9],
+//         }
+//     },
+//     edit: {
+//         '&:hover': {
+//             backgroundColor: theme.colorScheme === 'light' ?
+//                 theme.colors['gray'][0] : theme.colors['dark'][7],
+//         },
+//         '&:active': {
+//             paddingTop: 4,
+//             paddingBottom: 0
+//         },
+
+//     },
+//     textCell: {
+//         overflow: 'hidden',
+//         whiteSpace: 'nowrap',
+//         textOverflow: 'ellipsis',
+//         width: '100%'
+//     },
+// }))
 
 export interface DataPillTextCellProps {
     col: GridColProps
@@ -71,7 +73,7 @@ export const DataPill = ({ cells, ...props }: DataPillProps) => {
         base: 'sm',
         sm: 'xs'
     });
-    const { classes: { pill } } = useDataPillStyles();
+    const { pill } = classes;
     return <Grid gutter={2} p={1} columns={24} align='stretch'
         mb={mb} className={pill}
         {...props}>
@@ -102,7 +104,7 @@ const TextCell = ({ text, link, p, ...others }: TextCellProps) => {
     const isPhone = useIsPhone();
     const ref = useRef<HTMLDivElement>(null);
     const over = useIsOverflow(ref, text);
-    const { classes: { textCell } } = useDataPillStyles();
+    const { textCell } = classes;
     const content =
         <Text ref={ref} className={textCell} {...others}>
             {
@@ -135,7 +137,7 @@ interface EditCellProps {
 }
 
 const EditCell = ({ onEdit }: EditCellProps) => {
-    const { classes: { edit } } = useDataPillStyles();
+    const { edit } = classes;
     return <Center className={edit} onClick={() => onEdit()}>
         <TbPencil size={24} />
     </Center>

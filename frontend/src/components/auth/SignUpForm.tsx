@@ -1,9 +1,9 @@
-import { Button, Card, Flex, FocusTrap, PasswordInput, TextInput, Title } from "@mantine/core";
+import { Button, Card, Flex, FocusTrap, PasswordInput, TextInput, Title, useMatches } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FinnanceLogo from "../FinnanceLogo";
-import { LoginFormProps, useLoginFormStyles } from "./LoginForm";
+import { LoginFormProps } from "./LoginForm";
 import { emailExists, useRegister, usernameExists } from "./api";
 import { handleAxiosError } from "../../query";
 
@@ -15,7 +15,6 @@ interface SignUpInputType {
 }
 
 export function SignUpForm({ ...others }: LoginFormProps) {
-    const { classes } = useLoginFormStyles();
 
     const form = useForm<SignUpInputType>({
         initialValues: {
@@ -60,8 +59,18 @@ export function SignUpForm({ ...others }: LoginFormProps) {
         }).catch(handleAxiosError).finally(() => setLoading(false))
     }
 
+    const maxWidth = useMatches({
+        base: '90%',
+        xs: '70%',
+        sm: '60%',
+        md: '50%'
+    })
+
     return <Card
-        className={classes.LoginCard}
+        style={{
+            margin: 'auto',
+            maxWidth
+        }}
         withBorder
         shadow='sm'
         {...others}

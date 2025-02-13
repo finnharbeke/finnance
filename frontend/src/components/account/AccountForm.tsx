@@ -13,13 +13,6 @@ import { OrderCellProps } from "../OrderForm"
 import AmountInput from "../input/AmountInput"
 import CurrencyInput from "../input/CurrencyInput"
 
-const useStyles = createStyles((theme) => ({
-    AccountLink: {
-        textDecoration: 'none',
-        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
-    }
-}));
-
 export function AccountEdit({ data, ix, orderForm: { moveUp, moveDown } }: OrderCellProps<AccountDeepQueryResult>) {
     const currencies = useCurrencies();
 
@@ -46,8 +39,6 @@ export function AccountEdit({ data, ix, orderForm: { moveUp, moveDown } }: Order
             }
         );
     }
-
-    const { classes } = useStyles();
     const isPhone = useIsPhone();
 
     if (!currencies.isSuccess)
@@ -68,7 +59,11 @@ export function AccountEdit({ data, ix, orderForm: { moveUp, moveDown } }: Order
                     {open ?
                         <TextInput {...form.getInputProps('desc')} />
                         :
-                        <Link to={`${data.id}`} className={classes.AccountLink}>
+                        <Link to={`${data.id}`}
+                            style={{
+                                textDecoration: 'none',
+                                color: 'light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0))'
+                            }}>
                             <Title order={3} lineClamp={1} >
                                 {form.values.desc}
                             </Title>

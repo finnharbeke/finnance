@@ -7,6 +7,14 @@ import { FinnanceRouter } from './routes/Router';
 import { useCustomTheme } from './theme';
 import FinnanceModalProvider from './contexts/ModalProvider';
 
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '@mantine/dropzone/styles.css';
+import '@mantine/notifications/styles.css';
+import '@mantine/nprogress/styles.css';
+import '@mantine/spotlight/styles.css';
+
+
 function App() {
     const theme = useCustomTheme();
 

@@ -1,9 +1,11 @@
-import { Button, Grid, Input, MantineTheme, rgba, useMantineColorScheme } from "@mantine/core";
+import { Button, Grid, Input } from "@mantine/core";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
 import { isRecord } from "../../types/Record";
 import { TransactionFormType } from "../../types/Transaction";
 import AmountInput from "../input/AmountInput";
+
+import classes from "../../styles/TransactionAmountInput.module.css";
 
 interface TransactionAmountInputProps {
     form: TransactionFormType
@@ -11,47 +13,6 @@ interface TransactionAmountInputProps {
 }
 
 export default function TransactionAmountInput({ form, currency }: TransactionAmountInputProps) {
-    const { colorScheme } = useMantineColorScheme();
-    const useStyles = createStyles((theme: MantineTheme) => {
-        const inc = theme.colors.blue[
-            colorScheme === 'light' ? 6 : 5
-        ];
-        const exp = theme.colors.red[
-            colorScheme === 'light' ? 6 : 5
-        ];
-        const off = 0.5;
-        return {
-            incExpButton: {
-                border: 0
-            },
-            incomeOff: {
-                backgroundColor: rgba(inc, off),
-                '&:hover': {
-                    backgroundColor: inc,
-                }
-            },
-            incomeOn: {
-                backgroundColor: inc,
-                '&:hover': {
-                    backgroundColor: inc
-                }
-            },
-            expenseOff: {
-                backgroundColor: rgba(exp, off),
-                '&:hover': {
-                    backgroundColor: exp
-                }
-            },
-            expenseOn: {
-                backgroundColor: exp,
-                '&:hover': {
-                    backgroundColor: exp
-                }
-            },
-        }
-    });
-    const { classes, cx } = useStyles();
-
     return <Input.Wrapper
         label='amount'
         withAsterisk
@@ -66,7 +27,7 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
             <Grid.Col span='content'>
                 <Button.Group>
                     <Button
-                        className={cx(classes.incExpButton, form.values.is_expense ? classes.incomeOff : classes.incomeOn)}
+                        className={[classes.incExpButton, form.values.is_expense ? classes.incomeOff : classes.incomeOn].join(' ')}
                         onClick={() => {
                             if (form.values.is_expense) {
                                 form.values.items
@@ -78,7 +39,7 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
                         }}
                     ><TbPlus size={28} /></Button>
                     <Button
-                        className={cx(classes.incExpButton, form.values.is_expense ? classes.expenseOn : classes.expenseOff)}
+                        className={[classes.incExpButton, form.values.is_expense ? classes.expenseOn : classes.expenseOff].join(' ')}
                         onClick={() => {
                             if (!form.values.is_expense) {
                                 form.values.items
