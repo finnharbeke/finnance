@@ -7,7 +7,7 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     const query = useAuth();
 
     if (query.isLoading)
-        return <Group mt="xl" position="center">
+        return <Group mt="xl" justify='center'>
             <Loader size="lg" />
         </Group>
 

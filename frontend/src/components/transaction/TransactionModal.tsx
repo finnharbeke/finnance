@@ -82,7 +82,7 @@ export const TransactionForm = (props: TransactionFormProps) => {
             <DateTimeInput form={form} minDate={minDate} />
         }
         <AmountInput form={form} currency={currency} />
-        <AgentInput label='agent' withAsterisk withinPortal
+        <AgentInput label='agent' withAsterisk comboboxProps={{ withinPortal: false }}
             {...form.getInputProps('agent')}
         />
         <Divider mt='sm' />

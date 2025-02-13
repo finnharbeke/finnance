@@ -1,4 +1,4 @@
-import { Skeleton, useMantineTheme } from '@mantine/core';
+import { lighten, Skeleton, useMantineColorScheme, useMantineTheme } from '@mantine/core';
 import { ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -25,6 +25,7 @@ const useSunburstData = (props: NivoRequest) =>
 
 export const Sunburst = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const nivo = useNivoTheme();
     const query = useSunburstData(request);
     const height = size.height || 500;
@@ -40,10 +41,10 @@ export const Sunburst = ({ request, size }: NivoComponentProps) => {
         theme={nivo}
         data={data}
         cornerRadius={height / 10}
-        borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
+        borderColor={colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
         borderWidth={height / 150}
         colors={child => child.data.color}
-        childColor={(_, child) => theme.fn.lighten(child.data.color, child.depth * 0.13)}
+        childColor={(_, child) => lighten(child.data.color, child.depth * 0.13)}
 
         // tooltip={node => <MyTooltip node={node} currency_id={currency_id} />}
         tooltip={node => 
@@ -69,6 +70,7 @@ const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id }:
     const query = useCurrency(currency_id);
     const amount = useAmount(total, query.data);
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     return <text
         x={centerX}
         y={centerY}
@@ -77,7 +79,7 @@ const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id }:
         style={{
             fontSize: 18,
             fontWeight: 600,
-            fill: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black
+            fill: colorScheme === 'dark' ? theme.colors.dark[0] : theme.black
         }}
     >
         {amount}

@@ -18,7 +18,7 @@ export function ChangePills({ changes }: { changes: Change[] | undefined }) {
             )
         }</>
         :
-        <Title order={4} align='center'>no changes found</Title>
+        <Title order={4} ta='center'>no changes found</Title>
 }
 
 export function FilterableChanges({ id }: { id: number }) {

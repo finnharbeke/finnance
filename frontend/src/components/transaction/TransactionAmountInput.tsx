@@ -1,4 +1,4 @@
-import { Button, createStyles, Grid, Input, MantineTheme } from "@mantine/core";
+import { Button, Grid, Input, MantineTheme, rgba, useMantineColorScheme } from "@mantine/core";
 import { TbMinus, TbPlus } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
 import { isRecord } from "../../types/Record";
@@ -11,12 +11,13 @@ interface TransactionAmountInputProps {
 }
 
 export default function TransactionAmountInput({ form, currency }: TransactionAmountInputProps) {
+    const { colorScheme } = useMantineColorScheme();
     const useStyles = createStyles((theme: MantineTheme) => {
         const inc = theme.colors.blue[
-            theme.colorScheme === 'light' ? 6 : 5
+            colorScheme === 'light' ? 6 : 5
         ];
         const exp = theme.colors.red[
-            theme.colorScheme === 'light' ? 6 : 5
+            colorScheme === 'light' ? 6 : 5
         ];
         const off = 0.5;
         return {
@@ -24,7 +25,7 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
                 border: 0
             },
             incomeOff: {
-                backgroundColor: theme.fn.rgba(inc, off),
+                backgroundColor: rgba(inc, off),
                 '&:hover': {
                     backgroundColor: inc,
                 }
@@ -36,7 +37,7 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
                 }
             },
             expenseOff: {
-                backgroundColor: theme.fn.rgba(exp, off),
+                backgroundColor: rgba(exp, off),
                 '&:hover': {
                     backgroundColor: exp
                 }

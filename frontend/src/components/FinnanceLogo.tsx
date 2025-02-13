@@ -1,5 +1,4 @@
-import { Box, BoxProps, Center, createStyles } from "@mantine/core";
-import { MantineColor, useMantineTheme } from "@mantine/styles";
+import { Box, BoxProps, Center, MantineColor, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { DOMAttributes } from "react";
 import { Link } from "react-router-dom";
 
@@ -13,15 +12,16 @@ interface FinnanceLogoProps extends BoxProps, DOMAttributes<HTMLElement> {
 
 export default function FinnanceLogo({ inverted, text, size, color, link, ...others }: FinnanceLogoProps) {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const viewBox = text ? "220 205 1328 294" : "220 205 294 294"
 
     const light = theme.colors.gray[1];
     const dark = theme.colors.gray[7];
-    color = theme.fn.themeColor(color || theme.primaryColor, theme.fn.primaryShade());
+    color = color ?? theme.primaryColor;
 
     const useStyles = createStyles({
         innance: {
-            fill: inverted ? light : theme.colorScheme === "dark" ? light : dark
+            fill: inverted ? light : colorScheme === "dark" ? light : dark
         },
         f: {
             fill: inverted ? color : light

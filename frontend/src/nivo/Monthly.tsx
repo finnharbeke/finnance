@@ -40,12 +40,12 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
     const { ref: ref2, width: width2 } = useElementSize();
 
     return <>
-        <Group position='apart'>
+        <Group justify='space-between'>
             <Title>{
                 DateTime.fromJSDate(month)
                     .toFormat('MMMM yy').toLowerCase()
             }</Title>
-            <Group spacing='sm' noWrap ml='auto'>
+            <Group gap='sm' wrap='nowrap' ml='auto'>
                 <ActionIcon onClick={() => move('l')} size={isPhone ? 'xl' : 'lg'}
                     variant='default'>
                     <TbChevronLeft size={isPhone ? '1.5rem' : '1.3rem'} />
@@ -74,22 +74,22 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
             </Group>
         </Group>
         <Tabs defaultValue='sunburst'>
-            <Tabs.List position='right'>
-                <Tabs.Tab value='sunburst' icon={<TbChartDonut4 size='1.5rem' />} />
-                <Tabs.Tab value='bars' icon={<TbChartBar size='1.5rem' />} />
-                <Tabs.Tab value='list' icon={<TbList size='1.5rem' />} />
+            <Tabs.List justify='flex-end'>
+                <Tabs.Tab value='sunburst' leftSection={<TbChartDonut4 size='1.5rem' />} />
+                <Tabs.Tab value='bars' leftSection={<TbChartBar size='1.5rem' />} />
+                <Tabs.Tab value='list' leftSection={<TbList size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='sunburst'>
                 <Grid align='flex-end' gutter={'xs'}>
 
 
-                    <Grid.Col ref={ref1} span={12} sm={7} order={1}>
-                        <Title order={3} align='center'>expenses</Title>
+                    <Grid.Col ref={ref1} span={{base: 12, sm: 7}} order={1}>
+                        <Title order={3} ta='center'>expenses</Title>
                     </Grid.Col>
-                    <Grid.Col ref={ref2} span={12} sm={5} orderSm={2} order={4}>
-                        <Title order={3} align='center'>income</Title>
+                    <Grid.Col ref={ref2} span={{base: 12, sm: 5}} order={{base: 4, sm: 2}}>
+                        <Title order={3} ta='center'>income</Title>
                     </Grid.Col>
-                    <Grid.Col span={12} sm={7} order={2} orderSm={3}>
+                    <Grid.Col span={{base: 12, sm: 7}} order={{base: 2, sm: 3}}>
                         <NivoShell
                             nivo={Sunburst} skeleton={SunburstSkeleton}
                             height={Math.min(width1, 500)}
@@ -97,7 +97,7 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
                             is_expense={true}
                         />
                     </Grid.Col>
-                    <Grid.Col span={12} sm={5} order={5} orderSm={4}>
+                    <Grid.Col span={{base: 12, sm: 5}} order={{base: 5, sm: 4}}>
                         <NivoShell
                             nivo={Sunburst} skeleton={SunburstSkeleton}
                             height={Math.min(width2, 500)}
@@ -109,13 +109,13 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
             </Tabs.Panel>
             <Tabs.Panel value='bars'>
                 <Stack>
-                    <Title order={3} align='center'>expenses</Title>
+                    <Title order={3} ta='center'>expenses</Title>
                     <NivoShell
                         nivo={FinnanceBars} skeleton={BarsSkeleton}
                         {...commonProps}
                         is_expense={true}
                     />
-                    <Title order={3} align='center'>income</Title>
+                    <Title order={3} ta='center'>income</Title>
                     <NivoShell
                         nivo={FinnanceBars} skeleton={BarsSkeleton}
                         {...commonProps}

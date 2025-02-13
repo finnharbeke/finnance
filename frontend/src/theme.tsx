@@ -1,14 +1,12 @@
-import { DefaultMantineColor, MantineColor, Tuple } from '@mantine/core';
-import { MantineThemeOverride } from "@mantine/styles";
+import { createTheme, DefaultMantineColor, MantineColor, MantineColorsTuple, MantineThemeOverride, useMatches } from '@mantine/core';
 import { DateTime } from 'luxon';
 import useIsPhone from './hooks/useIsPhone';
-import { useSmallerThan } from './hooks/useSmallerthan';
 
 type ExtendedCustomColors = DefaultMantineColor;
 
 declare module '@mantine/core' {
   export interface MantineThemeColorsOverride {
-    colors: Record<ExtendedCustomColors, Tuple<string, 10>>;
+    colors: Record<ExtendedCustomColors, MantineColorsTuple>;
   }
   export interface MantineThemeOther {
     colors: {
@@ -23,14 +21,14 @@ declare module '@mantine/core' {
 
 export const useCustomTheme = (): MantineThemeOverride => {
   const isPhone = useIsPhone();
-  const isXs = useSmallerThan('xs');
-  return {
+  const fullscreen = useMatches({ base: true, xs: false });
+  return createTheme({
     colors: {
     },
     primaryColor: 'violet',
     primaryShade: { light: 4, dark: 8 },
     headings: {
-      fontWeight: 250,
+      fontWeight: '250',
     },
     spacing: {
       xxxs: '1pt',
@@ -127,7 +125,7 @@ export const useCustomTheme = (): MantineThemeOverride => {
       Modal: {
         defaultProps: {
           size: 'lg',
-          fullScreen: isXs,
+          fullScreen: fullscreen,
         }
       },
       ActionIcon: {
@@ -141,5 +139,5 @@ export const useCustomTheme = (): MantineThemeOverride => {
         }
       }
     }
-  }
+  })
 }

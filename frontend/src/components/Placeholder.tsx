@@ -1,4 +1,4 @@
-import { Center, Paper, PaperProps, Skeleton, Stack, Text, Title, createStyles } from "@mantine/core";
+import { Center, Paper, PaperProps, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { UseQueryResult } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
@@ -28,7 +28,7 @@ export default function Placeholder({ height=200, queries, ...other }: Placehold
                         queries.map((query, ix) =>
                             !query.isError ? <></> :
                                 query.error.response ?
-                                    <Title order={4} align='center' key={ix}>
+                                    <Title order={4} ta='center' key={ix}>
                                         {query.error.response.status}: {query.error.response.statusText}
                                     </Title>
                                     :

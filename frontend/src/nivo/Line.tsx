@@ -1,4 +1,4 @@
-import { Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Skeleton, Stack, Text } from "@mantine/core";
 import { ResponsiveLine } from "@nivo/line";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -22,7 +22,6 @@ const useLineData = (props: NivoRequest) =>
     });
 
 export const Line = ({ request, size }: NivoComponentProps) => {
-    const theme = useMantineTheme();
     const nivo = useNivoTheme();
     const query = useLineData(request);
 
@@ -41,7 +40,7 @@ export const Line = ({ request, size }: NivoComponentProps) => {
     const lines = [
         {
             id: 'expenses',
-            color: theme.colors.red[theme.fn.primaryShade()],
+            color: 'red',
             data: data.map(month => ({
                 y: month.expenses,
                 x: DateTime.fromISO(month.month).toFormat('MMM yy')
@@ -49,7 +48,7 @@ export const Line = ({ request, size }: NivoComponentProps) => {
         },
         {
             id: 'income',
-            color: theme.colors.blue[theme.fn.primaryShade()],
+            color: 'blue',
             data: data.map(month => ({
                 y: month.income,
                 x: DateTime.fromISO(month.month).toFormat('MMM yy')
@@ -99,7 +98,7 @@ export const Line = ({ request, size }: NivoComponentProps) => {
 }
 
 export const LineSkeleton = ({ width, height }: NivoSkeletonProps) =>
-    <Stack spacing='xs' w={width} h={height}>
+    <Stack gap='xs' w={width} h={height}>
         <Skeleton height={5} />
         <Skeleton height={5} />
         <Skeleton height={5} />

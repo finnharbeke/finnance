@@ -32,7 +32,7 @@ export const FlowPills = ({ flows }: { flows: FlowDeepQueryResult[] | undefined 
             )
         }</>
         :
-        <Title order={4} align='center'>no flows found</Title>
+        <Title order={4} ta='center'>no flows found</Title>
 }
 
 const FlowPill = ({ flow }: { flow: FlowDeepQueryResult }) => {

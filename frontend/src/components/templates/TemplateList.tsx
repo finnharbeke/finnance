@@ -12,10 +12,7 @@ export const TemplateList = () => {
     if (!query.isSuccess)
         return <Placeholder height={300} queries={[query]} />
 
-    return <SimpleGrid breakpoints={[
-        { minWidth: 'xs', cols: 2 },
-        { minWidth: 'md', cols: 3 },
-    ]}>
+    return <SimpleGrid cols={{base: 2, md: 3}}>
         {
             query.data.map((temp, i) =>
                 <TemplatePill key={i} template={temp} />
@@ -29,7 +26,7 @@ const TemplatePill = ({ template }: { template: TemplateDeepQueryResult }) => {
     const deleteTemplate = useDeleteTemplate(template.id);
 
     return <Paper p='xs'>
-        <Group noWrap align='center' spacing='xs'>
+        <Group wrap='nowrap' align='center' gap='xs'>
             <ActionIcon onClick={() => addTransactionAction({ template })}
                 variant='light' color={theme.other.colors.quick}>
                 <AiOutlineThunderbolt size={24} />

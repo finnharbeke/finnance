@@ -1,4 +1,4 @@
-import { Button, Center, Paper, Skeleton, Text, useMantineTheme } from "@mantine/core";
+import { Button, Center, Paper, Skeleton, Text, useMantineTheme, useMatches } from "@mantine/core";
 import { spotlight } from "@mantine/spotlight";
 import { DateTime } from "luxon";
 import { AiOutlineThunderbolt } from "react-icons/ai";
@@ -8,7 +8,6 @@ import AccountPills from "../components/account/AccountPills";
 import { Sunburst, SunburstSkeleton } from "../nivo/Sunburst";
 import { usePrefetch } from "../query";
 import { useCurrencies } from "../types/Currency";
-import { useSmallerThan } from "../hooks/useSmallerthan";
 import { NivoShell } from "../nivo/Nivo";
 
 export default function DashboardPage() {
@@ -16,7 +15,10 @@ export default function DashboardPage() {
     const query = useCurrencies();
     const navigate = useNavigate();
 
-    const isSm = useSmallerThan('sm');
+    const height = useMatches({
+        base: 200,
+        sm: 300,
+      });
 
     usePrefetch();
 
@@ -35,7 +37,7 @@ export default function DashboardPage() {
                         query.data.length > 0 &&
                         <NivoShell
                             nivo={Sunburst} skeleton={SunburstSkeleton}
-                            height={isSm ? 200 : 300}
+                            height={height}
                             currency_id={query.data[0].id.toString()}
                             min_date={DateTime.now().startOf('month')}
                             max_date={DateTime.now().endOf('month')}
@@ -48,7 +50,7 @@ export default function DashboardPage() {
                     }
                 </Paper>
                 :
-                <Skeleton height={200} my='sm' />
+                <Skeleton height={height} my='sm' />
         }
         <Center mt={75}>
             <FinnanceLogo opacity={0.1} size={200} />

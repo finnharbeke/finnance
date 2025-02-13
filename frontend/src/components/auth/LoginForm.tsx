@@ -1,6 +1,5 @@
 import { Anchor, Button, Card, CardProps, Flex, FocusTrap, Group, GroupProps, PasswordInput, Text, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { createStyles } from "@mantine/styles";
 import { useQueryClient } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import { TbChevronDown } from "react-icons/tb";
@@ -24,7 +23,7 @@ interface NextButtonProps extends GroupProps {
 
 export function NextButton({ loading, ...others }: NextButtonProps) {
     return (
-        <Group position="right" {...others}>
+        <Group justify="flex-end" {...others}>
             <Button
                 type="submit" radius="lg"
                 loading={loading}
@@ -34,7 +33,7 @@ export function NextButton({ loading, ...others }: NextButtonProps) {
 }
 
 export function FormTop({ children }: { children: ReactNode }) {
-    return <Group position='center' mt='xl' sx={{ height: 25 }}>
+    return <Group justify='center' mt='xl' style={{ height: 25 }}>
         {children}
     </Group>
 }

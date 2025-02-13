@@ -1,4 +1,4 @@
-import { Box, Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Box, lighten, Skeleton, Stack, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -31,6 +31,7 @@ const BAR_HEIGHT = 40;
 
 export const DivBars = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const nivo = useNivoTheme();
     const query = useDivBarsData(request);
 
@@ -63,18 +64,18 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
             maxValue={max}
             indexBy='month'
             layout='horizontal'
-            colors={({ id, data }) => theme.fn.lighten(data[`${id}_color`].toString(), 0.15)}
+            colors={({ id, data }) => lighten(data[`${id}_color`].toString(), 0.15)}
             reverse
             axisBottom={null}
             axisLeft={null}
             // borderColor={({ data: { id, data } }) => theme.fn.lighten(data['color'].toString(), 0.15)}
-            borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
+            borderColor={colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
             borderWidth={2}
             borderRadius={4}
             padding={0}
             label={'id'}
             labelSkipWidth={64}
-            labelTextColor={theme.colorScheme === 'light' ?
+            labelTextColor={colorScheme === 'light' ?
                 theme.black : theme.white
             }
             enableGridY={false}
@@ -85,7 +86,7 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
             markers={[{
                     axis: 'x',
                     value: 0,
-                    lineStyle: { stroke: theme.fn.primaryColor(), strokeWidth: 1 },
+                    lineStyle: { stroke: theme.primaryColor, strokeWidth: 1 },
                 }]}
         />
     </Box>
@@ -93,7 +94,7 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
 
 export const DivBarsSkeleton = (props: NivoSkeletonProps) => {
     const { ref, width } = useElementSize();
-    return <Stack spacing='xs'>
+    return <Stack gap='xs'>
         {
             Array(11).map((_, i) => (
                 <Skeleton height={BAR_HEIGHT} width={Math.random() * width} key={i} />

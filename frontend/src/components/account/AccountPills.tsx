@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Collapse, ColorSwatch, Divider, Grid, Group, Text, Title, createStyles, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Button, Collapse, ColorSwatch, Divider, Grid, Group, Text, Title, useMantineTheme } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { TbChevronDown, TbChevronUp } from "react-icons/tb";
@@ -32,7 +32,7 @@ export default function AccountPills() {
 
     const { data: accounts } = query;
     const cols = accounts.map(acc => (
-        <Grid.Col sm={accounts.length === 1 ? 12 : 6} key={acc.id}>
+        <Grid.Col span={{sm: accounts.length === 1 ? 12 : 6}} key={acc.id}>
             <AccountPill account={acc} />
         </Grid.Col>
     ));
@@ -54,7 +54,7 @@ export default function AccountPills() {
                     </Collapse>
                 </>
                 :
-                <Title align='center' order={3}>no accounts created yet</Title>
+                <Title ta='center' order={3}>no accounts created yet</Title>
         }
         <Divider
             my={more ? undefined : 'lg'}
@@ -80,39 +80,39 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
     const saldo = useAmount(acc.saldo, acc.currency);
 
     const svg = document.getElementById('transferSVG') as Element;
-    const background = theme.colors[theme.other.colors.transfer][theme.fn.primaryShade()]
+    const background = theme.other.colors.transfer
 
     return <>
         <Button component={Link} to={`/accounts/${acc.id}`} fullWidth classNames={{ label: classes.apart }}
             color={beingDragged || draggedOver ? theme.other.colors.transfer : undefined}
             draggable
-            onDragStart={event => {
+            onDragStart={(event: DragEvent) => {
                 // event.preventDefault();
                 setBeing(true);
-                event.dataTransfer.setData("json", JSON.stringify(acc))
-                event.dataTransfer.setDragImage(svg, 0, 25)
+                event.dataTransfer?.setData("json", JSON.stringify(acc))
+                event.dataTransfer?.setDragImage(svg, 0, 25)
             }}
             onDragEnd={() => setBeing(false)}
             onDragLeave={() => setDraggedOver(false)}
 
-            onDragOver={event => {
+            onDragOver={(event: DragEvent) => {
                 event.preventDefault();
                 setDraggedOver(true);
             }}
 
-            onDrop={event => {
+            onDrop={(event: DragEvent) => {
                 setDraggedOver(false);
-                const json = event.dataTransfer.getData("json");
+                const json = event.dataTransfer?.getData("json");
                 if (json === '')
                     return;
-                const source = JSON.parse(json);
+                const source = json ? JSON.parse(json) : undefined;
                 if (source.id === acc.id)
                     return;
                 event.preventDefault();
                 addTransferAction({ source, dest: acc });
             }}
         >
-            <Group spacing='xs' noWrap>
+            <Group gap='xs' wrap='nowrap'>
                 <ColorSwatch color={acc.color} size={isPhone ? 24 : 20} />
                 <Text align='left'>
                     {acc.desc}

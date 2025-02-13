@@ -42,7 +42,7 @@ export const CategoryPills = ({ request, size }: NivoComponentProps) => {
         return <LineSkeleton {...size} />
 
     return <>
-        <Group position='apart' my='sm'>
+        <Group justify='space-between' my='sm'>
             <Title order={3}>{
                 request.is_expense ? 'expenses' : 'income'
             }</Title>
@@ -67,7 +67,7 @@ interface CategoryPillStackProps {
 }
 
 const CategoryPillStack = ({ data, sorted, currency, indent = false }: CategoryPillStackProps) =>
-    <Stack ml={indent ? 'xl' : undefined} spacing={0}>
+    <Stack ml={indent ? 'xl' : undefined} gap={0}>
         {
             data.sort((a, b) => sorted ? b.total - a.total : a.category.order - b.category.order).map((pill, i) =>
                 <CategoryPill currency={currency} sorted={sorted} data={pill} key={i} />
@@ -90,7 +90,7 @@ const CategoryPill = ({ data: { category, children, total }, currency, sorted }:
             {
                 type: 'icon',
                 col: {
-                    span: 3, sm: 1
+                    span: {base: 3, sm: 1}
                 },
                 cell: {
                     icon: () => <></>,
@@ -100,7 +100,7 @@ const CategoryPill = ({ data: { category, children, total }, currency, sorted }:
             {
                 type: 'text',
                 col: {
-                    span: 8, sm: 8
+                    span: {base: 8, sm: 8}
                 },
                 cell: {
                     text: category.desc,
@@ -110,7 +110,7 @@ const CategoryPill = ({ data: { category, children, total }, currency, sorted }:
             {
                 type: 'text',
                 col: {
-                    span: 10, sm: 14
+                    span: {base: 10, sm: 14}
                 },
                 cell: {
                     text: amount,
@@ -120,7 +120,7 @@ const CategoryPill = ({ data: { category, children, total }, currency, sorted }:
             {
                 type: 'icon',
                 col: {
-                    span: 3, sm: 1
+                    span: {base: 3, sm: 1}
                 },
                 cell: {
                     icon: children.length ? (down ? TbChevronUp : TbChevronDown) : () => <></>,

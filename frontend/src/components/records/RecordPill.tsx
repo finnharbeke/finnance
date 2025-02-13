@@ -32,7 +32,7 @@ export const RecordPills = ({ records }: { records: RecordDeepQueryResult[] | un
             )
         }</>
         :
-        <Title order={4} align='center'>no records found</Title>
+        <Title order={4} ta='center'>no records found</Title>
 }
 
 const RecordPill = ({ record }: { record: RecordDeepQueryResult }) => {

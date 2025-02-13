@@ -62,14 +62,14 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
 
     return <>
         <Grid justify='space-between'>
-            <Grid.Col span={12} sm='content' order={2} orderSm={1}>
+            <Grid.Col span={{base: 12, sm: 'content'}} order={{base: 2, sm: 1}}>
                 <Button variant='default' onClick={toggle} leftIcon={
                     <TbFilter size={24}/>
                 }>filter
                 </Button>
             </Grid.Col>
-            <Grid.Col span={12} sm='content' order={1} orderSm={2}>
-                <Pagination size='md' withControls={false} grow
+            <Grid.Col span={{base: 12, sm: 'content'}} order={{base: 1, sm: 2}}>
+                <Pagination size='md' withControls={false}
                     value={filter.page + 1} total={pages ?? 0}
                     onChange={page => setFilter({...filter, page: page - 1})}
                 />

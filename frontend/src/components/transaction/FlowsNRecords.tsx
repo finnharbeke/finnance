@@ -1,4 +1,4 @@
-import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useMantineTheme } from "@mantine/core";
+import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useMantineColorScheme } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
@@ -15,7 +15,7 @@ interface FlowsNRecordsButtonProps extends ButtonProps {
 }
 
 const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
-    const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     return <Input.Wrapper
         label={
             form.values.account_id === 'remote' ?
@@ -26,9 +26,9 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
         {...form.getInputProps('direct')}
     >
         <Grid>
-            <Grid.Col xs='auto' span={12}>
+            <Grid.Col span={{xs: 'auto', base: 12}}>
                 <Button
-                    fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
+                    fullWidth variant={colorScheme === 'light' ? 'outline' : 'light'}
                     leftIcon={
                         form.values.is_expense ? <TbTrendingDown size={32} /> : <TbTrendingUp size={32} />
                     }
@@ -47,7 +47,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                 form.values.account_id !== 'remote' &&
                 <Grid.Col span='auto'>
                     <Button
-                        fullWidth variant={theme.colorScheme === 'light' ? 'outline' : 'light'}
+                        fullWidth variant={colorScheme === 'light' ? 'outline' : 'light'}
                         leftIcon={<TbArrowWaveRightUp size={32} />}
                         disabled={form.values.direct} color='pink'
                         onClick={() => {
@@ -100,7 +100,7 @@ const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
             />
         </Grid.Col>
         <Grid.Col span='auto'>
-            <AgentInput label='agent' withAsterisk withinPortal placeholder={`agent #${flow.ix}`}
+            <AgentInput label='agent' withAsterisk comboboxProps={{ withinPortal: false }} placeholder={`agent #${flow.ix}`}
                 {...form.getInputProps(`items.${i}.agent`)}
             />
         </Grid.Col>
@@ -143,7 +143,7 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
         </Grid.Col>
         <Grid.Col span='auto'>
             <CategoryInput is_expense={form.values.is_expense}
-                label='category' withAsterisk withinPortal must_be_usable
+                label='category' withAsterisk comboboxProps={{ withinPortal: false }} must_be_usable
                 placeholder={`category #${record.ix}`}
                 {...form.getInputProps(`items.${i}.category_id`)}
             />

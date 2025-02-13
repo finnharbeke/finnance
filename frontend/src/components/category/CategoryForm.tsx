@@ -24,31 +24,31 @@ export default function CategoryForm({ is_expense, form, modal, parent_except }:
                     />
                 </Grid.Col>
             }
-            <Grid.Col sm={4} xs={12}>
+            <Grid.Col span={{sm:4, xs:12}}>
                 <ColorInput
                     disallowInput={isPhone}
                     label="color" withAsterisk={modal}
                     {...form.getInputProps('color')}
                 />
             </Grid.Col>
-            <Grid.Col sm={4} xs={12}>
+            <Grid.Col span={{sm:4, xs:12}}>
                 <CategoryInput label="parent category" is_expense={is_expense}
                     placeholder="select parent" must_be_usable={false}
                     except={parent_except}
                     {...form.getInputProps('parent_id')}
                 />
             </Grid.Col>
-            <Grid.Col sm={4} xs={12}>
+            <Grid.Col span={{sm:4, xs:12}}>
                 <Input.Wrapper label='lock for records?'>
                     <Center>
                         <Switch color='red'
                             onLabel={
-                                <Group noWrap spacing='xs'>
+                                <Group wrap='nowrap' gap='xs'>
                                     <TbLock size={20} />
                                     <Text>locked</Text>
                                 </Group>
                             } offLabel={
-                                <Group noWrap spacing='xs'>
+                                <Group wrap='nowrap' gap='xs'>
                                     <Text>free to use</Text>
                                     <TbCircleCheck size={20} color='green' />
                                 </Group>

@@ -43,11 +43,11 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
         ), [setYear, year, start, last12]);
 
     return <>
-        <Group position='apart'>
+        <Group justify='space-between'>
             <Title>{
                 last12 ? 'last 12 months' : DateTime.fromJSDate(year).toFormat('yyyy')
             }</Title>
-            <Group spacing='sm' noWrap ml='auto'>
+            <Group gap='sm' wrap='nowrap' ml='auto'>
                 <ActionIcon onClick={() => move('l')}
                     size={isPhone ? 'xl' : 'lg'}
                     variant='default'
@@ -89,15 +89,15 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
             </Group>
         </Group>
         <Tabs defaultValue='divbars'>
-            <Tabs.List position='right'>
-                <Tabs.Tab value='divbars' icon={<TbChartBar size='1.5rem' />} />
-                <Tabs.Tab value='line' icon={<TbChartLine size='1.5rem' />} />
-                <Tabs.Tab value='list' icon={<TbList size='1.5rem' />} />
+            <Tabs.List justify='flex-end'>
+                <Tabs.Tab value='divbars' leftSection={<TbChartBar size='1.5rem' />} />
+                <Tabs.Tab value='line' leftSection={<TbChartLine size='1.5rem' />} />
+                <Tabs.Tab value='list' leftSection={<TbList size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='divbars'>
                 <SimpleGrid cols={2} mb='xs'>
-                    <Title order={3} align='center'>expenses</Title>
-                    <Title order={3} align='center'>income</Title>
+                    <Title order={3} ta='center'>expenses</Title>
+                    <Title order={3} ta='center'>income</Title>
                 </SimpleGrid>
                 <NivoShell
                     nivo={DivBars} skeleton={DivBarsSkeleton}

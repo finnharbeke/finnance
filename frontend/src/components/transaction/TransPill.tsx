@@ -32,7 +32,7 @@ export const TransPills = ({ transactions }: { transactions: TransactionDeepQuer
             )
         }</>
         :
-        <Title order={4} align='center'>no transactions found</Title>
+        <Title order={4} ta='center'>no transactions found</Title>
 }
 
 const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {

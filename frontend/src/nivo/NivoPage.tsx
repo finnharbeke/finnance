@@ -11,7 +11,7 @@ export default function NivoPage() {
     const [currency_id, setCurrency] = useState<string | null>(null)
 
     return <Stack>
-        <Group position='apart'>
+        <Group justify='space-between'>
             <Title>
                 analytics
             </Title>
@@ -20,9 +20,9 @@ export default function NivoPage() {
             />
         </Group>
         <Tabs defaultValue={'monthly'}>
-            <Tabs.List position='right' mb='sm'>
-                <Tabs.Tab value='monthly' icon={<TbCalendar size='1.5rem' />} />
-                <Tabs.Tab value='yearly' icon='365' />
+            <Tabs.List justify='flex-end' mb='sm'>
+                <Tabs.Tab value='monthly' leftSection={<TbCalendar size='1.5rem' />} />
+                <Tabs.Tab value='yearly' leftSection='365' />
             </Tabs.List>
             <Tabs.Panel value='monthly'>
                 <Monthly currency_id={currency_id} />

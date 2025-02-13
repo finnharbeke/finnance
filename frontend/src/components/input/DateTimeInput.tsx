@@ -18,14 +18,14 @@ export default function DateTimeInput<T extends DateTimeFormValues>({ minDate, f
     return <Group grow align='flex-start'>
         {isPhone ?
             <DatePickerInput
-                label="date" withAsterisk popoverProps={{ withinPortal: true }}
+                label="date" withAsterisk popoverProps={{ withinPortal: false }}
                 minDate={minDate}
                 maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}
             />
             :
             <DateInput
-                label="date" withAsterisk popoverProps={{ withinPortal: true }}
+                label="date" withAsterisk popoverProps={{ withinPortal: false }}
                 minDate={minDate}
                 maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}

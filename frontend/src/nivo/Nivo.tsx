@@ -1,4 +1,4 @@
-import { Box, Paper, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Box, Paper, Stack, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { Theme } from "@nivo/core";
 import useAmount from "../hooks/useAmount";
 import { searchParamsProps } from "../query";
@@ -7,10 +7,10 @@ import { DateTime } from "luxon";
 
 export const useNivoTheme = (): Theme => {
     const theme = useMantineTheme();
-
+    const { colorScheme } = useMantineColorScheme();
     return {
         text: {
-            fill: theme.colorScheme === 'light' ?
+            fill: colorScheme === 'light' ?
                 theme.black : theme.colors.dark[0],
             fontSize: 14
         }
@@ -35,7 +35,7 @@ export const NivoTooltip = ({ label, value, perc, currency_id }: NivoTooltipProp
     const query = useCurrency(currency_id);
     const amount = useAmount(value, query.data);
     return <Paper p='xs'>
-        <Stack spacing={0}>
+        <Stack gap={0}>
             <Text fz={14} fw={900} lineClamp={1}>{label}{perc ? `: ${perc.toFixed(0)}%` : ''}</Text>
             <Text fz={14} lineClamp={1}>{amount}</Text>
         </Stack>

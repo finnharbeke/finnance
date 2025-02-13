@@ -61,7 +61,7 @@ export default function CategoryEdit(props: OrderCellProps<CategoryHierarchyQuer
                     }
                 </Grid.Col>
                 <Grid.Col span='content'>
-                    <Group position='right' spacing='xs'>
+                    <Group justify='fley-end' gap='xs'>
                         {
                             form.isDirty() &&
                             <>

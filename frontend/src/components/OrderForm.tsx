@@ -34,7 +34,7 @@ export function OrderForm<T>(props: OrderFormProps<T>) {
                 }</Grid.Col>
                 <Grid.Col span='content'>{
                     form.isDirty() &&
-                    <Group spacing='xs'>
+                    <Group gap='xs'>
                         <PrimaryIcon icon={TbListDetails} tooltip='save new order'
                             loading={editing} onClick={() => form.onSubmit((fv) => {
                                 startEdit();

@@ -28,7 +28,7 @@ export default function AccountPage() {
 
     return <>
         <Flex justify="space-between" wrap='wrap'>
-            <Group noWrap>
+            <Group wrap='nowrap'>
                 <Title order={1}>{account.desc}</Title>
                 <ColorSwatch color={account.color} size={theme.headings.sizes.h1.fontSize} />
             </Group>

@@ -1,4 +1,4 @@
-import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Skeleton, TextInput, Title, createStyles } from "@mantine/core"
+import { Collapse, ColorInput, ColorSwatch, Grid, Group, Paper, Skeleton, TextInput, Title } from "@mantine/core"
 import { DateInput, DatePickerInput } from "@mantine/dates"
 import { UseFormReturnType } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -76,7 +76,7 @@ export function AccountEdit({ data, ix, orderForm: { moveUp, moveDown } }: Order
                     }
                 </Grid.Col>
                 <Grid.Col span='content'>
-                    <Group position='right' spacing='xs'>
+                    <Group justify='flex-end' gap='xs'>
                         {
                             form.isDirty() &&
                             <>
@@ -129,16 +129,16 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                     />
                 </Grid.Col>
             }
-            <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} orderXs={1} order={modal ? 2 : 1}>
+            <Grid.Col span={{md: modal ? undefined : 3, sm:6, xs: 12}} order={{base: modal ? 2 : 1, xs: 1}}>
                 <ColorInput withAsterisk={modal} label="color"
                     {...form.getInputProps('color')}
                 />
             </Grid.Col>
-            <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} orderXs={2} order={modal ? 1 : 2}>
+            <Grid.Col span={{md: modal ? undefined : 3, sm:6, xs: 12}} order={{base: modal ? 1 : 2, xs: 2}}>
                 {
                     isPhone ?
                         <DatePickerInput
-                            popoverProps={{ withinPortal: modal }}
+                            popoverProps={{ withinPortal: !modal }}
                             label="tracking since"
                             withAsterisk={modal}
 
@@ -146,7 +146,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                         />
                         :
                         <DateInput
-                            popoverProps={{ withinPortal: modal }}
+                            popoverProps={{ withinPortal: !modal }}
                             label="tracking since"
                             withAsterisk={modal}
 
@@ -155,12 +155,12 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
 
                 }
             </Grid.Col>
-            <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} order={3}>
+            <Grid.Col span={{md: modal ? undefined : 3, sm:6, xs: 12}} order={3}>
                 <CurrencyInput label="currency" withAsterisk={modal}
                     {...form.getInputProps('currency_id')}
                 />
             </Grid.Col>
-            <Grid.Col md={modal ? undefined : 3} sm={6} xs={12} order={3}>
+            <Grid.Col span={{md: modal ? undefined : 3, sm:6, xs: 12}} order={3}>
                 <AmountInput withAsterisk={modal}
                     label={form.values.date_created ?
                         `saldo at ${DateTime.fromJSDate(form.values.date_created).toFormat("dd.LL.yy")}`

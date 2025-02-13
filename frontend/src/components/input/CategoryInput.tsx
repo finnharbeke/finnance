@@ -29,7 +29,7 @@ const CategoryInput = ({ is_expense, must_be_usable, except, ...others }: Catego
     }
     const categories = query.data.filter(except_filter);
     return <Select
-        searchable={!isPhone} withinPortal
+        searchable={!isPhone} comboboxProps={{ withinPortal: false }}
         data={categories.filter(
             cat => (!must_be_usable) || cat.usable
         ).map(

@@ -1,4 +1,4 @@
-import { Center, ColProps, Grid, GridProps, MantineColor, Popover, Text, TextProps, Tooltip, createStyles, useMantineTheme } from "@mantine/core";
+import { Center, Grid, GridProps, MantineColor, Popover, Text, TextProps, Tooltip, useMantineTheme, lighten, useMantineColorScheme, GridColProps, useMatches } from "@mantine/core";
 import { DateTime } from "luxon";
 import { useRef } from "react";
 import { IconType } from "react-icons";
@@ -6,7 +6,6 @@ import { TbPencil } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import { useIsOverflow } from "../hooks/useIsOverflow";
 import useIsPhone from "../hooks/useIsPhone";
-import { useSmallerThan } from "../hooks/useSmallerthan";
 
 export const useDataPillStyles = createStyles(theme => ({
     pill: {
@@ -46,19 +45,19 @@ export const useDataPillStyles = createStyles(theme => ({
 }))
 
 export interface DataPillTextCellProps {
-    col: ColProps
+    col: GridColProps
     cell: TextCellProps
     type: 'text'
 }
 
 export interface DataPillEditCellProps {
-    col: ColProps
+    col: GridColProps
     cell: EditCellProps
     type: 'edit'
 }
 
 export interface DataPillIconCellProps {
-    col: ColProps
+    col: GridColProps
     cell: IconCellProps
     type: 'icon'
 }
@@ -68,10 +67,13 @@ interface DataPillProps extends Omit<GridProps, 'children'> {
 }
 
 export const DataPill = ({ cells, ...props }: DataPillProps) => {
-    const isSm = useSmallerThan('sm');
+    const mb = useMatches({
+        base: 'sm',
+        sm: 'xs'
+    });
     const { classes: { pill } } = useDataPillStyles();
     return <Grid gutter={2} p={1} columns={24} align='stretch'
-        mb={isSm ? 'sm' : 'xs'} className={pill}
+        mb={mb} className={pill}
         {...props}>
         {
             cells.map(({ col, type, cell }, i) => <Grid.Col {...col} key={i}>
@@ -122,14 +124,14 @@ const TextCell = ({ text, link, p, ...others }: TextCellProps) => {
                 </Popover.Dropdown>
             </Popover>
             :
-            <Tooltip label={text} disabled={!over} multiline width={w}>
+            <Tooltip label={text} disabled={!over} multiline w={w}>
                 {content}
             </Tooltip>
     }</Center>
 }
 
 interface EditCellProps {
-    onEdit: () => Promise<void>
+    onEdit: () => Promise<string>
 }
 
 const EditCell = ({ onEdit }: EditCellProps) => {
@@ -159,7 +161,7 @@ interface StandardPillProps {
     is_expense: boolean
     label: Omit<TextCellProps, 'align'>
     comment: string
-    onEdit: () => Promise<void>
+    onEdit: () => Promise<string>
 }
 
 export const StandardPill = (props: StandardPillProps) => {
@@ -168,18 +170,22 @@ export const StandardPill = (props: StandardPillProps) => {
         amount, is_expense, label,
         comment, onEdit
     } = props;
+    const { colorScheme } = useMantineColorScheme();
     const theme = useMantineTheme();
-    const lightIconColor = theme.fn.lighten(
-        theme.colors[iconColor][theme.fn.primaryShade()],
-        theme.colorScheme === 'light' ? 0.4 : 0.1
+    const lightIconColor = lighten(
+        iconColor,
+        colorScheme === 'light' ? 0.4 : 0.1
     );
-    const isSm = useSmallerThan('sm');
+    const align: 'left' | 'right' = useMatches({
+        base: 'left',
+        sm: 'right'
+    });
 
     return <DataPill cells={[
         {
             type: 'icon',
             col: {
-                span: 3, sm: 1, order: 1
+                span: {base: 3, sm: 1}, order: 1
             },
             cell: {
                 style: { backgroundColor: lightIconColor},
@@ -189,10 +195,10 @@ export const StandardPill = (props: StandardPillProps) => {
         {
             type: 'text',
             col: {
-                span: 14, sm: 5, order: 2, orderSm: 3
+                span: {base: 14, sm: 5}, order: {base: 2, sm: 3}
             },
             cell: {
-                align: isSm ? 'left' : 'right',
+                align: align,
                 text: amount,
                 color: is_expense ? theme.other.colors.expense : theme.other.colors.income
             }
@@ -200,7 +206,7 @@ export const StandardPill = (props: StandardPillProps) => {
         {
             type: 'text',
             col: {
-                span: 7, sm: 3, order: 3, orderSm: 2
+                span: {base: 7, sm: 3}, order: {base: 3, sm: 2}
             },
             cell: {
                 align: 'center',
@@ -210,14 +216,14 @@ export const StandardPill = (props: StandardPillProps) => {
         {
             type: 'edit',
             col: {
-                span: 3, sm: 1, order: 4, orderSm: 5
+                span: {base: 3, sm: 1}, order: {base: 4, sm: 5}
             },
             cell: { onEdit }
         },
         {
             type: 'text',
             col: {
-                span: 21, sm: 14, order: 5, orderSm: 4
+                span: {base: 21, sm: 14}, order: {base: 5, sm: 4}
             },
             cell: {
                 align: 'left',
@@ -251,17 +257,21 @@ export const SaldoPill = (props: SaldoPillProps) => {
         label, comment, onEdit
     } = props;
     const theme = useMantineTheme();
-    const lightIconColor = theme.fn.lighten(
-        theme.colors[iconColor][theme.fn.primaryShade()],
-        theme.colorScheme === 'light' ? 0.4 : 0.1
+    const { colorScheme } = useMantineColorScheme();
+    const lightIconColor = lighten(
+        iconColor,
+        colorScheme === 'light' ? 0.4 : 0.1
     );
-    const isSm = useSmallerThan('sm');
+    const align: 'left' | 'right' = useMatches({
+        base: 'left',
+        sm: 'right'
+    });
 
     return <DataPill cells={[
         {
             type: 'icon',
             col: {
-                span: 3, sm: 1, order: 1
+                span: {base: 3, sm: 1}, order: 1
             },
             cell: {
                 style: { backgroundColor: lightIconColor},
@@ -271,10 +281,10 @@ export const SaldoPill = (props: SaldoPillProps) => {
         {
             type: 'text',
             col: {
-                span: 10, sm: 5, order: 2, orderSm: 3
+                span: {base: 10, sm: 5}, order: {base: 2, sm: 3}
             },
             cell: {
-                align: isSm ? 'left' : 'right',
+                align: align,
                 text: amount,
                 color: is_expense ? theme.other.colors.expense : theme.other.colors.income
             }
@@ -282,24 +292,24 @@ export const SaldoPill = (props: SaldoPillProps) => {
         {
             type: 'text',
             col: {
-                span: 11, sm: 5, order: 3, orderSm: 5
+                span: {base: 11, sm: 5}, order: {base: 3, sm: 5}
             },
             cell: {
-                align: isSm ? 'left' : 'right',
+                align: align,
                 text: saldo,
             }
         },
         {
             type: 'edit',
             col: {
-                span: 3, sm: 1, order: 4, orderSm: 6
+                span: {base: 3, sm: 1}, order: {base: 4, sm: 6}
             },
             cell: { onEdit }
         },
         {
             type: 'text',
             col: {
-                span: 14, sm: 9, order: 5, orderSm: 4
+                span: {base: 14, sm: 9}, order: {base: 5, sm: 4}
             },
             cell: {
                 align: 'left',
@@ -309,7 +319,7 @@ export const SaldoPill = (props: SaldoPillProps) => {
         {
             type: 'text',
             col: {
-                span: 7, sm: 3, order: 6, orderSm: 2
+                span: {base: 7, sm: 3}, order: {base: 6, sm: 2}
             },
             cell: {
                 align: 'center',
@@ -338,22 +348,26 @@ interface TwoLabelPillProps extends StandardPillProps {
 
 export const TwoLabelPill = (props: TwoLabelPillProps) => {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const {
         icon, iconColor, datetime,
         amount, is_expense, label,
         label2, comment, onEdit
     } = props;
-    const lightIconColor = theme.fn.lighten(
-        theme.colors[iconColor][theme.fn.primaryShade()],
-        theme.colorScheme === 'light' ? 0.4 : 0.1
+    const lightIconColor = lighten(
+        iconColor,
+        colorScheme === 'light' ? 0.4 : 0.1
     );
-    const isSm = useSmallerThan('sm');
+    const align: 'left' | 'right' = useMatches({
+        base: 'left',
+        sm: 'right'
+    });
 
     return <DataPill cells={[
         {
             type: 'icon',
             col: {
-                span: 3, sm: 1, order: 1
+                span: {base: 3, sm: 1}, order: 1
             },
             cell: {
                 style: { backgroundColor: lightIconColor},
@@ -363,10 +377,10 @@ export const TwoLabelPill = (props: TwoLabelPillProps) => {
         {
             type: 'text',
             col: {
-                span: 10, sm: 4, order: 2, orderSm: 3
+                span: {base: 10, sm: 4}, order: {base: 2, sm: 3}
             },
             cell: {
-                align: isSm ? 'left' : 'right',
+                align: align,
                 text: amount,
                 color: is_expense ? theme.other.colors.expense : theme.other.colors.income
             }
@@ -374,7 +388,7 @@ export const TwoLabelPill = (props: TwoLabelPillProps) => {
         {
             type: 'text',
             col: {
-                span: 11, sm: 7, order: 3, orderSm: 5
+                span: {base: 11, sm: 7}, order: {base: 3, sm: 5}
             },
             cell: {
                 align: 'left',
@@ -384,14 +398,14 @@ export const TwoLabelPill = (props: TwoLabelPillProps) => {
         {
             type: 'edit',
             col: {
-                span: 3, sm: 1, order: 4, orderSm: 5
+                span: {base: 3, sm: 1}, order: {base: 4, sm: 5}
             },
             cell: { onEdit }
         },
         {
             type: 'text',
             col: {
-                span: 7, sm: 3, order: 6, orderSm: 2
+                span: {base: 7, sm: 3}, order: {base: 6, sm: 2}
             },
             cell: {
                 align: 'center',
@@ -401,7 +415,7 @@ export const TwoLabelPill = (props: TwoLabelPillProps) => {
         {
             type: 'text',
             col: {
-                span: 14, sm: 8, order: 5, orderSm: 4
+                span: {base: 14, sm: 8}, order: {base: 5, sm: 4}
             },
             cell: {
                 align: 'left',

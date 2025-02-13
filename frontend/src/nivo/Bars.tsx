@@ -1,4 +1,4 @@
-import { Box, Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Box, lighten, Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
 import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -7,6 +7,7 @@ import { getAxiosData, searchParams } from "../query";
 import { NivoComponentProps, NivoRequest, NivoSkeletonProps, NivoTooltip, useNivoTheme } from "./Nivo";
 import { useState, useEffect } from "react";
 import { useElementSize } from "@mantine/hooks";
+import { useMantineColorScheme } from "@mantine/core";
 
 interface Datum {
     category: string
@@ -30,6 +31,7 @@ const BAR_HEIGHT = 55;
 
 export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
+    const { colorScheme } = useMantineColorScheme();
     const nivo = useNivoTheme();
     const query = useBarsData(request);
 
@@ -54,17 +56,17 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
             data={barsRev} keys={keys}
             indexBy='category'
             layout='horizontal'
-            colors={({ id, data }) => theme.fn.lighten(data[`${id}_color`].toString(), 0.15)}
+            colors={({ id, data }) => lighten(data[`${id}_color`].toString(), 0.15)}
 
             axisBottom={null}
             axisLeft={null}
             // borderColor={({ data: { id, data } }) => theme.fn.lighten(data['color'].toString(), 0.15)}
-            borderColor={theme.colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
+            borderColor={colorScheme === 'light' ? theme.white : theme.colors.dark[7]}
             borderWidth={2}
             borderRadius={10}
             label={'id'}
             labelSkipWidth={64}
-            labelTextColor={theme.colorScheme === 'light' ?
+            labelTextColor={colorScheme === 'light' ?
                 theme.black : theme.white
             }
             enableGridY={false}
@@ -76,7 +78,7 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
 
 export const BarsSkeleton = (props: NivoSkeletonProps) => {
     const { ref, width } = useElementSize();
-    return <Stack spacing='xs'>
+    return <Stack gap='xs'>
         <Skeleton height={BAR_HEIGHT} width={Math.random() * width} />
         <Skeleton height={BAR_HEIGHT} ref={ref}  />
         <Skeleton height={BAR_HEIGHT} width={Math.random() * width} />

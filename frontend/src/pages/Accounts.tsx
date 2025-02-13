@@ -24,7 +24,7 @@ export default function AccountsPage() {
         <AccountList accounts={accounts} />
         {
             accounts.length === 0 &&
-            <Title order={2} align="center">no accounts yet</Title>
+            <Title order={2} ta="center">no accounts yet</Title>
         }
         <Button fullWidth mt='sm' loading={loading}
             onClick={() => {
@@ -40,7 +40,7 @@ export default function AccountsPage() {
         <Grid mb='sm' grow>
             {
                 currencies.map((curr, i) => (
-                    <Grid.Col md={4} sm={6} xs={12} key={i}>
+                    <Grid.Col span={{md:3, sm:6, xs:12}} key={i}>
                         <CurrencyCard currency={curr} />
                     </Grid.Col>
                 ))

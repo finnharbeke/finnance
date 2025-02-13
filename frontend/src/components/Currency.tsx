@@ -37,13 +37,13 @@ export function CurrencyForm({ ...others }: PaperProps) {
         <Title order={3}>add currency</Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
             <Grid align="flex-end">
-                <Grid.Col sm={6} xs={12}>
+                <Grid.Col span={{sm: 6, xs:12}}>
                     <TextInput label="currency code" {...form.getInputProps('code')} />
                 </Grid.Col>
-                <Grid.Col sm={6} xs={12}>
+                <Grid.Col span={{sm: 6, xs:12}}>
                     <NumberInput
                         label="decimals"
-                        precision={0}
+                        allowDecimal={false}
                         min={0}
                         max={4}
                         {...form.getInputProps('decimals')}

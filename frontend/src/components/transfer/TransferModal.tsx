@@ -38,7 +38,7 @@ const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: Transfer
 
     return <>
         <Grid align='flex-end'>
-            <Grid.Col span={12} sm={5} order={1}>
+            <Grid.Col span={{base: 12, sm: 5}} order={1}>
                 <AccountInput label="from" disabled={src_disabled}
                     {...form.getInputProps('src_id')} />
             </Grid.Col>
@@ -49,17 +49,17 @@ const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: Transfer
                     </Center>
                 </Grid.Col>
             }
-            <Grid.Col span={12} sm={5} order={4} orderXs={3}>
+            <Grid.Col span={{base: 12, sm: 5}} order={{base: 4, xs: 3}}>
                 <AccountInput label="to" disabled={dst_disabled}
                     {...form.getInputProps('dst_id')} />
             </Grid.Col>
-            <Grid.Col span={12} sm={5} order={3} orderXs={4}>
+            <Grid.Col span={{base: 12, sm: 5}} order={{base: 3, xs: 4}}>
                 <AmountInput withAsterisk
                     currency={src_curr}
                     {...form.getInputProps('src_amount')}
                 />
             </Grid.Col>
-            <Grid.Col span={3} sm={2} order={6} orderXs={5}>
+            <Grid.Col span={{base: 3, sm: 2}} order={{base: 6, xs: 5}}>
                 <Center>
                     <Switch color='red'
                         onLabel={<TbLock size={24} />}
@@ -69,7 +69,7 @@ const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: Transfer
                     />
                 </Center>
             </Grid.Col>
-            <Grid.Col span={9} sm={5} order={5} orderXs={6}>
+            <Grid.Col span={{base: 9, sm: 5}} order={{base: 5, xs: 6}}>
                 <AmountInput withAsterisk disabled={form.values.locked}
                     currency={dst_curr}
                     {...form.getInputProps('dst_amount')}
