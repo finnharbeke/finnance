@@ -17,7 +17,9 @@ const CurrencyInput = ({ hasDefault = true, onChange, value, ...props }: Currenc
 
     useEffect(() => {
         if (hasDefault && !setAlready && !value && onChange && query.data) {
-            onChange(query.data?.at(0)?.id.toString() ?? null);
+            let _val = query.data?.at(0)?.id.toString() ?? null;
+            let _label = query.data?.at(0)?.code;
+            _val && _label && onChange(_val, {label: _label, value: _val});
             setDefault();
         }
     // eslint-disable-next-line

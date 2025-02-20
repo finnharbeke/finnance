@@ -5,7 +5,7 @@ import { CurrencyQueryResult } from "../../types/Currency";
 interface AmountInputProps extends NumberInputProps {
     currency: CurrencyQueryResult | undefined
     onChange: (value: string | number) => void
-    value: number | ''
+    value?: number | ''
     showPrefix?: boolean
 }
 
@@ -19,17 +19,18 @@ export default function AmountInput(props: AmountInputProps) {
             setAmount(integral)
             :
             currency?.decimals === undefined ?
-                setAmount(integral)
+                integral && setAmount(integral)
                 :
-                setAmount(integral / (10 ** currency?.decimals))
+                integral && setAmount(integral / (10 ** currency?.decimals))
     }, [integral, currency])
 
     return <NumberInput
         decimalScale={currency?.decimals} hideControls
         min={0} step={0.1} // such that mobile has a . on keyboards
 
-        formatter={s => ((showPrefix && currency?.code && s && currency?.code + ' ') || '') + s}
-        parser={(value: string) => value.replace(/\D+\s/g, '').replace(',', '.')}
+        prefix={showPrefix ? currency?.code : ''}
+        // formatter={s => ((showPrefix && currency?.code && s && currency?.code + ' ') || '') + s}
+        // parser={(value: string) => value.replace(/\D+\s/g, '').replace(',', '.')}
 
         value={amount}
         onChange={(newVal) =>

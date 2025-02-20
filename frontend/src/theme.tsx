@@ -1,6 +1,7 @@
-import { createTheme, DefaultMantineColor, MantineColor, MantineColorsTuple, MantineThemeOverride, useMatches } from '@mantine/core';
+import { createTheme, DefaultMantineColor, MantineColor, MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 import { DateTime } from 'luxon';
 import useIsPhone from './hooks/useIsPhone';
+import { useMediaQuery } from '@mantine/hooks';
 
 type ExtendedCustomColors = DefaultMantineColor;
 
@@ -21,7 +22,7 @@ declare module '@mantine/core' {
 
 export const useCustomTheme = (): MantineThemeOverride => {
   const isPhone = useIsPhone();
-  const fullscreen = useMatches({ base: true, xs: false });
+  const fullscreen = useMediaQuery('(max-width: --mantine-breakpoint-xs)')
   return createTheme({
     colors: {
     },
