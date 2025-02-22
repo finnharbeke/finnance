@@ -1,4 +1,4 @@
-import { Button, TextInput } from "@mantine/core";
+import { Button, TextInput, Text, Divider } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useState } from "react";
 import { TemplateRequest, useAddTemplate, useTemplateForm } from "../../types/Template";
@@ -24,12 +24,17 @@ export const AddTemplateModal = (
     }
 
     return <form onSubmit={form.onSubmit(submitForm)}>
-        <TextInput label='template name' placeholder='my migros template'
+        <TextInput label='template name' placeholder='my migros template' withAsterisk
             {...form.getInputProps('desc')} />
+        <Text size='sm' c='dimmed' mt='xs'>
+            will open a transaction to add with your pre-filled values below, all fields are optional.
+        </Text>
+        <Divider mb='xs'/>
         {/* bad casting... */}
         <TransactionForm form={form as unknown as TransactionFormType}
             account_input={true}
             date_input={false}
+            template={true}
         />
         <Button fullWidth mt="md" type='submit' loading={loading} >
             add template

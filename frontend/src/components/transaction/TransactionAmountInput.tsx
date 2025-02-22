@@ -5,17 +5,16 @@ import { isRecord } from "../../types/Record";
 import { TransactionFormType } from "../../types/Transaction";
 import AmountInput from "../input/AmountInput";
 
-import classes from "../../styles/TransactionAmountInput.module.css";
-
 interface TransactionAmountInputProps {
     form: TransactionFormType
     currency?: CurrencyQueryResult
+    withAsterisk?: boolean
 }
 
-export default function TransactionAmountInput({ form, currency }: TransactionAmountInputProps) {
+export default function TransactionAmountInput({ form, currency, withAsterisk }: TransactionAmountInputProps) {
     return <Input.Wrapper
         label='amount'
-        withAsterisk
+        withAsterisk={withAsterisk}
     >
         <Grid>
             <Grid.Col span='auto'>
@@ -27,7 +26,8 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
             <Grid.Col span='content'>
                 <Button.Group>
                     <Button
-                        className={[classes.incExpButton, form.values.is_expense ? classes.incomeOff : classes.incomeOn].join(' ')}
+                        color='blue'
+                        variant={form.values.is_expense ? 'outline' : 'filled'}
                         onClick={() => {
                             if (form.values.is_expense) {
                                 form.values.items
@@ -39,7 +39,8 @@ export default function TransactionAmountInput({ form, currency }: TransactionAm
                         }}
                     ><TbPlus size={28} /></Button>
                     <Button
-                        className={[classes.incExpButton, form.values.is_expense ? classes.expenseOn : classes.expenseOff].join(' ')}
+                        color='red'
+                        variant={form.values.is_expense ? 'filled' : 'outline'}
                         onClick={() => {
                             if (!form.values.is_expense) {
                                 form.values.items

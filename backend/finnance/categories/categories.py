@@ -45,22 +45,22 @@ def flatten(category, children):
         ]
     ]
 
-def descs(is_expense: bool):
-    return [
-        flat
-        for cat in with_parent(None, is_expense)
-        for flat in flatten(**hierarchy(cat))
-    ]
+def group_descs(is_expense: bool):
+    return [dict(
+        group=cat.desc,
+        items = flatten(**hierarchy(cat))
+    ) for cat in with_parent(None, is_expense)]
+            
 
 @categories.route("/expenses")
 @login_required
 def expenses_descs():
-    return JSONModel.obj_to_api(descs(True))
+    return JSONModel.obj_to_api(group_descs(True))
 
 @categories.route("/incomes")
 @login_required
 def incomes_descs():
-    return JSONModel.obj_to_api(descs(False))
+    return JSONModel.obj_to_api(group_descs(False))
     
 @categories.route("/hierarchy/expenses")
 @login_required

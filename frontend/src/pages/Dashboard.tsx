@@ -5,10 +5,10 @@ import { AiOutlineThunderbolt } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import FinnanceLogo from "../components/FinnanceLogo";
 import AccountPills from "../components/account/AccountPills";
+import { NivoShell } from "../nivo/Nivo";
 import { Sunburst, SunburstSkeleton } from "../nivo/Sunburst";
 import { usePrefetch } from "../query";
 import { useCurrencies } from "../types/Currency";
-import { NivoShell } from "../nivo/Nivo";
 
 export default function DashboardPage() {
     const theme = useMantineTheme();
@@ -26,7 +26,7 @@ export default function DashboardPage() {
         <AccountPills />
         <Button color={theme.other.colors.quick} fullWidth
             onClick={() => spotlight.open()}
-            leftIcon={<AiOutlineThunderbolt size={24} />}
+            leftSection={<AiOutlineThunderbolt size={24} />}
         >
             quick access
         </Button>
@@ -52,7 +52,7 @@ export default function DashboardPage() {
                 :
                 <Skeleton height={height} my='sm' />
         }
-        <Center mt={75}>
+        <Center mt={75} mb='sm'>
             <FinnanceLogo opacity={0.1} size={200} />
         </Center>
     </>;

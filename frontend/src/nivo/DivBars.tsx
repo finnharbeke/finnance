@@ -86,7 +86,7 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
             markers={[{
                     axis: 'x',
                     value: 0,
-                    lineStyle: { stroke: theme.primaryColor, strokeWidth: 1 },
+                    lineStyle: { stroke: 'var(--mantine-primary-color-filled)', strokeWidth: 1 },
                 }]}
         />
     </Box>

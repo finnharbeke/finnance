@@ -25,10 +25,12 @@ export default function AmountInput(props: AmountInputProps) {
     }, [integral, currency])
 
     return <NumberInput
-        decimalScale={currency?.decimals} hideControls
+        decimalScale={currency?.decimals}
+        fixedDecimalScale
+        hideControls
         min={0} step={0.1} // such that mobile has a . on keyboards
 
-        prefix={showPrefix ? currency?.code : ''}
+        prefix={showPrefix ? currency?.code + ' ' : ''}
         // formatter={s => ((showPrefix && currency?.code && s && currency?.code + ' ') || '') + s}
         // parser={(value: string) => value.replace(/\D+\s/g, '').replace(',', '.')}
 

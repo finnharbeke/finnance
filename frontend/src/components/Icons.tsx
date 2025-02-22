@@ -40,7 +40,7 @@ export function PrimaryIcon(props: IconProps) {
 
 export function SecondaryIcon(props: IconProps) {
     return <MyIcon
-        variant='subtle'
+        variant='transparent'
         {...props}
     />
 }

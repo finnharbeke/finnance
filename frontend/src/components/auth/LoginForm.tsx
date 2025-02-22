@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useQueryClient } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import { TbChevronDown } from "react-icons/tb";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 import { handleAxiosError } from "../../query";
 import FinnanceLogo from "../FinnanceLogo";
@@ -66,7 +66,6 @@ export function LoginForm({ ...others }: LoginFormProps) {
     const [username, setUsername] = useState('');
     const [continued, setContinued] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation();
 
     const login = useLogin();
 
@@ -97,8 +96,9 @@ export function LoginForm({ ...others }: LoginFormProps) {
                     pwForm.setFieldError('password', "wrong password")
                 else {
                     queryClient.invalidateQueries();
-                    navigate(location.state?.from?.pathname || '/')
+                    navigate('/')
                 }
+                console.log('hello')
             },
             onSettled: () => setLoading(false)
         })
@@ -139,11 +139,11 @@ export function LoginForm({ ...others }: LoginFormProps) {
             </Text>
         </form>
         <form onSubmit={pwForm.onSubmit(handlePassword)}
-            hidden={continued}>
+            hidden={!continued}>
             <FormTop>
                 <Button onClick={reset}
-                    size='xs' variant='light' compact radius="lg"
-                    rightIcon={<TbChevronDown size={16} />}
+                    size='compact-xs' variant='light' radius="lg"
+                    rightSection={<TbChevronDown size={16} />}
                 >{username}</Button>
             </FormTop>
             <FocusTrap active={continued}>

@@ -1,6 +1,5 @@
 import { createTheme, DefaultMantineColor, MantineColor, MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 import { DateTime } from 'luxon';
-import useIsPhone from './hooks/useIsPhone';
 import { useMediaQuery } from '@mantine/hooks';
 
 type ExtendedCustomColors = DefaultMantineColor;
@@ -21,10 +20,21 @@ declare module '@mantine/core' {
 }
 
 export const useCustomTheme = (): MantineThemeOverride => {
-  const isPhone = useIsPhone();
-  const fullscreen = useMediaQuery('(max-width: --mantine-breakpoint-xs)')
+  const smaller_screen = useMediaQuery('(max-width: 36em)')
   return createTheme({
     colors: {
+      dark: [
+        '#C1C2C5',
+        '#A6A7AB',
+        '#909296',
+        '#5c5f66',
+        '#373A40',
+        '#2C2E33',
+        '#25262b',
+        '#1A1B1E',
+        '#141517',
+        '#101113',
+      ],
     },
     primaryColor: 'violet',
     primaryShade: { light: 4, dark: 8 },
@@ -36,6 +46,7 @@ export const useCustomTheme = (): MantineThemeOverride => {
       xxs: '3pt',
       xs: '6pt'
     },
+    defaultRadius: 'sm',
     other: {
       colors: {
         flow: 'grape',
@@ -54,7 +65,7 @@ export const useCustomTheme = (): MantineThemeOverride => {
           dateParser: (dateString: string) => {
             return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
           },
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         },
       },
       DatePickerInput: {
@@ -65,57 +76,57 @@ export const useCustomTheme = (): MantineThemeOverride => {
           dateParser: (dateString: string) => {
             return DateTime.fromFormat(dateString, 'dd.MM.yyyy').toJSDate()
           },
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         },
       },
       DateTimePicker: {
         defaultProps: {
           placeholder: "dd.mm.yyyy hh:mm",
           valueFormat: "DD.MM.YYYY HH:mm",
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         },
       },
       Select: {
         defaultProps: {
           searchable: true,
           clearable: true,
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         },
       },
       TextInput: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         }
       },
       NumberInput: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         }
       },
       Autocomplete: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         }
       },
       PasswordInput: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         }
       },
       ColorInput: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm',
-          disallowInput: isPhone
+          size: smaller_screen ? 'md' : 'sm',
+          disallowInput: smaller_screen
         }
       },
       TimeInput: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         }
       },
       Button: {
         defaultProps: {
-          size: isPhone ? 'md' : 'sm'
+          size: smaller_screen ? 'md' : 'sm'
         }
       },
       Switch: {
@@ -126,7 +137,7 @@ export const useCustomTheme = (): MantineThemeOverride => {
       Modal: {
         defaultProps: {
           size: 'lg',
-          fullScreen: fullscreen,
+          fullScreen: smaller_screen,
         }
       },
       ActionIcon: {

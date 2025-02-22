@@ -9,7 +9,7 @@ export const RemotesPage = () => {
     return <>
         <Title>remote transactions</Title>
         <Button color='pink' size='lg' fullWidth loading={loading} my='md'
-            leftIcon={<TbArrowWaveRightUp size={40} />}
+            leftSection={<TbArrowWaveRightUp size={40} />}
             onClick={() => {
                 setLoading(true);
                 addTransactionAction({ remote: true }).then(

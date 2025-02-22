@@ -36,7 +36,7 @@ export default function AccountPage() {
 
         </Flex>
         <Text fz="md">Tracking since {date_created.toRelative()}</Text>
-        <Button size="lg" my="md" fullWidth loading={loading} leftIcon={
+        <Button size="lg" my="md" fullWidth loading={loading} leftSection={
             <TbCirclePlus size={40} />
         } onClick={() => {
             setLoading(true);

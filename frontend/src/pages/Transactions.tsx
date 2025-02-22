@@ -9,7 +9,7 @@ export const TransactionsPage = () => {
     return <>
         <Title>all transactions</Title>
         <Button size='lg' fullWidth loading={loading} my='md'
-            leftIcon={<TbCirclePlus size={40} />}
+            leftSection={<TbCirclePlus size={40} />}
             onClick={() => {
                 setLoading(true);
                 addTransactionAction({}).then(

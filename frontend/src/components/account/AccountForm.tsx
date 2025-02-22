@@ -133,7 +133,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                 {
                     isPhone ?
                         <DatePickerInput
-                            popoverProps={{ withinPortal: !modal }}
+                            popoverProps={{ withinPortal: modal }}
                             label="tracking since"
                             withAsterisk={modal}
 
@@ -141,7 +141,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
                         />
                         :
                         <DateInput
-                            popoverProps={{ withinPortal: !modal }}
+                            popoverProps={{ withinPortal: modal }}
                             label="tracking since"
                             withAsterisk={modal}
 

@@ -42,7 +42,7 @@ const FlowPill = ({ flow }: { flow: FlowDeepQueryResult }) => {
 
     return <StandardPill {...{
         icon: flow.is_debt ? TbArrowWaveLeftUp : TbArrowWaveRightUp,
-        iconColor: theme.other.colors.flow,
+        iconColor: `var(--mantine-color-${theme.other.colors.flow}-filled)`,
         datetime: DateTime.fromISO(flow.trans.date_issued),
         amount,
         is_expense: flow.is_debt,

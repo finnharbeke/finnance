@@ -17,7 +17,7 @@ export default function FinnanceLogo({ inverted, text, size, color, link, ...oth
 
     const light = theme.colors.gray[1];
     const dark = theme.colors.gray[7];
-    color = color ?? theme.primaryColor;
+    color = color ?? 'var(--mantine-primary-color-filled)';
 
     const innance = {
         fill: inverted ? light : colorScheme === "dark" ? light : dark

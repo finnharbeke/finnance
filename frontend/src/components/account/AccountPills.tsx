@@ -31,11 +31,11 @@ export default function AccountPills() {
         {
             cols.length > 0 ?
                 <>
-                    <Grid mb={opened ? 0 : undefined} grow>
+                    <Grid mb={opened ? 'xs' : 0} grow>
                         {cols.slice(0, preview)}
                     </Grid>
                     <Collapse in={opened}>
-                        <Grid mt={0} grow>
+                        <Grid grow>
                             {cols.slice(preview)}
                         </Grid>
                     </Collapse>
@@ -53,7 +53,7 @@ export default function AccountPills() {
                 }
             }}
             label={more ?
-                <ActionIcon size="md">
+                <ActionIcon size="md" variant='transparent'>
                     {opened ? <TbChevronUp size={20} /> : <TbChevronDown size={20} />}
                 </ActionIcon>
                 : null
@@ -74,10 +74,7 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
 
     return <>
         <Button component={Link} to={`/accounts/${acc.id}`} fullWidth
-            style={{
-                justifyContent: 'space-between',
-                width: '100%'
-            }}
+            justify='space-between'
             color={beingDragged || draggedOver ? theme.other.colors.transfer : undefined}
             draggable
             onDragStart={(event: DragEvent) => {
@@ -105,15 +102,18 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
                 event.preventDefault();
                 addTransferAction({ source, dest: acc });
             }}
-        >
-            <Group gap='xs' wrap='nowrap'>
-                <ColorSwatch color={acc.color} size={isPhone ? 24 : 20} />
-                <Text align='left'>
-                    {acc.desc}
-                </Text>
-            </Group>
-            <Text align='right'>{saldo}</Text>
-        </Button >
+            leftSection={
+                <Group gap='xs' wrap='nowrap'>
+                    <ColorSwatch color={acc.color} size={isPhone ? 24 : 20} />
+                    <Text fw={600}>
+                        {acc.desc}
+                    </Text>
+                </Group>
+            }
+            rightSection={
+                <Text fw={600}>{saldo}</Text>
+            }
+        />
         <svg id="transferSVG" style={{ position: 'absolute', left: -1000 }}
             xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-arrows-left-right" width="32" height="32" viewBox="-8 -8 40 40" stroke={theme.white} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="20" fill={background} stroke="none" />

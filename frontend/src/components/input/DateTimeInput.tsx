@@ -11,21 +11,22 @@ interface DateTimeFormValues {
 interface DateTimeInputProps<T extends DateTimeFormValues> {
     form: UseFormReturnType<T, any>
     minDate?: Date
+    withAsterisk?: boolean
 }
 
-export default function DateTimeInput<T extends DateTimeFormValues>({ minDate, form }: DateTimeInputProps<T>) {
+export default function DateTimeInput<T extends DateTimeFormValues>({ minDate, form, withAsterisk }: DateTimeInputProps<T>) {
     const isPhone = useIsPhone();
     return <Group grow align='flex-start'>
         {isPhone ?
             <DatePickerInput
-                label="date" withAsterisk popoverProps={{ withinPortal: false }}
+                label="date" withAsterisk={withAsterisk} popoverProps={{ withinPortal: true }}
                 minDate={minDate}
                 maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}
             />
             :
             <DateInput
-                label="date" withAsterisk popoverProps={{ withinPortal: false }}
+                label="date" withAsterisk={withAsterisk} popoverProps={{ withinPortal: true }}
                 minDate={minDate}
                 maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}

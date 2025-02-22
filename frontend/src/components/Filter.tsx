@@ -63,7 +63,7 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
     return <>
         <Grid justify='space-between'>
             <Grid.Col span={{base: 12, sm: 'content'}} order={{base: 2, sm: 1}}>
-                <Button variant='default' onClick={toggle} leftIcon={
+                <Button variant='default' onClick={toggle} leftSection={
                     <TbFilter size={24}/>
                 }>filter
                 </Button>

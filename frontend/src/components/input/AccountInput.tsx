@@ -14,7 +14,7 @@ export default function AccountSelect({ include_remote = false, ...props }: Acco
     if (!query.isSuccess)
         return <Placeholder height={50} queries={[query]} />
     const accounts = query.data;
-    return <Select withAsterisk placeholder="select account"
+    return <Select placeholder="select account"
         searchable={!isPhone} label="account"
         data={accounts.map(
             acc => ({

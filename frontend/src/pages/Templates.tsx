@@ -10,7 +10,7 @@ export const TemplatesPage = () => {
     return <>
         <Title>templates</Title>
         <Button size='lg' fullWidth loading={loading} my='md'
-            leftIcon={<TbCirclePlus size={40} />}
+            leftSection={<TbCirclePlus size={40} />}
             onClick={() => {
                 setLoading(true);
                 addTemplateAction().then(

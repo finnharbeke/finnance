@@ -12,9 +12,10 @@ import CategoryInput from "../input/CategoryInput";
 
 interface FlowsNRecordsButtonProps extends ButtonProps {
     form: TransactionFormType
+    withAsterisk?: boolean
 }
 
-const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
+const FlowsNRecordsButtons = ({ form, withAsterisk, ...other }: FlowsNRecordsButtonProps) => {
     const { colorScheme } = useMantineColorScheme();
     return <Input.Wrapper
         label={
@@ -22,14 +23,14 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                 'add records'
                 : 'add records & flows | direct flow'
         }
-        withAsterisk
+        withAsterisk={withAsterisk}
         {...form.getInputProps('direct')}
     >
         <Grid>
             <Grid.Col span={{xs: 'auto', base: 12}}>
                 <Button
                     fullWidth variant={colorScheme === 'light' ? 'outline' : 'light'}
-                    leftIcon={
+                    leftSection={
                         form.values.is_expense ? <TbTrendingDown size={32} /> : <TbTrendingUp size={32} />
                     }
                     disabled={form.values.direct}
@@ -48,7 +49,7 @@ const FlowsNRecordsButtons = ({ form, ...other }: FlowsNRecordsButtonProps) => {
                 <Grid.Col span='auto'>
                     <Button
                         fullWidth variant={colorScheme === 'light' ? 'outline' : 'light'}
-                        leftIcon={<TbArrowWaveRightUp size={32} />}
+                        leftSection={<TbArrowWaveRightUp size={32} />}
                         disabled={form.values.direct} color='pink'
                         onClick={() => {
                             form.clearFieldError('direct');
@@ -82,13 +83,14 @@ interface FlowInputProps {
     form: TransactionFormType
     i: number
     currency?: CurrencyQueryResult
+    withAsterisk?: boolean
 }
 
-const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
+const FlowInput = ({ form, i, flow, currency, withAsterisk }: FlowInputProps) =>
     <Grid>
         <Grid.Col span={4}>
             <AmountInput
-                label={`#${i} flow`} withAsterisk
+                label={`#${i} flow`} withAsterisk={withAsterisk}
                 showPrefix={false}
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
@@ -100,7 +102,7 @@ const FlowInput = ({ form, i, flow, currency }: FlowInputProps) =>
             />
         </Grid.Col>
         <Grid.Col span='auto'>
-            <AgentInput label='agent' withAsterisk comboboxProps={{ withinPortal: false }} placeholder={`agent #${flow.ix}`}
+            <AgentInput label='agent' withAsterisk comboboxProps={{ withinPortal: true }} placeholder={`agent #${flow.ix}`}
                 {...form.getInputProps(`items.${i}.agent`)}
             />
         </Grid.Col>
@@ -124,14 +126,14 @@ interface RecordInputProps {
     form: TransactionFormType
     i: number
     currency?: CurrencyQueryResult
+    withAsterisk?: boolean
 }
 
-const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
+const RecordInput = ({ form, record, currency, i, withAsterisk }: RecordInputProps) =>
     <Grid>
         <Grid.Col span={4}>
             <AmountInput
-                label={`#${i} record`} withAsterisk
-                showPrefix={false}
+                label={`#${i} record`} withAsterisk={withAsterisk}
                 currency={currency}
                 {...form.getInputProps(`items.${i}.amount`)}
                 onChange={val => {
@@ -143,7 +145,7 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
         </Grid.Col>
         <Grid.Col span='auto'>
             <CategoryInput is_expense={form.values.is_expense}
-                label='category' withAsterisk comboboxProps={{ withinPortal: false }} must_be_usable
+                label='category' withAsterisk={withAsterisk} comboboxProps={{ withinPortal: true }} must_be_usable
                 placeholder={`category #${record.ix}`}
                 {...form.getInputProps(`items.${i}.category_id`)}
             />
@@ -168,9 +170,10 @@ const RecordInput = ({ form, record, currency, i }: RecordInputProps) =>
 interface FlowsNRecordsProps {
     form: TransactionFormType
     currency?: CurrencyQueryResult
+    withAsterisk?: boolean
 }
 
-const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) => {
+const FlowsNRecordsInput = ({ form, currency, withAsterisk }: FlowsNRecordsProps) => {
     const [hidden, setHidden] = useState(false);
 
     useEffect(() => {
@@ -185,9 +188,9 @@ const FlowsNRecordsInput = ({ form, currency }: FlowsNRecordsProps) => {
         {
             !form.values.direct && form.values.items.map((data, i) =>
                 isFlow(data) ?
-                    <FlowInput form={form} currency={currency} flow={data} i={i} key={i} />
+                    <FlowInput form={form} currency={currency} flow={data} withAsterisk={withAsterisk} i={i} key={i} />
                     :
-                    <RecordInput form={form} currency={currency} record={data} i={i} key={i} />
+                    <RecordInput form={form} currency={currency} record={data} withAsterisk={withAsterisk} i={i} key={i} />
             )
         }
         {

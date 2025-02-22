@@ -1,4 +1,4 @@
-import { Center, Grid, GridProps, MantineColor, Popover, Text, TextProps, Tooltip, useMantineTheme, lighten, useMantineColorScheme, GridColProps, useMatches } from "@mantine/core";
+import { Center, Grid, GridProps, Popover, Text, TextProps, Tooltip, useMantineTheme, lighten, useMantineColorScheme, GridColProps, useMatches } from "@mantine/core";
 import { DateTime } from "luxon";
 import { useRef } from "react";
 import { IconType } from "react-icons";
@@ -74,7 +74,7 @@ export const DataPill = ({ cells, ...props }: DataPillProps) => {
         sm: 'xs'
     });
     const { pill } = classes;
-    return <Grid gutter={2} p={1} columns={24} align='stretch'
+    return <Grid gutter={2} p={2} columns={24} align='stretch'
         mb={mb} className={pill}
         {...props}>
         {
@@ -104,7 +104,7 @@ const TextCell = ({ text, link, p, ...others }: TextCellProps) => {
     const isPhone = useIsPhone();
     const ref = useRef<HTMLDivElement>(null);
     const over = useIsOverflow(ref, text);
-    const { textCell } = classes;
+    const { textCell, cell } = classes;
     const content =
         <Text ref={ref} className={textCell} {...others}>
             {
@@ -113,7 +113,7 @@ const TextCell = ({ text, link, p, ...others }: TextCellProps) => {
             }
         </Text>
     const w = 250;
-    return <Center style={{
+    return <Center className={cell} style={{
         paddingTop: p, paddingBottom: p
     }}>{
         isPhone ?
@@ -146,18 +146,18 @@ const EditCell = ({ onEdit }: EditCellProps) => {
 interface IconCellProps {
     style?: React.CSSProperties
     onClick?: () => void
-    className?: string
     icon: IconType
 }
 
-const IconCell = ({ style, icon, onClick, className }: IconCellProps) =>
-    <Center style={style} onClick={onClick} className={className}>
+const IconCell = ({ style, icon, onClick }: IconCellProps) => {
+    const { cell } = classes;
+    return <Center style={style} onClick={onClick} className={cell}>
         {icon({ size: 24 })}
     </Center>
-
+}
 interface StandardPillProps {
     icon: IconType
-    iconColor: MantineColor
+    iconColor: string
     datetime: DateTime
     amount: string
     is_expense: boolean
@@ -235,7 +235,7 @@ export const StandardPill = (props: StandardPillProps) => {
         {
             type: 'text',
             col: {
-                span: comment === '' ? -1 : 24, order: 6
+                span: 24, order: 6, hidden: comment === ''
             },
             cell: {
                 align: 'left',
@@ -331,7 +331,7 @@ export const SaldoPill = (props: SaldoPillProps) => {
         {
             type: 'text',
             col: {
-                span: comment === '' ? -1 : 24, order: 7
+                span: 24, order: 7, hidden: comment === ''
             },
             cell: {
                 align: 'left',
@@ -427,7 +427,7 @@ export const TwoLabelPill = (props: TwoLabelPillProps) => {
         {
             type: 'text',
             col: {
-                span: comment === '' ? -1 : 24, order: 7
+                span: 24, order: 7, hidden: comment === '' 
             },
             cell: {
                 align: 'left',

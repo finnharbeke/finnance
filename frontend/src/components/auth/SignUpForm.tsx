@@ -1,7 +1,7 @@
-import { Button, Card, Flex, FocusTrap, PasswordInput, TextInput, Title, useMatches } from "@mantine/core";
+import { Button, Card, Flex, FocusTrap, PasswordInput, TextInput, Title, useMatches, Text, Anchor } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FinnanceLogo from "../FinnanceLogo";
 import { LoginFormProps } from "./LoginForm";
 import { emailExists, useRegister, usernameExists } from "./api";
@@ -87,10 +87,17 @@ export function SignUpForm({ ...others }: LoginFormProps) {
             <PasswordInput label="password" radius="lg" variant="filled" {...form.getInputProps('password')} />
             <PasswordInput label="repeat password" radius="lg" variant="filled" {...form.getInputProps('passwordCheck')} />
             <Button
-                type="submit" radius="lg" mt='sm'
+                type="submit" radius="lg" my='sm'
                 fullWidth
                 loading={loading}
             >sign up</Button>
+            
         </form>
+        <Text fz='sm' align='center'>
+            you already have an account?
+            <Anchor component={Link} ml='xs' to='/login'>
+                log in
+            </Anchor>
+        </Text>
     </Card>
 }

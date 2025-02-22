@@ -42,9 +42,9 @@ const RecordPill = ({ record }: { record: RecordDeepQueryResult }) => {
 
     return <StandardPill {...{
         icon: record.category.is_expense ? TbTrendingDown : TbTrendingUp,
-        iconColor: record.category.is_expense ?
-                theme.other.colors.expense :
-                theme.other.colors.income,
+        iconColor: `var(--mantine-color-${record.category.is_expense ?
+            theme.other.colors.expense :
+            theme.other.colors.income}-filled)`,
         datetime: DateTime.fromISO(record.trans.date_issued),
         amount,
         is_expense: record.category.is_expense,

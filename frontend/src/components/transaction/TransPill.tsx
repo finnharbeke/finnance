@@ -46,7 +46,9 @@ const TransPill = ({ trans }: { trans: TransactionDeepQueryResult }) => {
 
     return <TwoLabelPill {...{
         icon: trans.is_expense ? TbMinus : TbPlus,
-        iconColor: trans.is_expense ? 'red' : 'blue',
+        iconColor: `var(--mantine-color-${
+            trans.is_expense ? theme.other.colors.expense : theme.other.colors.income
+        }-filled)`,
         datetime: DateTime.fromISO(trans.date_issued),
         amount,
         is_expense: trans.is_expense,

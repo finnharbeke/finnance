@@ -1,4 +1,4 @@
-import { Collapse, ColorSwatch, Grid, Group, Paper, TextInput, Title } from "@mantine/core";
+import { Center, Collapse, ColorSwatch, Flex, Group, Paper, TextInput, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { TbChevronDown, TbChevronRight, TbChevronUp, TbDeviceFloppy, TbRotate2 } from "react-icons/tb";
 import useIsPhone from "../../hooks/useIsPhone";
@@ -39,50 +39,45 @@ export default function CategoryEdit(props: OrderCellProps<CategoryHierarchyQuer
 
     return <Paper p='xs'>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Grid gutter={isPhone ? 'xs' : undefined} align='center'>
-                <Grid.Col span='content'>
-                    <SecondaryIcon
-                        icon={open ? TbChevronDown : TbChevronRight}
-                        onClick={toggle}
-                    />
-                </Grid.Col>
-                <Grid.Col span='content'>
+            <Flex gap={isPhone ? 'xs' : 'sm'}>
+                <SecondaryIcon
+                    icon={open ? TbChevronDown : TbChevronRight}
+                    onClick={toggle}
+                    style={{ flexGrow: 0 }}
+                />
+                <Center style={{ flexGrow: 0 }}>
                     <ColorSwatch color={form.values.color} size={20} />
-                </Grid.Col>
-                <Grid.Col span='auto'>
-                    {open ?
-                        <TextInput {...form.getInputProps('desc')} />
-                        :
-                        // <Link to={`${data.id}`} className={classes.AccountLink}>
-                        <Title order={3} lineClamp={1} >
-                            {form.values.desc}
-                        </Title>
-                        // </Link>
+                </Center>
+                {open ?
+                    <TextInput {...form.getInputProps('desc')} style={{ flexGrow: 1 }} />
+                    :
+                    // <Link to={`${data.id}`} className={classes.AccountLink}>
+                    <Title order={3} lineClamp={1} style={{ flexGrow: 1 }} >
+                        {form.values.desc}
+                    </Title>
+                    // </Link>
+                }
+                <Group justify='fley-end' gap='xs' style={{ flexGrow: 0 }}>
+                    {
+                        form.isDirty() &&
+                        <>
+                            <PrimaryIcon type='submit' icon={TbDeviceFloppy} loading={editing}
+                                tooltip='save'
+                            />
+                            <RedIcon icon={TbRotate2}
+                                onClick={() => form.setValues(initials)}
+                                tooltip='discard'
+                            />
+                        </>
                     }
-                </Grid.Col>
-                <Grid.Col span='content'>
-                    <Group justify='fley-end' gap='xs'>
-                        {
-                            form.isDirty() &&
-                            <>
-                                <PrimaryIcon type='submit' icon={TbDeviceFloppy} loading={editing}
-                                    tooltip='save'
-                                />
-                                <RedIcon icon={TbRotate2}
-                                    onClick={() => form.setValues(initials)}
-                                    tooltip='discard'
-                                />
-                            </>
-                        }
-                        <SecondaryIcon icon={TbChevronUp}
-                            onClick={() => moveUp(ix)}
-                        />
-                        <SecondaryIcon icon={TbChevronDown}
-                            onClick={() => moveDown(ix)}
-                        />
-                    </Group>
-                </Grid.Col>
-            </Grid>
+                    <SecondaryIcon icon={TbChevronUp}
+                        onClick={() => moveUp(ix)}
+                    />
+                    <SecondaryIcon icon={TbChevronDown}
+                        onClick={() => moveDown(ix)}
+                    />
+                </Group>
+            </Flex>
             <Collapse in={open}>
                 <CategoryForm form={form} modal={false}
                     is_expense={category.is_expense}

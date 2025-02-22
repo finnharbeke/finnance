@@ -8,6 +8,7 @@ import { useAuth } from "../components/auth/api";
 import { useAccounts } from "../types/Account";
 import { useTemplates } from "../types/Template";
 import { addTransactionAction, addTransferAction } from "./actions";
+import { useDisclosure } from "@mantine/hooks";
 
 export const FinnanceSpotlight = () => {
     const theme = useMantineTheme();
@@ -19,34 +20,35 @@ export const FinnanceSpotlight = () => {
 
     const [baseActions, ] = useState<SpotlightActionData[]>([{
         id: 'goto-account',
-        title: 'go to account',
+        label: 'go to account',
         onClick: () => setQuery('goto '),
         leftSection: <TbMoneybag size="1.2rem" />,
         closeSpotlightOnTrigger: false
     }, {
         id: 'add-transaction',
-        title: 'add transaction',
+        label: 'add transaction',
         onClick: () => addTransactionAction({}),
         leftSection: <TbCirclePlus size="1.2rem"
-            color={theme.primaryColor}
+            color='var(--mantine-primary-color-filled)'
         />,
     }, {
         id: 'add-transfer',
-        title: 'add account transfer',
+        label: 'add account transfer',
         onClick: () => addTransferAction({}),
         leftSection: <TbArrowsRightLeft size="1.2rem"
-        color={theme.other.colors.transfer}
+        color={`var(--mantine-color-${theme.other.colors.transfer}-filled)`}
         />,
     }]);
 
     const [actions, setActions] = useState<SpotlightActionData[]>(baseActions);
+    const [appended, { open }] = useDisclosure(false);
 
     useEffect(() => {
-        tempQuery.isSuccess && accQuery.isSuccess &&
+        if (tempQuery.isSuccess && accQuery.isSuccess && !appended) {
             setActions(baseActions.concat(
                 tempQuery.data.map<SpotlightActionData>(t => ({
                     id: `template-${t.id}`,
-                    title: `${t.desc}`,
+                    label: `${t.desc}`,
                     onClick: () => addTransactionAction({
                         template: t
                     }),
@@ -56,14 +58,16 @@ export const FinnanceSpotlight = () => {
                 })).concat(
                     accQuery.data.map<SpotlightActionData>(a => ({
                         id: `account-${a.id}`,
-                        title: `${a.desc}`,
+                        label: `${a.desc}`,
                         onClick: () => navigate(`accounts/${a.id}`),
                         leftSection: <TbCoins size="1.2rem" />,
                         keywords: ['goto', `goto ${a.desc}`]
                     }))
                 )
-            ))
-    }, [accQuery, tempQuery, theme, navigate, baseActions])
+            ));
+            open();
+        }
+    }, [accQuery, tempQuery, theme, navigate, baseActions, appended, open])
 
     return <Spotlight
         disabled={!auth.isSuccess || !auth.data.auth}

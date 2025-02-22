@@ -14,8 +14,6 @@ import { CurrencyQueryResult, useCurrency } from "../types/Currency"
 import { LineSkeleton } from "./Line"
 import { NivoComponentProps, NivoRequest } from "./Nivo"
 
-import classes from "../styles/DataPill.module.css"
-
 interface CategoryData {
     category: CategoryQueryResult
     total: number
@@ -84,7 +82,6 @@ interface CategoryPillProps {
 }
 
 const CategoryPill = ({ data: { category, children, total }, currency, sorted }: CategoryPillProps) => {
-    const { edit } = classes;
     const amount = useAmount(total, currency);
     const [down, { toggle }] = useDisclosure(false)
     return <>
@@ -96,7 +93,7 @@ const CategoryPill = ({ data: { category, children, total }, currency, sorted }:
                 },
                 cell: {
                     icon: () => <></>,
-                    style: { backgroundColor: category.color }
+                    style: { backgroundColor: category.color, height: '100%' }
                 }
             },
             {
@@ -126,8 +123,8 @@ const CategoryPill = ({ data: { category, children, total }, currency, sorted }:
                 },
                 cell: {
                     icon: children.length ? (down ? TbChevronUp : TbChevronDown) : () => <></>,
-                    className: edit,
-                    onClick: toggle
+                    onClick: toggle,
+                    style: { height: '100%' }
                 }
             },
         ]} />

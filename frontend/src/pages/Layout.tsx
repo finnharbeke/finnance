@@ -1,6 +1,7 @@
-import { AppShell, Avatar, Burger, Container, Flex, Grid, Group, Loader, NavLink, NavLinkProps, ScrollArea, Stack, Text, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { AppShell, Avatar, Burger, Button, Container, Group, Loader, NavLink, NavLinkProps, ScrollArea, Stack, Text, useMantineColorScheme, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
+import { useEffect } from 'react';
 import { AiOutlineThunderbolt } from 'react-icons/ai';
 import { TbArrowWaveRightUp, TbChartDonut, TbCoins, TbColorFilter, TbHistory, TbHome, TbList, TbLogout, TbMoneybag, TbReceipt, TbReceiptRefund, TbTemplate } from 'react-icons/tb';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -11,35 +12,42 @@ import { LightDarkToggle } from '../components/LightDarkToggle';
 import useIsPhone from '../hooks/useIsPhone';
 import { useCurrentUser } from '../query';
 import { useAccounts } from '../types/Account';
-import { useEffect } from 'react';
 
 export const PublicLayout = () =>
     <AppShell header={{ height: 60 }} padding='lg'>
         <PublicHeader />
-        <Container>
-            <Outlet />
-        </Container>
+        <AppShell.Main>
+            <Container>
+                <Outlet />
+            </Container>
+        </AppShell.Main>
     </AppShell>
 
 
 export const AuthLayout = () => {
     const location = useLocation();
 
-    const [open, { toggle, close }] = useDisclosure(false);
+    const [mobileOpen, { toggle: mobileToggle, close: mobileClose }] = useDisclosure(false);
+    const [desktopOpen, { toggle: desktopToggle, close: desktopClose }] = useDisclosure(false);
 
-    useEffect(() => close(), [location.pathname, close]);
+    useEffect(() => { mobileClose(); desktopClose(); }, [location.pathname, mobileClose, desktopClose]);
 
     return <AppShell
         header={{height: 60}}
-        navbar={{breakpoint: 30000, width: { xs: 300  }}}
+        navbar={{
+            breakpoint: 'sm', width: { xs: 300  },
+            collapsed: { mobile: !mobileOpen, desktop: !desktopOpen }
+        }}
         // padding='lg'
         padding={0}
     >
-        <AuthNavbar open={open} />
-        <AuthHeader {...{ open, toggle }} />
-        <Container mt='md'>
-            <Outlet />
-        </Container>
+        <AuthNavbar/>
+        <AuthHeader {...{ mobileOpen, mobileToggle, desktopOpen, desktopToggle }} />
+        <AppShell.Main>
+            <Container mt='md'>
+                <Outlet />
+            </Container>
+        </AppShell.Main>
         <FinnanceSpotlight />
     </AppShell>
 }
@@ -51,33 +59,20 @@ const PublicHeader = () =>
         </Group>
     </AppShell.Header>
 
-const AuthHeader = ({ open, toggle }: { open: boolean, toggle: () => void }) => {
+const AuthHeader = ({ mobileOpen, mobileToggle, desktopOpen, desktopToggle }: {
+        mobileOpen: boolean, mobileToggle: () => void, desktopOpen: boolean, desktopToggle: () => void
+    }) => {
     const theme = useMantineTheme();
     const isPhone = useIsPhone();
     return <AppShell.Header p='sm'>
-        <Grid>
-            <Grid.Col span={2}>
-                <Burger
-                    opened={open}
-                    onClick={toggle}
-                    size="sm"
-                />
-            </Grid.Col>
-            <Grid.Col span={8}>
-                <FinnanceLogo text link size={32} />
-            </Grid.Col>
-            <Grid.Col span={2}>
-                {/* align to the right */}
-                {
-                    isPhone &&
-                    <Flex direction='row-reverse'>
-                        <MyIcon icon={AiOutlineThunderbolt} color={theme.other.colors.quick}
-                            onClick={() => spotlight.open()} radius='xl'
-                            variant='light' />
-                    </Flex>
-                }
-            </Grid.Col>
-        </Grid>
+        <Group justify='space-between'>
+            <Burger opened={mobileOpen} onClick={mobileToggle} hidden={!isPhone} size="sm"/>
+            <Burger opened={desktopOpen} onClick={desktopToggle} hidden={isPhone} size="sm"/>
+            <FinnanceLogo text link size={32} />
+            <MyIcon icon={AiOutlineThunderbolt} color={theme.other.colors.quick}
+                onClick={() => spotlight.open()} radius='xl'
+                variant='light' />
+        </Group>
     </AppShell.Header>
 }
 
@@ -87,17 +82,15 @@ interface MyNavLinkProps extends NavLinkProps {
 }
 
 const NavbarLink = ({ to, links, ...others }: MyNavLinkProps) => {
-    const theme = useMantineTheme();
     const navigate = useNavigate();
     const { pathname: location } = useLocation();
 
-    return <NavLink my='xs'
+    return <NavLink
         onClick={() => {
             if (!to)
                 return
             navigate(to)
         }}
-        style={{ borderRadius: theme.defaultRadius }}
         active={
             location === to
             // (to !== undefined && location.startsWith(to) && location.charAt(to.length) === "/")
@@ -110,7 +103,7 @@ const NavbarLink = ({ to, links, ...others }: MyNavLinkProps) => {
     </NavLink>
 }
 
-const AuthNavbar = ({ open }: { open: boolean }) => {
+const AuthNavbar = () => {
     const query = useCurrentUser();
     const accsQuery = useAccounts();
     const theme = useMantineTheme();
@@ -159,8 +152,8 @@ const AuthNavbar = ({ open }: { open: boolean }) => {
         { to: "/logout", label: "logout", leftSection: <TbLogout size='1.5rem' /> }
     ]
 
-    return <AppShell.Navbar p='xs' hidden={!open}>
-        <AppShell.Section grow component={ScrollArea} mx="-xs" px="xs">
+    return <AppShell.Navbar>
+        <AppShell.Section grow component={ScrollArea}>
             {FinnanceLinks.map((data, i) => <NavbarLink key={i} {...data} />)}
         </AppShell.Section>
         <AppShell.Section style={{

@@ -55,10 +55,10 @@ const ChangePill = ({ change }: { change: Change }) => {
         icon: isTransfer ? TbArrowsLeftRight :
             isExpense ?
                 TbMinus : TbPlus,
-        iconColor: theme.other.colors[
+        iconColor: `var(--mantine-color-${theme.other.colors[
             isTransfer ? 'transfer'
                 : isExpense ? 'expense' : 'income'
-        ],
+        ]}-filled)`,
         datetime: DateTime.fromISO(change.data.date_issued),
         amount, is_expense: isExpense, saldo,
         label: {

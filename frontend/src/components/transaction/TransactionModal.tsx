@@ -21,10 +21,11 @@ interface TransactionFormProps {
     date_input?: boolean
     minDate?: Date
     form: TransactionFormType
+    template?: boolean
 }
 
 export const TransactionForm = (props: TransactionFormProps) => {
-    const { edit = false, account_input = false, minDate, form, date_input = true } = props;
+    const { edit = false, account_input = false, minDate, form, date_input = true, template = false } = props;
     const currQuery = useCurrencies();
     const accQuery = useAccounts();
 
@@ -56,19 +57,19 @@ export const TransactionForm = (props: TransactionFormProps) => {
     return <>
         {
             (edit || account_input) &&
-            <AccountSelect include_remote
+            <AccountSelect include_remote withAsterisk={!template}
                 {...form.getInputProps('account_id')}
             />
         }
         {
             form.values.account_id === 'remote' &&
-            <AgentInput label='transaction via' withAsterisk placeholder="my friend tom"
+            <AgentInput label='transaction via' withAsterisk={!template} placeholder="my friend tom"
                 {...form.getInputProps('remote_agent')}
             />
         }
         {
             (form.values.account_id === 'remote' || form.values.account_id === null) &&
-            <CurrencyInput label='currency' withAsterisk hasDefault
+            <CurrencyInput label='currency' withAsterisk={!template} hasDefault
                 {...form.getInputProps('currency_id')}
             />
         }
@@ -79,14 +80,14 @@ export const TransactionForm = (props: TransactionFormProps) => {
         }
         {
             date_input &&
-            <DateTimeInput form={form} minDate={minDate} />
+            <DateTimeInput form={form} minDate={minDate} withAsterisk={!template} />
         }
-        <AmountInput form={form} currency={currency} />
-        <AgentInput label='agent' withAsterisk comboboxProps={{ withinPortal: false }}
+        <AmountInput form={form} currency={currency} withAsterisk={!template} />
+        <AgentInput label='agent' withAsterisk={!template} comboboxProps={{ withinPortal: true }}
             {...form.getInputProps('agent')}
         />
         <Divider mt='sm' />
-        <FlowsNRecordsInput form={form} currency={currency} />
+        <FlowsNRecordsInput form={form} currency={currency} withAsterisk={!template} />
         <Divider mt='sm' />
         <TextInput label='comment' {...form.getInputProps('comment')} />
     </>
