@@ -21,14 +21,12 @@ export default function DateTimeInput<T extends DateTimeFormValues>({ minDate, f
             <DatePickerInput
                 label="date" withAsterisk={withAsterisk} popoverProps={{ withinPortal: true }}
                 minDate={minDate}
-                maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}
             />
             :
             <DateInput
                 label="date" withAsterisk={withAsterisk} popoverProps={{ withinPortal: true }}
                 minDate={minDate}
-                maxDate={DateTime.now().toJSDate()}
                 {...form.getInputProps('date')}
             />
         }
