@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY package*.json .
 COPY tsconfig.json .
-RUN npm ci
+RUN npm ci --verbose --no-audit
 
 COPY public/ public
 COPY src/ src
