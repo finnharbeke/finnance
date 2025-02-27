@@ -12,7 +12,7 @@ records = Blueprint('records', __name__, url_prefix='/api/records')
 @login_required
 def get_records():
     kwargs = parseSearchParams(request.args.to_dict(), dict(
-        start=datetime, end=datetime, search=str
+        start=datetime, end=datetime, search=str, categories=str
     ))
 
     result = Record.query.join(Transaction).filter_by(user_id=current_user.id).order_by(Transaction.date_issued.desc())
@@ -20,7 +20,10 @@ def get_records():
         result = result.filter(Transaction.date_issued >= kwargs.get('start'))
     if 'end' in kwargs:
         result = result.filter(Transaction.date_issued < kwargs.get('end'))
-    
+    if 'categories' in kwargs:
+        categories_ids = [int(i) for i in kwargs.get('categories').strip().split(',')]
+        result = result.filter(Record.category_id.in_(categories_ids))
+
     pagesize = kwargs.get('pagesize')
     page = kwargs.get('page')
 

@@ -52,7 +52,7 @@ export const useCurrentUser = () =>
     useQuery<UserQueryResult, AxiosError>({ queryKey: ["auth", "me"] });
 
 export interface searchParamsProps {
-    [key: string]: string | number | boolean | undefined | null
+    [key: string]: string | number | boolean | string[] | undefined | null
 }
 
 export const searchParams = (props: searchParamsProps) => {

@@ -18,7 +18,7 @@ export function FilterableRecords() {
 
     return <>
         <RecordPills records={query.data?.records} />
-        <FilterPagination filter={filter} setFilter={setFilter} pages={query.data?.pages} />
+        <FilterPagination filter={filter} setFilter={setFilter} pages={query.data?.pages} categorySearch={true} />
     </>
 }
 

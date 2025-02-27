@@ -6,9 +6,10 @@ import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { TbFilter } from "react-icons/tb";
 import { searchParamsProps } from "../query";
-
+import CategoryMultipleInput from "./input/CategoryMultipleInput";
 interface FilterFormValues {
     search: string | undefined
+    categories: string[] | undefined
     start: Date | undefined
     end: Date | undefined
 }
@@ -17,6 +18,7 @@ export interface FilterRequest extends searchParamsProps {
     page: number
     pagesize: 10
     search?: string | undefined
+    categories?: string[] | undefined
     start?: string | undefined
     end?: string
 }
@@ -36,18 +38,21 @@ export const useFilterPagination:
 interface FilterPaginationProps {
     filter: FilterRequest,
     setFilter: React.Dispatch<React.SetStateAction<FilterRequest>>,
-    pages: number | undefined
+    pages: number | undefined,
+    categorySearch?: boolean
 }
 
-export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationProps) => {
+export const FilterPagination = ({ filter, setFilter, pages, categorySearch = false }: FilterPaginationProps) => {
     const form = useForm<FilterFormValues, FilterFormTransform>({
         transformValues: fv => ({
             ...filter,
             search: fv.search,
+            categories: fv.categories ? fv.categories : undefined,
             start: fv.start ? DateTime.fromJSDate(fv.start).toISO({ includeOffset: false }) : undefined,
             end: fv.end ? DateTime.fromJSDate(fv.end).toISO({ includeOffset: false }) : undefined
         })
     });
+
     useEffect(() => {
         if (!!pages && pages <= filter.page)
             setFilter({
@@ -77,7 +82,9 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
         </Grid>
         <Collapse in={open} pt='sm'>
             <form onSubmit={form.onSubmit(setFilter)}>
+            {/* <form onSubmit={form.onSubmit(() => form.values.categories)}> */}
                 <TextInput label='search' {...form.getInputProps('search')} />
+                {categorySearch && <CategoryMultipleInput label='categories' {...form.getInputProps('categories')} clearable/>}
                 <DateTimePicker label='min date' {...form.getInputProps('start')} clearable />
                 <DateTimePicker label='max date' {...form.getInputProps('end')} clearable />
                 <Button type='submit' fullWidth mt='sm'>apply</Button>
