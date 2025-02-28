@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { TbFilter } from "react-icons/tb";
 import { searchParamsProps } from "../query";
 import CategoryMultipleInput from "./input/CategoryMultipleInput";
+
 interface FilterFormValues {
     search: string | undefined
     categories: string[] | undefined
