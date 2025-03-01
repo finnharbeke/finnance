@@ -32,6 +32,7 @@ const CategoryMultipleInput = ({ ...others }) => {
         
     return <MultiSelect
         comboboxProps={{withinPortal: true}}
+        searchable
         data={data}
         {...others}
     />
