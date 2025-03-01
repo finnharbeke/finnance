@@ -18,7 +18,7 @@ export function FilterableTransactions(props: Partial<useTransactionsProps>) {
 
     return <>
         <TransPills transactions={query.data?.transactions} />
-        <FilterPagination filter={filter} setFilter={setFilter} pages={query.data?.pages} />
+        <FilterPagination filter={filter} setFilter={setFilter} pages={query.data?.pages} categorySearch />
     </>
 }
 

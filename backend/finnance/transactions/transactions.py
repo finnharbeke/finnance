@@ -26,7 +26,7 @@ def transaction(transaction_id: int):
 @login_required
 def get_transactions():
     kwargs = parseSearchParams(request.args.to_dict(), dict(
-        start=datetime, end=datetime, account_id=ModelID, search=str
+        start=datetime, end=datetime, account_id=ModelID, search=str, categories=str
     ))
 
     result = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date_issued.desc())
@@ -37,6 +37,11 @@ def get_transactions():
     if 'account_id' in kwargs:
         result = result.filter_by(account_id=kwargs['account_id'].id)
     
+    if 'categories' in kwargs:
+        categories_ids = [int(i) for i in kwargs.get('categories').strip().split(',')]
+        subq = Record.query.filter(Record.category_id.in_(categories_ids)).subquery()
+        result = result.join(subq)
+
     pagesize = kwargs.get('pagesize')
     page = kwargs.get('page')
 
