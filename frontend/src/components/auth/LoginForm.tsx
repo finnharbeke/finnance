@@ -92,13 +92,13 @@ export function LoginForm({ ...others }: LoginFormProps) {
         setLoading(true);
         login.mutate({ ...values, username }, {
             onSuccess: ({ data }) => {
-                if (!data.auth)
-                    pwForm.setFieldError('password', "wrong password")
-                else {
-                    queryClient.invalidateQueries();
-                    navigate('/')
-                }
-                console.log('hello')
+                queryClient.invalidateQueries(["auth"]).then(() => {
+                    if (!data.auth)
+                        pwForm.setFieldError('password', "wrong password")
+                    else {
+                        navigate('/')
+                    }
+                })
             },
             onSettled: () => setLoading(false)
         })

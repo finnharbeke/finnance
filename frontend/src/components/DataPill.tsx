@@ -1,4 +1,4 @@
-import { Center, Grid, GridProps, Popover, Text, TextProps, Tooltip, useMantineTheme, lighten, useMantineColorScheme, GridColProps, useMatches } from "@mantine/core";
+import { Center, Grid, GridColProps, GridProps, lighten, Popover, Text, TextProps, Tooltip, useComputedColorScheme, useMantineTheme, useMatches } from "@mantine/core";
 import { DateTime } from "luxon";
 import { useRef } from "react";
 import { IconType } from "react-icons";
@@ -172,7 +172,7 @@ export const StandardPill = (props: StandardPillProps) => {
         amount, is_expense, label,
         comment, onEdit
     } = props;
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     const theme = useMantineTheme();
     const lightIconColor = lighten(
         iconColor,
@@ -259,7 +259,7 @@ export const SaldoPill = (props: SaldoPillProps) => {
         label, comment, onEdit
     } = props;
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     const lightIconColor = lighten(
         iconColor,
         colorScheme === 'light' ? 0.4 : 0.1
@@ -350,7 +350,7 @@ interface TwoLabelPillProps extends StandardPillProps {
 
 export const TwoLabelPill = (props: TwoLabelPillProps) => {
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     const {
         icon, iconColor, datetime,
         amount, is_expense, label,

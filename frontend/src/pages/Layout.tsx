@@ -1,4 +1,4 @@
-import { AppShell, Avatar, Burger, Button, Container, Group, Loader, NavLink, NavLinkProps, ScrollArea, Stack, Text, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { AppShell, Avatar, Burger, Container, Group, Loader, NavLink, NavLinkProps, ScrollArea, Stack, Text, useComputedColorScheme, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { useEffect } from 'react';
@@ -54,9 +54,7 @@ export const AuthLayout = () => {
 
 const PublicHeader = () =>
     <AppShell.Header p='sm'>
-        <Group grow>
-            <FinnanceLogo text link size={32} />
-        </Group>
+        <FinnanceLogo text link size={32} />
     </AppShell.Header>
 
 const AuthHeader = ({ mobileOpen, mobileToggle, desktopOpen, desktopToggle }: {
@@ -107,7 +105,7 @@ const AuthNavbar = () => {
     const query = useCurrentUser();
     const accsQuery = useAccounts();
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
 
     const FinnanceLinks: Omit<MyNavLinkProps, 'close'>[] = [
         { to: "/", label: "home", leftSection: <TbHome size='1.5rem' /> },

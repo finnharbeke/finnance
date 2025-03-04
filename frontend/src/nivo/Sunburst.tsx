@@ -1,4 +1,4 @@
-import { lighten, Skeleton, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { lighten, Skeleton, useComputedColorScheme, useMantineTheme } from '@mantine/core';
 import { ResponsiveSunburst, SunburstCustomLayerProps } from '@nivo/sunburst';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -25,7 +25,7 @@ const useSunburstData = (props: NivoRequest) =>
 
 export const Sunburst = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     const nivo = useNivoTheme();
     const query = useSunburstData(request);
     const height = size.height || 500;
@@ -70,7 +70,7 @@ const MiddleNumber = ({ props: { nodes, centerX, centerY }, currency_id }:
     const query = useCurrency(currency_id);
     const amount = useAmount(total, query.data);
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     return <text
         x={centerX}
         y={centerY}

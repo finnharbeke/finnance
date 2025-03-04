@@ -1,10 +1,10 @@
-import { Button, Container, Group, Text, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { Button, Container, Group, Text, Title, useComputedColorScheme, useMantineTheme } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import useIsPhone from '../hooks/useIsPhone';
 
 export default function NotFound() {
   const theme = useMantineTheme();
-  const { colorScheme } = useMantineColorScheme();
+  const colorScheme = useComputedColorScheme();
   const isPhone = useIsPhone();
   return (
     <Container>

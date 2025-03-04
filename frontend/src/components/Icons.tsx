@@ -1,4 +1,4 @@
-import { ActionIcon, ActionIconProps, Tooltip, useMantineTheme, PolymorphicComponentProps, useMantineColorScheme } from "@mantine/core";
+import { ActionIcon, ActionIconProps, PolymorphicComponentProps, Tooltip, useComputedColorScheme, useMantineTheme } from "@mantine/core";
 import { IconType } from "react-icons/lib";
 
 interface IconProps extends PolymorphicComponentProps<"button", ActionIconProps> {
@@ -22,7 +22,7 @@ export function MyIcon({ icon, tooltip, iconSize = 20, ...others }: IconProps) {
 }
 
 export function RedIcon (props: IconProps) {
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     return <MyIcon
         color="red"
         variant={colorScheme === 'light' ? 'outline' : 'light'}

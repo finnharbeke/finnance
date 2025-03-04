@@ -1,4 +1,4 @@
-import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useMantineColorScheme } from "@mantine/core";
+import { Anchor, Button, ButtonProps, Collapse, Grid, Input, Switch, useComputedColorScheme } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { TbArrowWaveRightUp, TbEraser, TbTrendingDown, TbTrendingUp } from "react-icons/tb";
 import { CurrencyQueryResult } from "../../types/Currency";
@@ -16,7 +16,7 @@ interface FlowsNRecordsButtonProps extends ButtonProps {
 }
 
 const FlowsNRecordsButtons = ({ form, withAsterisk, ...other }: FlowsNRecordsButtonProps) => {
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     return <Input.Wrapper
         label={
             form.values.account_id === 'remote' ?

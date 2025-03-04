@@ -1,13 +1,13 @@
-import { Box, Paper, Stack, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { Box, Paper, Stack, Text, useComputedColorScheme, useMantineTheme } from "@mantine/core";
 import { Theme } from "@nivo/core";
+import { DateTime } from "luxon";
 import useAmount from "../hooks/useAmount";
 import { searchParamsProps } from "../query";
 import { useCurrency } from "../types/Currency";
-import { DateTime } from "luxon";
 
 export const useNivoTheme = (): Theme => {
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     return {
         text: {
             fill: colorScheme === 'light' ?

@@ -12,7 +12,7 @@ import LogoutPage from "../pages/Logout";
 import { RemotesPage } from "../pages/Remotes";
 import { TemplatesPage } from "../pages/Templates";
 import { TransactionsPage } from "../pages/Transactions";
-import { AuthRoute } from "./Route";
+import { AuthRoute, PublicOnlyRoute } from "./Route";
 import { FlowsPage } from "../pages/Flows";
 import { RecordsPage } from "../pages/Records";
 
@@ -59,7 +59,9 @@ export const FinnanceRouter = createBrowserRouter([
             element: <NotFound />
         }]
     }, {
-        element: <PublicLayout />,
+        element: <PublicOnlyRoute>
+            <PublicLayout />
+        </PublicOnlyRoute>,
         children: [{
             path: "login",
             element: <LoginForm />
@@ -67,5 +69,8 @@ export const FinnanceRouter = createBrowserRouter([
             path: "register",
             element: <SignUpForm />
         }]
+    }, {
+        element: <PublicLayout />,
+        children: [] // potential other public pages
     }
 ]);

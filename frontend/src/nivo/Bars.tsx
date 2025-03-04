@@ -1,13 +1,12 @@
-import { Box, lighten, Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Box, lighten, Skeleton, Stack, Text, useComputedColorScheme, useMantineTheme } from "@mantine/core";
+import { useElementSize } from "@mantine/hooks";
 import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useEffect, useState } from "react";
 import Placeholder from "../components/Placeholder";
 import { getAxiosData, searchParams } from "../query";
 import { NivoComponentProps, NivoRequest, NivoSkeletonProps, NivoTooltip, useNivoTheme } from "./Nivo";
-import { useState, useEffect } from "react";
-import { useElementSize } from "@mantine/hooks";
-import { useMantineColorScheme } from "@mantine/core";
 
 interface Datum {
     category: string
@@ -31,7 +30,7 @@ const BAR_HEIGHT = 55;
 
 export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
     const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
+    const colorScheme = useComputedColorScheme();
     const nivo = useNivoTheme();
     const query = useBarsData(request);
 
