@@ -38,7 +38,8 @@
     "react-icons": "^4.8.0",
     "react-router-dom": "^6.10.0",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "http-proxy-middleware": ">=2.0.8"
   },
   "devDependencies": {
     "@types/css-modules": "^1.0.5",
