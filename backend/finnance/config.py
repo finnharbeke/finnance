@@ -36,3 +36,7 @@ if not get_debug_flag():
     SECRET_KEY = os.environ['SECRET_COOKIE_KEY']
 else:
     SECRET_KEY = 'debug_secret_crazy_secure'
+
+# trying to have cookies work on mobile
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
