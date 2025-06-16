@@ -46,7 +46,8 @@
     "postcss": "^8.5.2",
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "webpack-dev-server": ">=5.2.1"
   },
   "scripts": {
     "start": "react-scripts start",
