@@ -40,6 +40,7 @@ const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: Transfer
         <Grid align='flex-end'>
             <Grid.Col span={{base: 12, sm: 5}} order={1}>
                 <AccountInput label="from" disabled={src_disabled}
+                    data-autofocus={(!src_disabled) ? true : undefined}
                     {...form.getInputProps('src_id')} />
             </Grid.Col>
             {!isPhone &&
@@ -51,13 +52,14 @@ const TransferForm = ({ form, src_disabled=false, dst_disabled=false }: Transfer
             }
             <Grid.Col span={{base: 12, sm: 5}} order={{base: 4, xs: 3}}>
                 <AccountInput label="to" disabled={dst_disabled}
+                    data-autofocus={(src_disabled && !dst_disabled) ? true : undefined}
                     {...form.getInputProps('dst_id')} />
             </Grid.Col>
             <Grid.Col span={{base: 12, sm: 5}} order={{base: 3, xs: 4}}>
-                <AmountInput withAsterisk
-                    currency={src_curr}
+                <AmountInput withAsterisk currency={src_curr}
+                    data-autofocus={(src_disabled && dst_disabled) ? true : undefined}
                     {...form.getInputProps('src_amount')}
-                />
+                    />
             </Grid.Col>
             <Grid.Col span={{base: 3, sm: 2}} order={{base: 6, xs: 5}}>
                 <Center>

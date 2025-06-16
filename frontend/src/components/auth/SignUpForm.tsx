@@ -79,10 +79,9 @@ export function SignUpForm({ ...others }: LoginFormProps) {
             <FinnanceLogo size={40} />
             <Title order={1} fw={250}>sign up</Title>
         </Flex>
+        <FocusTrap>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-            <FocusTrap>
-                <TextInput label="username" radius="lg" variant="filled" {...form.getInputProps('username')} />
-            </FocusTrap>
+            <TextInput label="username" radius="lg" variant="filled" {...form.getInputProps('username')} />
             <TextInput label="e-mail" radius="lg" variant="filled" {...form.getInputProps('email')} />
             <PasswordInput label="password" radius="lg" variant="filled" {...form.getInputProps('password')} />
             <PasswordInput label="repeat password" radius="lg" variant="filled" {...form.getInputProps('passwordCheck')} />
@@ -90,9 +89,10 @@ export function SignUpForm({ ...others }: LoginFormProps) {
                 type="submit" radius="lg" my='sm'
                 fullWidth
                 loading={loading}
-            >sign up</Button>
+                >sign up</Button>
             
         </form>
+        </FocusTrap>
         <Text fz='sm' align='center'>
             you already have an account?
             <Anchor component={Link} ml='xs' to='/login'>
