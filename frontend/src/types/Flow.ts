@@ -3,7 +3,7 @@ import { AgentQueryResult } from "./Agent"
 import { RecordFormValues } from "./Record"
 import { TransactionQueryResult } from "./Transaction"
 import { getAxiosData, searchParams } from "../query"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { FilterRequest } from "../components/Filter"
 
 export interface FlowQueryResult {
@@ -57,8 +57,20 @@ interface useFlowsReturn {
     pages: number
 }
 
-export const useFlows = (props: FilterRequest) =>
-    useQuery<useFlowsReturn, AxiosError>({
+export const useFlows = (props: FilterRequest) => {
+    const queryClient = useQueryClient();
+    // prefetch 2 pages left and right
+    const page = props.page;
+    for (let off of [-2, -1, 1, 2]) {
+        let other_page = page + off;
+        let new_props = { ...props, page: other_page };
+        queryClient.prefetchQuery<useFlowsReturn, AxiosError>({
+            queryKey: ['flows', new_props],
+            queryFn: () => getAxiosData(`/api/flows?${searchParams(new_props)}`)
+        })
+    }
+    return useQuery<useFlowsReturn, AxiosError>({
         queryKey: ['flows', props],
         queryFn: () => getAxiosData(`/api/flows?${searchParams(props)}`)
     });
+}
