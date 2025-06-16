@@ -156,8 +156,20 @@ interface useChangeReturn {
     pages: number
 }
 
-export const useChanges = (id: number, props: FilterRequest) =>
-    useQuery<useChangeReturn, AxiosError>({
+export const useChanges = (id: number, props: FilterRequest) => {
+    const queryClient = useQueryClient();
+    // prefetch 2 pages left and right
+    const page = props.page;
+    for (let off of [-2, -1, 1, 2]) {
+        let other_page = page + off;
+        let new_props = { ...props, page: other_page };
+        queryClient.prefetchQuery<useChangeReturn, AxiosError>({
+            queryKey: ["changes", id, new_props],
+            queryFn: () => getAxiosData(`/api/accounts/${id}/changes?${searchParams(new_props)}`)
+        })
+    }
+    return useQuery<useChangeReturn, AxiosError>({
         queryKey: ["changes", id, props],
         queryFn: () => getAxiosData(`/api/accounts/${id}/changes?${searchParams(props)}`)
     });
+}
