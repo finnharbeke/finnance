@@ -60,7 +60,7 @@ def login(username: str, password: str):
 
     success = bcrypt.check_password_hash(user.password, password)
     if success:
-        login_user(user)
+        success = login_user(user, remember=True)
 
     return jsonify({
         "auth": success,

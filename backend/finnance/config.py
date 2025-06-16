@@ -1,5 +1,6 @@
 import os
 from flask.helpers import get_debug_flag
+import datetime as dt
 
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))  
@@ -37,6 +38,6 @@ if not get_debug_flag():
 else:
     SECRET_KEY = 'debug_secret_crazy_secure'
 
-# trying to have cookies work on mobile
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+# FLASK-LOGIN
+
+REMEMBER_COOKIE_DURATION = dt.timedelta(days=28)
