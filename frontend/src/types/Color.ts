@@ -33,7 +33,7 @@ function hsv_to_hex(h: number, s: number, v: number) {
     }
     function hex(c: number) {
         var hex = c.toString(16);
-        return hex.length == 1 ? "0" + hex : hex;
+        return hex.length === 1 ? "0" + hex : hex;
     }
 
     return "#" + hex(Math.floor(r * 256)) + hex(Math.floor(g * 256)) + hex(Math.floor(b * 256));

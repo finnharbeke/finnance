@@ -25,7 +25,7 @@ export default function DashboardPage() {
     usePrefetch();
 
     useEffect(() => {
-        if (query.isSuccess && query.data.length == 11) {
+        if (query.isSuccess && query.data.length === 0) {
             initialCurrenciesAction();
         }
     }, [query])

@@ -78,7 +78,7 @@ export function InitialCurrencyCreationModal({ context, id }: ContextModalProps<
             let code = values.codes[i];
             for (let curr of INTERNATIONAL_CURRENCIES) {
                 if (curr.code === code) {
-                    if (i == values.codes.length - 1)
+                    if (i === values.codes.length - 1)
                         addCurrency.mutate(curr, {
                             onSuccess: () => {
                                 console.log('close');
