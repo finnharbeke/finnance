@@ -116,7 +116,7 @@ export const AccountForm = ({ form, currencies, modal }: AccountFormProps) => {
     );
 
     return (
-        <Grid align='flex-end'>
+        <Grid align='flex-start'>
             {modal &&
                 <Grid.Col span={12} order={0}>
                     <TextInput label="account name" withAsterisk
