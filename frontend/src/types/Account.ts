@@ -4,11 +4,12 @@ import axios, { AxiosError } from "axios";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { FilterRequest } from "../components/Filter";
+import { OrderRequest } from "../hooks/useOrderForm";
 import { getAxiosData, searchParams } from "../query";
+import { randomColor } from "./Color";
 import { CurrencyQueryResult } from "./Currency";
 import { TransactionQueryResult } from "./Transaction";
 import { TransferQueryResult } from "./Transfer";
-import { OrderRequest } from "../hooks/useOrderForm";
 
 export interface AccountQueryResult {
     id: number,
@@ -70,7 +71,7 @@ export const useAccountFormValues: (acc?: AccountQueryResult) => AccountFormValu
             color: acc.color,
             currency_id: acc.currency_id.toString()
         } : {
-            desc: '', color: '', date_created: new Date(),
+            desc: '', color: randomColor(), date_created: new Date(),
             starting_saldo: '', currency_id: null
         }
         const [fv, setFV] = useState(build());
@@ -112,7 +113,7 @@ export const useDeleteAccount = (id: number) => {
         mutationFn: () =>
             axios.delete(`/api/accounts/${id}/delete`),
         onSuccess: () => {
-            queryClient.removeQueries({ queryKey: ['accounts', id]})
+            queryClient.removeQueries({ queryKey: ['accounts', id] })
             queryClient.invalidateQueries();
         }
     });
@@ -156,8 +157,20 @@ interface useChangeReturn {
     pages: number
 }
 
-export const useChanges = (id: number, props: FilterRequest) =>
-    useQuery<useChangeReturn, AxiosError>({
+export const useChanges = (id: number, props: FilterRequest) => {
+    const queryClient = useQueryClient();
+    // prefetch 2 pages left and right
+    const page = props.page;
+    for (let off of [-2, -1, 1, 2]) {
+        let other_page = page + off;
+        let new_props = { ...props, page: other_page };
+        queryClient.prefetchQuery<useChangeReturn, AxiosError>({
+            queryKey: ["changes", id, new_props],
+            queryFn: () => getAxiosData(`/api/accounts/${id}/changes?${searchParams(new_props)}`)
+        })
+    }
+    return useQuery<useChangeReturn, AxiosError>({
         queryKey: ["changes", id, props],
         queryFn: () => getAxiosData(`/api/accounts/${id}/changes?${searchParams(props)}`)
     });
+}

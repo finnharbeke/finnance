@@ -34,6 +34,8 @@ export default function AmountInput(props: AmountInputProps) {
         // formatter={s => ((showPrefix && currency?.code && s && currency?.code + ' ') || '') + s}
         // parser={(value: string) => value.replace(/\D+\s/g, '').replace(',', '.')}
 
+        data-autofocus // focus trap
+
         value={amount}
         onChange={(newVal) =>
             onChange(typeof newVal === 'string' ? newVal :

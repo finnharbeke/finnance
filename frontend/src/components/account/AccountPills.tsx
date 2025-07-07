@@ -8,6 +8,7 @@ import Placeholder from "../Placeholder";
 import { Link } from "react-router-dom";
 import useAmount from "../../hooks/useAmount";
 import { addTransferAction } from "../../actions/actions";
+import AccountButton from "./AccountButton";
 
 export default function AccountPills() {
     const isPhone = useIsPhone();
@@ -15,11 +16,11 @@ export default function AccountPills() {
     const query = useAccounts();
 
     if (!query.isSuccess)
-        return <Placeholder queries={[query]} height={150} mb='sm'/>
+        return <Placeholder queries={[query]} height={150} mb='sm' />
 
     const { data: accounts } = query;
     const cols = accounts.map(acc => (
-        <Grid.Col span={{sm: accounts.length === 1 ? 12 : 6}} key={acc.id}>
+        <Grid.Col span={{ sm: accounts.length === 1 ? 12 : 6 }} key={acc.id}>
             <AccountPill account={acc} />
         </Grid.Col>
     ));
@@ -41,7 +42,10 @@ export default function AccountPills() {
                     </Collapse>
                 </>
                 :
-                <Title ta='center' order={3}>no accounts created yet</Title>
+                <>
+                    <Title ta='center' order={3}>no accounts created yet</Title>
+                    <AccountButton />
+                </>
         }
         <Divider
             my={more ? undefined : 'lg'}

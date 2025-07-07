@@ -5,6 +5,7 @@ import { AccountModal } from "../components/account/AccountModal";
 import { CategoryModal } from "../components/category/CategoryModal";
 import { AddTransferModal, EditTransferModal } from "../components/transfer/TransferModal";
 import { AddTemplateModal } from "../components/templates/TemplateModal";
+import { InitialCurrencyCreationModal } from "../components/Currency";
 
 
 const modals = {
@@ -14,7 +15,8 @@ const modals = {
     edit_transfer: EditTransferModal,
     account: AccountModal,
     category: CategoryModal,
-    add_template: AddTemplateModal
+    add_template: AddTemplateModal,
+    initial_currencies: InitialCurrencyCreationModal
 };
 declare module '@mantine/modals' {
     export interface MantineModalsOverride {

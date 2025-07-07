@@ -68,7 +68,7 @@ export const TransactionForm = (props: TransactionFormProps) => {
             />
         }
         {
-            (form.values.account_id === 'remote' || form.values.account_id === null) &&
+            form.values.account_id === 'remote' &&
             <CurrencyInput label='currency' withAsterisk={!template} hasDefault
                 {...form.getInputProps('currency_id')}
             />

@@ -1,20 +1,15 @@
 import { Button, Skeleton } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useState } from "react";
-import { AccountRequest, useAccountForm, useAddAccount } from "../../types/Account";
+import { AccountRequest, useAccountForm, useAccountFormValues, useAddAccount } from "../../types/Account";
 import { useCurrencies } from "../../types/Currency";
 import { AccountForm } from "./AccountForm";
 
 export const AccountModal = ({ context, id }: ContextModalProps<{}>) => {
     const currencies = useCurrencies();
 
-    const form = useAccountForm({
-        desc: '',
-        starting_saldo: '',
-        date_created: new Date(),
-        color: '',
-        currency_id: ''
-    })
+    const initial = useAccountFormValues();
+    const form = useAccountForm(initial);
 
     const [loading, setLoading] = useState(false);
     const addAccount = useAddAccount();

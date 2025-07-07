@@ -58,3 +58,10 @@ export const addTemplateAction = async () =>
         title: 'new template',
         innerProps: {}
     })
+
+export const initialCurrenciesAction = async () =>
+    openContextModal({
+        modal: 'initial_currencies',
+        title: 'create currencies',
+        innerProps: {}
+    })

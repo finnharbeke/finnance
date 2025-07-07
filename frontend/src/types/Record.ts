@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 import { FilterRequest } from "../components/Filter"
 import { getAxiosData, searchParams } from "../query"
@@ -55,8 +55,20 @@ interface useRecordsReturn {
     pages: number
 }
 
-export const useRecords = (props: FilterRequest) =>
-    useQuery<useRecordsReturn, AxiosError>({
+export const useRecords = (props: FilterRequest) => {
+    const queryClient = useQueryClient();
+    // prefetch 2 pages left and right
+    const page = props.page;
+    for (let off of [-2, -1, 1, 2]) {
+        let other_page = page + off;
+        let new_props = { ...props, page: other_page };
+        queryClient.prefetchQuery<useRecordsReturn, AxiosError>({
+            queryKey: ['records', new_props],
+            queryFn: () => getAxiosData(`/api/records?${searchParams(new_props)}`)
+        })
+    }
+    return useQuery<useRecordsReturn, AxiosError>({
         queryKey: ['records', props],
         queryFn: () => getAxiosData(`/api/records?${searchParams(props)}`)
     });
+}

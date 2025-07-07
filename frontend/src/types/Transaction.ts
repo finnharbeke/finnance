@@ -293,11 +293,23 @@ interface useTransactionsReturn {
     pages: number
 }
 
-export const useTransactions = (props: useTransactionsProps) =>
-    useQuery<useTransactionsReturn, AxiosError>({
+export const useTransactions = (props: useTransactionsProps) => {
+    const queryClient = useQueryClient();
+    // prefetch 2 pages left and right
+    const page = props.page;
+    for (let off of [-2, -1, 1, 2]) {
+        let other_page = page + off;
+        let new_props = { ...props, page: other_page };
+        queryClient.prefetchQuery<useTransactionsReturn, AxiosError>({
+            queryKey: ['transactions', new_props],
+            queryFn: () => getAxiosData(`/api/transactions?${searchParams(new_props)}`)
+        })
+    }
+    return useQuery<useTransactionsReturn, AxiosError>({
         queryKey: ['transactions', props],
         queryFn: () => getAxiosData(`/api/transactions?${searchParams(props)}`)
     });
+}
 
 export const useAddTransaction = () => {
     const queryClient = useQueryClient()

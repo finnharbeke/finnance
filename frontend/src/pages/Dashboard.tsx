@@ -9,6 +9,8 @@ import { NivoShell } from "../nivo/Nivo";
 import { Sunburst, SunburstSkeleton } from "../nivo/Sunburst";
 import { usePrefetch } from "../query";
 import { useCurrencies } from "../types/Currency";
+import { initialCurrenciesAction } from "../actions/actions";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
     const theme = useMantineTheme();
@@ -21,6 +23,12 @@ export default function DashboardPage() {
       });
 
     usePrefetch();
+
+    useEffect(() => {
+        if (query.isSuccess && query.data.length === 0) {
+            initialCurrenciesAction();
+        }
+    }, [query])
 
     return <>
         <AccountPills />
