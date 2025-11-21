@@ -7,6 +7,7 @@ import useIsPhone from "../hooks/useIsPhone";
 import { CategoryPills } from "./CategoryPills";
 import { DivBars, DivBarsSkeleton } from "./DivBars";
 import { ExpIncLine, LineSkeleton } from "./ExpIncLine";
+import { BalanceLine} from "./BalanceLine";
 import { NivoShell } from "./Nivo";
 
 export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
@@ -119,6 +120,13 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                 <NivoShell
                     nivo={CategoryPills} skeleton={LineSkeleton}
                     is_expense={false}
+                    {...commonProps}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel value='balanceline'>
+                <NivoShell
+                    nivo={BalanceLine} skeleton={LineSkeleton}
+                    height={300}
                     {...commonProps}
                 />
             </Tabs.Panel>

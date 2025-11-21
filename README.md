@@ -2,60 +2,38 @@
 
 Flask React App for saving all my financial transactions etc
 
-## contribute
+## dev environment
 
-thank you for considering contributing to this project :) let me walk you through the setup:
-
-### setting up the environment
+### setup
 
 **requirements:**
 
-you should have installed `conda` and `npm`.
-
-**backend:**
-
-create a conda environment according to the dependencies of this projects backend like so:
+- installed conda
+- installed npm
 
 ```
-conda env create -n finnance --file backend/environment.yml
+conda env create -n finnance --file environment.yml
 ```
 
-**frontend:**
-
-head into the `./frontend` directory and run the following to install the node packages used for the frontend:
+from `/frontend` dir:
 ```
 npm i
 ```
 
-*in case the project changes its dependencies the above should be repeated!*
+Do this zaz:
+### run
 
-### running locally
 
-in one terminal window head into the `./backend` directory and do:
-
+from `/backend` directory:
 ```
 conda activate finnance
 flask run --debug
 ```
 
-in another, head into the `./frontend` directory:
+from `/frontend` dir:
 ```
+npm i
 npm start
 ```
 
-if it doesn't open automatically you should find the application on `localhost:3000`!
-
-### populating the local database
-
-for development purposes it is cumbersome to start off with an empty database. you should be able to head into the `./frontend/dummy_data` directory and run:
-
-```
-npx tsx seed.ts
-```
-
-you might be prompted to install tsx and then you will find lots of data when logging in with:
-
-- username: `local`
-- password: `123456`
-
-This data should be deterministic during the current month, so that you can compare with other contributors.
+user name nd password: test - 123456

@@ -3,7 +3,7 @@ import { MonthPicker } from "@mantine/dates";
 import { useElementSize } from "@mantine/hooks";
 import { DateTime, Duration } from "luxon";
 import { useCallback, useState } from "react";
-import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight, TbList } from "react-icons/tb";
+import { TbCalendar, TbChartBar, TbChartDonut4, TbChevronLeft, TbChevronRight, TbList, TbTimeline } from "react-icons/tb";
 import useIsPhone from "../hooks/useIsPhone";
 import { BarsSkeleton, FinnanceBars } from "./Bars";
 import { NivoShell } from "./Nivo";
@@ -78,6 +78,7 @@ export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
                 <Tabs.Tab value='sunburst' leftSection={<TbChartDonut4 size='1.5rem' />} />
                 <Tabs.Tab value='bars' leftSection={<TbChartBar size='1.5rem' />} />
                 <Tabs.Tab value='list' leftSection={<TbList size='1.5rem' />} />
+                <Tabs.Tab value='line' leftSection={<TbTimeline size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='sunburst'>
                 <Grid align='flex-end' gutter={'xs'}>
