@@ -313,7 +313,7 @@ def line(currency: Currency, min_date: datetime, max_date: datetime):
     return jsonify(data)
 
 
-### I NEED YOU HERE FINN
+### I NEED YOU HERE FINN PLEASE
 @nivo.route("/balanceline")
 @login_required
 @nivo_wrapper
