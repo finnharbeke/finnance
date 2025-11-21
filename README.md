@@ -20,6 +20,7 @@ from `/frontend` dir:
 npm i
 ```
 
+Do this zaz:
 ### run
 
 
@@ -34,3 +35,5 @@ from `/frontend` dir:
 npm i
 npm start
 ```
+
+user name nd password: test - 123456
