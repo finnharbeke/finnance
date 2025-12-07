@@ -5,6 +5,7 @@ import { TbCalendar } from "react-icons/tb";
 import CurrencyInput from "../components/input/CurrencyInput";
 import { Monthly } from "./Monthly";
 import { Yearly } from "./Yearly";
+import { AllTime } from "./AllTime";
 
 export default function NivoPage() {
 
@@ -23,12 +24,16 @@ export default function NivoPage() {
             <Tabs.List justify='flex-end' mb='sm'>
                 <Tabs.Tab value='monthly' leftSection={<TbCalendar size='1.5rem' />} />
                 <Tabs.Tab value='yearly' leftSection='365' />
+                <Tabs.Tab value='alltime' leftSection='∞' />
             </Tabs.List>
             <Tabs.Panel value='monthly'>
                 <Monthly currency_id={currency_id} />
             </Tabs.Panel>
             <Tabs.Panel value='yearly'>
                 <Yearly currency_id={currency_id} />
+            </Tabs.Panel>
+            <Tabs.Panel value='alltime'>
+                <AllTime currency_id={currency_id} />
             </Tabs.Panel>
         </Tabs>
     </Stack>

@@ -6,7 +6,7 @@ from http import HTTPStatus
 
 import sqlalchemy
 from finnance.errors import APIError
-from finnance.models import Agent, Category, Currency, Record, Transaction
+from finnance.models import Account, AccountTransfer, Agent, Category, Currency, Record, Transaction
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
@@ -313,56 +313,228 @@ def line(currency: Currency, min_date: datetime, max_date: datetime):
     return jsonify(data)
 
 
-### I NEED YOU HERE FINN PLEASE
 @nivo.route("/balanceline")
 @login_required
 @nivo_wrapper
-def line(currency: Currency, min_date: datetime, max_date: datetime):
+def balanceline(currency: Currency, min_date: datetime, max_date: datetime):
+    """Calculate minimum balance per month across all user's accounts in this currency"""
+    from finnance.models import AccountTransfer
+    
+    # Get all accounts for this currency
+    accounts = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    
+    if not accounts:
+        return jsonify([])
+
+    # Start with sum of all account starting balances
+    total_saldo = sum(acc.starting_saldo for acc in accounts)
+    
+    # Collect ALL changes (transactions + transfers) for all accounts (entire history)
+    all_changes = []
+    for account in accounts:
+        all_changes.extend(account.transactions)
+        all_changes.extend(account.out_transfers)
+        all_changes.extend(account.in_transfers)
+    
+    # Sort by date
+    all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
+    
+    # Build a list of (date, balance_after_transaction) for ALL transactions
+    balances_by_date = {}
+    
+    for change in all_changes:
+        # Calculate amount and whether it's an expense (decreases balance)
+        if type(change) is AccountTransfer:
+            # For transfers, check if this account is the source (money going out)
+            account_ids = {acc.id for acc in accounts}
+            is_expense = change.src_id in account_ids
+            amount = change.src_amount if is_expense else change.dst_amount
+        else:
+            # Transaction
+            is_expense = change.is_expense
+            amount = change.amount
+        
+        # Update balance: income adds, expense subtracts
+        total_saldo = total_saldo + (amount if not is_expense else -amount)
+        balances_by_date[change.date_issued] = total_saldo
+    
+    # Now extract monthly minimums for the requested date range
+    data = []
     start = min_date
     end = end_of_month(start)
-
-    data = []
-
+    
+    # Keep track of the minimum from the previous month
+    previous_min = None
+    
     while start < max_date:
-
-        exp = Record.query.with_entities(
-             sqlalchemy.func.sum(Record.amount).label("sum")
-        ).join(Transaction).filter_by(
-            currency_id=currency.id,
-            is_expense=True
-        ).filter(
-            Transaction.date_issued >= start
-        ).filter(
-            Transaction.date_issued < end
-        ).first()
-        inc = Record.query.with_entities(
-             sqlalchemy.func.sum(Record.amount).label("sum")
-        ).join(Transaction).filter_by(
-            currency_id=currency.id,
-            is_expense=False
-        ).filter(
-            Transaction.date_issued >= start
-        ).filter(
-            Transaction.date_issued < end
-        ).first()
-        month = {
-            'expenses': 0 if exp is None or exp.sum is None else exp.sum,
-            'income': 0 if inc is None or inc.sum is None else inc.sum,
-            'month': start.isoformat()
-        }
-
-        data.append(month)
+        # Find all balances that fall within this month
+        month_balances = []
+        
+        for date, balance in balances_by_date.items():
+            if date >= start and date < end:
+                # This balance was recorded in this month
+                month_balances.append(balance)
+        
+        # Get minimum balance for this month
+        if month_balances:
+            min_balance_month = min(month_balances)
+            previous_min = min_balance_month  # Save for next month if needed
+        else:
+            # No transactions this month, use the minimum from previous month
+            min_balance_month = previous_min
+        
+        # Only add to data if we have a value
+        if min_balance_month is not None:
+            month = {
+                'balance': min_balance_month,
+                'month': start.isoformat()
+            }
+            data.append(month)
         
         start = end
         end = end_of_month(start)
         if end > max_date:
             end = max_date
 
-    cut = 0
-    while cut < len(data) and data[cut]['expenses'] == 0 and data[cut]['income'] == 0:
-        cut += 1
-    data = data[cut:]
+    return jsonify(data)
 
+
+@nivo.route("/yearlyminimum")
+@login_required
+@nivo_wrapper
+def yearlyminimum(currency: Currency, min_date: datetime, max_date: datetime):
+    """Calculate minimum balance per year across all user's accounts in this currency"""
+    from finnance.models import AccountTransfer
+    
+    # Get all accounts for this currency
+    accounts = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    
+    if not accounts:
+        return jsonify([])
+
+    # Start with sum of all account starting balances
+    total_saldo = sum(acc.starting_saldo for acc in accounts)
+    
+    # Collect ALL changes (transactions + transfers) for all accounts (entire history)
+    all_changes = []
+    for account in accounts:
+        all_changes.extend(account.transactions)
+        all_changes.extend(account.out_transfers)
+        all_changes.extend(account.in_transfers)
+    
+    # Sort by date
+    all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
+    
+    # Build a list of (date, balance_after_transaction) for ALL transactions
+    balances_by_date = {}
+    
+    for change in all_changes:
+        # Calculate amount and whether it's an expense (decreases balance)
+        if type(change) is AccountTransfer:
+            # For transfers, check if this account is the source (money going out)
+            account_ids = {acc.id for acc in accounts}
+            is_expense = change.src_id in account_ids
+            amount = change.src_amount if is_expense else change.dst_amount
+        else:
+            # Transaction
+            is_expense = change.is_expense
+            amount = change.amount
+        
+        # Update balance: income adds, expense subtracts
+        total_saldo = total_saldo + (amount if not is_expense else -amount)
+        balances_by_date[change.date_issued] = total_saldo
+    
+    # Now extract yearly minimums for the requested date range
+    data = []
+    start = min_date.replace(month=1, day=1)
+    end = min_date.replace(year=min_date.year + 1, month=1, day=1)
+    
+    # Keep track of the minimum from the previous year
+    previous_min = None
+    
+    while start < max_date:
+        # Find all balances that fall within this year
+        year_balances = []
+        
+        for date, balance in balances_by_date.items():
+            if date >= start and date < end:
+                # This balance was recorded in this year
+                year_balances.append(balance)
+        
+        # Get minimum balance for this year
+        if year_balances:
+            min_balance_year = min(year_balances)
+            previous_min = min_balance_year  # Save for next year if needed
+        else:
+            # No transactions this year, use the minimum from previous year
+            min_balance_year = previous_min
+        
+        # Only add to data if we have a value
+        if min_balance_year is not None:
+            year = {
+                'balance': min_balance_year,
+                'year': start.isoformat()
+            }
+            data.append(year)
+        
+        # Move to next year
+        start = end
+        end = end.replace(year=end.year + 1) if end.year < max_date.year else max_date
+
+    return jsonify(data)
+
+
+@nivo.route("/transactionbalanceline")
+@login_required
+@nivo_wrapper
+def transactionbalanceline(currency: Currency, min_date: datetime, max_date: datetime):
+    """Return balance after every single transaction within the date range"""
+    from finnance.models import AccountTransfer
+    
+    # Get all accounts for this currency
+    accounts = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    
+    if not accounts:
+        return jsonify([])
+
+    # Start with sum of all account starting balances
+    total_saldo = sum(acc.starting_saldo for acc in accounts)
+    
+    # Collect ALL changes (transactions + transfers) for all accounts (entire history)
+    all_changes = []
+    for account in accounts:
+        all_changes.extend(account.transactions)
+        all_changes.extend(account.out_transfers)
+        all_changes.extend(account.in_transfers)
+    
+    # Sort by date
+    all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
+    
+    # Process all transactions and build data points
+    data = []
+    
+    for change in all_changes:
+        # Calculate amount and whether it's an expense (decreases balance)
+        if type(change) is AccountTransfer:
+            # For transfers, check if this account is the source (money going out)
+            account_ids = {acc.id for acc in accounts}
+            is_expense = change.src_id in account_ids
+            amount = change.src_amount if is_expense else change.dst_amount
+        else:
+            # Transaction
+            is_expense = change.is_expense
+            amount = change.amount
+        
+        # Update balance: income adds, expense subtracts
+        total_saldo = total_saldo + (amount if not is_expense else -amount)
+        
+        # Only include transactions within the requested date range
+        if change.date_issued >= min_date and change.date_issued < max_date:
+            data.append({
+                'balance': total_saldo,
+                'date': change.date_issued.isoformat()
+            })
+    
     return jsonify(data)
 
 
