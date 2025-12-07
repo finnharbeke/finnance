@@ -37,7 +37,7 @@ def changes(account_id):
         raise APIError(HTTPStatus.NOT_FOUND)
     
     kwargs = parseSearchParams(request.args.to_dict(), dict(
-        start=datetime, end=datetime, search=str
+        start=datetime, end=datetime, search=str, category=int
     ))
 
     return acc.jsonify_changes(**kwargs)
