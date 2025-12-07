@@ -82,6 +82,7 @@ export const useCategoryGroupDescs = (is_expense: boolean) =>
     useQuery<CategoryGroupDescQueryResult[], AxiosError>({
         queryKey: ["categories", is_expense ? "expenses" : "incomes"]
     });
+
 export interface CategoryHierarchyQueryResult {
     category: CategoryQueryResult
     children: CategoryHierarchyQueryResult[]

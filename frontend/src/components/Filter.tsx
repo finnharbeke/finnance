@@ -1,4 +1,4 @@
-import { Button, Collapse, Grid, Pagination, TextInput } from "@mantine/core";
+import { Button, Collapse, Grid, Pagination, Select, Stack, TextInput, Group } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -6,11 +6,13 @@ import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { TbFilter } from "react-icons/tb";
 import { searchParamsProps } from "../query";
+import CategoryInput from "./input/CategoryInput";
 
 interface FilterFormValues {
     search: string | undefined
     start: Date | undefined
     end: Date | undefined
+    category: string | undefined
 }
 
 export interface FilterRequest extends searchParamsProps {
@@ -19,6 +21,7 @@ export interface FilterRequest extends searchParamsProps {
     search?: string | undefined
     start?: string | undefined
     end?: string
+    category?: string | undefined
 }
 
 type FilterFormTransform = (fv: FilterFormValues) => FilterRequest
@@ -40,14 +43,34 @@ interface FilterPaginationProps {
 }
 
 export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationProps) => {
+    const [showExpenseCats, setShowExpenseCats] = useState(false);
+    const [showIncomeCats, setShowIncomeCats] = useState(false);
+    
     const form = useForm<FilterFormValues, FilterFormTransform>({
+        initialValues: {
+            search: filter.search,
+            category: filter.category,
+            start: filter.start ? new Date(filter.start) : undefined,
+            end: filter.end ? new Date(filter.end) : undefined
+        },
         transformValues: fv => ({
             ...filter,
             search: fv.search,
+            category: fv.category,
             start: fv.start ? DateTime.fromJSDate(fv.start).toISO({ includeOffset: false }) : undefined,
             end: fv.end ? DateTime.fromJSDate(fv.end).toISO({ includeOffset: false }) : undefined
         })
     });
+    
+    // Update form when filter changes
+    useEffect(() => {
+        form.setValues({
+            search: filter.search,
+            category: filter.category,
+            start: filter.start ? new Date(filter.start) : undefined,
+            end: filter.end ? new Date(filter.end) : undefined
+        });
+    }, [filter]);
     useEffect(() => {
         if (!!pages && pages <= filter.page)
             setFilter({
@@ -78,6 +101,50 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
         <Collapse in={open} pt='sm'>
             <form onSubmit={form.onSubmit(setFilter)}>
                 <TextInput label='search' {...form.getInputProps('search')} />
+                <Stack gap='xs'>
+                    <Group grow>
+                        <Button 
+                            variant={showExpenseCats ? 'filled' : 'default'}
+                            onClick={() => {
+                                setShowExpenseCats(!showExpenseCats);
+                                if (!showExpenseCats) {
+                                    setShowIncomeCats(false);
+                                    form.setFieldValue('category', undefined);
+                                }
+                            }}
+                        >
+                            Expense Categories
+                        </Button>
+                        <Button 
+                            variant={showIncomeCats ? 'filled' : 'default'}
+                            onClick={() => {
+                                setShowIncomeCats(!showIncomeCats);
+                                if (!showIncomeCats) {
+                                    setShowExpenseCats(false);
+                                    form.setFieldValue('category', undefined);
+                                }
+                            }}
+                        >
+                            Income Categories
+                        </Button>
+                    </Group>
+                    {showExpenseCats && (
+                        <CategoryInput 
+                            is_expense={true}
+                            must_be_usable={false}
+                            clearable
+                            {...form.getInputProps('category')}
+                        />
+                    )}
+                    {showIncomeCats && (
+                        <CategoryInput 
+                            is_expense={false}
+                            must_be_usable={false}
+                            clearable
+                            {...form.getInputProps('category')}
+                        />
+                    )}
+                </Stack>
                 <DateTimePicker label='min date' {...form.getInputProps('start')} clearable />
                 <DateTimePicker label='max date' {...form.getInputProps('end')} clearable />
                 <Button type='submit' fullWidth mt='sm'>apply</Button>

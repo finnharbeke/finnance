@@ -120,7 +120,7 @@ class Account(db.Model, JSONModel):
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
-    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str = None):
+    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str = None, category: int = None):
         saldo = self.starting_saldo
         changes = sorted(
             self.transactions + self.out_transfers + self.in_transfers,
@@ -145,6 +145,11 @@ class Account(db.Model, JSONModel):
 
             if type(change) is Transaction:
                 desc = change.agent.desc
+                # Filter by category if provided
+                if category is not None:
+                    # Check if any record in this transaction matches the category
+                    if not any(record.category_id == category for record in change.records):
+                        continue
             elif change.src_id == self.id:
                 desc = change.dst.desc
             else:
