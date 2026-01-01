@@ -4,7 +4,7 @@ import Database from "better-sqlite3";
 
 export default defineConfig({
   adapter: () => {
-    const client = new Database('../backend/finnance/app.db', { fileMustExist: true });
+    const client = new Database('../../backend/finnance/app.db', { fileMustExist: true });
     return new SeedBetterSqlite3(client);
   },
 });

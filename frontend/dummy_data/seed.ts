@@ -67,6 +67,8 @@ const populate_db = async () => {
   process.exit();
 };
 
+populate_db();
+
 const populate_categories = async (seed: SeedClient, u: userScalars) => {
 
     const some_exps = copycat.someOf(u.id, [10, 25], categories.expense);
@@ -325,5 +327,3 @@ const monthsSince = (date: Date) => {
     months += endOfMonth.getMonth();
     return months <= 0 ? 0 : months;
 };
-
-export default populate_db;
