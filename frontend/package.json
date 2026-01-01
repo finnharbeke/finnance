@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://127.0.0.1:5000",
-  "allowedHosts": ["127.0.0.1"],
+  "allowedHosts": [
+    "127.0.0.1"
+  ],
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@mantine/core": "^7.16.3",
@@ -41,7 +43,11 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@snaplet/copycat": "^6.0.0",
+    "@snaplet/seed": "^0.98.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/css-modules": "^1.0.5",
+    "better-sqlite3": "^12.5.0",
     "postcss": "^8.5.2",
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",

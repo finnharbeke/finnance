@@ -1,0 +1,2093 @@
+{
+  "models": {
+    "account": {
+      "id": "account",
+      "tableName": "account",
+      "fields": [
+        {
+          "id": "account.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "account_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "account.desc",
+          "name": "desc",
+          "columnName": "desc",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account.starting_saldo",
+          "name": "starting_saldo",
+          "columnName": "starting_saldo",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account.date_created",
+          "name": "date_created",
+          "columnName": "date_created",
+          "type": "datetime",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account.currency_id",
+          "name": "currency_id",
+          "columnName": "currency_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account.color",
+          "name": "color",
+          "columnName": "color",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account.order",
+          "name": "order",
+          "columnName": "order",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "accountTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "currency",
+          "type": "currency",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "accountTocurrency",
+          "relationFromFields": [
+            "currency_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account_transfer_account_transfer_dst_idToaccount",
+          "type": "account_transfer",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "account_transfer_dst_idToaccount",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account_transfer_account_transfer_src_idToaccount",
+          "type": "account_transfer",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "account_transfer_src_idToaccount",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template",
+          "type": "template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "templateToaccount",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "trans",
+          "type": "trans",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "transToaccount",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "account_desc_user_id_key",
+          "fields": [
+            "desc",
+            "user_id"
+          ]
+        },
+        {
+          "name": "account_order_user_id_key",
+          "fields": [
+            "order",
+            "user_id"
+          ]
+        },
+        {
+          "name": "account_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "account_transfer": {
+      "id": "account_transfer",
+      "tableName": "account_transfer",
+      "fields": [
+        {
+          "id": "account_transfer.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "account_transfer_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "account_transfer.src_amount",
+          "name": "src_amount",
+          "columnName": "src_amount",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account_transfer.dst_amount",
+          "name": "dst_amount",
+          "columnName": "dst_amount",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account_transfer.src_id",
+          "name": "src_id",
+          "columnName": "src_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account_transfer.dst_id",
+          "name": "dst_id",
+          "columnName": "dst_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account_transfer.date_issued",
+          "name": "date_issued",
+          "columnName": "date_issued",
+          "type": "datetime",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account_transfer.comment",
+          "name": "comment",
+          "columnName": "comment",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "account_transfer.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "account_transferTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account_account_transfer_dst_idToaccount",
+          "type": "account",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "account_transfer_dst_idToaccount",
+          "relationFromFields": [
+            "dst_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account_account_transfer_src_idToaccount",
+          "type": "account",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "account_transfer_src_idToaccount",
+          "relationFromFields": [
+            "src_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "account_transfer_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "agent": {
+      "id": "agent",
+      "tableName": "agent",
+      "fields": [
+        {
+          "id": "agent.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "agent_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "agent.desc",
+          "name": "desc",
+          "columnName": "desc",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "agent.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "agentTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "flow",
+          "type": "flow",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "flowToagent",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "flow_template",
+          "type": "flow_template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "flow_templateToagent",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template_template_remote_agent_idToagent",
+          "type": "template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "template_remote_agent_idToagent",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template_template_agent_idToagent",
+          "type": "template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "template_agent_idToagent",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "trans",
+          "type": "trans",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "transToagent",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "agent_desc_user_id_key",
+          "fields": [
+            "desc",
+            "user_id"
+          ]
+        },
+        {
+          "name": "agent_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "category": {
+      "id": "category",
+      "tableName": "category",
+      "fields": [
+        {
+          "id": "category.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "category_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "category.desc",
+          "name": "desc",
+          "columnName": "desc",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "category.is_expense",
+          "name": "is_expense",
+          "columnName": "is_expense",
+          "type": "boolean",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "category.usable",
+          "name": "usable",
+          "columnName": "usable",
+          "type": "boolean",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "category.parent_id",
+          "name": "parent_id",
+          "columnName": "parent_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "category.color",
+          "name": "color",
+          "columnName": "color",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "category.order",
+          "name": "order",
+          "columnName": "order",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "category.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "categoryTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "category",
+          "type": "category",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "categoryTocategory",
+          "relationFromFields": [
+            "parent_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "category",
+          "type": "category",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "categoryTocategory",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "record",
+          "type": "record",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "recordTocategory",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "record_template",
+          "type": "record_template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "record_templateTocategory",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "category_user_id_desc_is_expense_key",
+          "fields": [
+            "user_id",
+            "desc",
+            "is_expense"
+          ]
+        },
+        {
+          "name": "category_user_id_order_is_expense_key",
+          "fields": [
+            "user_id",
+            "order",
+            "is_expense"
+          ]
+        },
+        {
+          "name": "category_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "currency": {
+      "id": "currency",
+      "tableName": "currency",
+      "fields": [
+        {
+          "id": "currency.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "currency_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "currency.code",
+          "name": "code",
+          "columnName": "code",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "currency.decimals",
+          "name": "decimals",
+          "columnName": "decimals",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "currency.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "currencyTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account",
+          "type": "account",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "accountTocurrency",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template",
+          "type": "template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "templateTocurrency",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "trans",
+          "type": "trans",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "transTocurrency",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "currency_code_user_id_key",
+          "fields": [
+            "code",
+            "user_id"
+          ]
+        },
+        {
+          "name": "currency_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "flow": {
+      "id": "flow",
+      "tableName": "flow",
+      "fields": [
+        {
+          "id": "flow.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "flow_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "flow.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "flow.is_debt",
+          "name": "is_debt",
+          "columnName": "is_debt",
+          "type": "boolean",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "flow.agent_id",
+          "name": "agent_id",
+          "columnName": "agent_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "flow.trans_id",
+          "name": "trans_id",
+          "columnName": "trans_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "trans",
+          "type": "trans",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "flowTotrans",
+          "relationFromFields": [
+            "trans_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "agent",
+          "type": "agent",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "flowToagent",
+          "relationFromFields": [
+            "agent_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "flow_agent_id_trans_id_key",
+          "fields": [
+            "agent_id",
+            "trans_id"
+          ]
+        },
+        {
+          "name": "flow_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "flow_template": {
+      "id": "flow_template",
+      "tableName": "flow_template",
+      "fields": [
+        {
+          "id": "flow_template.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "flow_template_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "flow_template.template_id",
+          "name": "template_id",
+          "columnName": "template_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "flow_template.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "flow_template.agent_id",
+          "name": "agent_id",
+          "columnName": "agent_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "flow_template.ix",
+          "name": "ix",
+          "columnName": "ix",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "agent",
+          "type": "agent",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "flow_templateToagent",
+          "relationFromFields": [
+            "agent_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template",
+          "type": "template",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "flow_templateTotemplate",
+          "relationFromFields": [
+            "template_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "flow_template_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "record": {
+      "id": "record",
+      "tableName": "record",
+      "fields": [
+        {
+          "id": "record.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "record_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "record.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "record.category_id",
+          "name": "category_id",
+          "columnName": "category_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "record.trans_id",
+          "name": "trans_id",
+          "columnName": "trans_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "trans",
+          "type": "trans",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "recordTotrans",
+          "relationFromFields": [
+            "trans_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "category",
+          "type": "category",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "recordTocategory",
+          "relationFromFields": [
+            "category_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "record_category_id_trans_id_key",
+          "fields": [
+            "category_id",
+            "trans_id"
+          ]
+        },
+        {
+          "name": "record_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "record_template": {
+      "id": "record_template",
+      "tableName": "record_template",
+      "fields": [
+        {
+          "id": "record_template.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "record_template_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "record_template.template_id",
+          "name": "template_id",
+          "columnName": "template_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "record_template.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "record_template.category_id",
+          "name": "category_id",
+          "columnName": "category_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "record_template.ix",
+          "name": "ix",
+          "columnName": "ix",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "category",
+          "type": "category",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "record_templateTocategory",
+          "relationFromFields": [
+            "category_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template",
+          "type": "template",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "record_templateTotemplate",
+          "relationFromFields": [
+            "template_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "record_template_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "template": {
+      "id": "template",
+      "tableName": "template",
+      "fields": [
+        {
+          "id": "template.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "template_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "template.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.desc",
+          "name": "desc",
+          "columnName": "desc",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.order",
+          "name": "order",
+          "columnName": "order",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.account_id",
+          "name": "account_id",
+          "columnName": "account_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.currency_id",
+          "name": "currency_id",
+          "columnName": "currency_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.is_expense",
+          "name": "is_expense",
+          "columnName": "is_expense",
+          "type": "boolean",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.agent_id",
+          "name": "agent_id",
+          "columnName": "agent_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.comment",
+          "name": "comment",
+          "columnName": "comment",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.direct",
+          "name": "direct",
+          "columnName": "direct",
+          "type": "boolean",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "template.remote_agent_id",
+          "name": "remote_agent_id",
+          "columnName": "remote_agent_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "agent_template_remote_agent_idToagent",
+          "type": "agent",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "template_remote_agent_idToagent",
+          "relationFromFields": [
+            "remote_agent_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "agent_template_agent_idToagent",
+          "type": "agent",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "template_agent_idToagent",
+          "relationFromFields": [
+            "agent_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "currency",
+          "type": "currency",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "templateTocurrency",
+          "relationFromFields": [
+            "currency_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account",
+          "type": "account",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "templateToaccount",
+          "relationFromFields": [
+            "account_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "templateTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "flow_template",
+          "type": "flow_template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "flow_templateTotemplate",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "record_template",
+          "type": "record_template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "record_templateTotemplate",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "template_order_user_id_key",
+          "fields": [
+            "order",
+            "user_id"
+          ]
+        },
+        {
+          "name": "template_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "trans": {
+      "id": "trans",
+      "tableName": "trans",
+      "fields": [
+        {
+          "id": "trans.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "trans_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "trans.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.is_expense",
+          "name": "is_expense",
+          "columnName": "is_expense",
+          "type": "boolean",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.currency_id",
+          "name": "currency_id",
+          "columnName": "currency_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.account_id",
+          "name": "account_id",
+          "columnName": "account_id",
+          "type": "integer",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.agent_id",
+          "name": "agent_id",
+          "columnName": "agent_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.date_issued",
+          "name": "date_issued",
+          "columnName": "date_issued",
+          "type": "datetime",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.comment",
+          "name": "comment",
+          "columnName": "comment",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "trans.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "user",
+          "type": "user",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "transTouser",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "agent",
+          "type": "agent",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "transToagent",
+          "relationFromFields": [
+            "agent_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account",
+          "type": "account",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "transToaccount",
+          "relationFromFields": [
+            "account_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "currency",
+          "type": "currency",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "transTocurrency",
+          "relationFromFields": [
+            "currency_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "flow",
+          "type": "flow",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "flowTotrans",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "record",
+          "type": "record",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "recordTotrans",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "trans_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "user": {
+      "id": "user",
+      "tableName": "user",
+      "fields": [
+        {
+          "id": "user.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "integer",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "user_id_seq",
+            "increment": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true
+        },
+        {
+          "id": "user.username",
+          "name": "username",
+          "columnName": "username",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "user.email",
+          "name": "email",
+          "columnName": "email",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "id": "user.password",
+          "name": "password",
+          "columnName": "password",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false
+        },
+        {
+          "name": "account",
+          "type": "account",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "accountTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "account_transfer",
+          "type": "account_transfer",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "account_transferTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "agent",
+          "type": "agent",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "agentTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "category",
+          "type": "category",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "categoryTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "currency",
+          "type": "currency",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "currencyTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "template",
+          "type": "template",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "templateTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "trans",
+          "type": "trans",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "transTouser",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "user_username_key",
+          "fields": [
+            "username"
+          ]
+        },
+        {
+          "name": "user_email_key",
+          "fields": [
+            "email"
+          ]
+        },
+        {
+          "name": "user_pkey",
+          "fields": [
+            "id"
+          ]
+        }
+      ]
+    }
+  },
+  "enums": {}
+}
