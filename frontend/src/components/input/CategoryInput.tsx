@@ -1,9 +1,9 @@
-import { ComboboxData, Select, SelectProps } from "@mantine/core";
+import { ComboboxData, MultiSelect, MultiSelectProps } from "@mantine/core";
 import { useEffect } from "react";
 import { CategoryDescQueryResult, CategoryGroupDescQueryResult, useCategoryGroupDescs } from "../../types/Category";
 import Placeholder from "../Placeholder";
 
-interface CategoryInputProps extends Omit<SelectProps, 'data'> {
+interface CategoryInputProps extends Omit<MultiSelectProps, 'data'> {
     is_expense: boolean
     must_be_usable: boolean
     except?: string
@@ -46,7 +46,7 @@ const CategoryInput = ({ is_expense, must_be_usable, except, ...others }: Catego
             })
         )
     }));
-    return <Select
+    return <MultiSelect
         searchable comboboxProps={{ withinPortal: true }}
         data={data}
         {...others}

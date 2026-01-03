@@ -120,18 +120,24 @@ class Account(db.Model, JSONModel):
 
         return changes[::-1] if num is None else changes[-num:][::-1], saldos[::-1]
 
-    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str = None, category: int = None):
+    def jsonify_changes(self, pagesize, page, start=None, end=None, search: str = None, expenseCategory: list = None, incomeCategory: list = None):
         saldo = self.starting_saldo
         changes = sorted(
             self.transactions + self.out_transfers + self.in_transfers,
             key=lambda ch: ch.date_issued
         )
         filtered = []
+        
+        # Check if any category filter is active
+        has_category_filter = (expenseCategory and len(expenseCategory) > 0) or (incomeCategory and len(incomeCategory) > 0)
 
         for i, change in enumerate(changes):
             if type(change) is AccountTransfer:
                 exp = change.src_id == self.id
                 amount = change.src_amount if exp else change.dst_amount
+                # Skip transfers if any category filter is active
+                if has_category_filter:
+                    continue
             else:
                 exp = change.is_expense
                 amount = change.amount
@@ -145,10 +151,14 @@ class Account(db.Model, JSONModel):
 
             if type(change) is Transaction:
                 desc = change.agent.desc
-                # Filter by category if provided
-                if category is not None:
-                    # Check if any record in this transaction matches the category
-                    if not any(record.category_id == category for record in change.records):
+                # Filter by category if any category filter is provided
+                if has_category_filter:
+                    category_ids = expenseCategory if exp else incomeCategory
+                    if not category_ids:
+                        # If no matching category filter for this transaction type, skip it
+                        continue
+                    # Check if any record in this transaction matches the selected categories
+                    if not any(record.category_id in category_ids for record in change.records):
                         continue
             elif change.src_id == self.id:
                 desc = change.dst.desc
@@ -168,7 +178,10 @@ class Account(db.Model, JSONModel):
             "acc_id": self.id,
             "saldo": saldo,
             "target": desc,
-            "data": change.json(deep=False)
+            "data": {
+                **change.json(deep=False),
+                "category_desc": change.records[0].category.desc if type(change) is Transaction and change.records else None
+            }
         }
             for (saldo, desc, change) in filtered[::-1][pagesize*page:pagesize*(page+1)]
         ]

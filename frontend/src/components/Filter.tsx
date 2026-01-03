@@ -1,4 +1,4 @@
-import { Button, Collapse, Grid, Pagination, Select, Stack, TextInput, Group } from "@mantine/core";
+import { Button, Collapse, Grid, Pagination, Select, Stack, TextInput, Group, Text } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -12,7 +12,8 @@ interface FilterFormValues {
     search: string | undefined
     start: Date | undefined
     end: Date | undefined
-    category: string | undefined
+    expenseCategory: string[] | undefined
+    incomeCategory: string[] | undefined
 }
 
 export interface FilterRequest extends searchParamsProps {
@@ -21,7 +22,8 @@ export interface FilterRequest extends searchParamsProps {
     search?: string | undefined
     start?: string | undefined
     end?: string
-    category?: string | undefined
+    expenseCategory?: string[] | undefined
+    incomeCategory?: string[] | undefined
 }
 
 type FilterFormTransform = (fv: FilterFormValues) => FilterRequest
@@ -49,14 +51,16 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
     const form = useForm<FilterFormValues, FilterFormTransform>({
         initialValues: {
             search: filter.search,
-            category: filter.category,
+            expenseCategory: filter.expenseCategory || [],
+            incomeCategory: filter.incomeCategory || [],
             start: filter.start ? new Date(filter.start) : undefined,
             end: filter.end ? new Date(filter.end) : undefined
         },
         transformValues: fv => ({
             ...filter,
             search: fv.search,
-            category: fv.category,
+            expenseCategory: fv.expenseCategory && fv.expenseCategory.length > 0 ? fv.expenseCategory : undefined,
+            incomeCategory: fv.incomeCategory && fv.incomeCategory.length > 0 ? fv.incomeCategory : undefined,
             start: fv.start ? DateTime.fromJSDate(fv.start).toISO({ includeOffset: false }) : undefined,
             end: fv.end ? DateTime.fromJSDate(fv.end).toISO({ includeOffset: false }) : undefined
         })
@@ -66,7 +70,8 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
     useEffect(() => {
         form.setValues({
             search: filter.search,
-            category: filter.category,
+            expenseCategory: filter.expenseCategory || [],
+            incomeCategory: filter.incomeCategory || [],
             start: filter.start ? new Date(filter.start) : undefined,
             end: filter.end ? new Date(filter.end) : undefined
         });
@@ -100,30 +105,19 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
         </Grid>
         <Collapse in={open} pt='sm'>
             <form onSubmit={form.onSubmit(setFilter)}>
-                <TextInput label='search' {...form.getInputProps('search')} />
+                <TextInput label='search (comment/agent)' {...form.getInputProps('search')} />
+                <Text fw={500} size='sm' mt='md' mb='xs'>search (category)</Text>
                 <Stack gap='xs'>
                     <Group grow>
                         <Button 
                             variant={showExpenseCats ? 'filled' : 'default'}
-                            onClick={() => {
-                                setShowExpenseCats(!showExpenseCats);
-                                if (!showExpenseCats) {
-                                    setShowIncomeCats(false);
-                                    form.setFieldValue('category', undefined);
-                                }
-                            }}
+                            onClick={() => setShowExpenseCats(!showExpenseCats)}
                         >
                             Expense Categories
                         </Button>
                         <Button 
                             variant={showIncomeCats ? 'filled' : 'default'}
-                            onClick={() => {
-                                setShowIncomeCats(!showIncomeCats);
-                                if (!showIncomeCats) {
-                                    setShowExpenseCats(false);
-                                    form.setFieldValue('category', undefined);
-                                }
-                            }}
+                            onClick={() => setShowIncomeCats(!showIncomeCats)}
                         >
                             Income Categories
                         </Button>
@@ -133,7 +127,8 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                             is_expense={true}
                             must_be_usable={false}
                             clearable
-                            {...form.getInputProps('category')}
+                            searchable
+                            {...form.getInputProps('expenseCategory')}
                         />
                     )}
                     {showIncomeCats && (
@@ -141,7 +136,8 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                             is_expense={false}
                             must_be_usable={false}
                             clearable
-                            {...form.getInputProps('category')}
+                            searchable
+                            {...form.getInputProps('incomeCategory')}
                         />
                     )}
                 </Stack>

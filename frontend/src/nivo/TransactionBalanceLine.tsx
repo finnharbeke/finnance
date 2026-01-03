@@ -44,7 +44,7 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
     const maxBalance = Math.max(...balances);
     const range = maxBalance - minBalance;
     const padding = range * 0.1;
-    const yMin = minBalance - padding;
+    const yMin = 0;
     const yMax = maxBalance + padding;
 
     const lines = [
@@ -53,17 +53,27 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
             color: `var(--mantine-color-${theme.primaryColor}-5)`,
             data: data.map(point => ({
                 y: point.balance,
-                x: DateTime.fromISO(point.date).toFormat('MMM dd, HH:mm')
+                x: DateTime.fromISO(point.date).toFormat('MMM dd')
             }))
         },
     ];
+
+    // Generate tick values for the 15th of every month of the year
+    const tickValues = (() => {
+        const ticks: string[] = [];
+        for (let month = 1; month <= 12; month++) {
+            const fifteenthDay = DateTime.fromObject({ year: 2025, month, day: 15 });
+            ticks.push(fifteenthDay.toFormat('MMM dd'));
+        }
+        return ticks;
+    })();
 
     return <ResponsiveLine
             theme={nivo}
             data={lines}
             
-            enableGridX={true}
-            enableGridY={true}
+            enableGridX={false}
+            enableGridY={false}
 
             curve='linear'
             
@@ -76,7 +86,7 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
             pointColor={{ theme: 'background' }}
             pointBorderWidth={2}
             pointBorderColor={{ from: 'serieColor' }}
-            pointSize={4}
+            pointSize={0}
             lineWidth={2}
 
             colors={{ datum: 'color' }}
@@ -87,12 +97,13 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
 
             axisBottom={{
                 tickRotation: -45,
+                tickValues: tickValues
             }}
 
             margin={{
                 bottom: 80,
                 left: 60,
-                right: 20,
+                right: 140,
                 top: 20
             }}
 
@@ -108,11 +119,18 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
                 {
                     anchor: 'bottom-right',
                     direction: 'column',
-                    translateX: 0,
+                    translateX: 120,
                     itemWidth: 80,
                     itemHeight: 22,
                     itemDirection: 'right-to-left',
-                    symbolShape: 'circle'
+                    symbolShape: 'circle',
+                    data: [
+                        {
+                            id: 'balance',
+                            label: 'Balance',
+                            color: `var(--mantine-color-${theme.primaryColor}-5)`
+                        }
+                    ]
                 }
             ]}
         />

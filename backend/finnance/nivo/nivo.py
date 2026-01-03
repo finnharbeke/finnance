@@ -313,25 +313,30 @@ def line(currency: Currency, min_date: datetime, max_date: datetime):
     return jsonify(data)
 
 
-@nivo.route("/balanceline")
-@login_required
-@nivo_wrapper
-def balanceline(currency: Currency, min_date: datetime, max_date: datetime):
-    """Calculate minimum balance per month across all user's accounts in this currency"""
+def _minimum_balance_line(currency: Currency, min_date: datetime, max_date: datetime, timescale: str):
+    """
+    Calculate minimum balance per timescale across all user's accounts in this currency.
+    
+    Args:
+        currency: Currency object
+        min_date: Start date for the range
+        max_date: End date for the range
+        timescale: Either 'month' or 'year'
+    """
     from finnance.models import AccountTransfer
     
     # Get all accounts for this currency
-    accounts = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    accs_with_currency = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
     
-    if not accounts:
-        return jsonify([])
+    if not accs_with_currency:
+        return []
 
     # Start with sum of all account starting balances
-    total_saldo = sum(acc.starting_saldo for acc in accounts)
+    total_saldo = sum(acc.starting_saldo for acc in accs_with_currency)
     
     # Collect ALL changes (transactions + transfers) for all accounts (entire history)
     all_changes = []
-    for account in accounts:
+    for account in accs_with_currency:
         all_changes.extend(account.transactions)
         all_changes.extend(account.out_transfers)
         all_changes.extend(account.in_transfers)
@@ -346,7 +351,7 @@ def balanceline(currency: Currency, min_date: datetime, max_date: datetime):
         # Calculate amount and whether it's an expense (decreases balance)
         if type(change) is AccountTransfer:
             # For transfers, check if this account is the source (money going out)
-            account_ids = {acc.id for acc in accounts}
+            account_ids = {acc.id for acc in accs_with_currency}
             is_expense = change.src_id in account_ids
             amount = change.src_amount if is_expense else change.dst_amount
         else:
@@ -358,129 +363,71 @@ def balanceline(currency: Currency, min_date: datetime, max_date: datetime):
         total_saldo = total_saldo + (amount if not is_expense else -amount)
         balances_by_date[change.date_issued] = total_saldo
     
-    # Now extract monthly minimums for the requested date range
+    # Initialize period boundaries based on timescale
     data = []
-    start = min_date
-    end = end_of_month(start)
+    if timescale == 'month':
+        start = min_date
+        end = end_of_month(start)
+        period_key = 'month'
+    else:  # year
+        start = min_date.replace(month=1, day=1)
+        end = min_date.replace(year=min_date.year + 1, month=1, day=1)
+        period_key = 'year'
     
-    # Keep track of the minimum from the previous month
+    # Keep track of the minimum from the previous period
     previous_min = None
     
     while start < max_date:
-        # Find all balances that fall within this month
-        month_balances = []
+        # Find all balances that fall within this period
+        period_balances = []
         
         for date, balance in balances_by_date.items():
             if date >= start and date < end:
-                # This balance was recorded in this month
-                month_balances.append(balance)
+                period_balances.append(balance)
         
-        # Get minimum balance for this month
-        if month_balances:
-            min_balance_month = min(month_balances)
-            previous_min = min_balance_month  # Save for next month if needed
+        # Get minimum balance for this period
+        if period_balances:
+            min_balance = min(period_balances)
+            previous_min = min_balance
         else:
-            # No transactions this month, use the minimum from previous month
-            min_balance_month = previous_min
+            # No transactions this period, use the minimum from previous period
+            min_balance = previous_min
         
         # Only add to data if we have a value
-        if min_balance_month is not None:
-            month = {
-                'balance': min_balance_month,
-                'month': start.isoformat()
-            }
-            data.append(month)
+        if min_balance is not None:
+            data.append({
+                'balance': min_balance,
+                period_key: start.isoformat()
+            })
         
-        start = end
-        end = end_of_month(start)
-        if end > max_date:
-            end = max_date
+        # Move to next period
+        if timescale == 'month':
+            start = end
+            end = end_of_month(start)
+            if end > max_date:
+                end = max_date
+        else:  # year
+            start = end
+            end = end.replace(year=end.year + 1) if end.year < max_date.year else max_date
 
+    return data
+
+
+@nivo.route("/monthminline")
+@login_required
+@nivo_wrapper
+def MonthMinLine(currency: Currency, min_date: datetime, max_date: datetime):
+    """Calculate minimum balance per month across all user's accounts in this currency"""
+    data = _minimum_balance_line(currency, min_date, max_date, 'month')
     return jsonify(data)
 
 
-@nivo.route("/yearlyminimum")
+@nivo.route("/yearminline")
 @login_required
 @nivo_wrapper
-def yearlyminimum(currency: Currency, min_date: datetime, max_date: datetime):
+def YearMinLine(currency: Currency, min_date: datetime, max_date: datetime):
     """Calculate minimum balance per year across all user's accounts in this currency"""
-    from finnance.models import AccountTransfer
-    
-    # Get all accounts for this currency
-    accounts = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
-    
-    if not accounts:
-        return jsonify([])
-
-    # Start with sum of all account starting balances
-    total_saldo = sum(acc.starting_saldo for acc in accounts)
-    
-    # Collect ALL changes (transactions + transfers) for all accounts (entire history)
-    all_changes = []
-    for account in accounts:
-        all_changes.extend(account.transactions)
-        all_changes.extend(account.out_transfers)
-        all_changes.extend(account.in_transfers)
-    
-    # Sort by date
-    all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
-    
-    # Build a list of (date, balance_after_transaction) for ALL transactions
-    balances_by_date = {}
-    
-    for change in all_changes:
-        # Calculate amount and whether it's an expense (decreases balance)
-        if type(change) is AccountTransfer:
-            # For transfers, check if this account is the source (money going out)
-            account_ids = {acc.id for acc in accounts}
-            is_expense = change.src_id in account_ids
-            amount = change.src_amount if is_expense else change.dst_amount
-        else:
-            # Transaction
-            is_expense = change.is_expense
-            amount = change.amount
-        
-        # Update balance: income adds, expense subtracts
-        total_saldo = total_saldo + (amount if not is_expense else -amount)
-        balances_by_date[change.date_issued] = total_saldo
-    
-    # Now extract yearly minimums for the requested date range
-    data = []
-    start = min_date.replace(month=1, day=1)
-    end = min_date.replace(year=min_date.year + 1, month=1, day=1)
-    
-    # Keep track of the minimum from the previous year
-    previous_min = None
-    
-    while start < max_date:
-        # Find all balances that fall within this year
-        year_balances = []
-        
-        for date, balance in balances_by_date.items():
-            if date >= start and date < end:
-                # This balance was recorded in this year
-                year_balances.append(balance)
-        
-        # Get minimum balance for this year
-        if year_balances:
-            min_balance_year = min(year_balances)
-            previous_min = min_balance_year  # Save for next year if needed
-        else:
-            # No transactions this year, use the minimum from previous year
-            min_balance_year = previous_min
-        
-        # Only add to data if we have a value
-        if min_balance_year is not None:
-            year = {
-                'balance': min_balance_year,
-                'year': start.isoformat()
-            }
-            data.append(year)
-        
-        # Move to next year
-        start = end
-        end = end.replace(year=end.year + 1) if end.year < max_date.year else max_date
-
+    data = _minimum_balance_line(currency, min_date, max_date, 'year')
     return jsonify(data)
 
 
@@ -492,17 +439,17 @@ def transactionbalanceline(currency: Currency, min_date: datetime, max_date: dat
     from finnance.models import AccountTransfer
     
     # Get all accounts for this currency
-    accounts = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    accs_with_currency = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
     
-    if not accounts:
+    if not accs_with_currency:
         return jsonify([])
 
     # Start with sum of all account starting balances
-    total_saldo = sum(acc.starting_saldo for acc in accounts)
+    total_saldo = sum(acc.starting_saldo for acc in accs_with_currency)
     
     # Collect ALL changes (transactions + transfers) for all accounts (entire history)
     all_changes = []
-    for account in accounts:
+    for account in accs_with_currency:
         all_changes.extend(account.transactions)
         all_changes.extend(account.out_transfers)
         all_changes.extend(account.in_transfers)
@@ -517,7 +464,7 @@ def transactionbalanceline(currency: Currency, min_date: datetime, max_date: dat
         # Calculate amount and whether it's an expense (decreases balance)
         if type(change) is AccountTransfer:
             # For transfers, check if this account is the source (money going out)
-            account_ids = {acc.id for acc in accounts}
+            account_ids = {acc.id for acc in accs_with_currency}
             is_expense = change.src_id in account_ids
             amount = change.src_amount if is_expense else change.dst_amount
         else:

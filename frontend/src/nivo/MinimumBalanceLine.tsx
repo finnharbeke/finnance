@@ -10,25 +10,33 @@ import { NivoComponentProps, NivoRequest, NivoTooltip, useNivoTheme } from "./Ni
 import { useCurrency } from "../types/Currency";
 import { LineSkeleton } from "./ExpIncLine";
 
-interface YearlyData {
+interface MinimumBalanceData {
     balance: number
-    year: string
+    month?: string
+    year?: string
 }
 
-const useYearlyMinimumLineData = (props: NivoRequest) =>
-    useQuery<YearlyData[], AxiosError>({
-        queryKey: ["nivo", "yearlyminimum", props],
-        queryFn: () => getAxiosData(`/api/nivo/yearlyminimum?${searchParams(props)}`)
+interface MinimumBalanceLineProps extends NivoComponentProps {
+    timescale: 'month' | 'year'
+    endpoint: string
+    label: string
+    dateFormat: string
+}
+
+const useMinimumBalanceData = (endpoint: string, props: NivoRequest) =>
+    useQuery<MinimumBalanceData[], AxiosError>({
+        queryKey: ["nivo", endpoint, props],
+        queryFn: () => getAxiosData(`/api/nivo/${endpoint}?${searchParams(props)}`)
     });
 
-export const YearlyMinimumLine = ({ request, size }: NivoComponentProps) => {
+export const MinimumBalanceLine = ({ request, size, timescale, endpoint, label, dateFormat }: MinimumBalanceLineProps) => {
     const nivo = useNivoTheme();
     const theme = useMantineTheme();
-    const query = useYearlyMinimumLineData(request);
+    const query = useMinimumBalanceData(endpoint, request);
 
     const currency = useCurrency(request.currency_id);
 
-    const [data, setData] = useState<YearlyData[]>()
+    const [data, setData] = useState<MinimumBalanceData[]>()
     useEffect(() => query.data && setData(query.data), [query.data, setData])
 
     if (query.isError || currency.isError)
@@ -43,27 +51,36 @@ export const YearlyMinimumLine = ({ request, size }: NivoComponentProps) => {
     const minBalance = Math.min(...balances);
     const maxBalance = Math.max(...balances);
     const range = maxBalance - minBalance;
-    const padding = range * 0.1;
-    const yMin = minBalance - padding;
+    const padding = range * 0.3;
+    const yMin = 0;
     const yMax = maxBalance + padding;
 
+    const dateKey = timescale === 'month' ? 'month' : 'year';
+    
     const lines = [
         {
-            id: 'Yearly\nminimum',
+            id: label,
             color: `var(--mantine-color-${theme.primaryColor}-5)`,
             data: data.map(point => ({
                 y: point.balance,
-                x: DateTime.fromISO(point.year).toFormat('yyyy')
+                x: DateTime.fromISO(point[dateKey as keyof MinimumBalanceData] as string).toFormat(dateFormat)
             }))
         },
     ];
+
+    const pointSize = 9;
+    const pointBorderWidth = 3;
+    const lineWidth = 3;
+    const bottomMargin = timescale === 'month' ? 30 : 80;
+    const rightMargin = timescale === 'month' ? 200 : 150;
+    const legendItemHeight = timescale === 'month' ? 40 : 22;
 
     return <ResponsiveLine
             theme={nivo}
             data={lines}
             
-            enableGridX={true}
-            enableGridY={true}
+            enableGridX={false}
+            enableGridY={false}
 
             curve='linear'
             
@@ -74,10 +91,10 @@ export const YearlyMinimumLine = ({ request, size }: NivoComponentProps) => {
             }}
 
             pointColor={{ theme: 'background' }}
-            pointBorderWidth={2}
+            pointBorderWidth={pointBorderWidth}
             pointBorderColor={{ from: 'serieColor' }}
-            pointSize={4}
-            lineWidth={2}
+            pointSize={pointSize}
+            lineWidth={lineWidth}
 
             colors={{ datum: 'color' }}
 
@@ -85,21 +102,21 @@ export const YearlyMinimumLine = ({ request, size }: NivoComponentProps) => {
                 format: (value: number) => (value / Math.pow(10, currency.data.decimals))
             }}
 
-            axisBottom={{
+            axisBottom={timescale === 'year' ? {
                 tickRotation: -45,
-            }}
+            } : undefined}
 
             margin={{
-                bottom: 80,
+                bottom: bottomMargin,
                 left: 60,
-                right: 20,
+                right: rightMargin,
                 top: 20
             }}
 
             useMesh
             enableCrosshair={false}
             tooltip={({ point }) => <NivoTooltip
-                label={`${point.data.x.toString()}`}
+                label={timescale === 'month' ? `${point.serieId} ${point.data.x.toString()}` : point.data.x.toString()}
                 value={point.data.y as number}
                 currency_id={request.currency_id}
             />}
@@ -108,11 +125,24 @@ export const YearlyMinimumLine = ({ request, size }: NivoComponentProps) => {
                 {
                     anchor: 'bottom-right',
                     direction: 'column',
-                    translateX: 0,
+                    translateX: 120,
                     itemWidth: 80,
-                    itemHeight: 22,
+                    itemHeight: legendItemHeight,
                     itemDirection: 'right-to-left',
-                    symbolShape: 'circle'
+                    symbolShape: 'circle',
+                    data: timescale === 'month' ? [
+                        {
+                            id: 'balance',
+                            label: 'Monthly\nminimum',
+                            color: `var(--mantine-color-${theme.primaryColor}-5)`
+                        }
+                    ] : [
+                        {
+                            id: 'balance',
+                            label: 'Yearly\nminimum',
+                            color: `var(--mantine-color-${theme.primaryColor}-5)`
+                        }
+                    ]
                 }
             ]}
         />
