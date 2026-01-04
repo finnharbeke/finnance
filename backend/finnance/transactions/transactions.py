@@ -14,6 +14,14 @@ from finnance import db
 
 transactions = Blueprint('transactions', __name__, url_prefix='/api/transactions')
 
+@transactions.route("/earliest-date", methods=["GET"])
+@login_required
+def earliest_transaction_date():
+    earliest = Transaction.query.filter_by(user_id=current_user.id).order_by(Transaction.date_issued.asc()).first()
+    if earliest is None:
+        return jsonify({"date": None})
+    return jsonify({"date": earliest.date_issued.isoformat()})
+
 @transactions.route("/<int:transaction_id>")
 @login_required
 def transaction(transaction_id: int):

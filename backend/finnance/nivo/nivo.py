@@ -332,6 +332,7 @@ def _minimum_balance_line(currency: Currency, min_date: datetime, max_date: date
         return []
 
     # Start with sum of all account starting balances
+    # THIS NEEDS TO BE CHANGED BY THE KING OF FINNANCE
     total_saldo = sum(acc.starting_saldo for acc in accs_with_currency)
     
     # Collect ALL changes (transactions + transfers) for all accounts (entire history)
@@ -344,8 +345,19 @@ def _minimum_balance_line(currency: Currency, min_date: datetime, max_date: date
     # Sort by date
     all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
     
-    # Build a list of (date, balance_after_transaction) for ALL transactions
-    balances_by_date = {}
+    # Initialize period boundaries based on timescale
+    data = []
+    if timescale == 'month':
+        period_start = min_date
+        period_end = end_of_month(period_start) if end_of_month(period_start) < max_date else max_date
+        period_key = 'month'
+    else:  # year
+        period_start = min_date.replace(month=1, day=1)
+        period_end = min_date.replace(year=min_date.year + 1, month=1, day=1) if min_date.replace(year=min_date.year + 1, month=1, day=1) < max_date else max_date
+        period_key = 'year'
+        
+    period_min = total_saldo
+    period_max = total_saldo
     
     for change in all_changes:
         # Calculate amount and whether it's an expense (decreases balance)
@@ -358,57 +370,66 @@ def _minimum_balance_line(currency: Currency, min_date: datetime, max_date: date
             # Transaction
             is_expense = change.is_expense
             amount = change.amount
+            
+        if change.date_issued > period_end:
+            # then we arrive in a new period
+            while period_end < change.date_issued:
+                # Record minimum balance for the period
+                data.append({
+                    'min': period_min,
+                    'max': period_max,
+                    period_key: period_start.isoformat()
+                })
+                # Move to next period
+                if timescale == 'month':
+                    period_start = period_end
+                    period_end = end_of_month(period_start)
+                    if period_end > max_date:
+                        period_end = max_date
+                    
+                else:  # year
+                    period_start = period_end
+                    period_end = period_end.replace(year=period_end.year + 1) if period_end.year < max_date.year else max_date
+                if period_end >= max_date:
+                    break
+                period_min = total_saldo
+                period_max = total_saldo
+            if change.date_issued > max_date:
+                break
         
         # Update balance: income adds, expense subtracts
         total_saldo = total_saldo + (amount if not is_expense else -amount)
-        balances_by_date[change.date_issued] = total_saldo
-    
-    # Initialize period boundaries based on timescale
-    data = []
-    if timescale == 'month':
-        start = min_date
-        end = end_of_month(start)
-        period_key = 'month'
-    else:  # year
-        start = min_date.replace(month=1, day=1)
-        end = min_date.replace(year=min_date.year + 1, month=1, day=1)
-        period_key = 'year'
-    
-    # Keep track of the minimum from the previous period
-    previous_min = None
-    
-    while start < max_date:
-        # Find all balances that fall within this period
-        period_balances = []
         
-        for date, balance in balances_by_date.items():
-            if date >= start and date < end:
-                period_balances.append(balance)
+        if change.date_issued < period_start:
+            continue  # before the whole window
         
-        # Get minimum balance for this period
-        if period_balances:
-            min_balance = min(period_balances)
-            previous_min = min_balance
-        else:
-            # No transactions this period, use the minimum from previous period
-            min_balance = previous_min
+        if total_saldo < period_min:
+            period_min = total_saldo
         
-        # Only add to data if we have a value
-        if min_balance is not None:
-            data.append({
-                'balance': min_balance,
-                period_key: start.isoformat()
-            })
+        if total_saldo > period_max:
+            period_max = total_saldo
         
+    while period_end <= max_date:
+        # Record minimum balance for the period
+        data.append({
+            'min': period_min,
+            'max': period_max,
+            period_key: period_start.isoformat()
+        })
         # Move to next period
         if timescale == 'month':
-            start = end
-            end = end_of_month(start)
-            if end > max_date:
-                end = max_date
+            period_start = period_end
+            period_end = end_of_month(period_start)
+            if period_end >= max_date:
+                break
         else:  # year
-            start = end
-            end = end.replace(year=end.year + 1) if end.year < max_date.year else max_date
+            period_start = period_end
+            period_end = period_end.replace(year=period_end.year + 1) if period_end.year < max_date.year else max_date
+        period_min = total_saldo
+        period_max = total_saldo
+        if period_end >= max_date:
+            break
+        
 
     return data
 
@@ -445,6 +466,7 @@ def transactionbalanceline(currency: Currency, min_date: datetime, max_date: dat
         return jsonify([])
 
     # Start with sum of all account starting balances
+    # THIS NEEDS TO BE CHANGED BY THE KING OF FINNANCE
     total_saldo = sum(acc.starting_saldo for acc in accs_with_currency)
     
     # Collect ALL changes (transactions + transfers) for all accounts (entire history)
@@ -459,21 +481,31 @@ def transactionbalanceline(currency: Currency, min_date: datetime, max_date: dat
     
     # Process all transactions and build data points
     data = []
+    done_transfers = set()
     
     for change in all_changes:
         # Calculate amount and whether it's an expense (decreases balance)
         if type(change) is AccountTransfer:
             # For transfers, check if this account is the source (money going out)
+            
+            if change.id in done_transfers:
+                continue  # already processed this transfer
+            
             account_ids = {acc.id for acc in accs_with_currency}
-            is_expense = change.src_id in account_ids
-            amount = change.src_amount if is_expense else change.dst_amount
+            
+            if change.src_id in account_ids:
+                total_saldo -= change.src_amount
+            if change.dst_id in account_ids:
+                total_saldo += change.dst_amount
+                
+            done_transfers.add(change.id)
+            
         else:
             # Transaction
             is_expense = change.is_expense
             amount = change.amount
-        
-        # Update balance: income adds, expense subtracts
-        total_saldo = total_saldo + (amount if not is_expense else -amount)
+            
+            total_saldo += (amount if not is_expense else -amount)
         
         # Only include transactions within the requested date range
         if change.date_issued >= min_date and change.date_issued < max_date:

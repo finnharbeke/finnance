@@ -1,16 +1,24 @@
 import { Tabs } from "@mantine/core";
 import { TbTimeline } from "react-icons/tb";
 import { DateTime } from "luxon";
+import { useQuery } from "@tanstack/react-query";
 import { useCurrency } from "../types/Currency";
-import { YearMinLine } from "./YearMinLine";
+import { YearExtremaLine } from "./YearExtremaLine";
 import { LineSkeleton } from "./ExpIncLine";
 import { NivoShell } from "./Nivo";
+import { getAxiosData } from "../query";
 
 export const AllTime = ({ currency_id }: { currency_id: string | null }) => {
     const currency = useCurrency(currency_id ?? '');
 
-    // All-time: from a very early date to today
-    const start = DateTime.fromISO('2000-01-01');
+    // Fetch earliest date from dataset
+    const { data: dateData } = useQuery({
+        queryKey: ["earliest-transaction-date"],
+        queryFn: () => getAxiosData("/api/transactions/earliest-date")
+    });
+
+    // All-time: from earliest date in dataset to today
+    const start = dateData?.date ? DateTime.fromISO(dateData.date) : DateTime.fromISO('2000-01-01');
     const end = DateTime.now();
 
     const commonProps = {
@@ -25,7 +33,7 @@ export const AllTime = ({ currency_id }: { currency_id: string | null }) => {
         </Tabs.List>
         <Tabs.Panel value='yearminline'>
             <NivoShell
-                nivo={YearMinLine} skeleton={LineSkeleton}
+                nivo={YearExtremaLine} skeleton={LineSkeleton}
                 height={400}
                 {...commonProps}
             />

@@ -107,40 +107,38 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
             <form onSubmit={form.onSubmit(setFilter)}>
                 <TextInput label='search (comment/agent)' {...form.getInputProps('search')} />
                 <Text fw={500} size='sm' mt='md' mb='xs'>search (category)</Text>
-                <Stack gap='xs'>
-                    <Group grow>
-                        <Button 
-                            variant={showExpenseCats ? 'filled' : 'default'}
-                            onClick={() => setShowExpenseCats(!showExpenseCats)}
-                        >
-                            Expense Categories
-                        </Button>
-                        <Button 
-                            variant={showIncomeCats ? 'filled' : 'default'}
-                            onClick={() => setShowIncomeCats(!showIncomeCats)}
-                        >
-                            Income Categories
-                        </Button>
-                    </Group>
-                    {showExpenseCats && (
-                        <CategoryInput 
-                            is_expense={true}
-                            must_be_usable={false}
-                            clearable
-                            searchable
-                            {...form.getInputProps('expenseCategory')}
-                        />
-                    )}
-                    {showIncomeCats && (
-                        <CategoryInput 
-                            is_expense={false}
-                            must_be_usable={false}
-                            clearable
-                            searchable
-                            {...form.getInputProps('incomeCategory')}
-                        />
-                    )}
-                </Stack>
+                <Group grow>
+                    <Button 
+                        variant={showExpenseCats ? 'filled' : 'default'}
+                        onClick={() => setShowExpenseCats(!showExpenseCats)}
+                    >
+                        Expense Categories
+                    </Button>
+                    <Button 
+                        variant={showIncomeCats ? 'filled' : 'default'}
+                        onClick={() => setShowIncomeCats(!showIncomeCats)}
+                    >
+                        Income Categories
+                    </Button>
+                </Group>
+                {showExpenseCats && (
+                    <CategoryInput 
+                        is_expense={true}
+                        must_be_usable={false}
+                        clearable
+                        searchable
+                        {...form.getInputProps('expenseCategory')}
+                    />
+                )}
+                {showIncomeCats && (
+                    <CategoryInput 
+                        is_expense={false}
+                        must_be_usable={false}
+                        clearable
+                        searchable
+                        {...form.getInputProps('incomeCategory')}
+                    />
+                )}
                 <DateTimePicker label='min date' {...form.getInputProps('start')} clearable />
                 <DateTimePicker label='max date' {...form.getInputProps('end')} clearable />
                 <Button type='submit' fullWidth mt='sm'>apply</Button>

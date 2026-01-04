@@ -10,34 +10,39 @@ import { NivoComponentProps, NivoRequest, NivoTooltip, useNivoTheme } from "./Ni
 import { useCurrency } from "../types/Currency";
 import { LineSkeleton } from "./ExpIncLine";
 
-interface MinimumBalanceData {
-    balance: number
+interface ExtremaBalanceData {
+    min: number
+    max: number
     month?: string
     year?: string
 }
 
-interface MinimumBalanceLineProps extends NivoComponentProps {
+interface ExtremaBalanceLineProps extends NivoComponentProps {
     timescale: 'month' | 'year'
     endpoint: string
     label: string
     dateFormat: string
 }
 
-const useMinimumBalanceData = (endpoint: string, props: NivoRequest) =>
-    useQuery<MinimumBalanceData[], AxiosError>({
+const useExtremaBalanceData = (endpoint: string, props: NivoRequest) =>
+    useQuery<ExtremaBalanceData[], AxiosError>({
         queryKey: ["nivo", endpoint, props],
         queryFn: () => getAxiosData(`/api/nivo/${endpoint}?${searchParams(props)}`)
     });
 
-export const MinimumBalanceLine = ({ request, size, timescale, endpoint, label, dateFormat }: MinimumBalanceLineProps) => {
+export const ExtremaBalanceLine = ({ request, size, timescale, endpoint, label, dateFormat }: ExtremaBalanceLineProps) => {
     const nivo = useNivoTheme();
     const theme = useMantineTheme();
-    const query = useMinimumBalanceData(endpoint, request);
+    const query = useExtremaBalanceData(endpoint, request);
 
     const currency = useCurrency(request.currency_id);
 
-    const [data, setData] = useState<MinimumBalanceData[]>()
+    const [data, setData] = useState<ExtremaBalanceData[]>()
     useEffect(() => query.data && setData(query.data), [query.data, setData])
+
+    useEffect(() => {
+        console.log(data);
+    }, [data]);
 
     if (query.isError || currency.isError)
         return <Placeholder queries={[query]} height={size.height} />
@@ -47,9 +52,10 @@ export const MinimumBalanceLine = ({ request, size, timescale, endpoint, label, 
         return <Text align='center' mt='md'>no data found</Text>
 
     // Calculate min and max with 10% padding
-    const balances = data.map(d => d.balance);
-    const minBalance = Math.min(...balances);
-    const maxBalance = Math.max(...balances);
+    const mins = data.map(d => d.min);
+    const maxs = data.map(d => d.max);
+    const minBalance = Math.min(...mins);
+    const maxBalance = Math.max(...maxs);
     const range = maxBalance - minBalance;
     const padding = range * 0.3;
     const yMin = 0;
@@ -59,11 +65,19 @@ export const MinimumBalanceLine = ({ request, size, timescale, endpoint, label, 
     
     const lines = [
         {
-            id: label,
+            id: label + ' minimum',
+            color: `var(--mantine-color-${theme.primaryColor}-3)`,
+            data: data.map((point: ExtremaBalanceData) => ({
+                y: point.min,
+                x: DateTime.fromISO(point[dateKey as keyof ExtremaBalanceData] as string).toFormat(dateFormat)
+            }))
+        },
+        {
+            id: label + ' maximum',
             color: `var(--mantine-color-${theme.primaryColor}-5)`,
-            data: data.map(point => ({
-                y: point.balance,
-                x: DateTime.fromISO(point[dateKey as keyof MinimumBalanceData] as string).toFormat(dateFormat)
+            data: data.map((point: ExtremaBalanceData) => ({
+                y: point.max,
+                x: DateTime.fromISO(point[dateKey as keyof ExtremaBalanceData] as string).toFormat(dateFormat)
             }))
         },
     ];
@@ -130,17 +144,16 @@ export const MinimumBalanceLine = ({ request, size, timescale, endpoint, label, 
                     itemHeight: legendItemHeight,
                     itemDirection: 'right-to-left',
                     symbolShape: 'circle',
-                    data: timescale === 'month' ? [
+                    data: [
                         {
-                            id: 'balance',
-                            label: 'Monthly\nminimum',
+                            id: label + ' maximum',
+                            label: 'Maximum',
                             color: `var(--mantine-color-${theme.primaryColor}-5)`
-                        }
-                    ] : [
+                        },
                         {
-                            id: 'balance',
-                            label: 'Yearly\nminimum',
-                            color: `var(--mantine-color-${theme.primaryColor}-5)`
+                            id: label + ' minimum',
+                            label: 'Minimum',
+                            color: `var(--mantine-color-${theme.primaryColor}-3)`
                         }
                     ]
                 }
