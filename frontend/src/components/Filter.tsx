@@ -45,9 +45,6 @@ interface FilterPaginationProps {
 }
 
 export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationProps) => {
-    const [showExpenseCats, setShowExpenseCats] = useState(false);
-    const [showIncomeCats, setShowIncomeCats] = useState(false);
-    
     const form = useForm<FilterFormValues, FilterFormTransform>({
         initialValues: {
             search: filter.search,
@@ -105,50 +102,23 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
         </Grid>
         <Collapse in={open} pt='sm'>
             <form onSubmit={form.onSubmit(setFilter)}>
-                <TextInput label='search (comment/agent)' {...form.getInputProps('search')} />
-                <Text fw={500} size='sm' mt='md' mb='xs'>search (category)</Text>
-                <Group grow>
-                    <Button 
-                        variant={showExpenseCats ? 'filled' : 'default'}
-                        onClick={() => {
-                            if (showExpenseCats) {
-                                form.setFieldValue('expenseCategory', []);
-                            }
-                            setShowExpenseCats(!showExpenseCats);
-                        }}
-                    >
-                        Expense Categories
-                    </Button>
-                    <Button 
-                        variant={showIncomeCats ? 'filled' : 'default'}
-                        onClick={() => {
-                            if (showIncomeCats) {
-                                form.setFieldValue('incomeCategory', []);
-                            }
-                            setShowIncomeCats(!showIncomeCats);
-                        }}
-                    >
-                        Income Categories
-                    </Button>
-                </Group>
-                {showExpenseCats && (
-                    <MultiCategoryInput 
-                        is_expense={true}
-                        must_be_usable={false}
-                        clearable
-                        searchable
-                        {...form.getInputProps('expenseCategory')}
-                    />
-                )}
-                {showIncomeCats && (
-                    <MultiCategoryInput 
-                        is_expense={false}
-                        must_be_usable={false}
-                        clearable
-                        searchable
-                        {...form.getInputProps('incomeCategory')}
-                    />
-                )}
+                <TextInput label='search' {...form.getInputProps('search')} />
+                <Text fw={500} size='sm' mt='md' mb='xs'>expense category</Text>
+                <MultiCategoryInput 
+                    is_expense={true}
+                    must_be_usable={false}
+                    clearable
+                    searchable
+                    {...form.getInputProps('expenseCategory')}
+                />
+                <Text fw={500} size='sm' mt='md' mb='xs'>income category</Text>
+                <MultiCategoryInput 
+                    is_expense={false}
+                    must_be_usable={false}
+                    clearable
+                    searchable
+                    {...form.getInputProps('incomeCategory')}
+                />
                 <DateTimePicker label='min date' {...form.getInputProps('start')} clearable />
                 <DateTimePicker label='max date' {...form.getInputProps('end')} clearable />
                 <Button type='submit' fullWidth mt='sm'>apply</Button>
