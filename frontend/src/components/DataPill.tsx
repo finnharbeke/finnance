@@ -250,14 +250,13 @@ export const StandardPill = (props: StandardPillProps) => {
 
 interface SaldoPillProps extends StandardPillProps {
     saldo: string
-    category?: string | null
 }
 
 export const SaldoPill = (props: SaldoPillProps) => {
     const {
         icon, iconColor, datetime,
         amount, saldo, is_expense,
-        label, comment, category, onEdit
+        label, comment, onEdit
     } = props;
     const theme = useMantineTheme();
     const colorScheme = useComputedColorScheme();
@@ -295,29 +294,7 @@ export const SaldoPill = (props: SaldoPillProps) => {
         {
             type: 'text',
             col: {
-                span: {base: 14, sm: 6}, order: {base: 3, sm: 4}
-            },
-            cell: {
-                align: 'left',
-                ...label
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: 3, order: {base: 4, sm: 5}
-            },
-            cell: {
-                align: 'left',
-                text: category || '',
-                fz: 'sm',
-                c: 'dimmed'
-            }
-        },
-        {
-            type: 'text',
-            col: {
-                span: {base: 11, sm: 5}, order: {base: 5, sm: 6}
+                span: {base: 11, sm: 5}, order: {base: 3, sm: 5}
             },
             cell: {
                 align: align,
@@ -327,14 +304,24 @@ export const SaldoPill = (props: SaldoPillProps) => {
         {
             type: 'edit',
             col: {
-                span: {base: 3, sm: 1}, order: {base: 6, sm: 7}
+                span: {base: 3, sm: 1}, order: {base: 4, sm: 6}
             },
             cell: { onEdit }
         },
         {
             type: 'text',
             col: {
-                span: {base: 7, sm: 3}, order: {base: 7, sm: 2}
+                span: {base: 14, sm: 9}, order: {base: 5, sm: 4}
+            },
+            cell: {
+                align: 'left',
+                ...label
+            }
+        },
+        {
+            type: 'text',
+            col: {
+                span: {base: 7, sm: 3}, order: {base: 6, sm: 2}
             },
             cell: {
                 align: 'center',

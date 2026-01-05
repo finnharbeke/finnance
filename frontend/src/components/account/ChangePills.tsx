@@ -67,7 +67,6 @@ const ChangePill = ({ change }: { change: Change }) => {
             color: isTransfer ? theme.primaryColor : undefined
         },
         comment: change.data.comment,
-        category: !isTransfer ? (change.data as any).category_desc : undefined,
         onEdit: () => isTransfer ?
             editTransferAction(change.data)
             :
