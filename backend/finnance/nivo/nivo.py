@@ -6,7 +6,7 @@ from http import HTTPStatus
 
 import sqlalchemy
 from finnance.errors import APIError
-from finnance.models import Agent, Category, Currency, Record, Transaction
+from finnance.models import Account, AccountTransfer, Agent, Category, Currency, Record, Transaction
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
@@ -311,6 +311,211 @@ def line(currency: Currency, min_date: datetime, max_date: datetime):
     data = data[cut:]
 
     return jsonify(data)
+
+
+def _minimum_balance_line(currency: Currency, min_date: datetime, max_date: datetime, timescale: str):
+    """
+    Calculate minimum balance per timescale across all user's accounts in this currency.
+    
+    Args:
+        currency: Currency object
+        min_date: Start date for the range
+        max_date: End date for the range
+        timescale: Either 'month' or 'year'
+    """
+    from finnance.models import AccountTransfer
+    
+    # Get all accounts for this currency
+    accs_with_currency = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    
+    if not accs_with_currency:
+        return []
+
+    # Start with sum of all account starting balances
+    # THIS NEEDS TO BE CHANGED BY THE KING OF FINNANCE
+    total_saldo = sum(acc.starting_saldo for acc in accs_with_currency)
+    
+    # Collect ALL changes (transactions + transfers) for all accounts (entire history)
+    all_changes = []
+    for account in accs_with_currency:
+        all_changes.extend(account.transactions)
+        all_changes.extend(account.out_transfers)
+        all_changes.extend(account.in_transfers)
+    
+    # Sort by date
+    all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
+    
+    # Initialize period boundaries based on timescale
+    data = []
+    if timescale == 'month':
+        period_start = min_date
+        period_end = end_of_month(period_start) if end_of_month(period_start) < max_date else max_date
+        period_key = 'month'
+    else:  # year
+        period_start = min_date.replace(month=1, day=1)
+        period_end = min_date.replace(year=min_date.year + 1, month=1, day=1) if min_date.replace(year=min_date.year + 1, month=1, day=1) < max_date else max_date
+        period_key = 'year'
+        
+    period_min = total_saldo
+    period_max = total_saldo
+    
+    for change in all_changes:
+        # Calculate amount and whether it's an expense (decreases balance)
+        if type(change) is AccountTransfer:
+            # For transfers, check if this account is the source (money going out)
+            account_ids = {acc.id for acc in accs_with_currency}
+            is_expense = change.src_id in account_ids
+            amount = change.src_amount if is_expense else change.dst_amount
+        else:
+            # Transaction
+            is_expense = change.is_expense
+            amount = change.amount
+            
+        if change.date_issued > period_end:
+            # then we arrive in a new period
+            while period_end < change.date_issued:
+                # Record minimum balance for the period
+                data.append({
+                    'min': period_min,
+                    'max': period_max,
+                    period_key: period_start.isoformat()
+                })
+                # Move to next period
+                if timescale == 'month':
+                    period_start = period_end
+                    period_end = end_of_month(period_start)
+                    if period_end > max_date:
+                        period_end = max_date
+                    
+                else:  # year
+                    period_start = period_end
+                    period_end = period_end.replace(year=period_end.year + 1) if period_end.year < max_date.year else max_date
+                if period_end >= max_date:
+                    break
+                period_min = total_saldo
+                period_max = total_saldo
+            if change.date_issued > max_date:
+                break
+        
+        # Update balance: income adds, expense subtracts
+        total_saldo = total_saldo + (amount if not is_expense else -amount)
+        
+        if change.date_issued < period_start:
+            continue  # before the whole window
+        
+        if total_saldo < period_min:
+            period_min = total_saldo
+        
+        if total_saldo > period_max:
+            period_max = total_saldo
+        
+    while period_end <= max_date:
+        # Record minimum balance for the period
+        data.append({
+            'min': period_min,
+            'max': period_max,
+            period_key: period_start.isoformat()
+        })
+        # Move to next period
+        if timescale == 'month':
+            period_start = period_end
+            period_end = end_of_month(period_start)
+            if period_end >= max_date:
+                break
+        else:  # year
+            period_start = period_end
+            period_end = period_end.replace(year=period_end.year + 1) if period_end.year < max_date.year else max_date
+        period_min = total_saldo
+        period_max = total_saldo
+        if period_end >= max_date:
+            break
+        
+
+    return data
+
+
+@nivo.route("/monthminline")
+@login_required
+@nivo_wrapper
+def MonthMinLine(currency: Currency, min_date: datetime, max_date: datetime):
+    """Calculate minimum balance per month across all user's accounts in this currency"""
+    data = _minimum_balance_line(currency, min_date, max_date, 'month')
+    return jsonify(data)
+
+
+@nivo.route("/yearminline")
+@login_required
+@nivo_wrapper
+def YearMinLine(currency: Currency, min_date: datetime, max_date: datetime):
+    """Calculate minimum balance per year across all user's accounts in this currency"""
+    data = _minimum_balance_line(currency, min_date, max_date, 'year')
+    return jsonify(data)
+
+
+@nivo.route("/transactionbalanceline")
+@login_required
+@nivo_wrapper
+def transactionbalanceline(currency: Currency, min_date: datetime, max_date: datetime):
+    """Return balance after every single transaction within the date range"""
+    from finnance.models import AccountTransfer
+    
+    # Get all accounts for this currency
+    accs_with_currency = Account.query.filter_by(currency_id=currency.id, user_id=current_user.id).all()
+    
+    if not accs_with_currency:
+        return jsonify([])
+
+    # Start with sum of all account starting balances
+    # THIS NEEDS TO BE CHANGED BY THE KING OF FINNANCE
+    total_saldo = sum(acc.starting_saldo for acc in accs_with_currency)
+    
+    # Collect ALL changes (transactions + transfers) for all accounts (entire history)
+    all_changes = []
+    for account in accs_with_currency:
+        all_changes.extend(account.transactions)
+        all_changes.extend(account.out_transfers)
+        all_changes.extend(account.in_transfers)
+    
+    # Sort by date
+    all_changes = sorted(all_changes, key=lambda ch: ch.date_issued)
+    
+    # Process all transactions and build data points
+    data = []
+    done_transfers = set()
+    
+    for change in all_changes:
+        # Calculate amount and whether it's an expense (decreases balance)
+        if type(change) is AccountTransfer:
+            # For transfers, check if this account is the source (money going out)
+            
+            if change.id in done_transfers:
+                continue  # already processed this transfer
+            
+            account_ids = {acc.id for acc in accs_with_currency}
+            
+            if change.src_id in account_ids:
+                total_saldo -= change.src_amount
+            if change.dst_id in account_ids:
+                total_saldo += change.dst_amount
+                
+            done_transfers.add(change.id)
+            
+        else:
+            # Transaction
+            is_expense = change.is_expense
+            amount = change.amount
+            
+            total_saldo += (amount if not is_expense else -amount)
+        
+        # Only include transactions within the requested date range
+        if change.date_issued >= min_date and change.date_issued < max_date:
+            data.append({
+                'balance': total_saldo,
+                'date': change.date_issued.isoformat()
+            })
+    
+    return jsonify(data)
+
 
 @nivo.route("/categories")
 @login_required

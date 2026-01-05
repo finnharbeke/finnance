@@ -1,12 +1,14 @@
-import { ActionIcon, Group, Popover, SimpleGrid, Switch, Tabs, Text, Title } from "@mantine/core";
+import { ActionIcon, Blockquote, Group, Popover, SimpleGrid, Switch, Tabs, Text, Title } from "@mantine/core";
 import { YearPicker } from "@mantine/dates";
 import { DateTime, Duration } from "luxon";
 import { useCallback, useState } from "react";
-import { TbCalendar, TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbList } from "react-icons/tb";
+import { TbCalendar, TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbList, TbTimeline, TbChartAreaLine, TbPlusMinus, TbInfoCircle  } from "react-icons/tb";
 import useIsPhone from "../hooks/useIsPhone";
 import { CategoryPills } from "./CategoryPills";
 import { DivBars, DivBarsSkeleton } from "./DivBars";
 import { ExpIncLine, LineSkeleton } from "./ExpIncLine";
+import { MonthExtremaLine} from "./MonthExtremaLine";
+import { TransactionBalanceLine } from "./TransactionBalanceLine";
 import { NivoShell } from "./Nivo";
 
 export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
@@ -90,7 +92,9 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
         <Tabs defaultValue='divbars'>
             <Tabs.List justify='flex-end'>
                 <Tabs.Tab value='divbars' leftSection={<TbChartBar size='1.5rem' />} />
-                <Tabs.Tab value='expincline' leftSection={<TbChartLine size='1.5rem' />} />
+                <Tabs.Tab value='expincline' leftSection={<TbPlusMinus  size='1.5rem' />} />
+                <Tabs.Tab value='balanceline' leftSection={<TbTimeline size='1.5rem' />} />
+                <Tabs.Tab value='transactionbalance' leftSection={<TbChartLine size='1.5rem' />} />
                 <Tabs.Tab value='list' leftSection={<TbList size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='divbars'>
@@ -119,6 +123,26 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                 <NivoShell
                     nivo={CategoryPills} skeleton={LineSkeleton}
                     is_expense={false}
+                    {...commonProps}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel value='balanceline'>
+                <Blockquote color="violet" icon={<TbInfoCircle />} style={{ fontSize: '0.9rem' }}>
+                    <strong>Warning:</strong> the starting saldos might be wrong in this plot. Do not gamble your life savings based on this plot, it needs to be fixed.
+                </Blockquote>
+                <NivoShell
+                    nivo={MonthExtremaLine} skeleton={LineSkeleton}
+                    height={300}
+                    {...commonProps}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel value='transactionbalance'>
+                <Blockquote color="violet" icon={<TbInfoCircle />} style={{ fontSize: '0.9rem' }}>
+                    <strong>Warning:</strong> the starting saldos might be wrong in this plot. Do not gamble your life savings based on this plot, it needs to be fixed.
+                </Blockquote>
+                <NivoShell
+                    nivo={TransactionBalanceLine} skeleton={LineSkeleton}
+                    height={300}
                     {...commonProps}
                 />
             </Tabs.Panel>
