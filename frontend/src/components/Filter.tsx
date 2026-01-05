@@ -6,7 +6,7 @@ import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { TbFilter } from "react-icons/tb";
 import { searchParamsProps } from "../query";
-import CategoryInput from "./input/CategoryInput";
+import MultiCategoryInput from "./input/MultiCategoryInput";
 
 interface FilterFormValues {
     search: string | undefined
@@ -122,7 +122,7 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                     </Button>
                 </Group>
                 {showExpenseCats && (
-                    <CategoryInput 
+                    <MultiCategoryInput 
                         is_expense={true}
                         must_be_usable={false}
                         clearable
@@ -131,7 +131,7 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                     />
                 )}
                 {showIncomeCats && (
-                    <CategoryInput 
+                    <MultiCategoryInput 
                         is_expense={false}
                         must_be_usable={false}
                         clearable
