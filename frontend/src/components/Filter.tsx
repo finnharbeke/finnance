@@ -110,13 +110,23 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                 <Group grow>
                     <Button 
                         variant={showExpenseCats ? 'filled' : 'default'}
-                        onClick={() => setShowExpenseCats(!showExpenseCats)}
+                        onClick={() => {
+                            if (showExpenseCats) {
+                                form.setFieldValue('expenseCategory', []);
+                            }
+                            setShowExpenseCats(!showExpenseCats);
+                        }}
                     >
                         Expense Categories
                     </Button>
                     <Button 
                         variant={showIncomeCats ? 'filled' : 'default'}
-                        onClick={() => setShowIncomeCats(!showIncomeCats)}
+                        onClick={() => {
+                            if (showIncomeCats) {
+                                form.setFieldValue('incomeCategory', []);
+                            }
+                            setShowIncomeCats(!showIncomeCats);
+                        }}
                     >
                         Income Categories
                     </Button>
