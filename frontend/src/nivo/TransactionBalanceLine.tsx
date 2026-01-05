@@ -58,12 +58,28 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
         },
     ];
 
-    // Generate tick values for the 15th of every month of the year
+    // Generate tick values for the closest date to the 15th of every month across all years in the data
     const tickValues = (() => {
         const ticks: string[] = [];
-        for (let month = 1; month <= 12; month++) {
-            const fifteenthDay = DateTime.fromObject({ year: 2025, month, day: 15 });
-            ticks.push(fifteenthDay.toFormat('MMM dd'));
+        const dates = data.map(d => DateTime.fromISO(d.date));
+        
+        if (dates.length === 0) return ticks;
+        
+        const minDate = DateTime.min(...dates);
+        const maxDate = DateTime.max(...dates);
+        
+        // Iterate through each month from min to max date
+        let current = minDate.startOf('month').set({ day: 15 });
+        while (current <= maxDate) {
+            // Find the closest date to the 15th of current month/year in the actual data
+            const closestDate = dates.reduce((closest, candidate) => {
+                const currentDiff = Math.abs(candidate.diff(current).as('days'));
+                const closestDiff = Math.abs(closest.diff(current).as('days'));
+                return currentDiff < closestDiff ? candidate : closest;
+            });
+            
+            ticks.push(closestDate.toFormat('MMM dd'));
+            current = current.plus({ months: 1 });
         }
         return ticks;
     })();
