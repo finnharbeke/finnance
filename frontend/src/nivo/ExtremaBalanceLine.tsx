@@ -1,5 +1,4 @@
-import { Text, useMantineTheme, Blockquote, Stack } from "@mantine/core";
-import { TbInfoCircle } from 'react-icons/tb';
+import { Text, useMantineTheme } from "@mantine/core";
 import { ResponsiveLine } from "@nivo/line";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -59,7 +58,7 @@ export const ExtremaBalanceLine = ({ request, size, timescale, endpoint, label, 
     const maxBalance = Math.max(...maxs);
     const range = maxBalance - minBalance;
     const padding = range * 0.3;
-    const yMin = 0;
+    const yMin = minBalance - padding;
     const yMax = maxBalance + padding;
 
     const dateKey = timescale === 'month' ? 'month' : 'year';
@@ -90,14 +89,7 @@ export const ExtremaBalanceLine = ({ request, size, timescale, endpoint, label, 
     const rightMargin = timescale === 'month' ? 200 : 150;
     const legendItemHeight = timescale === 'month' ? 40 : 22;
 
-    const plotHeight = (size.height ?? 400) - 100;
-
-    return <Stack gap='md' style={{ height: '100%' }}>
-        <Blockquote color="violet" icon={<TbInfoCircle />} style={{ fontSize: '0.9rem' }}>
-            <strong>Warning:</strong> the starting saldos might be wrong in this plot. Do not gamble your life savings based on this plot, it needs to be fixed.
-        </Blockquote>
-        <div style={{ flex: 1, height: plotHeight }}>
-            <ResponsiveLine
+    return <ResponsiveLine
             theme={nivo}
             data={lines}
             
@@ -167,6 +159,4 @@ export const ExtremaBalanceLine = ({ request, size, timescale, endpoint, label, 
                 }
             ]}
         />
-        </div>
-    </Stack>
 }

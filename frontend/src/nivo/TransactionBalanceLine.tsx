@@ -54,7 +54,7 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
             color: `var(--mantine-color-${theme.primaryColor}-5)`,
             data: data.map(point => ({
                 y: point.balance,
-                x: DateTime.fromISO(point.date).toFormat('MMM dd')
+                x: DateTime.fromISO(point.date).toJSDate()
             }))
         },
     ];
@@ -87,12 +87,7 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
 
     const plotHeight = (size.height ?? 400) - 100;
 
-    return <Stack gap='md' style={{ height: '100%' }}>
-        <Blockquote color="violet" icon={<TbInfoCircle />} style={{ fontSize: '0.9rem' }}>
-            <strong>Warning:</strong> the starting saldos might be wrong in this plot. Do not gamble your life savings based on this plot, it needs to be fixed.
-        </Blockquote>
-        <div style={{ flex: 1, height: plotHeight }}>
-            <ResponsiveLine
+    return <ResponsiveLine
             theme={nivo}
             data={lines}
             
@@ -107,6 +102,19 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
                 max: yMax
             }}
 
+            xScale={{ format: "time:%Y-%m-%dT%H:%M:%S.%f", type: "time" }}
+            xFormat="time:%Y-%m-%dT%H:%M:%S.%f"
+
+            axisBottom={{
+                tickRotation: -45,
+                tickValues: "every 30 days",
+                tickSize: 5,
+                tickPadding: 5,
+                format: "%b",
+                legendOffset: 36,
+                legendPosition: "middle"
+            }}
+
             pointColor={{ theme: 'background' }}
             pointBorderWidth={2}
             pointBorderColor={{ from: 'serieColor' }}
@@ -119,11 +127,6 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
                 format: (value: number) => (value / Math.pow(10, currency.data.decimals))
             }}
 
-            axisBottom={{
-                tickRotation: -45,
-                tickValues: tickValues
-            }}
-
             margin={{
                 bottom: 80,
                 left: 60,
@@ -134,7 +137,7 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
             useMesh
             enableCrosshair={false}
             tooltip={({ point }) => <NivoTooltip
-                label={`${point.data.x.toString()}`}
+                label={ DateTime.fromJSDate(point.data.x as Date).toFormat("LLL dd, HH:mm") }
                 value={point.data.y as number}
                 currency_id={request.currency_id}
             />}
@@ -158,6 +161,4 @@ export const TransactionBalanceLine = ({ request, size }: NivoComponentProps) =>
                 }
             ]}
         />
-        </div>
-    </Stack>
 }

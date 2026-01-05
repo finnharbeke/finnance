@@ -135,9 +135,6 @@ class Account(db.Model, JSONModel):
             if type(change) is AccountTransfer:
                 exp = change.src_id == self.id
                 amount = change.src_amount if exp else change.dst_amount
-                # Skip transfers if any category filter is active
-                if has_category_filter:
-                    continue
             else:
                 exp = change.is_expense
                 amount = change.amount
@@ -160,10 +157,14 @@ class Account(db.Model, JSONModel):
                     # Check if any record in this transaction matches the selected categories
                     if not any(record.category_id in category_ids for record in change.records):
                         continue
-            elif change.src_id == self.id:
-                desc = change.dst.desc
             else:
-                desc = change.src.desc
+                # Skip transfers if any category filter is active
+                if has_category_filter:
+                    continue
+                if change.src_id == self.id:
+                    desc = change.dst.desc
+                else:
+                    desc = change.src.desc
 
             if (search is not None):
                 inComment = search.lower() in change.comment.lower()
