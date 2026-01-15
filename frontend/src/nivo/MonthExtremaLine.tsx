@@ -1,4 +1,4 @@
-﻿import { ExtremaBalanceLine } from "./ExtremaBalanceLine";
+import { ExtremaBalanceLine } from "./ExtremaBalanceLine";
 import { NivoComponentProps } from "./Nivo";
 
 export const MonthExtremaLine = (props: NivoComponentProps) => {

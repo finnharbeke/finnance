@@ -54,7 +54,7 @@ export interface TransactionFormValues {
 export interface TransactionRequest {
     account_id: number | undefined
     currency_id: number | undefined
-    date_issued: string
+    date_issued: string | null
     amount: number
     agent: string
     is_expense: boolean
@@ -68,7 +68,7 @@ export interface TransactionRequest {
 export type TransactionTransform = (v: TransactionFormValues) => TransactionRequest
 export type TransactionFormType = UseFormReturnType<TransactionFormValues, TransactionTransform>
 
-export const datetimeString = (date: Date, timeS: string): string => {
+export const datetimeString = (date: Date, timeS: string): string | null => {
     const time = DateTime.fromFormat(timeS, "HH:mm")
     return DateTime.fromJSDate(date).startOf('day').plus(Duration.fromObject({
         hour: time.hour,

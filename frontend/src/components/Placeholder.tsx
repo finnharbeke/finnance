@@ -29,7 +29,7 @@ export default function Placeholder({ height=200, queries, ...other }: Placehold
                                         {query.error.response.status}: {query.error.response.statusText}
                                     </Title>
                                     :
-                                    <Text align='center' key={ix}>{query.error.message}</Text>
+                                    <Text ta='center' key={ix}>{query.error.message}</Text>
                         )
                     }
                 </Stack>

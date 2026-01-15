@@ -2,14 +2,14 @@ import { ActionIcon, Blockquote, Group, Popover, SimpleGrid, Switch, Tabs, Text,
 import { YearPicker } from "@mantine/dates";
 import { DateTime, Duration } from "luxon";
 import { useCallback, useState } from "react";
-import { TbCalendar, TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbList, TbTimeline, TbChartAreaLine, TbPlusMinus, TbInfoCircle  } from "react-icons/tb";
+import { TbCalendar, TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbInfoCircle, TbList, TbPlusMinus, TbTimeline } from "react-icons/tb";
 import useIsPhone from "../hooks/useIsPhone";
 import { CategoryPills } from "./CategoryPills";
 import { DivBars, DivBarsSkeleton } from "./DivBars";
 import { ExpIncLine, LineSkeleton } from "./ExpIncLine";
-import { MonthExtremaLine} from "./MonthExtremaLine";
-import { TransactionBalanceLine } from "./TransactionBalanceLine";
+import { MonthExtremaLine } from "./MonthExtremaLine";
 import { NivoShell } from "./Nivo";
+import { TransactionBalanceLine } from "./TransactionBalanceLine";
 
 export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
 

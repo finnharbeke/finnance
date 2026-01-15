@@ -1,15 +1,13 @@
 import { Blockquote, Tabs } from "@mantine/core";
-import { TbInfoCircle, TbTimeline } from "react-icons/tb";
-import { DateTime } from "luxon";
 import { useQuery } from "@tanstack/react-query";
-import { useCurrency } from "../types/Currency";
-import { YearExtremaLine } from "./YearExtremaLine";
+import { DateTime } from "luxon";
+import { TbInfoCircle, TbTimeline } from "react-icons/tb";
+import { getAxiosData } from "../query";
 import { LineSkeleton } from "./ExpIncLine";
 import { NivoShell } from "./Nivo";
-import { getAxiosData } from "../query";
+import { YearExtremaLine } from "./YearExtremaLine";
 
 export const AllTime = ({ currency_id }: { currency_id: string | null }) => {
-    const currency = useCurrency(currency_id ?? '');
 
     // Fetch earliest date from dataset
     const { data: dateData } = useQuery({

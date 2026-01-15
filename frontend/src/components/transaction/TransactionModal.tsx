@@ -175,7 +175,7 @@ export const EditTransactionModal = ({ context, id, innerProps: { transaction_id
                 </Button>
             </Popover.Target>
             <Popover.Dropdown>
-                <Text align='center' mb='sm'>are you sure?</Text>
+                <Text ta='center' mb='sm'>are you sure?</Text>
                 <Button fullWidth color='red' onClick={() => {
                     context.closeModal(id);
                     delTrans.mutateAsync(undefined, {

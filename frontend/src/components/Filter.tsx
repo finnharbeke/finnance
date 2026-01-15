@@ -1,4 +1,4 @@
-import { Button, Collapse, Grid, Pagination, Select, Stack, TextInput, Group, Text } from "@mantine/core";
+import { Button, Collapse, Grid, Pagination, Text, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -20,8 +20,8 @@ export interface FilterRequest extends searchParamsProps {
     page: number
     pagesize: 10
     search?: string | undefined
-    start?: string | undefined
-    end?: string
+    start?: string | undefined | null
+    end?: string | null
     expenseCategory?: string[] | undefined
     incomeCategory?: string[] | undefined
 }
@@ -72,7 +72,7 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
             start: filter.start ? new Date(filter.start) : undefined,
             end: filter.end ? new Date(filter.end) : undefined
         });
-    }, [filter]);
+    }, [form, filter]);
     useEffect(() => {
         if (!!pages && pages <= filter.page)
             setFilter({
@@ -80,7 +80,7 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                 page: Math.max(pages - 1, 0)
             })
         // eslint-disable-next-line
-    }, [pages, filter.page]);
+    }, [pages, filter.page, filter]);
      
 
     const [ open, { toggle }] = useDisclosure(false);

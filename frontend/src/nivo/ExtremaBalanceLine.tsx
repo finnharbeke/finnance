@@ -49,7 +49,7 @@ export const ExtremaBalanceLine = ({ request, size, timescale, endpoint, label, 
     if (data === undefined || currency.isLoading)
         return <LineSkeleton {...size} />
     if (data.length === 0)
-        return <Text align='center' mt='md'>no data found</Text>
+        return <Text ta='center' mt='md'>no data found</Text>
 
     // Calculate min and max with 10% padding
     const mins = data.map(d => d.min);

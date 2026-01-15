@@ -39,7 +39,7 @@ export interface TransferRequest {
     dst_id: number
     src_amount: number
     dst_amount: number
-    date_issued: string
+    date_issued: string | null
     comment: string
 }
 

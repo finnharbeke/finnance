@@ -157,7 +157,7 @@ export const EditTransferModal = ({ context, id, innerProps: { transfer } }: Con
                 </Button>
             </Popover.Target>
             <Popover.Dropdown>
-                <Text align='center' mb='sm'>are you sure?</Text>
+                <Text ta='center' mb='sm'>are you sure?</Text>
                 <Button fullWidth color='red' onClick={() => {
                     context.closeModal(id);
                     delTransfer.mutateAsync(undefined, {

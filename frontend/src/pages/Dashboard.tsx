@@ -54,7 +54,7 @@ export default function DashboardPage() {
                     }
                     {
                         query.data.length === 0 &&
-                        <Text align='center'>no expenses this month</Text>
+                        <Text ta='center'>no expenses this month</Text>
                     }
                 </Paper>
                 :

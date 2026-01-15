@@ -93,7 +93,7 @@ export function SignUpForm({ ...others }: LoginFormProps) {
             
         </form>
         </FocusTrap>
-        <Text fz='sm' align='center'>
+        <Text fz='sm' ta='center'>
             you already have an account?
             <Anchor component={Link} ml='xs' to='/login'>
                 log in

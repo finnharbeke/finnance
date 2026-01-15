@@ -36,7 +36,7 @@ export const ExpIncLine = ({ request, size }: NivoComponentProps) => {
     if (data === undefined || currency.isLoading)
         return <LineSkeleton {...size} />
     if (data.length === 0)
-        return <Text align='center' mt='md'>no data found</Text>
+        return <Text ta='center' mt='md'>no data found</Text>
 
     const lines = [
         {
