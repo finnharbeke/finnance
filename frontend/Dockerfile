@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json .
 COPY tsconfig.json .
 RUN npm update -g npm
-RUN npm ci --verbose --no-audit
+RUN npm ci --verbose --no-audit --omit=dev
 
 COPY public/ public
 COPY src/ src
