@@ -1,4 +1,4 @@
-import { Skeleton, Stack, Text } from "@mantine/core";
+import { Skeleton, Stack, Text, useMantineTheme } from "@mantine/core";
 import { ResponsiveLine } from "@nivo/line";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -15,15 +15,16 @@ interface LineData {
     month: string
 }
 
-const useLineData = (props: NivoRequest) =>
+const useExpIncLineData = (props: NivoRequest) =>
     useQuery<LineData[], AxiosError>({
         queryKey: ["categories", "changes", "line", props],
         queryFn: () => getAxiosData(`/api/nivo/line?${searchParams(props)}`)
     });
 
-export const Line = ({ request, size }: NivoComponentProps) => {
+export const ExpIncLine = ({ request, size }: NivoComponentProps) => {
     const nivo = useNivoTheme();
-    const query = useLineData(request);
+    const theme = useMantineTheme();
+    const query = useExpIncLineData(request);
 
     const currency = useCurrency(request.currency_id);
 
@@ -35,12 +36,12 @@ export const Line = ({ request, size }: NivoComponentProps) => {
     if (data === undefined || currency.isLoading)
         return <LineSkeleton {...size} />
     if (data.length === 0)
-        return <Text align='center' mt='md'>no data found</Text>
+        return <Text ta='center' mt='md'>no data found</Text>
 
     const lines = [
         {
             id: 'expenses',
-            color: 'red',
+            color: `var(--mantine-color-${theme.other.colors.expense}-5)`,
             data: data.map(month => ({
                 y: month.expenses,
                 x: DateTime.fromISO(month.month).toFormat('MMM yy')
@@ -48,7 +49,7 @@ export const Line = ({ request, size }: NivoComponentProps) => {
         },
         {
             id: 'income',
-            color: 'blue',
+            color: `var(--mantine-color-${theme.other.colors.income}-5)`,
             data: data.map(month => ({
                 y: month.income,
                 x: DateTime.fromISO(month.month).toFormat('MMM yy')
@@ -81,7 +82,7 @@ export const Line = ({ request, size }: NivoComponentProps) => {
             margin={{
                 bottom: 30,
                 left: 60,
-                right: 30,
+                right: 140,
                 top: 20
             }}
 
@@ -94,6 +95,18 @@ export const Line = ({ request, size }: NivoComponentProps) => {
                 value={point.data.y as number}
                 currency_id={request.currency_id}
             />}
+
+            legends={[
+                {
+                    anchor: 'bottom-right',
+                    direction: 'column',
+                    translateX: 120,
+                    itemWidth: 80,
+                    itemHeight: 22,
+                    itemDirection: 'right-to-left',
+                    symbolShape: 'circle'
+                }
+            ]}
         />
 }
 

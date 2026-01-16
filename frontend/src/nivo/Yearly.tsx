@@ -1,13 +1,15 @@
-import { ActionIcon, Center, Checkbox, Group, Popover, SimpleGrid, Tabs, Text, Title } from "@mantine/core";
+import { ActionIcon, Blockquote, Group, Popover, SimpleGrid, Switch, Tabs, Text, Title } from "@mantine/core";
 import { YearPicker } from "@mantine/dates";
 import { DateTime, Duration } from "luxon";
 import { useCallback, useState } from "react";
-import { TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbList } from "react-icons/tb";
+import { TbCalendar, TbChartBar, TbChartLine, TbChevronLeft, TbChevronRight, TbInfoCircle, TbList, TbPlusMinus, TbTimeline } from "react-icons/tb";
 import useIsPhone from "../hooks/useIsPhone";
-import { DivBars, DivBarsSkeleton } from "./DivBars";
-import { Line, LineSkeleton } from "./Line";
-import { NivoShell } from "./Nivo";
 import { CategoryPills } from "./CategoryPills";
+import { DivBars, DivBarsSkeleton } from "./DivBars";
+import { ExpIncLine, LineSkeleton } from "./ExpIncLine";
+import { MonthExtremaLine } from "./MonthExtremaLine";
+import { NivoShell } from "./Nivo";
+import { TransactionBalanceLine } from "./TransactionBalanceLine";
 
 export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
 
@@ -15,7 +17,7 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
     const [popover, setPopover] = useState(false);
 
     const [year, setYear] = useState(new Date());
-    const [last12, setLast12] = useState(true);
+    const [last12, setLast12] = useState(false);
 
     const start = last12 ?
         DateTime.now().startOf('month').minus(Duration.fromObject({
@@ -56,7 +58,8 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                 </ActionIcon>
                 <Popover opened={popover} onChange={setPopover}>
                     <Popover.Target>
-                        <ActionIcon onClick={() => setPopover(!popover)} size={isPhone ? 'xl' : 'lg'}
+                        <ActionIcon disabled={last12}
+                            onClick={() => setPopover(!popover)} size={isPhone ? 'xl' : 'lg'}
                             variant='default'>
                             {/* <TbCalendar size={isPhone ? '1.5rem' : '1.3rem'} /> */}
                             <Text fz='xs'>
@@ -77,21 +80,21 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                     variant='default'>
                     <TbChevronRight size={isPhone ? '1.5rem' : '1.3rem'} />
                 </ActionIcon>
-                <Checkbox size='xl'
+                <Switch size='xl'
                     checked={last12}
                     onChange={(event) => setLast12(event.currentTarget.checked)}
-                    icon={({className}) => <Center className={className}>
-                        <Text fw='bold'>12</Text>
-                        </Center>}
-                        
-                    indeterminate
+                    thumbIcon={
+                        last12 ? <Text fw='bold' c='dark'>12</Text> :  <TbCalendar size={16} />
+                    }
                 />
             </Group>
         </Group>
         <Tabs defaultValue='divbars'>
             <Tabs.List justify='flex-end'>
                 <Tabs.Tab value='divbars' leftSection={<TbChartBar size='1.5rem' />} />
-                <Tabs.Tab value='line' leftSection={<TbChartLine size='1.5rem' />} />
+                <Tabs.Tab value='expincline' leftSection={<TbPlusMinus  size='1.5rem' />} />
+                <Tabs.Tab value='balanceline' leftSection={<TbTimeline size='1.5rem' />} />
+                <Tabs.Tab value='transactionbalance' leftSection={<TbChartLine size='1.5rem' />} />
                 <Tabs.Tab value='list' leftSection={<TbList size='1.5rem' />} />
             </Tabs.List>
             <Tabs.Panel value='divbars'>
@@ -104,9 +107,9 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                     {...commonProps}
                 />
             </Tabs.Panel>
-            <Tabs.Panel value='line'>
+            <Tabs.Panel value='expincline'>
                 <NivoShell
-                    nivo={Line} skeleton={LineSkeleton}
+                    nivo={ExpIncLine} skeleton={LineSkeleton}
                     height={300}
                     {...commonProps}
                 />
@@ -120,6 +123,26 @@ export const Yearly = ({ currency_id }: { currency_id: string | null }) => {
                 <NivoShell
                     nivo={CategoryPills} skeleton={LineSkeleton}
                     is_expense={false}
+                    {...commonProps}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel value='balanceline'>
+                <Blockquote color="violet" icon={<TbInfoCircle />} style={{ fontSize: '0.9rem' }}>
+                    <strong>Warning:</strong> the starting saldos might be wrong in this plot. Do not gamble your life savings based on this plot, it needs to be fixed.
+                </Blockquote>
+                <NivoShell
+                    nivo={MonthExtremaLine} skeleton={LineSkeleton}
+                    height={300}
+                    {...commonProps}
+                />
+            </Tabs.Panel>
+            <Tabs.Panel value='transactionbalance'>
+                <Blockquote color="violet" icon={<TbInfoCircle />} style={{ fontSize: '0.9rem' }}>
+                    <strong>Warning:</strong> the starting saldos might be wrong in this plot. Do not gamble your life savings based on this plot, it needs to be fixed.
+                </Blockquote>
+                <NivoShell
+                    nivo={TransactionBalanceLine} skeleton={LineSkeleton}
+                    height={300}
                     {...commonProps}
                 />
             </Tabs.Panel>

@@ -52,7 +52,7 @@ export const DivBars = ({ request, size }: NivoComponentProps) => {
     )
 
     if (divBars.length === 0 || max === 0)
-        return <Text align='center'>no data found</Text>
+        return <Text ta='center'>no data found</Text>
         
 
     return <Box style={{ height: divBars.length * (BAR_HEIGHT + 2) }}>

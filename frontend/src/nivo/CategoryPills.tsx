@@ -11,7 +11,7 @@ import useIsPhone from "../hooks/useIsPhone"
 import { getAxiosData, searchParams } from "../query"
 import { CategoryQueryResult } from "../types/Category"
 import { CurrencyQueryResult, useCurrency } from "../types/Currency"
-import { LineSkeleton } from "./Line"
+import { LineSkeleton } from "./ExpIncLine"
 import { NivoComponentProps, NivoRequest } from "./Nivo"
 
 interface CategoryData {

@@ -195,7 +195,7 @@ const FlowsNRecordsInput = ({ form, currency, withAsterisk }: FlowsNRecordsProps
         }
         {
             hidden &&
-            <Anchor align='right' onClick={() => setHidden(false)}>
+            <Anchor ta='right' onClick={() => setHidden(false)}>
                 more...
             </Anchor>
         }

@@ -131,7 +131,7 @@ export function LoginForm({ ...others }: LoginFormProps) {
                     {...unForm.getInputProps('username')} />
             </FocusTrap>
             <NextButton loading={loading} my='sm' />
-            <Text fz='sm' align='center'>
+            <Text fz='sm' ta='center'>
                 no account?
                 <Anchor component={Link} ml='xs' to='/register'>
                     sign up

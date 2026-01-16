@@ -39,7 +39,7 @@ export interface AccountFormValues {
 export interface AccountRequest extends Omit<AccountFormValues,
     'starting_saldo' | 'currency_id' | 'date_created'> {
     starting_saldo: number
-    date_created: string
+    date_created: string | null
     currency_id: number
 }
 

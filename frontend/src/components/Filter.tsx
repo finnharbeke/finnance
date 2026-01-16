@@ -1,4 +1,4 @@
-import { Button, Collapse, Grid, Pagination, TextInput } from "@mantine/core";
+import { Button, Collapse, Grid, Pagination, Text, TextInput } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -6,19 +6,24 @@ import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
 import { TbFilter } from "react-icons/tb";
 import { searchParamsProps } from "../query";
+import MultiCategoryInput from "./input/MultiCategoryInput";
 
 interface FilterFormValues {
     search: string | undefined
     start: Date | undefined
     end: Date | undefined
+    expenseCategory: string[] | undefined
+    incomeCategory: string[] | undefined
 }
 
 export interface FilterRequest extends searchParamsProps {
     page: number
     pagesize: 10
     search?: string | undefined
-    start?: string | undefined
-    end?: string
+    start?: string | undefined | null
+    end?: string | null
+    expenseCategory?: string[] | undefined
+    incomeCategory?: string[] | undefined
 }
 
 type FilterFormTransform = (fv: FilterFormValues) => FilterRequest
@@ -41,13 +46,33 @@ interface FilterPaginationProps {
 
 export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationProps) => {
     const form = useForm<FilterFormValues, FilterFormTransform>({
+        initialValues: {
+            search: filter.search,
+            expenseCategory: filter.expenseCategory || [],
+            incomeCategory: filter.incomeCategory || [],
+            start: filter.start ? new Date(filter.start) : undefined,
+            end: filter.end ? new Date(filter.end) : undefined
+        },
         transformValues: fv => ({
             ...filter,
             search: fv.search,
+            expenseCategory: fv.expenseCategory && fv.expenseCategory.length > 0 ? fv.expenseCategory : undefined,
+            incomeCategory: fv.incomeCategory && fv.incomeCategory.length > 0 ? fv.incomeCategory : undefined,
             start: fv.start ? DateTime.fromJSDate(fv.start).toISO({ includeOffset: false }) : undefined,
             end: fv.end ? DateTime.fromJSDate(fv.end).toISO({ includeOffset: false }) : undefined
         })
     });
+    
+    // Update form when filter changes
+    useEffect(() => {
+        form.setValues({
+            search: filter.search,
+            expenseCategory: filter.expenseCategory || [],
+            incomeCategory: filter.incomeCategory || [],
+            start: filter.start ? new Date(filter.start) : undefined,
+            end: filter.end ? new Date(filter.end) : undefined
+        });
+    }, [form, filter]);
     useEffect(() => {
         if (!!pages && pages <= filter.page)
             setFilter({
@@ -55,7 +80,7 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
                 page: Math.max(pages - 1, 0)
             })
         // eslint-disable-next-line
-    }, [pages, filter.page]);
+    }, [pages, filter.page, filter]);
      
 
     const [ open, { toggle }] = useDisclosure(false);
@@ -78,6 +103,22 @@ export const FilterPagination = ({ filter, setFilter, pages }: FilterPaginationP
         <Collapse in={open} pt='sm'>
             <form onSubmit={form.onSubmit(setFilter)}>
                 <TextInput label='search' {...form.getInputProps('search')} />
+                <Text fw={500} size='sm' mt='md' mb='xs'>expense category</Text>
+                <MultiCategoryInput 
+                    is_expense={true}
+                    must_be_usable={false}
+                    clearable
+                    searchable
+                    {...form.getInputProps('expenseCategory')}
+                />
+                <Text fw={500} size='sm' mt='md' mb='xs'>income category</Text>
+                <MultiCategoryInput 
+                    is_expense={false}
+                    must_be_usable={false}
+                    clearable
+                    searchable
+                    {...form.getInputProps('incomeCategory')}
+                />
                 <DateTimePicker label='min date' {...form.getInputProps('start')} clearable />
                 <DateTimePicker label='max date' {...form.getInputProps('end')} clearable />
                 <Button type='submit' fullWidth mt='sm'>apply</Button>

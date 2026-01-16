@@ -36,9 +36,16 @@ def changes(account_id):
     if acc is None:
         raise APIError(HTTPStatus.NOT_FOUND)
     
+    # Get multi-value parameters directly
+    expenseCategory = [int(x) for x in request.args.getlist('expenseCategory')]
+    incomeCategory = [int(x) for x in request.args.getlist('incomeCategory')]
+    
     kwargs = parseSearchParams(request.args.to_dict(), dict(
         start=datetime, end=datetime, search=str
     ))
+    
+    kwargs['expenseCategory'] = expenseCategory
+    kwargs['incomeCategory'] = incomeCategory
 
     return acc.jsonify_changes(**kwargs)
 

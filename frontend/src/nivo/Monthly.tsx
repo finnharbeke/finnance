@@ -9,7 +9,7 @@ import { BarsSkeleton, FinnanceBars } from "./Bars";
 import { NivoShell } from "./Nivo";
 import { Sunburst, SunburstSkeleton } from "./Sunburst";
 import { CategoryPills } from "./CategoryPills";
-import { LineSkeleton } from "./Line";
+import { LineSkeleton } from "./ExpIncLine";
 
 export const Monthly = ({ currency_id }: { currency_id: string | null }) => {
 

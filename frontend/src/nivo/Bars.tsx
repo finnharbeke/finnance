@@ -42,7 +42,7 @@ export const FinnanceBars = ({ request, size }: NivoComponentProps) => {
     if (data === undefined)
         return <BarsSkeleton {...size} />
     if (data.data.length === 0)
-        return <Text align='center'>no data found</Text>
+        return <Text ta='center'>no data found</Text>
 
     const { data: bars, keys, total } = data;
     // with horizontal layout it goes bottom - up, so i reverse them

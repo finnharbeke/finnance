@@ -81,7 +81,7 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
             justify='space-between'
             color={beingDragged || draggedOver ? theme.other.colors.transfer : undefined}
             draggable
-            onDragStart={(event: DragEvent) => {
+            onDragStart={(event) => {
                 // event.preventDefault();
                 setBeing(true);
                 event.dataTransfer?.setData("json", JSON.stringify(acc))
@@ -90,12 +90,12 @@ const AccountPill = ({ account: acc }: { account: AccountDeepQueryResult }) => {
             onDragEnd={() => setBeing(false)}
             onDragLeave={() => setDraggedOver(false)}
 
-            onDragOver={(event: DragEvent) => {
+            onDragOver={(event) => {
                 event.preventDefault();
                 setDraggedOver(true);
             }}
 
-            onDrop={(event: DragEvent) => {
+            onDrop={(event) => {
                 setDraggedOver(false);
                 const json = event.dataTransfer?.getData("json");
                 if (json === '')

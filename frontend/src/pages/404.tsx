@@ -16,7 +16,7 @@ export default function NotFound() {
       <Title order={1} fw={900} ta='center' ff={`Greycliff CF, ${theme.fontFamily}`}>
         You have found a secret place.
       </Title>
-      <Text color="dimmed" size="lg" align="center" my='sm' mx='auto'>
+      <Text c="dimmed" size="lg" ta="center" my='sm' mx='auto'>
         Unfortunately, this is only a 404 page. You may have mistyped the address, or the page has
         been moved to another URL.
       </Text>

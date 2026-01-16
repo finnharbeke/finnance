@@ -20,8 +20,8 @@ export const useNivoTheme = (): Theme => {
 export interface NivoRequest extends searchParamsProps {
     is_expense?: boolean
     currency_id: string
-    min_date: string
-    max_date: string
+    min_date: string | null
+    max_date: string | null
 }
 
 interface NivoTooltipProps {
