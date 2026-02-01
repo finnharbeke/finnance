@@ -1,14 +1,12 @@
 # Import flask and template operators
-import json
 import traceback
 from http import HTTPStatus
 
-from flask import Blueprint, Flask, current_app, request
+from flask import Flask, current_app
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
-from jsonschema import Draft202012Validator, ValidationError
 
 from finnance.errors.errors import APIError
 
