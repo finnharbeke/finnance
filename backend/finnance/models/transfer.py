@@ -2,6 +2,8 @@ from sqlalchemy.sql.schema import CheckConstraint
 
 from finnance import db
 
+from .json import JSONModel
+
 
 class AccountTransfer(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)

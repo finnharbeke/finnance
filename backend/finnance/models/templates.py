@@ -2,6 +2,8 @@ from sqlalchemy.sql.schema import UniqueConstraint
 
 from finnance import db
 
+from .json import JSONModel
+
 
 class TransactionTemplate(db.Model, JSONModel):
     __tablename__ = 'template'

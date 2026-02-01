@@ -2,6 +2,8 @@ from sqlalchemy.sql.schema import CheckConstraint, UniqueConstraint
 
 from finnance import db
 
+from .json import JSONModel
+
 
 class Currency(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)

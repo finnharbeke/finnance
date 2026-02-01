@@ -2,6 +2,8 @@ from flask_login import UserMixin
 
 from finnance import db, login_manager
 
+from .json import JSONModel
+
 
 class User(db.Model, JSONModel, UserMixin):
     id = db.Column(db.Integer, primary_key=True)

@@ -4,6 +4,10 @@ from sqlalchemy.sql.schema import UniqueConstraint
 
 from finnance import db
 
+from .json import JSONModel
+from .transaction import Transaction
+from .transfer import AccountTransfer
+
 
 class Account(db.Model, JSONModel):
     id = db.Column(db.Integer, primary_key=True)
